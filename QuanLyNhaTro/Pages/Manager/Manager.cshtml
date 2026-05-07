@@ -3,7 +3,15 @@
 @{
     Layout = null;
 }
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quản Lý Nhà Trọ</title>
 
+    <!-- Font Awesome - để hiển thị icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
     <style>
             /* ===== BIẾN MÀU TOÀN CỤC ===== */
             :root {
@@ -48,7 +56,31 @@
               box-shadow: 4px 0 24px rgba(0,0,0,0.18);
               overflow-y: auto;
               transition: width 0.3s;
+                transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
             }
+            /* Sidebar thu gọn */
+#thanh-sidebar.thu-gon { width: 60px; min-width: 60px; }
+
+/* Ẩn text với animation */
+#thanh-sidebar.thu-gon .ten-logo,
+#thanh-sidebar.thu-gon .admin-sidebar .ten-admin { opacity: 0; max-width: 0; transform: translateX(-8px); }
+.ten-logo, .admin-sidebar .ten-admin {
+  transition: opacity 0.2s ease, max-width 0.35s ease, transform 0.25s ease;
+  max-width: 160px; overflow: hidden;
+}
+
+/* Ẩn group label */
+.nhan-nhom { transition: opacity 0.2s ease, max-height 0.3s ease; max-height: 40px; overflow: hidden; }
+#thanh-sidebar.thu-gon .nhan-nhom { opacity: 0; max-height: 0; padding: 0; }
+
+/* Ẩn text trong menu item */
+.menu-item span:not(.huy-hieu-menu) { transition: opacity 0.2s ease, max-width 0.35s ease; max-width: 160px; overflow: hidden; display: inline-block; }
+#thanh-sidebar.thu-gon .menu-item span:not(.huy-hieu-menu) { opacity: 0; max-width: 0; }
+#thanh-sidebar.thu-gon .huy-hieu-menu { opacity: 0; width: 0; overflow: hidden; padding: 0; }
+
+/* Căn giữa icon khi thu gọn */
+#thanh-sidebar.thu-gon .menu-item { padding: 10px 0; justify-content: center; border-radius: 10px; margin: 2px 8px; }
+#thanh-sidebar.thu-gon .admin-sidebar { justify-content: center; }
 
             /* Logo khu vực trên cùng sidebar */
             .logo-sidebar {
@@ -529,8 +561,7 @@
               .hang-thong-ke { grid-template-columns: 1fr 1fr; }
             }
     </style>
-
-
+<body>
     <!-- =============================================
      SIDEBAR - THANH ĐIỀU HƯỚNG
 ============================================= -->
@@ -1162,7 +1193,7 @@
 
             // Đóng/mở sidebar trên mobile
             function dongMoSidebar() {
-              document.getElementById('thanh-sidebar').classList.toggle('mo');
+                document.getElementById('thanh-sidebar').classList.toggle('thu-gon');
             }
 
             // Mở modal thêm phòng
@@ -1226,5 +1257,6 @@
             function timKiem(tuKhoa) { console.log('Tìm kiếm:', tuKhoa); /* ⚙️ BACKEND: gọi API tìm kiếm */ }
             function thayDoiNam(nam) { console.log('Đổi năm biểu đồ:', nam); /* ⚙️ BACKEND: reload data biểu đồ */ }
     </script>
-
+    </body>
+</html>
 
