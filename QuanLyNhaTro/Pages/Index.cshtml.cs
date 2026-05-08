@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace QuanLyNhaTro.Pages
 {
-  
+    [AllowAnonymous]
     public class IndexModel : PageModel
     {
         public void OnGet()
