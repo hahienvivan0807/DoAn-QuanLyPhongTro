@@ -44,36 +44,7 @@ namespace QuanLyNhaTro.Controllers
             }
             return Ok(new { message = "Đăng nhập thành công!", chucVu = user.Roles });
         }
-        public class XuLyDangKyRequest
-        {
-            public string UserNameDK { get; set; }
-            public string PassWordDK { get; set; }
-        }
-        [HttpPost("DangKy")]
-        public IActionResult DangKy([FromBody] XuLyDangKyRequest request)
-        {
-            //Kiểm tra username có tồn tại chưa
-            var user = _context.ACCOUNT.FirstOrDefault(u => u.Username == request.UserNameDK);
-            if(user != null)
-            {
-                return BadRequest(new { message = "Tài khoản đã tồn tại!"});
-            }
-            //Bắt đầu băm mật khẩu
-            string HashPassword = BCrypt.Net.BCrypt.HashPassword(request.PassWordDK);
-            //Tạo tài khoản mới
-            var NewUser = new ACCOUNT
-            {
-                Username = request.UserNameDK,
-                Passwords = HashPassword,
-                Roles = "User",
-                CreatedAt = DateTime.Now,
-                FullName = "Pin Vũ Trụ",
-                Phone = "0123456789",
-                QR_Link = "abc.com"
-            };
-            _context.ACCOUNT.Add(NewUser);
-            _context.SaveChanges();
-            return Ok(new { message = "Đăng ký thành công!" });
-        }
+      
+        
     }
 }
