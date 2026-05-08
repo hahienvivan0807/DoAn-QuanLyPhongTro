@@ -858,9 +858,6 @@
         <!-- ⚙️ BACKEND: Ngày giờ thực -->
         <p id="ngay-gio-chu-tro">Đang tải...</p>
       </div>
-      <button class="nut-hanh-dong-chinh" onclick="moModal('modal-tai-khoan-quan-ly')">
-        <i class="fas fa-user-plus"></i> Thêm quản lý mới
-      </button>
     </div>
 
     <!-- =============================================
@@ -1247,87 +1244,49 @@
      ⚙️ BACKEND: POST/PUT/DELETE /api/quan-ly
 ============================================= -->
 <div class="lop-phu-modal" id="modal-tai-khoan-quan-ly" onclick="dongModalNhapNgoai(event,'modal-tai-khoan-quan-ly')">
-  <div class="hop-modal rong">
+
+<div class="hop-modal rong">
     <div class="tieu-de-modal">
       <h3>
-        <span style="width:32px;height:32px;background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;"><i class="fas fa-user-shield"></i></span>
-        Thêm tài khoản quản lý mới
+        <span style="width:32px;height:32px;background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;"><i class="fas fa-user-plus"></i></span>
+        Thêm người dùng mới
       </h3>
       <button class="nut-dong-modal" onclick="dongModal('modal-tai-khoan-quan-ly')">✕</button>
     </div>
 
-    <!-- Thông tin cơ bản -->
-    <div class="tieu-de-muc-modal">Thông tin cá nhân</div>
     <div class="luoi-form-2">
       <div class="nhom-nhap">
+        <label class="nhan-nhap">Username *</label>
+        <input class="o-nhap" type="text" id="username-moi" placeholder="VD: nguyenthilan" />
+      </div>
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Mật khẩu *</label>
+        <input class="o-nhap" type="password" id="password-moi" placeholder="Tối thiểu 8 ký tự" />
+      </div>
+      <div class="nhom-nhap">
         <label class="nhan-nhap">Họ và tên *</label>
-        <!-- ⚠️ Validate: không bỏ trống -->
-        <input class="o-nhap" type="text" id="ten-quan-ly-moi" placeholder="VD: Nguyễn Thị Lan" />
+        <input class="o-nhap" type="text" id="fullname-moi" placeholder="VD: Nguyễn Thị Lan" />
       </div>
       <div class="nhom-nhap">
         <label class="nhan-nhap">Số điện thoại *</label>
-        <input class="o-nhap" type="tel" id="sdt-quan-ly-moi" placeholder="VD: 0901234567" />
+        <input class="o-nhap" type="tel" id="phone-moi" placeholder="VD: 0901234567" />
       </div>
       <div class="nhom-nhap">
-        <label class="nhan-nhap">Email đăng nhập *</label>
-        <!-- ⚠️ Validate: email hợp lệ, không trùng -->
-        <input class="o-nhap" type="email" id="email-quan-ly-moi" placeholder="VD: lan@nhatroabc.vn" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Mật khẩu khởi tạo *</label>
-        <!-- ⚠️ Yêu cầu đổi mật khẩu lần đăng nhập đầu -->
-        <input class="o-nhap" type="password" id="matkhau-quan-ly-moi" placeholder="Tối thiểu 8 ký tự" />
-      </div>
-    </div>
-
-    <hr class="duong-ke-modal" />
-
-    <!-- Phân khu quản lý -->
-    <div class="tieu-de-muc-modal">Phân khu & Ca làm việc</div>
-    <div class="luoi-form-2">
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Khu vực phụ trách</label>
-        <select class="o-nhap o-chon" id="khu-vuc-quan-ly">
-          <option value="">-- Chọn khu vực --</option>
-          <option>Tầng 1 – 2</option>
-          <option>Tầng 3 – 4</option>
-          <option>Toàn bộ</option>
-        </select>
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Ca làm việc</label>
-        <select class="o-nhap o-chon" id="ca-lam-viec">
-          <option>Ca sáng (6:00 – 14:00)</option>
-          <option>Ca chiều (14:00 – 22:00)</option>
-          <option>Ca tối (22:00 – 6:00)</option>
-          <option>Toàn thời gian</option>
-        </select>
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Mức quyền hạn</label>
-        <select class="o-nhap o-chon" id="muc-quyen-han">
-          <option>Đầy đủ quyền</option>
-          <option>Giới hạn quyền</option>
-          <option>Chỉ xem</option>
-        </select>
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Trạng thái tài khoản</label>
-        <select class="o-nhap o-chon" id="trang-thai-tai-khoan">
-          <option>Hoạt động</option>
-          <option>Tạm khóa</option>
+        <label class="nhan-nhap">Vai trò (Role) *</label>
+        <select class="o-nhap o-chon" id="role-moi">
+          <option value="NguoiThue">Người thuê</option>
+          <option value="QuanLy">Quản lý</option>
         </select>
       </div>
     </div>
 
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-tai-khoan-quan-ly')">Hủy</button>
-      <!-- ⚙️ BACKEND: POST /api/quan-ly -->
-      <button class="nut-luu-modal" onclick="luuTaiKhoanQuanLy()">
+      <button class="nut-luu-modal" onclick="luuTaiKhoanMoi()">
         <i class="fas fa-user-plus"></i> Tạo tài khoản
       </button>
     </div>
-  </div>
+</div>
 </div>
 
 
