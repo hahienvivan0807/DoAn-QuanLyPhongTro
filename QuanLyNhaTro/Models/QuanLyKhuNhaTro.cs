@@ -8,12 +8,17 @@ namespace QuanLyNhaTro.Models
     {
         [Key] public string IDUser { get; set; }
         public string Username { get; set; }
-        public string Password { get; set; }
+        public string Passwords { get; set; }
         public string FullName { get; set; }
         public string Phone { get; set; }
         public string Roles { get; set; }
         public string QR_Link { get; set; }
         public DateTime CreatedAt { get; set; }
 
+    }
+    public class QuanLyKhuNhaTro : DbContext
+    {
+        public QuanLyKhuNhaTro(DbContextOptions<QuanLyKhuNhaTro> options) : base(options) { }
+        public DbSet <ACCOUNT> ACCOUNT { get; set; }
     }
 }

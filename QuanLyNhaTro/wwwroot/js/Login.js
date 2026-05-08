@@ -1,11 +1,44 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
+﻿
 /* ===== XỬ LÝ ĐĂNG NHẬP (kết nối với backend Razor Pages) ===== */
-function xuLyDangNhap() {
+async function xuLyDangNhap() {
     const User = document.getElementById("ten-dang-nhap").value;
     const Pass = document.getElementById("mat-khau").value;
+    const dulieu = {
+        UserName: User,
+        PassWord: Pass
+    }
+    /* ===== Kết nối API ===== */
+    try {
+        let Response = await fetch('api/XuLyDangNhap/DangNhap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dulieu)
+        });
+        let result = await Response.json()
+        if (Response.ok) {
+            const Chucvucnguoidung = result.chucVu;
+            if (Chucvucnguoidung == "Admin") {
+                alert("Đang chuyển tới trang Chủ trọ...");
+                window.location.href = "/Admin/ChuTro"
+            }
+            if (Chucvucnguoidung == "Manager") {
+                alert("Đang chuyển đến trang quản lý....");
+                window.location.href = "/Manager/Manger"
+            }
+            if (Chucvucnguoidung == "Tenant") {
+                alert("Đang chuyển hướng đến trang Khách thuê");
+                window.location.href = "/KhachThue/KhachThue";
+            }
 
-    alert('Đang đăng nhập... (Kết nối backend tại hàm xuLyDangNhap)');
+        }
+        else {
+            alert("Đăng nhập không thành công");
+        }
+
+    }
+    catch (error) {
+        alert("Không thể kết nối");
+        console.error(error);
+    }
+   
 }
