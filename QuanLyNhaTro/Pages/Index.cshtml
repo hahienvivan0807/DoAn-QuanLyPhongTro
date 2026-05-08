@@ -635,21 +635,40 @@
             transform: translateY(0);
         }
 
-        /* Thông báo lỗi */
-        .thong-bao-loi {
+                /* Thông báo lỗi */
+        .thong-bao {
             padding: 12px 16px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
             border-radius: 8px;
-            color: #dc2626;
             font-size: 13.5px;
             display: none;
             margin-bottom: 16px;
             align-items: center;
             gap: 8px;
+            border: 1px solid;
         }
 
-        .thong-bao-loi svg {
+        /* Trạng thái lỗi */
+        .thong-bao.loi {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        /* Trạng thái thành công */
+        .thong-bao.thanh-cong {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #16a34a;
+        }
+
+        /* Trạng thái cảnh báo (tuỳ chọn) */
+        .thong-bao.canh-bao {
+            background: #fffbeb;
+            border-color: #fde68a;
+            color: #d97706;
+        }
+
+        .thong-bao svg {
             width: 15px;
             height: 15px;
             stroke: currentColor;
@@ -775,17 +794,7 @@
     </style>
 </head>
 <body>
-    <form action="#" method="post">
 
-        <label for="username">Username:</label><br>
-        <input type="text" id="username" name="username" placeholder="Nhập username"><br><br>
-
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" placeholder="Nhập password"><br><br>
-
-        <button type="button" onclick="DangKy()">Đăng Ký</button>
-
-         </form>
 <!-- ===================================================
      KHỐI CHỨA TOÀN BỘ TRANG (chia đôi trái / phải)
 =================================================== -->
@@ -951,12 +960,11 @@
             ======================================= -->
             <div id="noi-dung-dang-nhap">
 
-                <!-- Thông báo lỗi (ẩn mặc định, hiện khi có lỗi) -->
-                <div class="thong-bao-loi" id="loi-dang-nhap">
-                    <!-- Icon cảnh báo đơn sắc -->
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.
-                </div>
+                <!-- Thông báo !-->
+            <div class="thong-bao" id="thong-bao" style="display:none;">
+                <svg class="thong-bao-icon" viewBox="0 0 24 24"></svg>
+                <span class="thong-bao-text"></span>
+            </div>
 
                 <!-- Các trường nhập liệu đăng nhập -->
                 <div class="nhom-nhap-lieu">
