@@ -25,7 +25,7 @@ async function xuLyDangNhap() {
                 alert("Đang chuyển đến trang quản lý....");
                 window.location.href = "/Manager/Manger"
             }
-            if (Chucvucnguoidung == "Tenant") {
+            if (Chucvucnguoidung == "User") {
                 alert("Đang chuyển hướng đến trang Khách thuê");
                 window.location.href = "/KhachThue/KhachThue";
             }
@@ -42,3 +42,27 @@ async function xuLyDangNhap() {
     }
    
 }
+async function DangKy() {
+    const User = document.getElementById("pusername").value;
+    const Pass = document.getElementById("password").value;
+    const dulieu = {
+        UserNameDK: User,
+        PassWordDK: Pass
+    }
+    try {
+        let Response = await fetch('api/XuLyDangNhap/DangKy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dulieu)
+        });
+        if (Response.ok) {
+            alert("Dang ky thanh cong");
+        } else {
+            alert("khong thanh cong");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Loi ko ket noi");
+    }
+}
+

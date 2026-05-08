@@ -6,7 +6,10 @@ namespace QuanLyNhaTro.Models
 {
     public class ACCOUNT
     {
-        [Key] public string IDUser { get; set; }
+
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int IDUser { get; set; }
         public string Username { get; set; }
         public string Passwords { get; set; }
         public string FullName { get; set; }

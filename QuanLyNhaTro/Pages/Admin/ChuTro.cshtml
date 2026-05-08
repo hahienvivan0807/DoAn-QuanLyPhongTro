@@ -63,18 +63,14 @@
       transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
       position: relative;
     }
-
+    #thanh-sidebar.an { width: 0; min-width: 0; overflow: hidden; }
     /* Sidebar thu gọn */
-    #thanh-sidebar.thu-gon { width: 62px; min-width: 62px; }
-    #thanh-sidebar.thu-gon .ten-logo,
-    #thanh-sidebar.thu-gon .thong-tin-chu-tro .ten-chu { opacity: 0; max-width: 0; }
     .ten-logo, .thong-tin-chu-tro .ten-chu {
       transition: opacity 0.2s, max-width 0.35s;
       max-width: 160px; overflow: hidden;
     }
     .nhan-nhom-menu {
       transition: opacity 0.2s, max-height 0.3s;
-      max-height: 40px; overflow: hidden;
     }
     #thanh-sidebar.thu-gon .nhan-nhom-menu { opacity: 0; max-height: 0; padding: 0; }
     .muc-menu span:not(.huy-hieu) {
@@ -2105,7 +2101,7 @@
 
   // ===== ĐÓng/MỞ SIDEBAR =====
   function dongMoSidebar() {
-    document.getElementById('thanh-sidebar').classList.toggle('thu-gon');
+    document.getElementById('thanh-sidebar').classList.toggle('an');
   }
 
   // ===== HÀM LƯU CÁC MODAL =====

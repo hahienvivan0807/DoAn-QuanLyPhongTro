@@ -2,776 +2,758 @@
 @model QuanLyNhaTro.Pages.KhachThue.KhachThueModel
 @{
     ViewData["title"] = "Trang khách thuê";
-}
-<!DOCTYPE html>
+    Layout = null;
+}<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nhà Trọ ABC – Trang Chủ</title>
+  <title>Nhà Trọ ABC – Khách Thuê</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    /* =============================================
-       BIẾN CSS TOÀN CỤC (Design Tokens)
-    ============================================= */
+    /* ===== BIẾN MÀU TOÀN CỤC ===== */
     :root {
-      --primary:       #2563eb;
-      --primary-dark:  #1e3a8a;
-      --primary-soft:  #eff6ff;
-      --primary-light: #bfdbfe;
-
-      --green:         #059669;
-      --green-soft:    #d1fae5;
-      --amber:         #d97706;
-      --amber-soft:    #fef3c7;
-      --red:           #dc2626;
-      --red-soft:      #fee2e2;
-      --purple-soft:   #ede9fe;
-
-      --text-900:      #0f172a;
-      --text-600:      #475569;
-      --text-400:      #94a3b8;
-
-      --border:        #e2e8f0;
-      --bg-page:       #f8fafc;
-      --bg-card:       #ffffff;
-
-      --sidebar-w:     230px;
-      --header-h:      58px;
-      --radius-lg:     14px;
-      --radius-md:     10px;
-      --radius-sm:     7px;
-
-      --shadow-sm:     0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md:     0 4px 20px rgba(37,99,235,0.10);
-      --shadow-card:   0 2px 8px rgba(15,23,42,0.06);
-
-      --font:          'Be Vietnam Pro', sans-serif;
-      --speed:         0.24s;
+      --mau-sidebar:       #0d1b3e;
+      --mau-sidebar-dam:   #091429;
+      --mau-chu-de:        #1a56db;
+      --mau-chu-de-sang:   #3b82f6;
+      --mau-nen:           #f0f4f8;
+      --mau-trang:         #ffffff;
+      --mau-chu:           #1e293b;
+      --mau-chu-phu:       #64748b;
+      --mau-vien:          #e2e8f0;
+      --mau-xanh-nhat:     #eff6ff;
+      --mau-xanh-trung:    #dbeafe;
+      --mau-xanh-la:       #059669;
+      --mau-xanh-la-nhat:  #d1fae5;
+      --mau-cam:           #d97706;
+      --mau-cam-nhat:      #fef3c7;
+      --mau-do:            #dc2626;
+      --mau-do-nhat:       #fee2e2;
+      --mau-tim-nhat:      #ede9fe;
+      --bong-card:         0 4px 24px rgba(26,86,219,0.10);
+      --bong-card-hover:   0 8px 32px rgba(26,86,219,0.18);
     }
 
-    /* =============================================
-       RESET & BASE
-    ============================================= */
+    /* ===== RESET & CƠ BẢN ===== */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      font-family: var(--font);
-      background: var(--bg-page);
-      color: var(--text-900);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-
-    /* =============================================
-       LAYOUT CHÍNH: SIDEBAR + HEADER + MAIN
-    ============================================= */
-    .layout {
+      font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+      background: var(--mau-nen);
+      color: var(--mau-chu);
       display: flex;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
 
-
     /* =============================================
-       SIDEBAR – Thanh điều hướng bên trái
+       SIDEBAR
     ============================================= */
-    .sidebar {
-      width: var(--sidebar-w);
-      background: var(--primary-dark);
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 200;
+    #thanh-sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: linear-gradient(180deg, #0d1b3e 0%, #091429 100%);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      transition: width var(--speed) cubic-bezier(.4,0,.2,1),
-                  transform var(--speed) cubic-bezier(.4,0,.2,1);
+      height: 100vh;
+      position: relative;
+      z-index: 100;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
     }
-    .sidebar.closed { width: 0; overflow: hidden; }
+    #thanh-sidebar.an-sidebar { width: 0; min-width: 0; overflow: hidden; }
 
-    /* Logo trong sidebar */
-    .sidebar-logo {
-      padding: 18px 16px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: var(--sidebar-w);
-    }
-    .logo-icon {
-      width: 38px; height: 38px;
-      background: var(--primary);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 17px; font-weight: 800; color: #fff;
-      flex-shrink: 0;
-      box-shadow: 0 3px 10px rgba(37,99,235,0.4);
-    }
-    .logo-name { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.2px; }
-    .logo-sub  { font-size: 10px; color: rgba(255,255,255,0.38); margin-top: 1px; }
-
-    /* Nhãn nhóm menu */
-    .nav-label {
-      padding: 14px 16px 4px;
-      font-size: 9.5px; font-weight: 700;
-      letter-spacing: 1.2px;
+    .nhan-nhom {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; color: rgba(255,255,255,0.3);
       text-transform: uppercase;
-      color: rgba(255,255,255,0.28);
-      min-width: var(--sidebar-w);
-    }
-
-    /* Item menu */
-    .nav-item {
-      display: flex; align-items: center; gap: 9px;
-      margin: 1px 8px;
-      padding: 8px 11px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      text-decoration: none;
-      color: rgba(255,255,255,0.60);
-      font-size: 12.5px; font-weight: 600;
-      transition: background .16s, color .16s;
-      min-width: calc(var(--sidebar-w) - 16px);
+      padding: 18px 20px 6px 20px;
       white-space: nowrap;
     }
-    .nav-item:hover  { background: rgba(255,255,255,0.08); color: #fff; }
-    .nav-item.active {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 3px 12px rgba(37,99,235,0.4);
-    }
-    .nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
-    .nav-badge {
-      margin-left: auto;
-      background: var(--red);
-      color: #fff;
-      font-size: 9px; font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 20px;
-    }
 
-    /* Thông tin user ở cuối sidebar */
-    .sidebar-footer {
-      margin-top: auto;
-      padding: 11px 14px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; gap: 9px;
-      min-width: var(--sidebar-w);
-    }
-    .ava-sm {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), #93c5fd);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 800; color: #fff;
-      flex-shrink: 0;
-    }
-    .footer-name { font-size: 11.5px; font-weight: 700; color: #fff; }
-    .footer-role { font-size: 10px; color: rgba(255,255,255,0.38); }
-
-
-    /* =============================================
-       HEADER – Thanh trên cùng cố định
-    ============================================= */
-    .header {
-      position: fixed;
-      top: 0;
-      left: var(--sidebar-w);
-      right: 0;
-      height: var(--header-h);
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center;
-      justify-content: space-between;
-      padding: 0 22px;
-      z-index: 100;
-      box-shadow: var(--shadow-sm);
-      transition: left var(--speed) cubic-bezier(.4,0,.2,1);
-    }
-    .header.wide { left: 0; }
-
-    .header-left { display: flex; align-items: center; gap: 12px; }
-
-    /* Nút hamburger mở/đóng sidebar */
-    .hamburger {
-      width: 34px; height: 34px;
-      border: none; background: var(--primary-soft);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 4px;
-      transition: background .18s;
-    }
-    .hamburger:hover { background: var(--primary-light); }
-    .hline {
-      display: block; width: 15px; height: 2px;
-      background: var(--primary-dark); border-radius: 2px;
-      transition: transform var(--speed), opacity var(--speed);
-    }
-    .hamburger.open .hline:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-    .hamburger.open .hline:nth-child(2) { opacity: 0; }
-    .hamburger.open .hline:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-
-    .page-title { font-size: 15px; font-weight: 800; color: var(--text-900); }
-    .breadcrumb { font-size: 10.5px; color: var(--text-400); margin-top: 1px; }
-
-    .header-right { display: flex; align-items: center; gap: 10px; }
-
-    .hdr-date {
-      font-size: 11.5px; font-weight: 600; color: var(--text-600);
-      background: var(--bg-page);
-      padding: 5px 10px; border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-    }
-    .hdr-bell {
-      position: relative;
-      width: 34px; height: 34px;
-      border: none; background: var(--primary-soft);
-      border-radius: var(--radius-sm);
-      cursor: pointer; font-size: 15px;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .18s;
-    }
-    .hdr-bell:hover { background: var(--primary-light); }
-    .bell-dot {
-      position: absolute; top: 6px; right: 6px;
-      width: 7px; height: 7px;
-      background: var(--red); border-radius: 50%;
-      border: 1.5px solid white;
-    }
-    .hdr-user {
-      display: flex; align-items: center; gap: 8px;
-      padding: 5px 10px; border-radius: var(--radius-sm);
-      cursor: pointer; transition: background .18s;
-    }
-    .hdr-user:hover { background: var(--bg-page); }
-    .ava-md {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), #93c5fd);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 800; color: #fff;
-    }
-    .hdr-uname { font-size: 11.5px; font-weight: 700; color: var(--text-900); }
-    .hdr-urole { font-size: 10px; color: var(--text-400); }
-
-
-    /* =============================================
-       MAIN CONTENT – Vùng nội dung chính
-    ============================================= */
-    .main {
-      margin-left: var(--sidebar-w);
-      margin-top: var(--header-h);
-      padding: 18px 22px;
-      min-height: calc(100vh - var(--header-h));
-      transition: margin-left var(--speed) cubic-bezier(.4,0,.2,1);
-    }
-    .main.wide { margin-left: 0; }
-
-
-    /* =============================================
-       GREETING BAR – Dòng chào đầu trang
-    ============================================= */
-    .greeting {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-    }
-    .greeting-title { font-size: 18px; font-weight: 800; color: var(--text-900); letter-spacing: -0.3px; }
-    .greeting-sub   { font-size: 12px; color: var(--text-600); margin-top: 2px; }
-    .status-pill {
-      display: flex; align-items: center; gap: 6px;
-      background: var(--green-soft); color: var(--green);
-      font-size: 11.5px; font-weight: 700;
-      padding: 5px 13px; border-radius: 20px;
-    }
-    .status-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 0 2px rgba(5,150,105,0.25);
-    }
-
-
-    /* =============================================
-       STATS STRIP – Hàng số liệu nhanh
-    ============================================= */
-    .stats-strip {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
+    .logo-sidebar {
       display: flex; align-items: center; gap: 12px;
-      box-shadow: var(--shadow-card);
-      transition: box-shadow .2s, transform .2s;
+      padding: 28px 20px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      white-space: nowrap;
     }
-    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .stat-icon-wrap {
-      width: 40px; height: 40px; border-radius: 10px;
+    .logo-sidebar .bieu-tuong {
+      width: 42px; height: 42px;
+      background: var(--mau-chu-de);
+      border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
-    }
-    .stat-info {}
-    .stat-num  { font-size: 22px; font-weight: 800; line-height: 1; }
-    .stat-desc { font-size: 11px; color: var(--text-400); margin-top: 2px; }
-
-
-    /* =============================================
-       GRID CHÍNH – 3 cột nội dung
-    ============================================= */
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 1fr 0.9fr;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-
-    /* =============================================
-       CARD CHUNG – Khung thẻ tái sử dụng
-    ============================================= */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-card);
-      display: flex; flex-direction: column;
-      overflow: hidden;
-      transition: box-shadow .2s, transform .2s;
-    }
-    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-
-    /* Đầu card */
-    .card-head {
-      display: flex; align-items: center; gap: 9px;
-      padding: 13px 16px;
-      border-bottom: 1px solid var(--border);
+      font-size: 18px; color: #fff; font-weight: 800;
       flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(26,86,219,0.4);
     }
-    .chead-icon {
-      width: 28px; height: 28px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; flex-shrink: 0;
+    .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; letter-spacing: 0.5px; }
+    .logo-sidebar .ten-logo span { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+    .menu-item {
+      display: flex; align-items: center; gap: 13px;
+      padding: 11px 20px;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      border-radius: 0 30px 30px 0;
+      margin: 2px 10px 2px 0;
+      transition: all 0.2s;
+      font-size: 13.5px; font-weight: 600;
+      text-decoration: none;
+      position: relative;
+      white-space: nowrap;
     }
-    .card-title { font-size: 12.5px; font-weight: 800; color: var(--text-900); }
-    .card-action {
+    .menu-item i { width: 20px; text-align: center; font-size: 15px; flex-shrink: 0; }
+    .menu-item:hover { background: rgba(59,130,246,0.15); color: #fff; }
+    .menu-item.dang-chon {
+      background: linear-gradient(90deg, rgba(26,86,219,0.85) 0%, rgba(59,130,246,0.6) 100%);
+      color: #fff; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(26,86,219,0.3);
+    }
+    .menu-item.dang-chon::before {
+      content: '';
+      position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      height: 70%; width: 4px;
+      background: #60a5fa;
+      border-radius: 0 4px 4px 0;
+    }
+    .huy-hieu-menu {
       margin-left: auto;
-      font-size: 11px; font-weight: 700; color: var(--primary);
-      background: var(--primary-soft);
-      padding: 3px 9px; border-radius: 6px;
-      cursor: pointer; text-decoration: none;
-      transition: background .18s;
+      background: #ef4444; color: #fff;
+      font-size: 10px; font-weight: 700;
+      border-radius: 20px; padding: 1px 7px;
+      min-width: 20px; text-align: center;
     }
-    .card-action:hover { background: var(--primary-light); }
 
-    /* Thân card */
-    .card-body { padding: 14px 16px; flex: 1; }
-
-
-    /* =============================================
-       CARD: THÔNG TIN CÁ NHÂN
-    ============================================= */
-    .profile-wrap {
-      display: flex; align-items: flex-start; gap: 13px;
-      margin-bottom: 12px;
+    .khach-thue-footer {
+      margin-top: auto;
+      padding: 18px 16px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; white-space: nowrap;
     }
-    .ava-xl {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary) 0%, #60a5fa 100%);
+    .khach-thue-footer .anh-khach {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a56db, #60a5fa);
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 800; color: #fff;
+      color: #fff; font-size: 15px; font-weight: 800;
+      border: 2px solid rgba(255,255,255,0.2);
       flex-shrink: 0;
-      border: 3px solid var(--primary-light);
+    }
+    .khach-thue-footer .ten-khach strong { display: block; color: #fff; font-size: 13px; }
+    .khach-thue-footer .ten-khach span { color: rgba(255,255,255,0.45); font-size: 11px; }
+    /* Online dot */
+    .online-badge {
       position: relative;
     }
-    .online-ring {
+    .online-badge::after {
+      content: '';
       position: absolute; bottom: 1px; right: 1px;
-      width: 12px; height: 12px; border-radius: 50%;
-      background: var(--green);
-      border: 2px solid white;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #10b981;
+      border: 2px solid #091429;
     }
-    .profile-meta {}
-    .pname { font-size: 14px; font-weight: 800; color: var(--text-900); }
+
+    /* =============================================
+       KHU VỰC CHÍNH
+    ============================================= */
+    #khu-vuc-chinh {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    #thanh-header {
+      background: var(--mau-trang);
+      padding: 0 28px;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--mau-vien);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+    }
+    .header-trai { display: flex; align-items: center; gap: 16px; }
+    .nut-ham-menu {
+      background: none; border: none; cursor: pointer;
+      font-size: 20px; color: var(--mau-chu-phu);
+      padding: 6px; border-radius: 8px; transition: background 0.2s;
+    }
+    .nut-ham-menu:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+    .tieu-de-trang { font-size: 16px; font-weight: 800; color: var(--mau-chu); }
+    .duong-dan { font-size: 12px; color: var(--mau-chu-phu); }
+
+    .header-phai { display: flex; align-items: center; gap: 14px; }
+    .hdr-date {
+      font-size: 12px; font-weight: 600; color: var(--mau-chu-phu);
+      background: var(--mau-nen); padding: 6px 12px;
+      border-radius: 20px; border: 1px solid var(--mau-vien);
+    }
+    .nut-thong-bao {
+      position: relative; background: none; border: none;
+      cursor: pointer; font-size: 18px; color: var(--mau-chu-phu);
+      padding: 8px; border-radius: 50%; transition: all 0.2s;
+    }
+    .nut-thong-bao:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+    .so-thong-bao {
+      position: absolute; top: 2px; right: 2px;
+      background: #ef4444; color: #fff;
+      font-size: 9px; font-weight: 700; border-radius: 50%;
+      width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #fff;
+    }
+    .thong-tin-khach {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; padding: 6px 12px; border-radius: 24px;
+      transition: background 0.2s;
+    }
+    .thong-tin-khach:hover { background: var(--mau-xanh-nhat); }
+    .thong-tin-khach .anh-dai-dien {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a56db, #60a5fa);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 14px; font-weight: 800;
+      position: relative;
+    }
+    .thong-tin-khach .anh-dai-dien::after {
+      content: ''; position: absolute; bottom: 0; right: 0;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #10b981; border: 2px solid #fff;
+    }
+    .thong-tin-khach .ten { font-size: 13px; font-weight: 700; }
+    .thong-tin-khach .phong-so { font-size: 11px; color: var(--mau-chu-phu); }
+
+    /* =============================================
+       NỘI DUNG CHÍNH
+    ============================================= */
+    #noi-dung-chinh {
+      flex: 1; overflow-y: auto; padding: 24px 28px;
+    }
+
+    /* Dòng chào */
+    .hang-chao-mung {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .hang-chao-mung h2 { font-size: 20px; font-weight: 800; }
+    .hang-chao-mung p { font-size: 13px; color: var(--mau-chu-phu); margin-top: 2px; }
+    .trang-thai-pill {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--mau-xanh-la-nhat); color: var(--mau-xanh-la);
+      font-size: 12px; font-weight: 700;
+      padding: 7px 16px; border-radius: 20px;
+    }
+    .trang-thai-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--mau-xanh-la);
+      box-shadow: 0 0 0 3px rgba(5,150,105,0.2);
+      animation: nhip 2s ease-in-out infinite;
+    }
+    @@keyframes nhip { 0%,100%{box-shadow:0 0 0 3px rgba(5,150,105,0.2)} 50%{box-shadow:0 0 0 6px rgba(5,150,105,0.08)} }
+
+    /* =============================================
+       HÀNG 1: 3 CARD THỐNG KÊ
+    ============================================= */
+    .hang-thong-ke {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 18px; margin-bottom: 22px;
+    }
+    .card-thong-ke {
+      background: var(--mau-trang);
+      border-radius: 16px; padding: 20px;
+      box-shadow: var(--bong-card);
+      position: relative; overflow: hidden;
+      cursor: pointer; transition: all 0.25s;
+      border: 1px solid transparent;
+    }
+    .card-thong-ke:hover { transform: translateY(-4px); box-shadow: var(--bong-card-hover); }
+    .card-thong-ke::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      border-radius: 16px 16px 0 0;
+    }
+    .card-thong-ke.mau-xanh::before { background: linear-gradient(90deg, #1a56db, #60a5fa); }
+    .card-thong-ke.mau-xanh { border-color: #dbeafe; }
+    .card-thong-ke.mau-xanh .bieu-tuong-card { background: #eff6ff; color: #1a56db; }
+    .card-thong-ke.mau-do::before { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .card-thong-ke.mau-do { border-color: #fee2e2; }
+    .card-thong-ke.mau-do .bieu-tuong-card { background: #fee2e2; color: #dc2626; }
+    .card-thong-ke.mau-cam::before { background: linear-gradient(90deg, #d97706, #fbbf24); }
+    .card-thong-ke.mau-cam { border-color: #fef3c7; }
+    .card-thong-ke.mau-cam .bieu-tuong-card { background: #fffbeb; color: #d97706; }
+
+    .card-noi-dung { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+    .bieu-tuong-card {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .so-lieu .con-so { font-size: 28px; font-weight: 800; line-height: 1; }
+    .so-lieu .ten-thong-ke { font-size: 12px; color: var(--mau-chu-phu); margin-top: 4px; }
+    .nhan-trang-thai {
+      font-size: 11px; font-weight: 600; padding: 3px 8px;
+      border-radius: 20px; margin-top: 6px; display: inline-block;
+    }
+    .nhan-trang-thai.tot { background: #dcfce7; color: #16a34a; }
+    .nhan-trang-thai.canh-bao { background: #fef3c7; color: #d97706; }
+    .nhan-trang-thai.nguy-hiem { background: #fee2e2; color: #dc2626; }
+
+    /* =============================================
+       HÀNG 2: THÔNG TIN CÁ NHÂN + THÔNG BÁO
+    ============================================= */
+    .hang-giua { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 22px; }
+
+    /* Card chung */
+    .card {
+      background: var(--mau-trang);
+      border-radius: 16px;
+      box-shadow: var(--bong-card);
+      border: 1px solid var(--mau-vien);
+      position: relative; overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: var(--bong-card-hover); }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      border-radius: 16px 16px 0 0;
+    }
+    .card.accent-xanh::before { background: linear-gradient(90deg, #1a56db, #60a5fa); }
+    .card.accent-vang::before { background: linear-gradient(90deg, #d97706, #fbbf24, #60a5fa); }
+    .card.accent-tim::before  { background: linear-gradient(90deg, #7c3aed, #a78bfa, #60a5fa); }
+    .card.accent-xanh-la::before { background: linear-gradient(90deg, #059669, #34d399, #60a5fa); }
+    .card.accent-do::before { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+    .tieu-de-card {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--mau-vien);
+    }
+    .tieu-de-card h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
+    .tieu-de-card h3 i { color: var(--mau-chu-de); font-size: 14px; }
+    .nut-xem-them {
+      background: none; border: 1px solid var(--mau-vien);
+      color: var(--mau-chu-de); font-size: 12px; font-weight: 600;
+      border-radius: 8px; padding: 5px 12px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nut-xem-them:hover { background: var(--mau-xanh-nhat); border-color: var(--mau-chu-de); }
+
+    .card-body { padding: 18px 20px; }
+
+    /* Profile */
+    .profile-wrap { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+    .ava-xl {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a56db, #60a5fa);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: #fff;
+      flex-shrink: 0; position: relative;
+      border: 3px solid #dbeafe;
+      box-shadow: 0 4px 16px rgba(26,86,219,0.25);
+    }
+    .ava-xl::after {
+      content: ''; position: absolute; bottom: 2px; right: 2px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #10b981; border: 2px solid #fff;
+    }
+    .pname { font-size: 15px; font-weight: 800; color: var(--mau-chu); }
     .pbadge {
       display: inline-block;
-      background: var(--primary-soft); color: var(--primary);
-      font-size: 10.5px; font-weight: 700;
-      padding: 2px 8px; border-radius: 20px;
-      margin: 5px 0 7px;
+      background: var(--mau-xanh-nhat); color: var(--mau-chu-de);
+      font-size: 11px; font-weight: 700;
+      padding: 2px 10px; border-radius: 20px; margin: 6px 0 8px;
     }
     .prow {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 11px; color: var(--text-600); margin-bottom: 4px;
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; color: var(--mau-chu-phu); margin-bottom: 5px;
     }
-    .prow-icon { font-size: 13px; width: 16px; text-align: center; }
+    .prow i { width: 16px; text-align: center; font-size: 12px; color: var(--mau-chu-de); }
+
     .btn-profile {
-      width: 100%; padding: 8px;
-      background: var(--primary); color: #fff;
-      border: none; border-radius: var(--radius-sm);
-      font-family: var(--font); font-size: 12px; font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 3px 10px rgba(37,99,235,0.28);
-      transition: background .18s, box-shadow .18s;
-      margin-bottom: 12px;
+      width: 100%; padding: 10px;
+      background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+      color: #fff; border: none; border-radius: 10px;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+      transition: all 0.2s; margin-bottom: 14px;
     }
-    .btn-profile:hover { background: #1d4ed8; }
-    .divider { height: 1px; background: var(--border); margin-bottom: 12px; }
+    .btn-profile:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,86,219,0.4); }
 
-    /* Mini stats trong card profile */
-    .mini-stats { display: flex; gap: 8px; }
+    .divider { height: 1px; background: var(--mau-vien); margin-bottom: 14px; }
+
+    .mini-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .mini-stat {
-      flex: 1; background: var(--bg-page);
-      border-radius: var(--radius-sm);
-      padding: 8px 6px; text-align: center;
+      background: var(--mau-nen); border-radius: 10px;
+      padding: 10px 8px; text-align: center;
+      border: 1px solid var(--mau-vien);
     }
-    .ms-num { font-size: 17px; font-weight: 800; color: var(--text-900); }
-    .ms-lbl { font-size: 9.5px; color: var(--text-400); margin-top: 1px; }
+    .ms-num { font-size: 18px; font-weight: 800; color: var(--mau-chu); }
+    .ms-lbl { font-size: 10px; color: var(--mau-chu-phu); margin-top: 2px; }
 
-
-    /* =============================================
-       CARD: THÔNG BÁO
-    ============================================= */
+    /* Thông báo */
     .notif-list { list-style: none; }
     .notif-item {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 9px 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 11px;
+      padding: 11px 0; border-bottom: 1px solid var(--mau-vien);
     }
     .notif-item:last-child { border-bottom: none; }
     .ndot {
-      width: 7px; height: 7px; border-radius: 50%;
-      flex-shrink: 0; margin-top: 5px;
+      width: 9px; height: 9px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
     }
-    .nd-blue  { background: var(--primary); }
-    .nd-amber { background: var(--amber); }
-    .nd-green { background: var(--green); }
-    .nd-red   { background: var(--red); }
-    .notif-text { font-size: 11.5px; font-weight: 600; color: var(--text-900); line-height: 1.4; }
-    .notif-time { font-size: 10px; color: var(--text-400); margin-top: 2px; }
-
+    .nd-blue   { background: var(--mau-chu-de); box-shadow: 0 0 0 3px #dbeafe; }
+    .nd-amber  { background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
+    .nd-green  { background: #10b981; box-shadow: 0 0 0 3px #d1fae5; }
+    .nd-red    { background: #ef4444; box-shadow: 0 0 0 3px #fee2e2; }
+    .notif-text { font-size: 12.5px; font-weight: 600; color: var(--mau-chu); line-height: 1.4; }
+    .notif-time { font-size: 11px; color: var(--mau-chu-phu); margin-top: 2px; }
 
     /* =============================================
-       CARD: TIỆN ÍCH NHANH
+       HÀNG 3: TIỆN ÍCH NHANH (FULL WIDTH)
     ============================================= */
+    .hang-tien-ich { margin-bottom: 22px; }
+
     .quick-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px; padding: 18px 20px;
     }
     .quick-item {
-      display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
-      padding: 11px 11px;
-      background: var(--bg-page);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
+      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+      padding: 14px; background: var(--mau-nen);
+      border: 1px solid var(--mau-vien); border-radius: 12px;
       text-decoration: none; cursor: pointer;
-      transition: background .18s, box-shadow .18s, transform .18s;
+      transition: all 0.2s;
     }
     .quick-item:hover {
-      background: var(--primary-soft);
-      box-shadow: var(--shadow-sm);
-      transform: translateY(-1px);
+      background: var(--mau-xanh-nhat);
+      border-color: var(--mau-chu-de-sang);
+      box-shadow: var(--bong-card);
+      transform: translateY(-2px);
     }
     .qi-icon {
-      width: 32px; height: 32px; border-radius: 9px;
+      width: 38px; height: 38px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
+      font-size: 17px;
     }
-    .qi-name { font-size: 11.5px; font-weight: 700; color: var(--text-900); }
-    .qi-desc { font-size: 10px; color: var(--text-400); line-height: 1.3; }
-
+    .qi-name { font-size: 13px; font-weight: 700; color: var(--mau-chu); }
+    .qi-desc { font-size: 11px; color: var(--mau-chu-phu); line-height: 1.4; }
 
     /* =============================================
-       CARD: LIÊN HỆ NHÀ TRỌ – Full width bên dưới
+       HÀNG 4: LIÊN HỆ NHÀ TRỌ
     ============================================= */
-    .contact-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-card);
-      overflow: hidden;
-      transition: box-shadow .2s;
-    }
-    .contact-card:hover { box-shadow: var(--shadow-md); }
+    .hang-lien-he { margin-bottom: 22px; }
 
-    /* Nội dung bên trong contact card */
     .contact-inner {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 20px;
-      padding: 14px 16px;
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 20px; padding: 18px 20px;
     }
     .contact-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .crow {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 11px;
-      background: var(--bg-page);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 14px;
+      background: var(--mau-nen); border: 1px solid var(--mau-vien);
+      border-radius: 10px; transition: border-color 0.2s;
     }
+    .crow:hover { border-color: var(--mau-chu-de-sang); }
     .crow-icon {
-      width: 28px; height: 28px; border-radius: 7px;
+      width: 30px; height: 30px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px; flex-shrink: 0;
+      font-size: 14px; flex-shrink: 0;
     }
-    .crow-label { font-size: 10px; color: var(--text-400); font-weight: 600; }
-    .crow-value { font-size: 12px; font-weight: 700; color: var(--text-900); margin-top: 1px; }
+    .crow-label { font-size: 10px; color: var(--mau-chu-phu); font-weight: 600; }
+    .crow-value { font-size: 12.5px; font-weight: 700; color: var(--mau-chu); margin-top: 1px; }
 
-    /* Ô bản đồ giả */
     .map-box {
-      width: 185px;
-      background: linear-gradient(135deg, var(--primary-soft) 0%, var(--purple-soft) 100%);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
+      width: 190px;
+      background: linear-gradient(135deg, #eff6ff 0%, #ede9fe 100%);
+      border-radius: 12px; border: 1px solid var(--mau-vien);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 5px; padding: 14px; text-align: center;
+      gap: 6px; padding: 16px; text-align: center;
+      cursor: pointer; transition: all 0.2s;
     }
-    .map-emoji { font-size: 30px; }
-    .map-title { font-size: 12px; font-weight: 700; color: var(--primary-dark); }
-    .map-addr  { font-size: 10.5px; color: var(--text-600); line-height: 1.4; }
-
+    .map-box:hover { box-shadow: var(--bong-card); transform: translateY(-2px); }
+    .map-emoji { font-size: 32px; }
+    .map-title { font-size: 13px; font-weight: 700; color: #1e3a8a; }
+    .map-addr  { font-size: 11px; color: var(--mau-chu-phu); line-height: 1.5; }
 
     /* =============================================
-       RESPONSIVE – Mobile
+       MODAL
     ============================================= */
-    @@media (max-width: 900px) {
-      .content-grid { grid-template-columns: 1fr 1fr; }
-      .stats-strip  { grid-template-columns: 1fr 1fr 1fr; }
-      .contact-rows { grid-template-columns: 1fr; }
+    .lop-che-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 999;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
     }
-    @@media (max-width: 620px) {
-      .content-grid { grid-template-columns: 1fr; }
-      .stats-strip  { grid-template-columns: 1fr 1fr; }
-      .sidebar { width: 0; }
-      .main, .header { margin-left: 0; left: 0; }
+    .lop-che-modal.hien { display: flex; }
+    .hop-modal {
+      background: var(--mau-trang); border-radius: 20px;
+      padding: 28px; width: 520px; max-width: 95vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: hienModal 0.3s ease;
+    }
+    @@keyframes hienModal { from { opacity:0; transform:scale(0.9) translateY(-20px); } to { opacity:1; transform:none; } }
+    .tieu-de-modal { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .tieu-de-modal h3 { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 9px; }
+    .nut-dong-modal { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--mau-chu-phu); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .nut-dong-modal:hover { background: var(--mau-nen); color: var(--mau-chu); }
+
+    .hang-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .nhom-truong-nhap { margin-bottom: 4px; }
+    .nhan-truong-nhap { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--mau-chu); }
+    .truong-nhap {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--mau-vien); border-radius: 10px;
+      font-size: 13px; outline: none; transition: border-color 0.2s;
+      color: var(--mau-chu); font-family: 'Be Vietnam Pro', sans-serif;
+    }
+    .truong-nhap:focus { border-color: var(--mau-chu-de-sang); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .chon-lua { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-color: #fff; }
+
+    .nhom-nut-modal { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .nut-huy { background: var(--mau-nen); color: var(--mau-chu-phu); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif; }
+    .nut-huy:hover { background: var(--mau-vien); }
+    .nut-luu { background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang)); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(26,86,219,0.3); transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif; }
+    .nut-luu:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,86,219,0.4); }
+
+    /* Info row trong modal */
+    .info-row-modal {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--mau-vien);
+      font-size: 13px;
+    }
+    .info-row-modal:last-child { border-bottom: none; }
+    .info-row-modal .label-modal { color: var(--mau-chu-phu); font-weight: 600; }
+    .info-row-modal .value-modal { font-weight: 700; color: var(--mau-chu); }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 1100px) {
+      .hang-thong-ke { grid-template-columns: repeat(3, 1fr); }
+      .quick-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @@media (max-width: 900px) {
+      .hang-giua { grid-template-columns: 1fr; }
+      .contact-rows { grid-template-columns: 1fr; }
       .map-box { display: none; }
+    }
+    @@media (max-width: 768px) {
+      #thanh-sidebar { width: 0; min-width: 0; overflow: hidden; }
+      #thanh-sidebar.mo { width: 220px; min-width: 220px; }
+      .hang-thong-ke { grid-template-columns: 1fr 1fr; }
+      #noi-dung-chinh { padding: 16px; }
+    }
+    @@media (max-width: 500px) {
+      .hang-thong-ke { grid-template-columns: 1fr; }
+      .quick-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
 
 <!-- =============================================
-     LAYOUT WRAPPER – Bọc toàn bộ trang
+     SIDEBAR
 ============================================= -->
-<div class="layout">
-
-  <!-- =============================================
-       SIDEBAR – Thanh điều hướng bên trái
-  ============================================= -->
-  <aside class="sidebar" id="sidebar">
-
-    <!-- Logo thương hiệu -->
-    <div class="sidebar-logo">
-      <div class="logo-icon">A</div>
-      <div>
-        <div class="logo-name">Nhà Trọ ABC</div>
-        <div class="logo-sub">Khách thuê</div>
-      </div>
+<nav id="thanh-sidebar">
+  <div class="logo-sidebar">
+    <div class="bieu-tuong">A</div>
+    <div class="ten-logo">
+      <strong>NHÀ TRỌ ABC</strong>
+      <span>Cổng khách thuê</span>
     </div>
+  </div>
 
-    <!-- Nhóm menu Chính -->
-    <div class="nav-label">Chính</div>
-    <a href="#" class="nav-item active">
-      <span class="nav-icon">🏠</span> Trang chủ
-    </a>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">💳</span> Thanh toán
-      <span class="nav-badge">1</span>
-    </a>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">⚡</span> Tiện ích
-    </a>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">🔧</span> Báo sự cố
-    </a>
+  <div class="nhan-nhom">Tổng quan</div>
+  <a href="#" class="menu-item dang-chon" onclick="chuyenTrang('trang-chu', this); return false;">
+    <i class="fas fa-home"></i><span>Trang chủ</span>
+  </a>
 
-    <!-- Nhóm menu Khác -->
-    <div class="nav-label">Khác</div>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">🔔</span> Thông báo
-      <span class="nav-badge">4</span>
-    </a>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">👤</span> Hồ sơ
-    </a>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">⚙️</span> Cài đặt
-    </a>
+  <div class="nhan-nhom">Dịch vụ</div>
+  <a href="#" class="menu-item" onclick="chuyenTrang('thanh-toan', this); return false;">
+    <i class="fas fa-credit-card"></i><span>Thanh toán</span>
+    <span class="huy-hieu-menu">1</span>
+  </a>
+  <a href="#" class="menu-item" onclick="chuyenTrang('tien-ich', this); return false;">
+    <i class="fas fa-bolt"></i><span>Dịch vụ & Tiện ích</span>
+  </a>
+  <a href="#" class="menu-item" onclick="chuyenTrang('bao-su-co', this); return false;">
+    <i class="fas fa-tools"></i><span>Báo sự cố</span>
+  </a>
 
-    <!-- Thông tin người dùng cuối sidebar -->
-    <div class="sidebar-footer">
-      <div class="ava-sm">T</div>
-      <div>
-        <div class="footer-name">Trần Duy Hơn</div>
-        <div class="footer-role">Khách thuê</div>
-      </div>
+  <div class="nhan-nhom">Cá nhân</div>
+  <a href="#" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
+    <i class="fas fa-bell"></i><span>Thông báo</span>
+    <span class="huy-hieu-menu">4</span>
+  </a>
+  <a href="#" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
+    <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
+  </a>
+  <a href="#" class="menu-item" onclick="chuyenTrang('cai-dat', this); return false;">
+    <i class="fas fa-cog"></i><span>Cài đặt</span>
+  </a>
+
+  <div class="khach-thue-footer">
+    <div class="anh-khach online-badge">T</div>
+    <div class="ten-khach">
+      <strong>Trần Duy Hơn</strong>
+      <span>Phòng 201 · Tầng 2</span>
     </div>
+  </div>
+</nav>
 
-  </aside>
-  <!-- /SIDEBAR -->
+<!-- =============================================
+     KHU VỰC CHÍNH
+============================================= -->
+<div id="khu-vuc-chinh">
 
-
-  <!-- =============================================
-       HEADER – Thanh tiêu đề cố định trên cùng
-  ============================================= -->
-  <header class="header" id="header">
-
-    <!-- Bên trái: nút mở sidebar + tiêu đề trang -->
-    <div class="header-left">
-      <button class="hamburger open" id="hamburger" onclick="toggleSidebar()">
-        <span class="hline"></span>
-        <span class="hline"></span>
-        <span class="hline"></span>
+  <!-- HEADER -->
+  <header id="thanh-header">
+    <div class="header-trai">
+      <button class="nut-ham-menu" onclick="dongMoSidebar()">
+        <i class="fas fa-bars"></i>
       </button>
       <div>
-        <div class="page-title">Tổng quan</div>
-        <div class="breadcrumb">Trang chủ / Dashboard</div>
+        <div class="tieu-de-trang">Dashboard Khách Thuê</div>
+        <div class="duong-dan">Trang chủ / Tổng quan</div>
       </div>
     </div>
 
-    <!-- Bên phải: ngày, chuông, avatar -->
-    <div class="header-right">
+    <div class="header-phai">
       <div class="hdr-date" id="headerDate"></div>
-      <button class="hdr-bell" onclick="alert('Thông báo')">
-        🔔 <span class="bell-dot"></span>
+      <button class="nut-thong-bao" onclick="moThongBao()">
+        <i class="fas fa-bell"></i>
+        <span class="so-thong-bao">4</span>
       </button>
-      <div class="hdr-user" onclick="alert('Hồ sơ')">
-        <div class="ava-md">T</div>
+      <div class="thong-tin-khach" onclick="moHoSo()">
+        <div class="anh-dai-dien">T</div>
         <div>
-          <div class="hdr-uname">Trần Duy Hơn</div>
-          <div class="hdr-urole">Phòng 201</div>
+          <div class="ten">Trần Duy Hơn</div>
+          <div class="phong-so">Phòng 201</div>
         </div>
+        <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
       </div>
     </div>
-
   </header>
-  <!-- /HEADER -->
 
+  <!-- NỘI DUNG CHÍNH -->
+  <main id="noi-dung-chinh">
 
-  <!-- =============================================
-       MAIN – Vùng nội dung chính
-  ============================================= -->
-  <main class="main" id="main">
-
-    <!-- Dòng chào và trạng thái -->
-    <div class="greeting">
+    <!-- Dòng chào -->
+    <div class="hang-chao-mung">
       <div>
-        <div class="greeting-title">Xin chào, Duy Hơn 👋</div>
-        <div class="greeting-sub">Phòng 201 · Nhà Trọ ABC · Hồ Chí Minh</div>
+        <h2>Xin chào, Duy Hơn! 👋</h2>
+        <p id="ngay-gio-hien-tai">Đang tải...</p>
       </div>
-      <div class="status-pill">
-        <div class="status-dot"></div>
-        Đang hoạt động
+      <div class="trang-thai-pill">
+        <div class="trang-thai-dot"></div>
+        Phòng 201 · Đang hoạt động
       </div>
     </div>
 
+    <!-- ==========================================
+         HÀNG 1: 3 CARD THỐNG KÊ
+    ========================================== -->
+    <div class="hang-thong-ke">
 
-    <!-- =============================================
-         STATS STRIP – 3 thẻ số liệu tổng quan
-    ============================================= -->
-    <div class="stats-strip">
-
-      <div class="stat-card">
-        <div class="stat-icon-wrap" style="background:#eff6ff;">📅</div>
-        <div class="stat-info">
-          <div class="stat-num" style="color:var(--primary)">13</div>
-          <div class="stat-desc">Tháng đã ở</div>
+      <div class="card-thong-ke mau-xanh">
+        <div class="card-noi-dung">
+          <div class="bieu-tuong-card"><i class="fas fa-calendar-check"></i></div>
+          <div class="so-lieu">
+            <div class="con-so" style="color:var(--mau-chu-de);">13</div>
+            <div class="ten-thong-ke">Tháng đã thuê</div>
+            <span class="nhan-trang-thai tot">✓ Hợp đồng còn hiệu lực</span>
+          </div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon-wrap" style="background:#fee2e2;">💳</div>
-        <div class="stat-info">
-          <div class="stat-num" style="color:var(--red)">0</div>
-          <div class="stat-desc">Hóa đơn trễ</div>
+      <div class="card-thong-ke mau-do">
+        <div class="card-noi-dung">
+          <div class="bieu-tuong-card"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div class="so-lieu">
+            <div class="con-so" style="color:var(--mau-do);">0</div>
+            <div class="ten-thong-ke">Hóa đơn trễ hạn</div>
+            <span class="nhan-trang-thai tot">✓ Không có hóa đơn quá hạn</span>
+          </div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon-wrap" style="background:#fef3c7;">⚠️</div>
-        <div class="stat-info">
-          <div class="stat-num" style="color:var(--amber)">2</div>
-          <div class="stat-desc">Sự cố đã ghi</div>
+      <div class="card-thong-ke mau-cam">
+        <div class="card-noi-dung">
+          <div class="bieu-tuong-card"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="so-lieu">
+            <div class="con-so" style="color:var(--mau-cam);">2</div>
+            <div class="ten-thong-ke">Sự cố đã ghi nhận</div>
+            <span class="nhan-trang-thai canh-bao">↻ 1 đang xử lý</span>
+          </div>
         </div>
       </div>
 
     </div>
-    <!-- /STATS STRIP -->
 
+    <!-- ==========================================
+         HÀNG 2: THÔNG TIN CÁ NHÂN + THÔNG BÁO
+    ========================================== -->
+    <div class="hang-giua">
 
-    <!-- =============================================
-         CONTENT GRID – 3 cột thẻ chính
-    ============================================= -->
-    <div class="content-grid">
-
-      <!-- ==========================================
-           CỘT 1: Thông tin cá nhân
-      ========================================== -->
-      <div class="card">
-        <div class="card-head">
-          <div class="chead-icon" style="background:var(--primary-soft);">👤</div>
-          <span class="card-title">Thông tin cá nhân</span>
+      <!-- Card Thông tin cá nhân -->
+      <div class="card accent-xanh">
+        <div class="tieu-de-card">
+          <h3><i class="fas fa-user-circle"></i> Thông tin cá nhân</h3>
+          <button class="nut-xem-them" onclick="moHoSo()">Xem hồ sơ</button>
         </div>
         <div class="card-body">
-
-          <!-- Ảnh đại diện + thông tin cơ bản -->
           <div class="profile-wrap">
-            <div class="ava-xl">
-              T
-              <div class="online-ring"></div>
-            </div>
-            <div class="profile-meta">
+            <div class="ava-xl">T</div>
+            <div>
               <div class="pname">Trần Duy Hơn</div>
-              <div class="pbadge">📍 Phòng 201</div>
-              <div class="prow"><span class="prow-icon">✉️</span> tranduyhon@example.com</div>
-              <div class="prow"><span class="prow-icon">📱</span> 0312.345.678</div>
-              <div class="prow"><span class="prow-icon">🏡</span> Ủ Minh, Cà Mau</div>
-              <div class="prow"><span class="prow-icon">📅</span> Vào ở: 01/04/2025</div>
+              <div class="pbadge">📍 Phòng 201 · Tầng 2</div>
+              <div class="prow"><i class="fas fa-envelope"></i> tranduyhon@example.com</div>
+              <div class="prow"><i class="fas fa-phone"></i> 0312.345.678</div>
+              <div class="prow"><i class="fas fa-map-marker-alt"></i> Ủ Minh, Cà Mau</div>
+              <div class="prow"><i class="fas fa-calendar-alt"></i> Vào ở: 01/04/2025</div>
             </div>
           </div>
 
-          <button class="btn-profile" onclick="alert('Mở trang hồ sơ')">Xem hồ sơ đầy đủ</button>
+          <button class="btn-profile" onclick="moHoSo()">
+            <i class="fas fa-id-card"></i> &nbsp;Xem hồ sơ đầy đủ
+          </button>
 
           <div class="divider"></div>
 
-          <!-- 3 số liệu nhỏ -->
           <div class="mini-stats">
             <div class="mini-stat">
-              <div class="ms-num">13</div>
+              <div class="ms-num" style="color:var(--mau-chu-de);">13</div>
               <div class="ms-lbl">Tháng ở</div>
             </div>
             <div class="mini-stat">
-              <div class="ms-num" style="color:var(--red)">0</div>
+              <div class="ms-num" style="color:#16a34a;">0</div>
               <div class="ms-lbl">Hóa đơn trễ</div>
             </div>
             <div class="mini-stat">
-              <div class="ms-num" style="color:var(--amber)">2</div>
+              <div class="ms-num" style="color:var(--mau-cam);">2</div>
               <div class="ms-lbl">Sự cố</div>
             </div>
           </div>
-
         </div>
       </div>
-      <!-- /CỘT 1 -->
 
-
-      <!-- ==========================================
-           CỘT 2: Thông báo
-      ========================================== -->
-      <div class="card">
-        <div class="card-head">
-          <div class="chead-icon" style="background:var(--amber-soft);">🔔</div>
-          <span class="card-title">Thông báo</span>
-          <span class="card-action" onclick="alert('Xem tất cả')">Xem tất cả</span>
+      <!-- Card Thông báo -->
+      <div class="card accent-vang">
+        <div class="tieu-de-card">
+          <h3><i class="fas fa-bell" style="color:#d97706;"></i> Thông báo</h3>
+          <button class="nut-xem-them" onclick="moThongBao()">Xem tất cả</button>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="padding-top:10px;">
           <ul class="notif-list">
-
             <li class="notif-item">
               <span class="ndot nd-blue"></span>
               <div>
@@ -779,7 +761,6 @@
                 <div class="notif-time">10 phút trước</div>
               </div>
             </li>
-
             <li class="notif-item">
               <span class="ndot nd-amber"></span>
               <div>
@@ -787,7 +768,6 @@
                 <div class="notif-time">1 giờ trước</div>
               </div>
             </li>
-
             <li class="notif-item">
               <span class="ndot nd-green"></span>
               <div>
@@ -795,7 +775,6 @@
                 <div class="notif-time">3 giờ trước</div>
               </div>
             </li>
-
             <li class="notif-item">
               <span class="ndot nd-blue"></span>
               <div>
@@ -803,164 +782,280 @@
                 <div class="notif-time">Hôm qua</div>
               </div>
             </li>
-
           </ul>
         </div>
       </div>
-      <!-- /CỘT 2 -->
-
-
-      <!-- ==========================================
-           CỘT 3: Tiện ích nhanh
-      ========================================== -->
-      <div class="card">
-        <div class="card-head">
-          <div class="chead-icon" style="background:var(--purple-soft);">⚡</div>
-          <span class="card-title">Tiện ích nhanh</span>
-        </div>
-        <div class="card-body">
-          <div class="quick-grid">
-
-            <a class="quick-item" href="#" onclick="alert('Thanh Toán'); return false;">
-              <div class="qi-icon" style="background:#dbeafe;">💳</div>
-              <div class="qi-name">Thanh toán</div>
-              <div class="qi-desc">Xem & thanh toán hóa đơn</div>
-            </a>
-
-            <a class="quick-item" href="#" onclick="alert('Tiện Ích'); return false;">
-              <div class="qi-icon" style="background:#dcfce7;">⚡</div>
-              <div class="qi-name">Dịch vụ</div>
-              <div class="qi-desc">Điện, nước, internet...</div>
-            </a>
-
-            <a class="quick-item" href="#" onclick="alert('Báo Sự Cố'); return false;">
-              <div class="qi-icon" style="background:#ffedd5;">🔧</div>
-              <div class="qi-name">Báo sự cố</div>
-              <div class="qi-desc">Ghi nhận vấn đề phòng</div>
-            </a>
-
-            <a class="quick-item" href="#" onclick="alert('Cài Đặt'); return false;">
-              <div class="qi-icon" style="background:#ede9fe;">⚙️</div>
-              <div class="qi-name">Cài đặt</div>
-              <div class="qi-desc">Tùy chỉnh tài khoản</div>
-            </a>
-
-          </div>
-        </div>
-      </div>
-      <!-- /CỘT 3 -->
 
     </div>
-    <!-- /CONTENT GRID -->
 
+    <!-- ==========================================
+         HÀNG 3: TIỆN ÍCH NHANH
+    ========================================== -->
+    <div class="hang-tien-ich">
+      <div class="card accent-tim">
+        <div class="tieu-de-card">
+          <h3><i class="fas fa-th-large" style="color:#7c3aed;"></i> Tiện ích nhanh</h3>
+        </div>
+        <div class="quick-grid">
 
-    <!-- =============================================
-         CONTACT CARD – Liên hệ nhà trọ (full width)
-    ============================================= -->
-    <div class="contact-card">
+          <a class="quick-item" href="#" onclick="moThanhToan(); return false;">
+            <div class="qi-icon" style="background:#dbeafe;color:#1a56db;"><i class="fas fa-credit-card"></i></div>
+            <div class="qi-name">Thanh toán</div>
+            <div class="qi-desc">Xem & thanh toán hóa đơn tháng này</div>
+          </a>
 
-      <!-- Đầu card liên hệ -->
-      <div class="card-head">
-        <div class="chead-icon" style="background:var(--green-soft);">📞</div>
-        <span class="card-title">Thông tin liên hệ nhà trọ</span>
-      </div>
+          <a class="quick-item" href="#" onclick="moTienIch(); return false;">
+            <div class="qi-icon" style="background:#dcfce7;color:#059669;"><i class="fas fa-bolt"></i></div>
+            <div class="qi-name">Dịch vụ</div>
+            <div class="qi-desc">Điện, nước, internet, chỉ số tiêu thụ</div>
+          </a>
 
-      <!-- Nội dung: 4 ô thông tin + bản đồ -->
-      <div class="contact-inner">
+          <a class="quick-item" href="#" onclick="moBaoSuCo(); return false;">
+            <div class="qi-icon" style="background:#ffedd5;color:#d97706;"><i class="fas fa-tools"></i></div>
+            <div class="qi-name">Báo sự cố</div>
+            <div class="qi-desc">Ghi nhận vấn đề cần sửa chữa</div>
+          </a>
 
-        <!-- Lưới 4 ô thông tin liên hệ (2 cột × 2 hàng) -->
-        <div class="contact-rows">
-
-          <div class="crow">
-            <div class="crow-icon" style="background:#dbeafe;">📍</div>
-            <div>
-              <div class="crow-label">Địa chỉ</div>
-              <div class="crow-value">123 Đường ABC, Quận 1, TP. Hồ Chí Minh</div>
-            </div>
-          </div>
-
-          <div class="crow">
-            <div class="crow-icon" style="background:#dcfce7;">📱</div>
-            <div>
-              <div class="crow-label">Số điện thoại</div>
-              <div class="crow-value">0123 456 789</div>
-            </div>
-          </div>
-
-          <div class="crow">
-            <div class="crow-icon" style="background:#ffedd5;">📧</div>
-            <div>
-              <div class="crow-label">Email</div>
-              <div class="crow-value">contact@nhatroabc.vn</div>
-            </div>
-          </div>
-
-          <div class="crow">
-            <div class="crow-icon" style="background:#ede9fe;">🕐</div>
-            <div>
-              <div class="crow-label">Giờ làm việc</div>
-              <div class="crow-value">T2–T6: 8:00–17:00 &nbsp;|&nbsp; T7: 8:00–12:00</div>
-            </div>
-          </div>
+          <a class="quick-item" href="#" onclick="moHoSo(); return false;">
+            <div class="qi-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-cog"></i></div>
+            <div class="qi-name">Cài đặt</div>
+            <div class="qi-desc">Tùy chỉnh tài khoản & thông báo</div>
+          </a>
 
         </div>
-        <!-- /contact-rows -->
-
-        <!-- Ô bản đồ giả -->
-        <div class="map-box">
-          <div class="map-emoji">🗺️</div>
-          <div class="map-title">Bản đồ vị trí</div>
-          <div class="map-addr">123 Đường ABC, Quận 1<br>TP. Hồ Chí Minh</div>
-        </div>
-
       </div>
-      <!-- /contact-inner -->
-
     </div>
-    <!-- /CONTACT CARD -->
+
+    <!-- ==========================================
+         HÀNG 4: LIÊN HỆ NHÀ TRỌ
+    ========================================== -->
+    <div class="hang-lien-he">
+      <div class="card accent-xanh-la">
+        <div class="tieu-de-card">
+          <h3><i class="fas fa-phone-alt" style="color:#059669;"></i> Thông tin liên hệ nhà trọ</h3>
+        </div>
+        <div class="contact-inner">
+          <div class="contact-rows">
+            <div class="crow">
+              <div class="crow-icon" style="background:#dbeafe;color:#1a56db;"><i class="fas fa-map-marker-alt"></i></div>
+              <div>
+                <div class="crow-label">Địa chỉ</div>
+                <div class="crow-value">123 Đường ABC, Quận 1, TP. Hồ Chí Minh</div>
+              </div>
+            </div>
+            <div class="crow">
+              <div class="crow-icon" style="background:#dcfce7;color:#059669;"><i class="fas fa-phone"></i></div>
+              <div>
+                <div class="crow-label">Số điện thoại</div>
+                <div class="crow-value">0123 456 789</div>
+              </div>
+            </div>
+            <div class="crow">
+              <div class="crow-icon" style="background:#ffedd5;color:#d97706;"><i class="fas fa-envelope"></i></div>
+              <div>
+                <div class="crow-label">Email</div>
+                <div class="crow-value">contact@nhatroabc.vn</div>
+              </div>
+            </div>
+            <div class="crow">
+              <div class="crow-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-clock"></i></div>
+              <div>
+                <div class="crow-label">Giờ làm việc</div>
+                <div class="crow-value">T2–T6: 8:00–17:00 &nbsp;|&nbsp; T7: 8:00–12:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="map-box" onclick="alert('Mở bản đồ Google Maps')">
+            <div class="map-emoji">🗺️</div>
+            <div class="map-title">Bản đồ vị trí</div>
+            <div class="map-addr">123 Đường ABC, Quận 1<br>TP. Hồ Chí Minh</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </main>
-  <!-- /MAIN -->
-
 </div>
-<!-- /LAYOUT WRAPPER -->
 
 
+<!-- =============================================
+     MODAL: THANH TOÁN HÓA ĐƠN
+============================================= -->
+<div class="lop-che-modal" id="modal-thanh-toan" onclick="dongModalNeuNhanNgoai(event, 'modal-thanh-toan')">
+  <div class="hop-modal">
+    <div class="tieu-de-modal">
+      <h3><i class="fas fa-credit-card" style="color:var(--mau-chu-de);"></i> Hóa đơn tháng 5/2025</h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-thanh-toan')">✕</button>
+    </div>
+    <div class="info-row-modal"><span class="label-modal">Phòng</span><span class="value-modal">Phòng 201</span></div>
+    <div class="info-row-modal"><span class="label-modal">Người thuê</span><span class="value-modal">Trần Duy Hơn</span></div>
+    <div class="info-row-modal"><span class="label-modal">Tiền phòng</span><span class="value-modal">3,500,000 đ</span></div>
+    <div class="info-row-modal"><span class="label-modal">Tiền điện (120 kWh × 3.500đ)</span><span class="value-modal">420,000 đ</span></div>
+    <div class="info-row-modal"><span class="label-modal">Tiền nước</span><span class="value-modal">80,000 đ</span></div>
+    <div class="info-row-modal"><span class="label-modal">Internet</span><span class="value-modal">100,000 đ</span></div>
+    <div class="info-row-modal" style="border-top:2px solid var(--mau-chu-de);margin-top:6px;padding-top:12px;">
+      <span class="label-modal" style="font-size:14px;font-weight:800;color:var(--mau-chu);">Tổng cộng</span>
+      <span class="value-modal" style="font-size:16px;color:var(--mau-chu-de);">4,100,000 đ</span>
+    </div>
+    <div class="info-row-modal"><span class="label-modal">Hạn thanh toán</span><span class="value-modal" style="color:var(--mau-do);">15/05/2025</span></div>
+    <div class="nhom-nut-modal">
+      <button class="nut-huy" onclick="dongModal('modal-thanh-toan')">Đóng</button>
+      <button class="nut-luu" onclick="alert('Đang chuyển đến cổng thanh toán...'); dongModal(\'modal-thanh-toan\')">
+        <i class="fas fa-check-circle"></i> Thanh toán ngay
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============================================
+     MODAL: BÁO SỰ CỐ
+============================================= -->
+<div class="lop-che-modal" id="modal-bao-su-co" onclick="dongModalNeuNhanNgoai(event, 'modal-bao-su-co')">
+  <div class="hop-modal">
+    <div class="tieu-de-modal">
+      <h3><i class="fas fa-tools" style="color:#ef4444;"></i> Báo sự cố phòng</h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-bao-su-co')">✕</button>
+    </div>
+    <div class="hang-form">
+      <div class="nhom-truong-nhap">
+        <label class="nhan-truong-nhap">Loại sự cố *</label>
+        <select class="truong-nhap chon-lua" id="loai-su-co">
+          <option>-- Chọn loại --</option>
+          <option>Điện</option>
+          <option>Nước</option>
+          <option>Cửa / Khóa</option>
+          <option>Thiết bị</option>
+          <option>Khác</option>
+        </select>
+      </div>
+      <div class="nhom-truong-nhap">
+        <label class="nhan-truong-nhap">Mức độ *</label>
+        <select class="truong-nhap chon-lua" id="muc-do-su-co">
+          <option>Thấp</option>
+          <option>Trung bình</option>
+          <option>Khẩn cấp</option>
+        </select>
+      </div>
+    </div>
+    <div class="nhom-truong-nhap" style="margin-top:14px;">
+      <label class="nhan-truong-nhap">Mô tả chi tiết *</label>
+      <textarea class="truong-nhap" rows="4" id="mo-ta-su-co" placeholder="Mô tả vấn đề bạn gặp phải..."></textarea>
+    </div>
+    <div class="nhom-nut-modal">
+      <button class="nut-huy" onclick="dongModal('modal-bao-su-co')">Hủy</button>
+      <button class="nut-luu" style="background:linear-gradient(135deg,#ef4444,#f97316);" onclick="luuSuCo()">
+        <i class="fas fa-paper-plane"></i> Gửi báo cáo
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============================================
+     MODAL: HỒ SƠ CÁ NHÂN
+============================================= -->
+<div class="lop-che-modal" id="modal-ho-so" onclick="dongModalNeuNhanNgoai(event, 'modal-ho-so')">
+  <div class="hop-modal">
+    <div class="tieu-de-modal">
+      <h3><i class="fas fa-user-circle" style="color:var(--mau-chu-de);"></i> Hồ sơ cá nhân</h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-ho-so')">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;padding:14px 0 18px;border-bottom:1px solid var(--mau-vien);margin-bottom:16px;">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#60a5fa);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;border:3px solid #dbeafe;">T</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;">Trần Duy Hơn</div>
+        <div style="font-size:12px;color:var(--mau-chu-phu);margin-top:3px;">Phòng 201 · Nhà Trọ ABC</div>
+        <span style="display:inline-block;background:#dcfce7;color:#16a34a;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;margin-top:5px;">● Đang hoạt động</span>
+      </div>
+    </div>
+    <div class="hang-form">
+      <div class="nhom-truong-nhap">
+        <label class="nhan-truong-nhap">Họ và tên</label>
+        <input class="truong-nhap" type="text" value="Trần Duy Hơn" />
+      </div>
+      <div class="nhom-truong-nhap">
+        <label class="nhan-truong-nhap">Số điện thoại</label>
+        <input class="truong-nhap" type="text" value="0312.345.678" />
+      </div>
+      <div class="nhom-truong-nhap">
+        <label class="nhan-truong-nhap">Email</label>
+        <input class="truong-nhap" type="email" value="tranduyhon@example.com" />
+      </div>
+      <div class="nhom-truong-nhap">
+        <label class="nhan-truong-nhap">Quê quán</label>
+        <input class="truong-nhap" type="text" value="Ủ Minh, Cà Mau" />
+      </div>
+    </div>
+    <div class="nhom-nut-modal">
+      <button class="nut-huy" onclick="dongModal('modal-ho-so')">Hủy</button>
+      <button class="nut-luu" onclick="alert('Đã lưu thông tin hồ sơ!'); dongModal('modal-ho-so')">
+        <i class="fas fa-save"></i> Lưu thay đổi
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============================================
+     JAVASCRIPT
+============================================= -->
 <script>
-  // Hiển thị ngày hiện tại
-  (function () {
-    var days = ['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
-    var now  = new Date();
-    var d    = days[now.getDay()];
-    var dd   = String(now.getDate()).padStart(2, '0');
-    var mm   = String(now.getMonth() + 1).padStart(2, '0');
-    var yy   = now.getFullYear();
-    document.getElementById('headerDate').textContent = d + ', ' + dd + '/' + mm + '/' + yy;
-  })();
+  // Ngày giờ
+  function capNhatNgayGio() {
+    const tuan = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+    const now = new Date();
+    document.getElementById('ngay-gio-hien-tai').textContent =
+      `${tuan[now.getDay()]}, ${now.getDate()} tháng ${now.getMonth()+1} năm ${now.getFullYear()}`;
 
-  // Toggle sidebar mở/đóng
-  var sidebarOpen = true;
-  function toggleSidebar() {
-    var sidebar = document.getElementById('sidebar');
-    var header  = document.getElementById('header');
-    var main    = document.getElementById('main');
-    var btn     = document.getElementById('hamburger');
+    // Header date
+    const days = ['CN','T2','T3','T4','T5','T6','T7'];
+    const dd = String(now.getDate()).padStart(2,'0');
+    const mm = String(now.getMonth()+1).padStart(2,'0');
+    const yy = now.getFullYear();
+    document.getElementById('headerDate').textContent = `${days[now.getDay()]}, ${dd}/${mm}/${yy}`;
+  }
+  capNhatNgayGio();
 
-    if (sidebarOpen) {
-      sidebar.classList.add('closed');
-      header.classList.add('wide');
-      main.classList.add('wide');
-      btn.classList.remove('open');
-    } else {
-      sidebar.classList.remove('closed');
-      header.classList.remove('wide');
-      main.classList.remove('wide');
-      btn.classList.add('open');
-    }
-    sidebarOpen = !sidebarOpen;
+  // Toggle sidebar
+  function dongMoSidebar() {
+    document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
+  }
+
+  // Chuyển trang
+  function chuyenTrang(tenTrang, phanTu) {
+    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
+    phanTu.classList.add('dang-chon');
+    const bang = {
+      'trang-chu':   '/KhachThue',
+      'thanh-toan':  '/KhachThue/ThanhToan',
+      'tien-ich':    '/KhachThue/TienIch',
+      'bao-su-co':   '/KhachThue/BaoSuCo',
+      'thong-bao':   '/KhachThue/ThongBao',
+      'ho-so':       '/KhachThue/HoSo',
+      'cai-dat':     '/KhachThue/CaiDat',
+    };
+    // Demo: chỉ hiển thị alert, thực tế dùng: window.location.href = bang[tenTrang];
+    alert('Chuyển đến trang: ' + (bang[tenTrang] || tenTrang));
+  }
+
+  // Modals
+  function moThanhToan()  { document.getElementById('modal-thanh-toan').classList.add('hien'); }
+  function moBaoSuCo()    { document.getElementById('modal-bao-su-co').classList.add('hien'); }
+  function moHoSo()       { document.getElementById('modal-ho-so').classList.add('hien'); }
+  function moTienIch()    { alert('Trang dịch vụ & tiện ích: Điện, nước, internet...'); }
+  function moThongBao()   { alert('Danh sách thông báo (4 chưa đọc)'); }
+
+  function dongModal(id)  { document.getElementById(id).classList.remove('hien'); }
+  function dongModalNeuNhanNgoai(e, id) { if (e.target.id === id) dongModal(id); }
+
+  function luuSuCo() {
+    const moTa = document.getElementById('mo-ta-su-co').value;
+    if (!moTa) { alert('Vui lòng mô tả sự cố!'); return; }
+    alert('Đã gửi báo cáo sự cố thành công! Chúng tôi sẽ xử lý sớm nhất có thể.');
+    dongModal('modal-bao-su-co');
   }
 </script>
 
 </body>
 </html>
-

@@ -58,15 +58,8 @@
               transition: width 0.3s;
                 transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
             }
+            #thanh-sidebar.an-sidebar { width: 0; min-width: 0; overflow: hidden; }
             /* Sidebar thu gọn */
-#thanh-sidebar.thu-gon { width: 60px; min-width: 60px; }
-
-/* Ẩn text với animation */
-#thanh-sidebar.thu-gon .ten-logo,
-#thanh-sidebar.thu-gon .admin-sidebar .ten-admin { opacity: 0; max-width: 0; transform: translateX(-8px); }
-.ten-logo, .admin-sidebar .ten-admin {
-  transition: opacity 0.2s ease, max-width 0.35s ease, transform 0.25s ease;
-  max-width: 160px; overflow: hidden;
 }
 
 /* Ẩn group label */
@@ -1193,7 +1186,7 @@
 
             // Đóng/mở sidebar trên mobile
             function dongMoSidebar() {
-                document.getElementById('thanh-sidebar').classList.toggle('thu-gon');
+                document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
             }
 
             // Mở modal thêm phòng
