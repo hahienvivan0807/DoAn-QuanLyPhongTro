@@ -30,6 +30,7 @@ async function xuLyDangNhap() {
         UserName: User,
         PassWord: Pass
     }
+
     /* ===== Kết nối API ===== */
     try {
         let Response = await fetch('api/XuLyDangNhap/DangNhap', {
@@ -37,9 +38,12 @@ async function xuLyDangNhap() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dulieu)
         });
-        let result = await Response.json()
+
+        // CHỈNH SỬA CHÍNH: Kiểm tra Response.ok trước khi gọi .json()
         if (Response.ok) {
+            let result = await Response.json(); // Đưa vào trong khối if thành công
             const Chucvucnguoidung = result.chucVu;
+
             if (Chucvucnguoidung == "Admin") {
                 hienThiThongBao('thanh-cong', result.message || 'Đăng nhập thành công!, Đang chuyển tới trang chủ trọ');
                 window.location.href = "/Admin/ChuTro"
@@ -52,7 +56,6 @@ async function xuLyDangNhap() {
                 hienThiThongBao('thanh-cong', result.message || 'Đăng nhập thành công!');
                 window.location.href = "/KhachThue/KhachThue";
             }
-
         }
         else {
             hienThiThongBao('loi', result.message || 'Sai tên hoặc mật khẩu.');
@@ -63,29 +66,4 @@ async function xuLyDangNhap() {
         hienThiThongBao('loi', result.message);
         console.error(error);
     }
-   
 }
-async function DangKy() {
-    const User = document.getElementById("pusername").value;
-    const Pass = document.getElementById("password").value;
-    const dulieu = {
-        UserNameDK: User,
-        PassWordDK: Pass
-    }
-    try {
-        let Response = await fetch('api/XuLyDangNhap/DangKy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dulieu)
-        });
-        if (Response.ok) {
-            alert("Dang ky thanh cong");
-        } else {
-            alert("khong thanh cong");
-        }
-    } catch (error) {
-        console.error(error);
-        alert("Loi ko ket noi");
-    }
-}
-
