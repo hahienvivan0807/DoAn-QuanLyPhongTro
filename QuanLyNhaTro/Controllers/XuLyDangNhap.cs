@@ -24,7 +24,7 @@ namespace QuanLyNhaTro.Controllers
         }
         // Chi tiết kết nối đăng nhập
         [HttpPost("DangNhap")]
-        public IActionResult DangNhap([FromBody] XuLyDangNhapRequest request)
+        public IActionResult DangNhap([FromBody] XuLyDangNhapRequest request) 
         {
             if (string.IsNullOrEmpty(request.UserName) || string.IsNullOrEmpty(request.PassWord))
             {

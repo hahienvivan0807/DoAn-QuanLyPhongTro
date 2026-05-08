@@ -1,4 +1,5 @@
-﻿// ---- Hàm chung hiển thị thông báo ----
+
+// ---- Hàm chung hiển thị thông báo ----
 const ICON = {
     loi: `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`,
     thanhCong: `<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>`,
@@ -21,8 +22,7 @@ function hienThiThongBao(loai, noiDung) {
     el.style.display = 'flex';
 }
 
-/* ===== XỬ LÝ ĐĂNG NHẬP (kết nối với backend Razor Pages) ===== */
-
+﻿/* ===== XỬ LÝ ĐĂNG NHẬP (kết nối với backend Razor Pages) ===== */
 async function xuLyDangNhap() {
     const User = document.getElementById("ten-dang-nhap").value;
     const Pass = document.getElementById("mat-khau").value;
@@ -39,12 +39,11 @@ async function xuLyDangNhap() {
             body: JSON.stringify(dulieu)
         });
 
-        // CHỈNH SỬA CHÍNH: Kiểm tra Response.ok trước khi gọi .json()
         if (Response.ok) {
             let result = await Response.json(); // Đưa vào trong khối if thành công
             const Chucvucnguoidung = result.chucVu;
 
-            if (Chucvucnguoidung == "Admin") {
+            if (Chucvucnguoidung == "Admin") 
                 hienThiThongBao('thanh-cong', result.message || 'Đăng nhập thành công!, Đang chuyển tới trang chủ trọ');
                 window.location.href = "/Admin/ChuTro"
             }
@@ -54,16 +53,24 @@ async function xuLyDangNhap() {
             }
             if (Chucvucnguoidung == "User") {
                 hienThiThongBao('thanh-cong', result.message || 'Đăng nhập thành công!');
+                alert("Đang chuyển tới trang Chủ trọ...");
+                window.location.href = "/Admin/ChuTro";
+            }
+            else if (Chucvucnguoidung == "Manager") { // Dùng else if để tối ưu
+                alert("Đang chuyển đến trang quản lý....");
+                window.location.href = "/Manager/Manger";
+            }
+            else if (Chucvucnguoidung == "User") {
+                alert("Đang chuyển hướng đến trang Khách thuê");
                 window.location.href = "/KhachThue/KhachThue";
             }
-        }
-        else {
-            hienThiThongBao('loi', result.message || 'Sai tên hoặc mật khẩu.');
-        }
+            else {
+                hienThiThongBao('loi', result.message || 'Sai tên hoặc mật khẩu.');
+            }
 
-    }
-    catch (error) {
+    } catch (error) {
         hienThiThongBao('loi', result.message);
-        console.error(error);
-    }
+            // Nếu lỗi 401, 404, 500... code sẽ chạy vào đây
+            alert("Đăng nhập không thành công: Sai tài khoản hoặc mật khẩu");
+        }
 }
