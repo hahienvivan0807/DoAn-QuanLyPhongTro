@@ -10,7 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hệ Thống Quản Lý – Chủ Trọ</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="/js/ChuTro.js"></script>
   <style>
     /* =========================================================
        BIẾN MÀU & FONT TOÀN CỤC
@@ -687,6 +687,42 @@
       .hang-thong-ke-tong-quan { grid-template-columns: 1fr 1fr; }
       .hang-tinh-nang-chu-tro  { grid-template-columns: 1fr; }
     }
+    /* HỘP THÔNG BÁO */
+    .hop-thong-bao{
+        position: fixed;
+        top: 25px;
+        right: 25px;
+
+        background: #ffffff;
+        border-left: 5px solid #f59e0b;
+
+        padding: 14px 18px;
+        border-radius: 12px;
+
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+
+        min-width: 280px;
+        max-width: 350px;
+
+        z-index: 99999;
+
+        opacity: 0;
+        transform: translateX(100px);
+
+        transition: all 0.4s ease;
+    }
+
+    /* HIỆN THÔNG BÁO */
+    .hop-thong-bao.hien{
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .noi-dung-thong-bao{
+        font-size: 15px;
+        font-weight: 500;
+        color: #333;
+    }
   </style>
 </head>
 <body>
@@ -1261,7 +1297,7 @@
       </div>
       <div class="nhom-nhap">
         <label class="nhan-nhap">Mật khẩu *</label>
-        <input class="o-nhap" type="password" id="password-moi" placeholder="Tối thiểu 8 ký tự" />
+        <input class="o-nhap" type="password" id="password-moi" placeholder="VD:123" />
       </div>
       <div class="nhom-nhap">
         <label class="nhan-nhap">Họ và tên *</label>
@@ -1282,7 +1318,7 @@
 
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-tai-khoan-quan-ly')">Hủy</button>
-      <button class="nut-luu-modal" onclick="luuTaiKhoanMoi()">
+      <button class="nut-luu-modal" onclick="ThemUser()">
         <i class="fas fa-user-plus"></i> Tạo tài khoản
       </button>
     </div>
@@ -1483,6 +1519,12 @@
   </div>
 </div>
 
+<!-- THÔNG BÁO -->
+<div id="hop-thong-bao" class="hop-thong-bao">
+    <div class="noi-dung-thong-bao">
+        <span id="text-thong-bao"></span>
+    </div>
+</div>
 
 <!-- =============================================
      MODAL 4: CẤU HÌNH CHI PHÍ DỊCH VỤ
