@@ -12,6 +12,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
+    <script src="/js/Login.js"></script>
     <style>
         /* ===== BIẾN MÀU SẮC VÀ FONT TOÀN CỤC ===== */
         :root {
@@ -132,7 +134,16 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-            font-size: 22px;
+        }
+
+        .bieu-tuong-logo svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--xanh-chinh);
+            stroke-width: 1.75;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .ten-thuong-hieu {
@@ -193,7 +204,7 @@
         }
 
         .tieu-de-chinh {
-            font-family: 'Playfair Display', serif;
+            font-family: Arial;
             font-size: clamp(28px, 3vw, 40px);
             font-weight: 700;
             color: var(--trang);
@@ -296,7 +307,19 @@
         }
 
         .placeholder-anh .bieu-tuong-them {
-            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placeholder-anh .bieu-tuong-them svg {
+            width: 26px;
+            height: 26px;
+            stroke: rgba(255,255,255,0.55);
+            stroke-width: 1.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .placeholder-anh .chu-them {
@@ -470,10 +493,22 @@
         .bieu-tuong-truong {
             position: absolute;
             left: 14px;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--xam-chu);
             pointer-events: none;
             transition: color 0.2s;
+        }
+
+        .bieu-tuong-truong svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .o-nhap-lieu {
@@ -514,11 +549,23 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--xam-chu);
             padding: 4px;
             border-radius: 4px;
             transition: color 0.2s;
+        }
+
+        .nut-hien-mat-khau svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .nut-hien-mat-khau:hover {
@@ -598,6 +645,19 @@
             font-size: 13.5px;
             display: none;
             margin-bottom: 16px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .thong-bao-loi svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
         }
 
         /* Phần đường kẻ "hoặc" */
@@ -737,7 +797,10 @@
 
         <!-- Logo và tên thương hiệu góc trên -->
         <div class="thuong-hieu-goc-tren">
-            <div class="bieu-tuong-logo">🏠</div>
+            <div class="bieu-tuong-logo">
+                <!-- Icon ngôi nhà đơn sắc -->
+                <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+            </div>
             <div class="ten-thuong-hieu">
                 <span class="ten-lon">NHÀ TRỌ ABC</span>
                 <span class="ten-nho">Quản lý hệ thống</span>
@@ -778,7 +841,10 @@
                      * Nếu chưa có ảnh, placeholder bên dưới sẽ hiển thị
                     -->
                     <div class="placeholder-anh">
-                        <span class="bieu-tuong-them">🛏️</span>
+                        <span class="bieu-tuong-them">
+                            <!-- Icon giường ngủ đơn sắc -->
+                            <svg viewBox="0 0 24 24"><path d="M2 9V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3"/><path d="M2 11v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6"/><path d="M2 14h20"/><path d="M7 14v-3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3"/></svg>
+                        </span>
                         <span class="chu-them">Thêm ảnh<br/>phòng ngủ</span>
                     </div>
                     <div class="nhan-anh">Phòng ngủ</div>
@@ -791,7 +857,10 @@
                      * Gán background-image vào class .anh-nho-2 trong CSS
                     -->
                     <div class="placeholder-anh">
-                        <span class="bieu-tuong-them">🍳</span>
+                        <span class="bieu-tuong-them">
+                            <!-- Icon bếp nấu đơn sắc -->
+                            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+                        </span>
                         <span class="chu-them">Thêm ảnh<br/>bếp chung</span>
                     </div>
                     <div class="nhan-anh">Khu bếp</div>
@@ -804,7 +873,10 @@
                      * Gán background-image vào class .anh-nho-3 trong CSS
                     -->
                     <div class="placeholder-anh">
-                        <span class="bieu-tuong-them">🚿</span>
+                        <span class="bieu-tuong-them">
+                            <!-- Icon vòi hoa sen đơn sắc -->
+                            <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 16 0"/><line x1="12" y1="12" x2="12" y2="22"/><path d="M12 12c0 0-3 2-3 5"/><path d="M12 12c0 0 3 2 3 5"/><circle cx="12" cy="5" r="1"/></svg>
+                        </span>
                         <span class="chu-them">Thêm ảnh<br/>tiện ích</span>
                     </div>
                     <div class="nhan-anh">Tiện ích</div>
@@ -852,7 +924,7 @@
 
             <!-- Tiêu đề phía trên form -->
             <div class="tieu-de-form">
-                <p class="chao-mung">Chào mừng trở lại 👋</p>
+                <p class="chao-mung">Chào mừng trở lại</p>
                 <h2 class="ten-trang">Đăng nhập hệ thống</h2>
                 <p class="mo-ta-form">Nhập thông tin để truy cập bảng điều khiển quản lý.</p>
             </div>
@@ -871,7 +943,9 @@
 
                 <!-- Thông báo lỗi (ẩn mặc định, hiện khi có lỗi) -->
                 <div class="thong-bao-loi" id="loi-dang-nhap">
-                    ⚠️ Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.
+                    <!-- Icon cảnh báo đơn sắc -->
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.
                 </div>
 
                 <!-- Các trường nhập liệu đăng nhập -->
@@ -888,8 +962,12 @@
                                 name="TenDangNhap"
                                 placeholder="Nhập tên đăng nhập của bạn"
                                 autocomplete="username"
+                                
                             />
-                            <span class="bieu-tuong-truong">👤</span>
+                            <span class="bieu-tuong-truong">
+                                <!-- Icon người dùng đơn sắc -->
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            </span>
                         </div>
                     </div>
 
@@ -905,13 +983,19 @@
                                 placeholder="Nhập mật khẩu"
                                 autocomplete="current-password"
                             />
-                            <span class="bieu-tuong-truong">🔒</span>
+                            <span class="bieu-tuong-truong">
+                                <!-- Icon ổ khoá đơn sắc -->
+                                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
                             <button
                                 class="nut-hien-mat-khau"
                                 type="button"
                                 onclick="toggleMatKhau('mat-khau', this)"
                                 title="Hiện/ẩn mật khẩu"
-                            >👁️</button>
+                            >
+                                <!-- Icon mắt đơn sắc (mặc định: hiện) -->
+                                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
                         </div>
                     </div>
 
@@ -929,7 +1013,8 @@
 
                 <!-- Nút đăng nhập -->
                 <button class="nut-chinh" type="button" onclick="xuLyDangNhap()">
-                    Đăng nhập →
+                    <span>Đăng nhập</span>
+                    <svg style="width:16px;height:16px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-left:6px" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </button>
 
             </div>
@@ -979,73 +1064,36 @@
         const chaoMung = document.querySelector('.chao-mung');
 
         if (laDangNhap) {
-            chaoMung.textContent = 'Chào mừng trở lại 👋';
+            chaoMung.textContent = 'Chào mừng trở lại';
             tenTrang.textContent = 'Đăng nhập hệ thống';
             moTaForm.textContent = 'Nhập thông tin để truy cập bảng điều khiển quản lý.';
         } else {
-            chaoMung.textContent = 'Bắt đầu ngay hôm nay ✨';
+            chaoMung.textContent = 'Bắt đầu ngay hôm nay';
             tenTrang.textContent = 'Tạo tài khoản mới';
             moTaForm.textContent = 'Điền đầy đủ thông tin để tạo tài khoản quản lý.';
         }
     }
 
     /* ===== HIỆN / ẨN MẬT KHẨU ===== */
+    // SVG icon mắt mở (đang ẩn mật khẩu)
+    const svgMatMo = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    // SVG icon mắt gạch chéo (đang hiện mật khẩu)
+    const svgMatGach = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
     function toggleMatKhau(idInput, nutBam) {
         const o = document.getElementById(idInput);
         if (o.type === 'password') {
             o.type = 'text';
-            nutBam.textContent = '🙈';
+            nutBam.innerHTML = svgMatGach;
         } else {
             o.type = 'password';
-            nutBam.textContent = '👁️';
+            nutBam.innerHTML = svgMatMo;
         }
     }
 
-    /* ===== XỬ LÝ ĐĂNG NHẬP (kết nối với backend Razor Pages) ===== */
-    function xuLyDangNhap() {
-        const tenDangNhap = document.getElementById('ten-dang-nhap').value.trim();
-        const matKhau = document.getElementById('mat-khau').value;
-        const loiEl = document.getElementById('loi-dang-nhap');
+   
 
-        // Kiểm tra cơ bản phía client
-        if (!tenDangNhap || !matKhau) {
-            loiEl.style.display = 'block';
-            loiEl.textContent = '⚠️ Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.';
-            return;
-        }
-
-        loiEl.style.display = 'none';
-
-        /*
-         * TODO: Kết nối với backend Razor Pages
-         * Tạo form POST hoặc dùng fetch() để gửi dữ liệu lên server.
-         * Ví dụ tạo form và submit:
-         *
-         * const form = document.createElement('form');
-         * form.method = 'POST';
-         * form.action = '/Login';
-         * // Thêm __RequestVerificationToken (AntiForgery)
-         * // Thêm các input ẩn
-         * document.body.appendChild(form);
-         * form.submit();
-         */
-        alert('Đang đăng nhập... (Kết nối backend tại hàm xuLyDangNhap)');
-    }
-
-    /* ===== XỬ LÝ ĐĂNG KÝ ===== */
-    function xuLyDangKy() {
-        const dongYDieuKhoan = document.getElementById('dong-y-dieu-khoan').checked;
-        const loiEl = document.getElementById('loi-dang-ky');
-
-        if (!dongYDieuKhoan) {
-            loiEl.style.display = 'block';
-            loiEl.textContent = '⚠️ Bạn cần đồng ý với điều khoản sử dụng.';
-            return;
-        }
-
-        loiEl.style.display = 'none';
-        alert('Đang đăng ký... (Kết nối backend tại hàm xuLyDangKy)');
-    }
+   
 </script>
 
 </body>
