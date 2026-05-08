@@ -74,3 +74,4 @@ async function xuLyDangNhap() {
             alert("Đăng nhập không thành công: Sai tài khoản hoặc mật khẩu");
         }
 }
+console.log("Đã tải file Login.js");
