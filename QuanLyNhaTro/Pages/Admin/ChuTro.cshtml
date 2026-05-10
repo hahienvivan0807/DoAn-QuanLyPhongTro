@@ -6,12 +6,18 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hệ Thống Quản Lý – Chủ Trọ</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="/css/ChuTro.css" />
-  <script src="/js/ChuTro.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Quản Lý – Chủ Trọ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/ChuTro.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Javascript-->
+    <script src="/js/ChuTro/chuTro-core.js"></script>
+    <script src="/js/ChuTro/chuTro-quanLy.js"></script>
+    <script src="/js/ChuTro/chuTro-bieuDo.js"></script>
+    <script src="/js/ChuTro/chuTro-cauHinh.js"></script>
+    <script src="/js/ChuTro/chuTro-pheDuyet.js"></script>
   <style>
     /* =========================================================
        BIẾN MÀU & FONT TOÀN CỤC
@@ -1202,7 +1208,7 @@
       </div><!-- Kết thúc card phê duyệt hợp đồng -->
 
       <!-- Card danh sách quản lý + thao tác nhanh -->
-      <div class="card-phe-duyet vien-tim">
+      <div class="card-phe-duyet vien-tim" onclick="moModalDanhSachQuanLy()">
         <div class="tieu-de-card">
           <h3><i class="fas fa-users-cog" style="color:#7c3aed;"></i> Quản lý hệ thống</h3>
           <button class="nut-xem-them" onclick="moModalDanhSachQuanLy()">Quản lý</button>
@@ -1952,227 +1958,58 @@
     document.getElementById('ngay-gio-chu-tro').textContent =
       `${t[ngay.getDay()]}, ${ngay.getDate()} tháng ${ngay.getMonth()+1} năm ${ngay.getFullYear()}`;
   })();
-
-  // ===== BIỂU ĐỒ DOANH THU & CHI PHÍ (Chart.js) =====
-  // ⚙️ BACKEND: Thay duLieuThu, duLieuChi bằng dữ liệu thật từ API
-  const duLieuThu = [45, 42, 53, 49, 58.5, 65.5, 0, 0, 0, 0, 0, 0];
-  const duLieuChi = [18, 16, 20, 17, 21.3, 22, 0, 0, 0, 0, 0, 0];
-
-  const ctxChuTro = document.getElementById('bieu-do-chu-tro').getContext('2d');
-  const grdThu = ctxChuTro.createLinearGradient(0, 0, 0, 200);
-  grdThu.addColorStop(0, 'rgba(201,129,10,0.25)');
-  grdThu.addColorStop(1, 'rgba(201,129,10,0.0)');
-
-  new Chart(ctxChuTro, {
-    type: 'line',
-    data: {
-      labels: ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'],
-      datasets: [
-        {
-          label: 'Doanh thu',
-          data: duLieuThu,
-          borderColor: '#c9810a',
-          backgroundColor: grdThu,
-          borderWidth: 2.5,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#c9810a',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          fill: true,
-          tension: 0.4,
-        },
-        {
-          label: 'Chi phí',
-          data: duLieuChi,
-          borderColor: '#ef4444',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#ef4444',
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          fill: false,
-          tension: 0.4,
-          borderDash: [5, 4],
-        }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          display: true,
-          labels: { font: { size: 11, family: 'Be Vietnam Pro' }, boxWidth: 12, padding: 16 }
-        },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          titleColor: '#94a3b8', bodyColor: '#fff',
-          padding: 10, borderRadius: 8,
-          callbacks: { label: c => ` ${c.raw} triệu đồng` }
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-        y: {
-          grid: { color: '#f1f5f9' },
-          ticks: { font: { size: 11 }, callback: v => v + 'M' },
-          beginAtZero: true
-        }
-      }
-    }
-  });
-
-  // ===== HÀM ĐIỀU HƯỚNG MENU SIDEBAR =====
-  function chuyenMenu(tenTrang, phanTu) {
-    document.querySelectorAll('.muc-menu').forEach(m => m.classList.remove('dang-chon'));
-    if (phanTu) phanTu.classList.add('dang-chon');
-    // ⚙️ BACKEND: Map tên trang → Razor Page route
-    const bangDuongDan = {
-      'trang-chu':    '/ChuTro',
-      'quan-ly-phong': '/ChiTietPhong',
-      'nguoi-thue':   '/QuanLyNguoiThue',
-      'hop-dong':     '/HopDong',
-      'hoa-don':      '/HoaDon',
-      'sua-chua':     '/SuCoBaoTri',
-      'bao-cao':      '/BaoCao',
-      'cai-dat':      '/CaiDat',
-    };
-    const url = bangDuongDan[tenTrang];
-    if (url) window.location.href = url;
-    else console.log('Chưa có trang:', tenTrang);
-  }
-
-  // ===== MỞ / ĐÓNG MODAL =====
-  function moModal(idModal) {
-    document.getElementById(idModal).classList.add('hien');
-    document.body.style.overflow = 'hidden';
-  }
-  function dongModal(idModal) {
-    document.getElementById(idModal).classList.remove('hien');
-    document.body.style.overflow = '';
-  }
-  function dongModalNhapNgoai(event, idModal) {
-    if (event.target.id === idModal) dongModal(idModal);
-  }
-
-  // ===== ĐÓng/MỞ SIDEBAR =====
-  function dongMoSidebar() {
-    document.getElementById('thanh-sidebar').classList.toggle('an');
-  }
-
-  // ===== HÀM LƯU CÁC MODAL =====
-
-  // Lưu tài khoản quản lý mới
-  // ⚙️ BACKEND: POST /api/quan-ly
-  function luuTaiKhoanQuanLy() {
-    const ten = document.getElementById('ten-quan-ly-moi').value;
-    const email = document.getElementById('email-quan-ly-moi').value;
-    if (!ten || !email) { hienThongBao('Vui lòng điền đầy đủ họ tên và email!', 'loi'); return; }
-    hienThongBao(`Đã tạo tài khoản cho "${ten}" thành công!`, 'thanh-cong');
-    dongModal('modal-tai-khoan-quan-ly');
-  }
-
-  // Lưu phân quyền
-  // ⚙️ BACKEND: PUT /api/quan-ly/{id}/quyen
-  function luuPhanQuyen() {
-    const ql = document.getElementById('chon-quan-ly-phan-quyen').value;
-    if (!ql) { hienThongBao('Vui lòng chọn tài khoản quản lý!', 'loi'); return; }
-    hienThongBao('Đã cập nhật phân quyền thành công!', 'thanh-cong');
-    dongModal('modal-phan-quyen');
-  }
-
-  // Lưu cấu hình giá thuê
-  // ⚙️ BACKEND: PUT /api/cau-hinh/gia-thue
-  function luuCauHinhGia() {
-    hienThongBao('Đã cập nhật bảng giá thuê mặc định!', 'thanh-cong');
-    dongModal('modal-cau-hinh-gia');
-  }
-
-  // Lưu cấu hình dịch vụ
-  // ⚙️ BACKEND: PUT /api/cau-hinh/dich-vu
-  function luuCauHinhDichVu() {
-    hienThongBao('Đã cập nhật chi phí dịch vụ!', 'thanh-cong');
-    dongModal('modal-chi-phi-dich-vu');
-  }
-
-  // Lưu quy định đặt cọc
-  // ⚙️ BACKEND: PUT /api/cau-hinh/dat-coc
-  function luuQuyDinhDatCoc() {
-    hienThongBao('Đã cập nhật quy định đặt cọc!', 'thanh-cong');
-    dongModal('modal-dat-coc');
-  }
-
-  // Xuất báo cáo PDF
-  // ⚙️ BACKEND: GET /api/bao-cao/xuat-pdf?thang=5&nam=2025
-  function xuatBaoCao() {
-    hienThongBao('Đang tạo file PDF báo cáo tháng 5/2025...', 'info');
-    setTimeout(() => dongModal('modal-bao-cao-chi-tiet'), 1200);
-  }
-
-  // ===== HÀM PHÊ DUYỆT =====
-  // ⚙️ BACKEND: POST /api/hop-dong/{id}/duyet
-  function pheDuyet(maHD, loai) {
-    hienThongBao(`Đã phê duyệt ${loai === 'xoa' ? 'xóa' : 'gia hạn'} hợp đồng ${maHD}!`, 'thanh-cong');
-  }
-  // ⚙️ BACKEND: POST /api/hop-dong/{id}/tu-choi
-  function tuChoi(maHD) {
-    hienThongBao(`Đã từ chối yêu cầu hợp đồng ${maHD}.`, 'canh-bao');
-  }
-  // ⚙️ BACKEND: POST /api/sua-chua/{id}/duyet
-  function pheDuyetSuaChua(maSC) {
-    hienThongBao(`Đã phê duyệt yêu cầu sửa chữa ${maSC}!`, 'thanh-cong');
-  }
-  function tuChoiSuaChua(maSC) {
-    hienThongBao(`Đã từ chối yêu cầu sửa chữa ${maSC}.`, 'canh-bao');
-  }
-  function pheDuyetTatCa() {
-    hienThongBao('Đã phê duyệt tất cả yêu cầu sửa chữa lớn!', 'thanh-cong');
-    setTimeout(() => dongModal('modal-phe-duyet-sua-chua'), 1000);
-  }
-
-  // Sửa thông tin quản lý
-  // ⚙️ BACKEND: GET /api/quan-ly/{id} rồi mở modal prefill
-  function suaQuanLy(maQL) {
-    hienThongBao('Đang mở form chỉnh sửa quản lý ' + maQL + '...', 'info');
-    setTimeout(() => moModal('modal-tai-khoan-quan-ly'), 400);
-  }
-
-  // Xác nhận xóa quản lý
-  // ⚙️ BACKEND: DELETE /api/quan-ly/{id}
-  function xacNhanXoaQuanLy(maQL) {
-    if (confirm(`Bạn có chắc muốn xóa tài khoản quản lý "${maQL}" không? Hành động này không thể hoàn tác.`)) {
-      hienThongBao(`Đã xóa tài khoản ${maQL} thành công!`, 'thanh-cong');
-    }
-  }
-
-  // Tải quyền hiện tại của quản lý khi chọn dropdown phân quyền
-  // ⚙️ BACKEND: GET /api/quan-ly/{id}/quyen
-  function taiQuyenQuanLy(maQL) {
-    console.log('Tải quyền cho quản lý:', maQL);
-  }
-
-  // ===== TOAST THÔNG BÁO NHỎ (không dùng alert) =====
-  function hienThongBao(noiDung, loai = 'info') {
-    const mauNen = { 'thanh-cong': '#059669', 'loi': '#dc2626', 'canh-bao': '#d97706', 'info': '#1d4ed8' };
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-      position:fixed; bottom:28px; right:28px; z-index:99999;
-      background:${mauNen[loai]}; color:#fff; padding:14px 20px;
-      border-radius:12px; font-size:13px; font-weight:700;
-      box-shadow:0 8px 32px rgba(0,0,0,0.2); max-width:320px;
-      animation: truot-len 0.3s ease; font-family:'Be Vietnam Pro',sans-serif;
-    `;
-    toast.textContent = noiDung;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = 'all 0.3s'; }, 2700);
-    setTimeout(() => toast.remove(), 3100);
-  }
-
-  // Style animation toast
-  const styleToast = document.createElement('style');
-  styleToast.textContent = `@@keyframes truot-len { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }`;
-  document.head.appendChild(styleToast);
 </script>
+<!-- MODAL: DANH SÁCH QUẢN LÝ -->
+<div class="lop-phu-modal" id="modal-danh-sach-quan-ly" onclick="dongModalNhapNgoai(event,'modal-danh-sach-quan-ly')">
+  <div class="hop-modal" style="width:560px;">
+    <div class="tieu-de-modal">
+      <h3>
+        <span style="width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">
+          <i class="fas fa-users-cog"></i>
+        </span>
+        Danh sách quản lý
+      </h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-danh-sach-quan-ly')">✕</button>
+    </div>
 
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <div style="flex:1;display:flex;align-items:center;gap:8px;background:var(--mau-nen);border:1px solid var(--mau-vien);border-radius:10px;padding:8px 14px;">
+        <i class="fas fa-search" style="color:var(--mau-chu-phu);font-size:12px;"></i>
+        <input type="text" id="input-tim-quan-ly" placeholder="Tìm theo tên, username..."
+          oninput="locDanhSachQuanLy(this.value)"
+          style="border:none;background:none;outline:none;font-size:13px;width:100%;font-family:inherit;color:var(--mau-chu);" />
+      </div>
+      <button onclick="moModal('modal-tai-khoan-quan-ly')"
+        style="background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+
+    <div style="font-size:11px;color:var(--mau-chu-phu);margin-bottom:12px;" id="so-luong-quan-ly">Đang tải...</div>
+
+    <div id="ds-quan-ly-trong-modal" style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;padding-right:4px;">
+      <div style="text-align:center;padding:32px;color:var(--mau-chu-phu);">
+        <i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:8px;display:block;"></i>
+        Đang tải danh sách...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CHI TIẾT 1 QUẢN LÝ -->
+<div class="lop-phu-modal" id="modal-chi-tiet-quan-ly" onclick="dongModalNhapNgoai(event,'modal-chi-tiet-quan-ly')">
+  <div class="hop-modal nho" style="width:420px;">
+    <div class="tieu-de-modal">
+      <h3>
+        <span style="width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">
+          <i class="fas fa-id-card"></i>
+        </span>
+        Chi tiết quản lý
+      </h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-chi-tiet-quan-ly')">✕</button>
+    </div>
+    <div id="noi-dung-chi-tiet-quan-ly"></div>
+  </div>
+</div>
 </body>
 </html>

@@ -1,17 +1,4 @@
-﻿function hienThongBao(message) {
-
-    const hopThongBao = document.getElementById("hop-thong-bao");
-    const textThongBao = document.getElementById("text-thong-bao");
-
-    textThongBao.innerText = message;
-
-    hopThongBao.classList.add("hien");
-
-    setTimeout(() => {
-        hopThongBao.classList.remove("hien");
-    }, 3000);
-}
-async function ThemUser() {
+﻿async function ThemUser() {
     const Username = document.getElementById("username-moi").value;
     const Password = document.getElementById("password-moi").value;
     const Fullname = document.getElementById("fullname-moi").value;
@@ -354,4 +341,33 @@ function renderDanhSachTrenDashboard(danhSach) {
         `;
     }).join('');
 }
-document.addEventListener('DOMContentLoaded', taiDanhSachQuanLy);
+document.addEventListener('DOMContentLoaded', taiDanhSachQuanLy); // Load danh sách khi trang được tải xong
+// Lưu phân quyền
+// ⚙️ BACKEND: PUT /api/quan-ly/{id}/quyen
+function luuPhanQuyen() {
+    const ql = document.getElementById('chon-quan-ly-phan-quyen').value;
+    if (!ql) { hienThongBao('Vui lòng chọn tài khoản quản lý!', 'loi'); return; }
+    hienThongBao('Đã cập nhật phân quyền thành công!', 'thanh-cong');
+    dongModal('modal-phan-quyen');
+}
+
+// Xác nhận xóa quản lý
+// ⚙️ BACKEND: DELETE /api/quan-ly/{id}
+function xacNhanXoaQuanLy(maQL) {
+    if (confirm(`Bạn có chắc muốn xóa tài khoản quản lý "${maQL}" không? Hành động này không thể hoàn tác.`)) {
+        hienThongBao(`Đã xóa tài khoản ${maQL} thành công!`, 'thanh-cong');
+    }
+}
+
+// Tải quyền hiện tại của quản lý khi chọn dropdown phân quyền
+// ⚙️ BACKEND: GET /api/quan-ly/{id}/quyen
+function taiQuyenQuanLy(maQL) {
+    console.log('Tải quyền cho quản lý:', maQL);
+}
+
+  // ===== TOAST THÔNG BÁO NHỎ (không dùng alert) =====
+
+// Style animation toast
+const styleToast = document.createElement('style');
+styleToast.textContent = `@@keyframes truot-len { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }`;
+document.head.appendChild(styleToast);
