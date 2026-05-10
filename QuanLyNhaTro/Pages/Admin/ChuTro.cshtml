@@ -10,6 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hệ Thống Quản Lý – Chủ Trọ</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/css/ChuTro.css" />
   <script src="/js/ChuTro.js"></script>
   <style>
     /* =========================================================
@@ -1204,61 +1205,16 @@
       <div class="card-phe-duyet vien-tim">
         <div class="tieu-de-card">
           <h3><i class="fas fa-users-cog" style="color:#7c3aed;"></i> Quản lý hệ thống</h3>
-          <button class="nut-xem-them" onclick="moModal('modal-tai-khoan-quan-ly')">Quản lý</button>
+          <button class="nut-xem-them" onclick="moModalDanhSachQuanLy()">Quản lý</button>
         </div>
 
         <!-- ⚙️ BACKEND: Load danh sách tài khoản quản lý từ DB -->
 
         <!-- Quản lý 1 -->
-        <div class="dong-quan-ly">
-          <div class="anh-quan-ly" style="background:linear-gradient(135deg,#1a56db,#60a5fa);">N</div>
-          <div class="thong-tin-quan-ly">
-            <div class="ten-quan-ly">Nguyễn Thị Lan</div>
-            <div class="quyen-quan-ly">Quản lý ca sáng · Tầng 1–2</div>
-            <span class="the-quyen day-du">Đầy đủ quyền</span>
-          </div>
-          <div class="nhom-nut-quan-ly">
-            <button class="nut-sua-ql" onclick="suaQuanLy('NTL')" title="Sửa thông tin">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="nut-xoa-ql" onclick="xacNhanXoaQuanLy('NTL')" title="Xóa tài khoản">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
+        <div id="danh-sach-quan-ly-container">
+            <!-- JS sẽ render vào đây -->
         </div>
 
-        <!-- Quản lý 2 -->
-        <div class="dong-quan-ly">
-          <div class="anh-quan-ly" style="background:linear-gradient(135deg,#059669,#34d399);">T</div>
-          <div class="thong-tin-quan-ly">
-            <div class="ten-quan-ly">Trần Văn Toàn</div>
-            <div class="quyen-quan-ly">Quản lý ca tối · Tầng 3–4</div>
-            <span class="the-quyen gioi-han">Giới hạn quyền</span>
-          </div>
-          <div class="nhom-nut-quan-ly">
-            <button class="nut-sua-ql" onclick="suaQuanLy('TVT')"><i class="fas fa-edit"></i></button>
-            <button class="nut-xoa-ql" onclick="xacNhanXoaQuanLy('TVT')"><i class="fas fa-trash"></i></button>
-          </div>
-        </div>
-
-        <!-- Quản lý 3 -->
-        <div class="dong-quan-ly">
-          <div class="anh-quan-ly" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">P</div>
-          <div class="thong-tin-quan-ly">
-            <div class="ten-quan-ly">Phạm Thị Hoa</div>
-            <div class="quyen-quan-ly">Kế toán · Hóa đơn & Báo cáo</div>
-            <span class="the-quyen chi-doc">Chỉ xem</span>
-          </div>
-          <div class="nhom-nut-quan-ly">
-            <button class="nut-sua-ql" onclick="suaQuanLy('PTH')"><i class="fas fa-edit"></i></button>
-            <button class="nut-xoa-ql" onclick="xacNhanXoaQuanLy('PTH')"><i class="fas fa-trash"></i></button>
-          </div>
-        </div>
-
-        <!-- Nút thêm quản lý mới -->
-        <button style="width:100%;margin-top:14px;background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(201,129,10,0.3);font-family:inherit;" onclick="moModal('modal-tai-khoan-quan-ly')">
-          <i class="fas fa-plus"></i> Thêm quản lý mới
-        </button>
 
       </div><!-- Kết thúc card danh sách quản lý -->
 
@@ -1985,7 +1941,6 @@
   </div>
 </div>
 
-
 <!-- =============================================
      JAVASCRIPT – XỬ LÝ TƯƠNG TÁC
 ============================================= -->
@@ -2218,5 +2173,6 @@
   styleToast.textContent = `@@keyframes truot-len { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }`;
   document.head.appendChild(styleToast);
 </script>
+
 </body>
 </html>

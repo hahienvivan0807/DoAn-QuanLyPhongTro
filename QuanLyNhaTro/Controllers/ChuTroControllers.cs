@@ -86,6 +86,24 @@ namespace QuanLyNhaTro.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "Tạo tài khoản thành công" });
         }
+        // GET /api/ChuTro/danh-sach-quan-ly
+        [HttpGet("danh-sach-quan-ly")]
+        public async Task<IActionResult> LayDanhSachQuanLy()
+        {
+            var danhSach = await _context.ACCOUNT
+                .Where(u => u.Roles == "QuanLy")
+                .Select(u => new {
+                    u.IDUser,
+                    u.Username,
+                    u.FullName,
+                    u.Phone,
+                    u.Roles,
+                    u.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(danhSach);
+        }
     }
 
 }
