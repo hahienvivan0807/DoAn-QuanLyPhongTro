@@ -1,11 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace QuanLyNhaTro.Pages.KhachThue
 {
-    [Authorize(Roles = "User")]
-    public class KhachThueModel : PageModel
+    public class ThanhToanModel : PageModel
     {
         public void OnGet()
         {

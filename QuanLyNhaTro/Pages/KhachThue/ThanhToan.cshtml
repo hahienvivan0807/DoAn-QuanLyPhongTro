@@ -1,0 +1,1480 @@
+﻿@page "/KhachThue/ThanhToan"
+@model QuanLyNhaTro.Pages.KhachThue.ThanhToanModel
+@{
+    ViewData["title"] = "Thanh Toán";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thanh Toán – Nhà Trọ Bà Năm</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+
+    /* =============================================
+       BIẾN MÀU TOÀN CỤC — đồng bộ KhachThue.cshtml
+    ============================================= */
+    :root {
+      --mau-sidebar:        #0d1b3e;
+      --mau-sidebar-dam:    #091429;
+      --mau-chu-de:         #1a56db;
+      --mau-chu-de-sang:    #3b82f6;
+      --mau-nen:            #f0f4f8;
+      --mau-trang:          #ffffff;
+      --mau-chu:            #1e293b;
+      --mau-chu-phu:        #64748b;
+      --mau-vien:           #e2e8f0;
+      --mau-xanh-nhat:      #eff6ff;
+      --mau-xanh-trung:     #dbeafe;
+      --mau-xanh-la:        #059669;
+      --mau-xanh-la-nhat:   #d1fae5;
+      --mau-cam:            #d97706;
+      --mau-cam-nhat:       #fef3c7;
+      --mau-do:             #dc2626;
+      --mau-do-nhat:        #fee2e2;
+      --bong-card:          0 4px 24px rgba(26,86,219,0.10);
+      --bong-card-hover:    0 8px 32px rgba(26,86,219,0.18);
+    }
+
+    /* =============================================
+       RESET & CƠ BẢN
+    ============================================= */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+      background: var(--mau-nen);
+      color: var(--mau-chu);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* =============================================
+       SIDEBAR — giống KhachThue.cshtml
+    ============================================= */
+    #thanh-sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: linear-gradient(180deg, #0d1b3e 0%, #091429 100%);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      z-index: 100;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s;
+      flex-shrink: 0;
+    }
+    #thanh-sidebar.an-sidebar { width: 0; min-width: 0; overflow: hidden; }
+
+    .logo-sidebar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 28px 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      white-space: nowrap;
+    }
+    .logo-sidebar .bieu-tuong {
+      width: 42px; height: 42px;
+      background: var(--mau-chu-de);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff; font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(26,86,219,0.4);
+    }
+    .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; }
+    .logo-sidebar .ten-logo span  { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+    .nhan-nhom {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      padding: 18px 20px 6px;
+      white-space: nowrap;
+    }
+
+    .menu-item {
+      display: flex; align-items: center; gap: 13px;
+      padding: 11px 20px;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      border-radius: 0 30px 30px 0;
+      margin: 2px 10px 2px 0;
+      transition: all 0.2s;
+      font-size: 13.5px; font-weight: 600;
+      text-decoration: none;
+      position: relative;
+      white-space: nowrap;
+    }
+    .menu-item i { width: 20px; text-align: center; font-size: 15px; flex-shrink: 0; }
+    .menu-item:hover { background: rgba(59,130,246,0.15); color: #fff; }
+    .menu-item.dang-chon {
+      background: linear-gradient(90deg, rgba(26,86,219,0.85), rgba(59,130,246,0.6));
+      color: #fff; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(26,86,219,0.3);
+    }
+    .menu-item.dang-chon::before {
+      content: '';
+      position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      height: 70%; width: 4px;
+      background: #60a5fa;
+      border-radius: 0 4px 4px 0;
+    }
+    .huy-hieu-menu {
+      margin-left: auto;
+      background: #ef4444; color: #fff;
+      font-size: 10px; font-weight: 700;
+      border-radius: 20px; padding: 1px 7px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 18px 16px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; gap: 10px;
+      white-space: nowrap;
+    }
+    .sidebar-footer .anh-khach {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a56db, #60a5fa);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 15px; font-weight: 800;
+      border: 2px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .sidebar-footer .anh-khach::after {
+      content: '';
+      position: absolute; bottom: 1px; right: 1px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #10b981; border: 2px solid #091429;
+    }
+    .sidebar-footer .ten-khach strong { display: block; color: #fff; font-size: 13px; }
+    .sidebar-footer .ten-khach span  { color: rgba(255,255,255,0.45); font-size: 11px; }
+
+    /* =============================================
+       KHU VỰC CHÍNH
+    ============================================= */
+    #khu-vuc-chinh {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* HEADER */
+    #thanh-header {
+      background: var(--mau-trang);
+      padding: 0 28px;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--mau-vien);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+    }
+    .header-trai { display: flex; align-items: center; gap: 16px; }
+    .nut-ham-menu {
+      background: none; border: none; cursor: pointer;
+      font-size: 20px; color: var(--mau-chu-phu);
+      padding: 6px; border-radius: 8px; transition: background 0.2s;
+    }
+    .nut-ham-menu:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+    .tieu-de-trang { font-size: 16px; font-weight: 800; }
+    .duong-dan     { font-size: 12px; color: var(--mau-chu-phu); }
+    .duong-dan a   { color: var(--mau-chu-de); text-decoration: none; font-weight: 600; }
+
+    .header-phai { display: flex; align-items: center; gap: 14px; }
+    .hdr-date {
+      font-size: 12px; font-weight: 600; color: var(--mau-chu-phu);
+      background: var(--mau-nen); padding: 6px 12px;
+      border-radius: 20px; border: 1px solid var(--mau-vien);
+    }
+    .nut-thong-bao {
+      position: relative; background: none; border: none;
+      cursor: pointer; font-size: 18px; color: var(--mau-chu-phu);
+      padding: 8px; border-radius: 50%; transition: all 0.2s;
+    }
+    .nut-thong-bao:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+    .so-thong-bao {
+      position: absolute; top: 2px; right: 2px;
+      background: #ef4444; color: #fff;
+      font-size: 9px; font-weight: 700; border-radius: 50%;
+      width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #fff;
+    }
+    .thong-tin-khach {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; padding: 6px 12px; border-radius: 24px;
+      transition: background 0.2s;
+    }
+    .thong-tin-khach:hover { background: var(--mau-xanh-nhat); }
+    .thong-tin-khach .anh-dai-dien {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a56db, #60a5fa);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 14px; font-weight: 800;
+      position: relative;
+    }
+    .thong-tin-khach .anh-dai-dien::after {
+      content: ''; position: absolute; bottom: 0; right: 0;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #10b981; border: 2px solid #fff;
+    }
+    .thong-tin-khach .ten     { font-size: 13px; font-weight: 700; }
+    .thong-tin-khach .phong-so{ font-size: 11px; color: var(--mau-chu-phu); }
+
+    /* NỘI DUNG CUỘN */
+    #noi-dung-chinh {
+      flex: 1; overflow-y: auto; padding: 28px 32px;
+    }
+
+    /* =============================================
+       BREADCRUMB + TIÊU ĐỀ TRANG
+    ============================================= */
+    .page-heading {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-heading h2 {
+      font-size: 22px; font-weight: 800; color: var(--mau-chu);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .page-heading h2 i { color: var(--mau-chu-de); font-size: 20px; }
+    .page-heading p   { font-size: 13px; color: var(--mau-chu-phu); margin-top: 4px; }
+
+    /* Badge trạng thái hóa đơn */
+    .badge-chua-tt {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--mau-cam-nhat); color: var(--mau-cam);
+      font-size: 12px; font-weight: 700;
+      padding: 7px 16px; border-radius: 20px;
+      border: 1px solid #fed7aa;
+    }
+    .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--mau-cam);
+      box-shadow: 0 0 0 3px rgba(217,119,6,0.2);
+      animation: nhip-cam 2s ease-in-out infinite;
+    }
+    @@keyframes nhip-cam {
+      0%,100% { box-shadow: 0 0 0 3px rgba(217,119,6,0.2); }
+      50%      { box-shadow: 0 0 0 6px rgba(217,119,6,0.06); }
+    }
+
+    /* =============================================
+       LAYOUT 2 CỘT CHÍNH
+    ============================================= */
+    .tt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+    @@keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =============================================
+       CARD CHUNG
+    ============================================= */
+    .tt-card {
+      background: var(--mau-trang);
+      border-radius: 20px;
+      border: 1px solid var(--mau-vien);
+      box-shadow: var(--bong-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.25s;
+    }
+    .tt-card:hover { box-shadow: var(--bong-card-hover); }
+
+    /* Thanh accent màu trên cùng */
+    .tt-accent {
+      height: 5px;
+      border-radius: 20px 20px 0 0;
+    }
+    .tt-accent.xanh { background: linear-gradient(90deg, #1a56db, #60a5fa); }
+    .tt-accent.xanh-la { background: linear-gradient(90deg, #059669, #34d399); }
+
+    /* Header card */
+    .tt-card-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--mau-vien);
+    }
+    .tt-icon-wrap {
+      width: 40px; height: 40px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .tt-icon-wrap.xanh    { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+    .tt-icon-wrap.xanh-la { background: var(--mau-xanh-la-nhat); color: var(--mau-xanh-la); }
+    .tt-card-header h3 {
+      font-size: 15px; font-weight: 800; color: var(--mau-chu); line-height: 1.2;
+    }
+    .tt-card-header .sub {
+      font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 2px;
+    }
+
+    /* =============================================
+       KHỐI 1 — CHI TIẾT HÓA ĐƠN
+    ============================================= */
+    .tt-invoice-body { padding: 20px 24px; flex: 1; }
+
+    /* Mỗi dòng chi phí */
+    .tt-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--mau-vien); gap: 12px;
+    }
+    .tt-row:last-of-type { border-bottom: none; }
+
+    .tt-row-left {
+      display: flex; align-items: flex-start; gap: 10px; flex: 1;
+    }
+    .tt-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
+    }
+    .dot-blue   { background: #1a56db; box-shadow: 0 0 0 3px #dbeafe; }
+    .dot-yellow { background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
+    .dot-cyan   { background: #0ea5e9; box-shadow: 0 0 0 3px #e0f2fe; }
+    .dot-purple { background: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+    .dot-green  { background: #10b981; box-shadow: 0 0 0 3px #d1fae5; }
+
+    .tt-label-name {
+      font-size: 13.5px; font-weight: 600; color: var(--mau-chu); line-height: 1.4;
+    }
+    .tt-label-name i { margin-right: 5px; font-size: 11px; }
+    .tt-label-sub  {
+      font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 3px; font-weight: 500;
+    }
+    .tt-amount {
+      font-size: 14px; font-weight: 700; color: var(--mau-chu);
+      white-space: nowrap; text-align: right; padding-top: 1px;
+    }
+    .tt-amount.mien-phi { color: var(--mau-xanh-la); font-size: 12.5px; }
+
+    /* Đường phân cách gradient */
+    .tt-hr {
+      height: 2px; margin: 6px 0 8px;
+      background: linear-gradient(90deg, var(--mau-chu-de) 0%, transparent 70%);
+      border-radius: 2px;
+    }
+
+    /* Dòng tổng tiền */
+    .tt-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 18px;
+      background: var(--mau-xanh-nhat);
+      border-radius: 14px;
+      border: 1.5px solid var(--mau-xanh-trung);
+      margin-top: 6px;
+    }
+    .tt-total-label {
+      font-size: 14px; font-weight: 800; color: var(--mau-chu);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tt-total-label i { color: var(--mau-chu-de); }
+    .tt-total-amount  {
+      font-size: 22px; font-weight: 800; color: var(--mau-chu-de);
+      letter-spacing: -0.5px;
+    }
+
+    /* Cảnh báo hạn thanh toán */
+    .tt-deadline {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 14px; padding: 10px 16px;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 10px;
+      font-size: 12.5px; font-weight: 600; color: #b45309;
+    }
+    .tt-deadline i { font-size: 13px; color: var(--mau-cam); }
+    .tt-deadline strong { color: var(--mau-do); margin: 0 3px; }
+    .tt-deadline .tt-days-left {
+      margin-left: auto;
+      background: var(--mau-cam-nhat); color: var(--mau-cam);
+      font-size: 11px; font-weight: 700;
+      padding: 2px 10px; border-radius: 20px;
+    }
+
+    /* =============================================
+       KHỐI 2 — THANH TOÁN
+    ============================================= */
+    .tt-pay-body {
+      padding: 20px 24px; flex: 1;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* Tóm tắt số tiền */
+    .tt-summary {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1.5px solid #bfdbfe; border-radius: 16px;
+    }
+    .tt-sum-label { font-size: 12px; color: var(--mau-chu-phu); font-weight: 600; }
+    .tt-sum-amount{
+      font-size: 26px; font-weight: 800; color: var(--mau-chu-de);
+      letter-spacing: -1px; margin-top: 3px;
+    }
+    .tt-sum-icon {
+      width: 54px; height: 54px; border-radius: 15px;
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: #fff;
+      box-shadow: 0 6px 18px rgba(26,86,219,0.35);
+      flex-shrink: 0;
+    }
+
+    /* Nút THANH TOÁN NHANH */
+    .tt-btn-pay {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      color: #fff; border: none; border-radius: 14px;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 15px; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 6px 20px rgba(26,86,219,0.35);
+      transition: all 0.22s;
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+    .tt-btn-pay::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+      border-radius: 14px;
+    }
+    .tt-btn-pay:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(26,86,219,0.45);
+    }
+    .tt-btn-pay:active { transform: translateY(0); }
+
+    /* =============================================
+       MODAL THANH TOÁN NHANH — QR CODE
+    ============================================= */
+    .qr-modal-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(9,20,41,0.72);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .qr-modal-overlay.hien {
+      opacity: 1; pointer-events: auto;
+    }
+    .qr-modal {
+      background: #fff;
+      border-radius: 24px;
+      width: 100%; max-width: 420px;
+      margin: 16px;
+      box-shadow: 0 24px 64px rgba(9,20,41,0.35), 0 0 0 1px rgba(255,255,255,0.06);
+      overflow: hidden;
+      transform: translateY(22px) scale(0.97);
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    }
+    .qr-modal-overlay.hien .qr-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Thanh accent gradient đầu modal */
+    .qr-modal-accent {
+      height: 6px;
+      background: linear-gradient(90deg, #1a56db 0%, #3b82f6 50%, #06b6d4 100%);
+    }
+
+    /* Header modal */
+    .qr-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 22px 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .qr-modal-header-left {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .qr-icon-badge {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border: 1.5px solid #bfdbfe;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: #1a56db;
+    }
+    .qr-modal-title { font-size: 16px; font-weight: 800; color: #1e293b; }
+    .qr-modal-sub   { font-size: 11.5px; color: #64748b; margin-top: 2px; }
+    .qr-modal-close {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #f1f5f9; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #64748b;
+      transition: all 0.18s;
+    }
+    .qr-modal-close:hover { background: #fee2e2; color: #dc2626; }
+
+    /* Body modal */
+    .qr-modal-body { padding: 20px 22px 24px; }
+
+    /* Số tiền cần chuyển */
+    .qr-amount-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border: 1.5px solid #bfdbfe;
+      border-radius: 14px; padding: 14px 18px;
+      margin-bottom: 18px;
+    }
+    .qr-amount-label { font-size: 12px; font-weight: 600; color: #64748b; }
+    .qr-amount-value { font-size: 22px; font-weight: 800; color: #1a56db; letter-spacing: -0.5px; }
+    .qr-amount-icon {
+      width: 42px; height: 42px; border-radius: 11px;
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff;
+      box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+    }
+
+    /* Khung ảnh QR */
+    .qr-image-wrap {
+      position: relative;
+      background: #f8faff;
+      border: 2px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .qr-image-wrap::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(26,86,219,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* === THẺ IMG QR — kết nối SQL sau này ===
+       src sẽ được bind từ Model.QrCodeUrl (C# Razor)
+       hoặc load qua fetch() từ API endpoint.
+       id="qr-img" dùng để JS cập nhật src động.
+    */
+    #qr-img {
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto 10px;
+      /* TODO: src="@@Model.QuanLy.QrCodeUrl" */
+    }
+
+    .qr-bank-info {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 0;
+    }
+    .qr-bank-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12.5px;
+    }
+    .qr-bank-row .lbl { color: #64748b; font-weight: 500; }
+    .qr-bank-row .val {
+      font-weight: 700; color: #1e293b;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .qr-copy-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; color: #1a56db;
+      padding: 2px 6px; border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .qr-copy-btn:hover { background: #eff6ff; }
+
+    /* Dòng hướng dẫn */
+    .qr-guide {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 10px; padding: 10px 14px;
+      margin-top: 14px;
+      font-size: 12px; color: #166534; font-weight: 600; line-height: 1.5;
+    }
+    .qr-guide i { font-size: 14px; color: #16a34a; flex-shrink: 0; margin-top: 1px; }
+
+    /* Nội dung chuyển khoản copy-to-clipboard */
+    .qr-noi-dung {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fefce8; border: 1px solid #fde68a;
+      border-radius: 10px; padding: 10px 14px;
+      margin-top: 10px;
+      font-size: 12.5px;
+    }
+    .qr-noi-dung .nd-label { color: #92400e; font-weight: 600; }
+    .qr-noi-dung .nd-val   { color: #b45309; font-weight: 800; font-size: 13px; }
+    .qr-noi-dung .nd-copy {
+      background: none; border: none; cursor: pointer;
+      font-size: 13px; color: #b45309;
+      padding: 4px 8px; border-radius: 7px;
+      transition: background 0.15s;
+    }
+    .qr-noi-dung .nd-copy:hover { background: #fde68a; }
+
+    /* Footer modal */
+    .qr-modal-footer {
+      padding: 0 22px 22px;
+      display: flex; gap: 10px;
+    }
+    .qr-btn-dong {
+      flex: 1; padding: 12px;
+      background: #f1f5f9; color: #475569;
+      border: 1.5px solid #e2e8f0; border-radius: 12px;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 13.5px; font-weight: 700; cursor: pointer;
+      transition: all 0.18s;
+    }
+    .qr-btn-dong:hover { background: #e2e8f0; }
+    .qr-btn-xac-nhan {
+      flex: 2; padding: 12px;
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff; border: none; border-radius: 12px;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 13.5px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 14px rgba(5,150,105,0.3);
+      transition: all 0.18s;
+    }
+    .qr-btn-xac-nhan:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(5,150,105,0.4);
+    }
+
+    /* Hiệu ứng pulse nhẹ trên QR */
+    @@keyframes qr-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(26,86,219,0.18); }
+      50%       { box-shadow: 0 0 0 10px rgba(26,86,219,0); }
+    }
+    #qr-img { animation: qr-pulse 2.5s ease-in-out infinite; }
+
+    /* Phân cách "hoặc" */
+    .tt-sep {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 11.5px; font-weight: 600; color: var(--mau-chu-phu);
+    }
+    .tt-sep::before, .tt-sep::after {
+      content: ''; flex: 1; height: 1px; background: var(--mau-vien);
+    }
+
+    /* =============================================
+       VÙNG UPLOAD ẢNH BILL
+    ============================================= */
+    .tt-upload-zone {
+      border: 2px dashed #bfdbfe; border-radius: 14px;
+      background: #f8faff; padding: 24px 16px;
+      text-align: center; cursor: pointer;
+      transition: all 0.25s; position: relative;
+    }
+    .tt-upload-zone.drag-over {
+      border-color: var(--mau-chu-de);
+      background: var(--mau-xanh-nhat);
+      transform: scale(1.01);
+    }
+    .tt-upload-zone:hover { border-color: var(--mau-chu-de-sang); }
+
+    /* Input file ẩn — kích hoạt bởi toàn vùng */
+    .tt-file-input {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .tt-upload-icon {
+      font-size: 34px; color: #93c5fd;
+      display: block; margin-bottom: 10px;
+      transition: transform 0.2s;
+    }
+    .tt-upload-zone:hover .tt-upload-icon { transform: translateY(-4px); }
+    .tt-upload-title {
+      font-size: 13.5px; font-weight: 700; color: var(--mau-chu); margin-bottom: 5px;
+    }
+    .tt-upload-hint {
+      font-size: 11.5px; color: var(--mau-chu-phu); line-height: 1.6;
+    }
+    .tt-upload-hint span { color: var(--mau-chu-de); font-weight: 700; }
+
+    /* Preview ảnh đã chọn */
+    .tt-preview { display: none; margin-top: 12px; position: relative; }
+    .tt-preview img {
+      width: 100%; max-height: 170px; object-fit: cover;
+      border-radius: 10px; border: 1.5px solid var(--mau-vien); display: block;
+    }
+    /* Nút xóa ảnh */
+    .tt-btn-remove {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(220,38,38,0.9); color: #fff;
+      border: none; border-radius: 50%;
+      width: 28px; height: 28px; font-size: 12px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .tt-btn-remove:hover { background: #b91c1c; }
+    .tt-file-name {
+      font-size: 11px; color: var(--mau-chu-phu);
+      margin-top: 6px; font-style: italic; text-align: center;
+    }
+
+    /* Nút GỬI XÁC NHẬN */
+    .tt-btn-send {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff; border: none; border-radius: 14px;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      box-shadow: 0 4px 14px rgba(5,150,105,0.3);
+      transition: all 0.22s;
+      opacity: 0.45; pointer-events: none;   /* vô hiệu khi chưa có ảnh */
+    }
+    .tt-btn-send.active {
+      opacity: 1; pointer-events: auto;
+    }
+    .tt-btn-send.active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(5,150,105,0.4);
+    }
+
+    /* =============================================
+       TRẠNG THÁI THÀNH CÔNG (ẩn mặc định)
+    ============================================= */
+    .tt-success {
+      display: none;
+      flex-direction: column; align-items: center;
+      text-align: center; gap: 10px;
+      padding: 36px 24px;
+      animation: fadeUp 0.4s ease;
+    }
+    .tt-success-icon {
+      font-size: 52px; color: #059669;
+      animation: tt-bounce 0.5s ease;
+    }
+    @@keyframes tt-bounce {
+      0%  { transform: scale(0); }
+      70% { transform: scale(1.15); }
+      100%{ transform: scale(1); }
+    }
+    .tt-success h4 { font-size: 17px; font-weight: 800; color: var(--mau-chu); }
+    .tt-success p  { font-size: 13px; color: var(--mau-chu-phu); line-height: 1.7; }
+    .tt-success .tt-btn-back {
+      margin-top: 8px; padding: 10px 24px;
+      background: var(--mau-xanh-nhat); color: var(--mau-chu-de);
+      border: 1.5px solid var(--mau-xanh-trung); border-radius: 10px;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .tt-success .tt-btn-back:hover { background: var(--mau-xanh-trung); }
+
+    /* =============================================
+       SCROLLBAR
+    ============================================= */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @@media (max-width: 1000px) {
+      .tt-grid { grid-template-columns: 1fr; }
+    }
+    @@media (max-width: 768px) {
+      #thanh-sidebar { width: 0; min-width: 0; }
+      #thanh-sidebar.mo { width: 220px; min-width: 220px; }
+      #noi-dung-chinh { padding: 16px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  @* =============================================
+     SIDEBAR
+  ============================================= *@
+  <nav id="thanh-sidebar">
+
+    <div class="logo-sidebar">
+      <div class="bieu-tuong">A</div>
+      <div class="ten-logo">
+        <strong>NHÀ TRỌ ABC</strong>
+        <span>Cổng khách thuê</span>
+      </div>
+    </div>
+
+    <div class="nhan-nhom">Tổng quan</div>
+    <a href="/KhachThue/KhachThue" class="menu-item" onclick="chuyenTrang('trang-chu', this); return false;">
+      <i class="fas fa-home"></i><span>Trang chủ</span>
+    </a>
+
+    <div class="nhan-nhom">Dịch vụ</div>
+    <a href="/KhachThue/ThanhToan" class="menu-item dang-chon" onclick="chuyenTrang('thanh-toan', this); return false;">
+      <i class="fas fa-credit-card"></i><span>Thanh toán</span>
+    </a>
+    <a href="/KhachThue/TienIch" class="menu-item" onclick="chuyenTrang('tien-ich', this); return false;">
+      <i class="fas fa-bolt"></i><span>Dịch vụ &amp; Tiện ích</span>
+    </a>
+    <a href="/KhachThue/BaoSuCo" class="menu-item" onclick="chuyenTrang('bao-su-co', this); return false;">
+      <i class="fas fa-tools"></i><span>Báo sự cố</span>
+    </a>
+
+    <div class="nhan-nhom">Cá nhân</div>
+    <a href="/KhachThue/ThongBao" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
+      <i class="fas fa-bell"></i><span>Thông báo</span>
+      <span class="huy-hieu-menu">4</span>
+    </a>
+    <a href="/KhachThue/HoSo" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
+      <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
+    </a>
+    <a href="/KhachThue/CaiDat" class="menu-item" onclick="chuyenTrang('cai-dat', this); return false;">
+      <i class="fas fa-cog"></i><span>Cài đặt</span>
+    </a>
+
+    <div class="sidebar-footer">
+      <div class="anh-khach">T</div>
+      <div class="ten-khach">
+        <strong>Trần Duy Hơn</strong>
+        <span>Phòng 201 · Tầng 2</span>
+      </div>
+    </div>
+  </nav>
+
+  @* =============================================
+     KHU VỰC CHÍNH
+  ============================================= *@
+  <div id="khu-vuc-chinh">
+
+    @* HEADER *@
+    <header id="thanh-header">
+      <div class="header-trai">
+        <button class="nut-ham-menu" onclick="dongMoSidebar()" aria-label="Toggle menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <div class="tieu-de-trang">Thanh Toán</div>
+          <div class="duong-dan">
+            <a href="#">Trang chủ</a>
+            &nbsp;/&nbsp; Thanh toán
+          </div>
+        </div>
+      </div>
+      <div class="header-phai">
+        <div class="hdr-date" id="headerDate"></div>
+        <button class="nut-thong-bao" aria-label="Thông báo">
+          <i class="fas fa-bell"></i>
+          <span class="so-thong-bao">4</span>
+        </button>
+        <div class="thong-tin-khach">
+          <div class="anh-dai-dien">T</div>
+          <div>
+            <div class="ten">Trần Duy Hơn</div>
+            <div class="phong-so">Phòng 201</div>
+          </div>
+          <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
+        </div>
+      </div>
+    </header>
+
+    @* NỘI DUNG CUỘN *@
+    <main id="noi-dung-chinh">
+
+      @* Tiêu đề trang *@
+      <div class="page-heading">
+        <div>
+          <h2><i class="fas fa-file-invoice-dollar"></i> Hóa đơn tháng 5/2025</h2>
+          <p>Phòng 201 &nbsp;·&nbsp; Trần Duy Hơn &nbsp;·&nbsp; Nhà Trọ ABC</p>
+        </div>
+        <div class="badge-chua-tt">
+          <div class="badge-dot"></div>
+          Chưa thanh toán
+        </div>
+      </div>
+
+      @* ==========================================
+         LƯỚI 2 KHỐI: HÓA ĐƠN + THANH TOÁN
+      ========================================== *@
+      <div class="tt-grid">
+
+        @* ------------------------------------------
+           KHỐI 1: CHI TIẾT HÓA ĐƠN THÁNG NÀY
+           Liệt kê từng khoản thu kèm chi tiết.
+        ------------------------------------------ *@
+        <div class="tt-card">
+
+          @* Thanh accent xanh dương *@
+          <div class="tt-accent xanh"></div>
+
+          @* Tiêu đề khối *@
+          <div class="tt-card-header">
+            <div class="tt-icon-wrap xanh">
+              <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <div>
+              <h3>Chi tiết hóa đơn</h3>
+              <div class="sub">Tháng 5/2025 &nbsp;·&nbsp; Phòng 201</div>
+            </div>
+          </div>
+
+          @* Danh sách các khoản phí *@
+          <div class="tt-invoice-body">
+
+            @* --- Tiền phòng gốc --- *@
+            <div class="tt-row">
+              <div class="tt-row-left">
+                <span class="tt-dot dot-blue"></span>
+                <div>
+                  <div class="tt-label-name">
+                    <i class="fas fa-home" style="color:#1a56db;"></i>Tiền phòng
+                  </div>
+                </div>
+              </div>
+              <div class="tt-amount">3,500,000 đ</div>
+            </div>
+
+            @* --- Tiền điện: số kWh & đơn giá --- *@
+            <div class="tt-row">
+              <div class="tt-row-left">
+                <span class="tt-dot dot-yellow"></span>
+                <div>
+                  <div class="tt-label-name">
+                    <i class="fas fa-bolt" style="color:#f59e0b;"></i>Tiền điện
+                  </div>
+                  <div class="tt-label-sub">120 kWh &times; 3.500 đ/kWh</div>
+                </div>
+              </div>
+              <div class="tt-amount">420,000 đ</div>
+            </div>
+
+            @* --- Tiền nước: số khối & đơn giá --- *@
+            <div class="tt-row">
+              <div class="tt-row-left">
+                <span class="tt-dot dot-cyan"></span>
+                <div>
+                  <div class="tt-label-name">
+                    <i class="fas fa-tint" style="color:#0ea5e9;"></i>Tiền nước
+                  </div>
+                  <div class="tt-label-sub">4 khối &times; 20.000 đ/khối</div>
+                </div>
+              </div>
+              <div class="tt-amount">80,000 đ</div>
+            </div>
+
+            @* --- Internet --- *@
+            <div class="tt-row">
+              <div class="tt-row-left">
+                <span class="tt-dot dot-purple"></span>
+                <div>
+                  <div class="tt-label-name">
+                    <i class="fas fa-wifi" style="color:#8b5cf6;"></i>Internet
+                  </div>
+                  <div class="tt-label-sub">Gói cố định hàng tháng</div>
+                </div>
+              </div>
+              <div class="tt-amount">100,000 đ</div>
+            </div>
+
+            @* --- Phí vệ sinh / rác --- *@
+            <div class="tt-row">
+              <div class="tt-row-left">
+                <span class="tt-dot dot-green"></span>
+                <div>
+                  <div class="tt-label-name">
+                    <i class="fas fa-recycle" style="color:#10b981;"></i>Phí vệ sinh / rác
+                  </div>
+                  <div class="tt-label-sub">Dịch vụ chung tòa nhà</div>
+                </div>
+              </div>
+              <div class="tt-amount mien-phi">Miễn phí</div>
+            </div>
+
+            @* Đường phân cách trước dòng tổng *@
+            <div class="tt-hr"></div>
+
+            @* Dòng TỔNG TIỀN — nổi bật, in đậm *@
+            <div class="tt-total">
+              <div class="tt-total-label">
+                <i class="fas fa-receipt"></i>
+                Tổng tiền cần thanh toán
+              </div>
+              <div class="tt-total-amount">4,100,000 đ</div>
+            </div>
+
+            @* Cảnh báo hạn thanh toán *@
+            <div class="tt-deadline">
+              <i class="fas fa-clock"></i>
+              Hạn thanh toán:
+              <strong>15/05/2025</strong>
+              <span class="tt-days-left">Còn 5 ngày</span>
+            </div>
+
+          </div>
+        </div>
+        @* -- KẾT THÚC KHỐI 1 -- *@
+
+
+        @* ------------------------------------------
+           KHỐI 2: HÀNH ĐỘNG THANH TOÁN + UPLOAD
+           Tóm tắt số tiền, nút Thanh toán ngay,
+           form kéo-thả ảnh bill, nút Gửi xác nhận.
+        ------------------------------------------ *@
+        <div class="tt-card">
+
+          @* Thanh accent xanh lá *@
+          <div class="tt-accent xanh-la"></div>
+
+          @* Tiêu đề khối *@
+          <div class="tt-card-header">
+            <div class="tt-icon-wrap xanh-la">
+              <i class="fas fa-credit-card"></i>
+            </div>
+            <div>
+              <h3>Thanh toán hóa đơn</h3>
+              <div class="sub">Chuyển khoản &amp; xác nhận ngay</div>
+            </div>
+          </div>
+
+          @* Body thanh toán — ẩn khi thành công *@
+          <div class="tt-pay-body" id="tt-pay-body">
+
+            @* Tóm tắt số tiền *@
+            <div class="tt-summary">
+              <div>
+                <div class="tt-sum-label">Số tiền cần thanh toán</div>
+                <div class="tt-sum-amount">4,100,000 đ</div>
+              </div>
+              <div class="tt-sum-icon">
+                <i class="fas fa-wallet"></i>
+              </div>
+            </div>
+
+            @* Nút THANH TOÁN NHANH
+               Onclick: mở modal QR code của quản lý *@
+            <button class="tt-btn-pay" onclick="ttMoQR()">
+              <i class="fas fa-qrcode"></i>
+              Thanh toán nhanh
+            </button>
+
+            @* Phân cách "hoặc" *@
+            <div class="tt-sep">hoặc đính kèm ảnh xác nhận chuyển khoản</div>
+
+            @* -----------------------------------------
+               FORM UPLOAD ẢNH BILL
+               Hỗ trợ click + kéo-thả (drag & drop).
+               Chỉ nhận file image/*.
+            ----------------------------------------- *@
+            <div class="tt-upload-zone"
+                 id="tt-upload-zone"
+                 ondragover="ttDragOver(event)"
+                 ondragleave="ttDragLeave(event)"
+                 ondrop="ttDrop(event)">
+
+              @* Input file ẩn, kích hoạt khi click vào vùng *@
+              <input type="file"
+                     class="tt-file-input"
+                     id="tt-file-input"
+                     accept="image/*"
+                     onchange="ttFileChosen(this)" />
+
+              @* Hướng dẫn upload (hiển thị khi chưa chọn ảnh) *@
+              <div id="tt-upload-prompt">
+                <i class="fas fa-cloud-upload-alt tt-upload-icon"></i>
+                <div class="tt-upload-title">Kéo &amp; thả ảnh vào đây</div>
+                <div class="tt-upload-hint">
+                  hoặc <span>nhấn để chọn từ thiết bị</span><br />
+                  JPG, PNG, HEIC — tối đa 10 MB
+                </div>
+              </div>
+
+              @* Preview ảnh (ẩn mặc định, JS hiện sau khi chọn) *@
+              <div class="tt-preview" id="tt-preview">
+                <img src="" alt="Ảnh bill chuyển khoản" id="tt-preview-img" />
+                @* Nút xóa ảnh — stopPropagation tránh mở dialog lại *@
+                <button class="tt-btn-remove" type="button"
+                        title="Xóa ảnh" onclick="ttXoaAnh(event)">
+                  <i class="fas fa-times"></i>
+                </button>
+                <div class="tt-file-name" id="tt-file-name"></div>
+              </div>
+            </div>
+
+            @* Nút GỬI XÁC NHẬN
+               Mờ + vô hiệu cho đến khi người dùng chọn ảnh hợp lệ.
+               JS thêm class .active để kích hoạt. *@
+            <button class="tt-btn-send" id="tt-btn-send" onclick="ttGuiXacNhan()">
+              <i class="fas fa-paper-plane"></i>
+              Gửi xác nhận thanh toán
+            </button>
+
+          </div>
+          @* -- KẾT THÚC .tt-pay-body -- *@
+
+          @* Trạng thái thành công (ẩn ban đầu, JS hiển thị sau submit) *@
+          <div class="tt-success" id="tt-success">
+            <div class="tt-success-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h4>Đã gửi xác nhận thành công!</h4>
+            <p>
+              Chúng tôi đã nhận được ảnh bill chuyển khoản.<br />
+              Hóa đơn sẽ được cập nhật trong vòng <strong>15 phút</strong>.
+            </p>
+            <button class="tt-btn-back" onclick="window.location.href='#'">
+              <i class="fas fa-arrow-left" style="margin-right:6px;"></i>Về trang chủ
+            </button>
+          </div>
+
+        </div>
+        @* -- KẾT THÚC KHỐI 2 -- *@
+
+      </div>
+      @* -- KẾT THÚC .tt-grid -- *@
+
+    </main>
+  </div>
+  @* -- KẾT THÚC #khu-vuc-chinh -- *@
+
+
+  @* =============================================
+     MODAL THANH TOÁN NHANH — QR CODE
+     img#qr-img: src sẽ bind từ Model.QuanLy.QrCodeUrl
+     hoặc load qua fetch('/api/qrcode?managerId=...') sau khi tích hợp SQL
+  ============================================= *@
+  <div class="qr-modal-overlay" id="qr-modal-overlay" onclick="ttDongQR(event)">
+    <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+
+      <div class="qr-modal-accent"></div>
+
+      <div class="qr-modal-header">
+        <div class="qr-modal-header-left">
+          <div class="qr-icon-badge"><i class="fas fa-qrcode"></i></div>
+          <div>
+            <div class="qr-modal-title" id="qr-modal-title">Thanh toán nhanh</div>
+            <div class="qr-modal-sub">Quét mã QR để chuyển khoản ngay</div>
+          </div>
+        </div>
+        <button class="qr-modal-close" onclick="ttDongQRBtn()" aria-label="Đóng">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="qr-modal-body">
+
+        @* Số tiền *@
+        <div class="qr-amount-bar">
+          <div>
+            <div class="qr-amount-label">Số tiền cần chuyển</div>
+            <div class="qr-amount-value" id="qr-so-tien">4,100,000 đ</div>
+          </div>
+          <div class="qr-amount-icon"><i class="fas fa-wallet"></i></div>
+        </div>
+
+        @* Khung QR *@
+        <div class="qr-image-wrap">
+
+          @* =====================================================
+             THẺ IMG QR — THUỘC TÍNH CHUẨN ĐỂ KẾT NỐI SQL SAU
+             -------------------------------------------------
+             Razor  :  src="@Model.QuanLy.QrCodeUrl"
+             API    :  id="qr-img" → JS gán src từ fetch response
+             Alt    :  mô tả cho accessibility
+             SQL    :  SELECT QrCodeUrl FROM QuanLy WHERE Id = @quanLyId
+          ===================================================== *@
+          <img
+            id="qr-img"
+            src=""
+            alt="Mã QR chuyển khoản của quản lý"
+            width="200"
+            height="200"
+            data-quan-ly-id=""
+            onerror="this.src='';this.style.display='none';document.getElementById('qr-fallback').style.display='flex';"
+          />
+
+          @* Fallback khi chưa có ảnh QR từ DB *@
+          <div id="qr-fallback" style="width:200px;height:200px;margin:0 auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;border:2px dashed #bfdbfe;background:#f8faff;color:#94a3b8;gap:8px;font-size:12px;font-weight:600;">
+            <i class="fas fa-image" style="font-size:36px;color:#bfdbfe;"></i>
+            Chờ kết nối dữ liệu
+          </div>
+
+          <div class="qr-bank-info">
+            <div class="qr-bank-row">
+              <span class="lbl">Ngân hàng</span>
+              <span class="val" id="qr-ngan-hang">— —</span>
+            </div>
+            <div class="qr-bank-row">
+              <span class="lbl">Số tài khoản</span>
+              <span class="val">
+                <span id="qr-so-tk">— — — —</span>
+                <button class="qr-copy-btn" onclick="ttCopy('qr-so-tk')" title="Sao chép số TK">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </span>
+            </div>
+            <div class="qr-bank-row">
+              <span class="lbl">Chủ tài khoản</span>
+              <span class="val" id="qr-chu-tk">— — — —</span>
+            </div>
+          </div>
+        </div>
+
+        @* Nội dung chuyển khoản *@
+        <div class="qr-noi-dung">
+          <div>
+            <div class="nd-label">Nội dung CK</div>
+            <div class="nd-val" id="qr-nd-ck">P201 THANG 5 2025</div>
+          </div>
+          <button class="nd-copy" onclick="ttCopy('qr-nd-ck')" title="Sao chép">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+
+        @* Hướng dẫn *@
+        <div class="qr-guide">
+          <i class="fas fa-circle-info"></i>
+          Mở app ngân hàng → Chuyển tiền → Quét mã QR hoặc nhập số tài khoản.
+          Sau khi chuyển, hãy tải ảnh bill lên bên dưới để xác nhận.
+        </div>
+
+      </div>
+
+      <div class="qr-modal-footer">
+        <button class="qr-btn-dong" onclick="ttDongQRBtn()">
+          <i class="fas fa-arrow-left" style="margin-right:6px;"></i>Quay lại
+        </button>
+        <button class="qr-btn-xac-nhan" onclick="ttDongVaUpload()">
+          <i class="fas fa-upload"></i>
+          Đã chuyển – Tải bill lên
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  @* =============================================
+     JAVASCRIPT
+  ============================================= *@
+  <script>
+    /* --- Cập nhật ngày giờ header --- */
+    (function () {
+      const days = ['CN','T2','T3','T4','T5','T6','T7'];
+      const now  = new Date();
+      const dd   = String(now.getDate()).padStart(2, '0');
+      const mm   = String(now.getMonth() + 1).padStart(2, '0');
+      const yy   = now.getFullYear();
+      const el   = document.getElementById('headerDate');
+      if (el) el.textContent = `${days[now.getDay()]}, ${dd}/${mm}/${yy}`;
+    })();
+
+    /* --- Toggle sidebar --- */
+    function dongMoSidebar() {
+      document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
+    }
+
+    /* --- Chuyển trang --- */
+    function chuyenTrang(tenTrang, phanTu) {
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
+      phanTu.classList.add('dang-chon');
+      const bang = {
+        'trang-chu':  '/KhachThue/KhachThue',
+        'thanh-toan': '/KhachThue/ThanhToan',
+        'tien-ich':   '/KhachThue/TienIch',
+        'bao-su-co':  '/KhachThue/BaoSuCo',
+        'thong-bao':  '/KhachThue/ThongBao',
+        'ho-so':      '/KhachThue/HoSo',
+        'cai-dat':    '/KhachThue/CaiDat',
+      };
+      if (bang[tenTrang]) window.location.href = bang[tenTrang];
+    }
+
+    /* ==============================================
+       UPLOAD ẢNH BILL
+    ============================================== */
+
+    /* Biến lưu file đã chọn để gửi khi submit */
+    let ttSelectedFile = null;
+
+    /* Gọi khi người dùng chọn file qua input click */
+    function ttFileChosen(input) {
+      const file = input.files && input.files[0];
+      ttXuLyFile(file);
+    }
+
+    /* Ngăn hành vi mặc định, thêm hiệu ứng drag-over */
+    function ttDragOver(event) {
+      event.preventDefault();
+      document.getElementById('tt-upload-zone').classList.add('drag-over');
+    }
+
+    /* Bỏ hiệu ứng khi kéo ra ngoài vùng */
+    function ttDragLeave(event) {
+      document.getElementById('tt-upload-zone').classList.remove('drag-over');
+    }
+
+    /* Nhận file khi người dùng thả vào vùng upload */
+    function ttDrop(event) {
+      event.preventDefault();
+      document.getElementById('tt-upload-zone').classList.remove('drag-over');
+      const file = event.dataTransfer.files && event.dataTransfer.files[0];
+      ttXuLyFile(file);
+    }
+
+    /* Hàm dùng chung: kiểm tra file, hiện preview, kích hoạt nút gửi */
+    function ttXuLyFile(file) {
+      if (!file) return;
+
+      /* Chỉ nhận ảnh */
+      if (!file.type.startsWith('image/')) {
+        alert('Vui lòng chọn file ảnh (JPG, PNG, HEIC...)!');
+        return;
+      }
+      /* Giới hạn 10 MB */
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File quá lớn! Vui lòng chọn ảnh nhỏ hơn 10 MB.');
+        return;
+      }
+
+      ttSelectedFile = file;
+
+      /* Đọc file và hiển thị preview */
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('tt-preview-img').src = e.target.result;
+        document.getElementById('tt-file-name').textContent  = file.name;
+        document.getElementById('tt-upload-prompt').style.display = 'none';
+        document.getElementById('tt-preview').style.display  = 'block';
+      };
+      reader.readAsDataURL(file);
+
+      /* Kích hoạt nút Gửi xác nhận */
+      document.getElementById('tt-btn-send').classList.add('active');
+    }
+
+    /* Xóa ảnh đã chọn và reset trạng thái */
+    function ttXoaAnh(event) {
+      event.stopPropagation(); /* Tránh mở dialog chọn file */
+      ttSelectedFile = null;
+      document.getElementById('tt-file-input').value    = '';
+      document.getElementById('tt-preview').style.display       = 'none';
+      document.getElementById('tt-upload-prompt').style.display = 'block';
+      document.getElementById('tt-preview-img').src             = '';
+      document.getElementById('tt-file-name').textContent       = '';
+      document.getElementById('tt-btn-send').classList.remove('active');
+    }
+
+    /* ==============================================
+       GỬI XÁC NHẬN THANH TOÁN
+       TODO: Thay setTimeout bằng fetch() thật:
+
+       const fd = new FormData();
+       fd.append('billImage', ttSelectedFile);
+       fd.append('invoiceId', '@@Model.InvoiceId');
+       const res = await fetch('#/GuiXacNhan', {
+         method: 'POST',
+         headers: { 'RequestVerificationToken':
+           document.querySelector('[name=__RequestVerificationToken]').value },
+         body: fd
+       });
+       if (!res.ok) throw new Error('Lỗi server');
+    ============================================== */
+    async function ttGuiXacNhan() {
+      if (!ttSelectedFile) return;
+
+      const btn = document.getElementById('tt-btn-send');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+      btn.classList.remove('active');
+
+      try {
+        /* Giả lập độ trễ mạng — xóa khi có API thật */
+        await new Promise(resolve => setTimeout(resolve, 1800));
+
+        /* Ẩn form, hiện trạng thái thành công */
+        document.getElementById('tt-pay-body').style.display = 'none';
+        document.getElementById('tt-success').style.display  = 'flex';
+
+      } catch (err) {
+        alert('Gửi xác nhận thất bại! Vui lòng thử lại. (' + err.message + ')');
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi xác nhận thanh toán';
+        btn.classList.add('active');
+      }
+    }
+
+    /* ==============================================
+       THANH TOÁN NHANH — MÃ QR
+       Hàm ttMoQR(): mở modal và load thông tin QR từ DB
+       TODO: thay dữ liệu tĩnh bằng fetch() thật:
+
+       const res = await fetch('/api/QuanLy/QrInfo?phongId=@@Model.PhongId');
+       const info = await res.json();
+       document.getElementById('qr-img').src            = info.qrCodeUrl;
+       document.getElementById('qr-img').dataset.quanLyId = info.quanLyId;
+       document.getElementById('qr-ngan-hang').textContent = info.nganHang;
+       document.getElementById('qr-so-tk').textContent     = info.soTaiKhoan;
+       document.getElementById('qr-chu-tk').textContent    = info.chuTaiKhoan;
+       document.getElementById('qr-so-tien').textContent   = info.soTien;
+       document.getElementById('qr-nd-ck').textContent     = info.noiDungCK;
+    ============================================== */
+    function ttMoQR() {
+      const overlay = document.getElementById('qr-modal-overlay');
+      overlay.classList.add('hien');
+      document.body.style.overflow = 'hidden';
+
+      /* Hiện fallback vì chưa có URL thật từ SQL */
+      const img = document.getElementById('qr-img');
+      const fallback = document.getElementById('qr-fallback');
+      if (!img.src || img.src === window.location.href) {
+        img.style.display = 'none';
+        fallback.style.display = 'flex';
+      }
+    }
+
+    /* Đóng khi click overlay (không phải modal) */
+    function ttDongQR(e) {
+      if (e.target === document.getElementById('qr-modal-overlay')) {
+        ttDongQRBtn();
+      }
+    }
+
+    /* Đóng modal */
+    function ttDongQRBtn() {
+      const overlay = document.getElementById('qr-modal-overlay');
+      overlay.classList.remove('hien');
+      document.body.style.overflow = '';
+    }
+
+    /* Đóng modal rồi cuộn xuống vùng upload bill */
+    function ttDongVaUpload() {
+      ttDongQRBtn();
+      setTimeout(function () {
+        const zone = document.getElementById('tt-upload-zone');
+        if (zone) zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 320);
+    }
+
+    /* Sao chép nội dung phần tử vào clipboard */
+    function ttCopy(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      navigator.clipboard.writeText(el.textContent.trim()).then(function () {
+        const btn = el.nextElementSibling || el.parentElement.querySelector('.qr-copy-btn, .nd-copy');
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check" style="color:#059669"></i>';
+          setTimeout(function () { btn.innerHTML = orig; }, 1400);
+        }
+      });
+    }
+
+    /* Phím ESC đóng modal */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') ttDongQRBtn();
+    });
+  </script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "/KhachThue/KhachThue"
 @model QuanLyNhaTro.Pages.KhachThue.KhachThueModel
 @{
     ViewData["title"] = "Trang khách thuê";
@@ -8,7 +8,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nhà Trọ ABC – Khách Thuê</title>
+  <title>Nhà Trọ Bà Năm– Khách Thuê</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
@@ -80,14 +80,13 @@
       border-bottom: 1px solid rgba(255,255,255,0.07);
       white-space: nowrap;
     }
-    .logo-sidebar .bieu-tuong {
+    .logo-sidebar .logo-img {
       width: 42px; height: 42px;
-      background: var(--mau-chu-de);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff; font-weight: 800;
+      object-fit: cover;
       flex-shrink: 0;
       box-shadow: 0 4px 12px rgba(26,86,219,0.4);
+      display: block;
     }
     .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; letter-spacing: 0.5px; }
     .logo-sidebar .ten-logo span { font-size: 11px; color: rgba(255,255,255,0.45); }
@@ -565,39 +564,39 @@
 ============================================= -->
 <nav id="thanh-sidebar">
   <div class="logo-sidebar">
-    <div class="bieu-tuong">A</div>
+    <img src="~/images/logo.png" alt="Logo Nhà Trọ ABC" class="logo-img" />
     <div class="ten-logo">
-      <strong>NHÀ TRỌ ABC</strong>
+      <strong>NHÀ TRỌ Bà Năm</strong>
       <span>Cổng khách thuê</span>
     </div>
   </div>
 
   <div class="nhan-nhom">Tổng quan</div>
-  <a href="#" class="menu-item dang-chon" onclick="chuyenTrang('trang-chu', this); return false;">
+  <a href="/KhachThue/KhachThue" class="menu-item dang-chon" onclick="chuyenTrang('trang-chu', this); return false;">
     <i class="fas fa-home"></i><span>Trang chủ</span>
   </a>
 
   <div class="nhan-nhom">Dịch vụ</div>
-  <a href="#" class="menu-item" onclick="chuyenTrang('thanh-toan', this); return false;">
+  <a href="/KhachThue/ThanhToan" class="menu-item" onclick="chuyenTrang('thanh-toan', this); return false;">
     <i class="fas fa-credit-card"></i><span>Thanh toán</span>
     <span class="huy-hieu-menu">1</span>
   </a>
-  <a href="#" class="menu-item" onclick="chuyenTrang('tien-ich', this); return false;">
+  <a href="/KhachThue/TienIch" class="menu-item" onclick="chuyenTrang('tien-ich', this); return false;">
     <i class="fas fa-bolt"></i><span>Dịch vụ & Tiện ích</span>
   </a>
-  <a href="#" class="menu-item" onclick="chuyenTrang('bao-su-co', this); return false;">
+  <a href="/KhachThue/BaoSuCo" class="menu-item" onclick="chuyenTrang('bao-su-co', this); return false;">
     <i class="fas fa-tools"></i><span>Báo sự cố</span>
   </a>
 
   <div class="nhan-nhom">Cá nhân</div>
-  <a href="#" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
+  <a href="/KhachThue/ThongBao" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
     <i class="fas fa-bell"></i><span>Thông báo</span>
     <span class="huy-hieu-menu">4</span>
   </a>
-  <a href="#" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
+  <a href="/KhachThue/HoSo" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
     <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
   </a>
-  <a href="#" class="menu-item" onclick="chuyenTrang('cai-dat', this); return false;">
+  <a href="/KhachThue/CaiDat" class="menu-item" onclick="chuyenTrang('cai-dat', this); return false;">
     <i class="fas fa-cog"></i><span>Cài đặt</span>
   </a>
 
@@ -622,7 +621,7 @@
         <i class="fas fa-bars"></i>
       </button>
       <div>
-        <div class="tieu-de-trang">Dashboard Khách Thuê</div>
+        <div class="tieu-de-trang">Trang Khách Thuê</div>
         <div class="duong-dan">Trang chủ / Tổng quan</div>
       </div>
     </div>
@@ -1027,7 +1026,7 @@
     document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
     phanTu.classList.add('dang-chon');
     const bang = {
-      'trang-chu':   '/KhachThue',
+      'trang-chu':   '/KhachThue/KhachThue',
       'thanh-toan':  '/KhachThue/ThanhToan',
       'tien-ich':    '/KhachThue/TienIch',
       'bao-su-co':   '/KhachThue/BaoSuCo',
@@ -1036,7 +1035,14 @@
       'cai-dat':     '/KhachThue/CaiDat',
     };
     // Demo: chỉ hiển thị alert, thực tế dùng: window.location.href = bang[tenTrang];
-    alert('Chuyển đến trang: ' + (bang[tenTrang] || tenTrang));
+    // alert('Chuyển đến trang: ' + (bang[tenTrang] || tenTrang));
+    if (bang[tenTrang]) {
+        // Thay chuỗi cố định bằng chính giá trị động lấy từ bảng
+        window.location.href = bang[tenTrang]; 
+    } else {
+        console.error("Không tìm thấy trang cho khóa: " + tenTrang);
+    }
+    
   }
 
   // Modals

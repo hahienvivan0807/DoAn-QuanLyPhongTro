@@ -1169,7 +1169,7 @@
               // Bản đồ tên trang → đường dẫn Razor Page
               const bangDieuHuong = {
                 'trang-chu':           '/Manager',
-                'quan-ly-phong':       '/ChiTietPhong',
+                'quan-ly-phong':       'Manager/ChiTietPhong',
                 'quan-ly-nguoi-thue':  '/QuanLyNguoiThue',
                 'hoa-don':             '/HoaDon',
                 'su-co-bao-tri':       '/SuCoBaoTri',
@@ -1234,7 +1234,7 @@
             }
 
             // Các hàm xem chi tiết – điều hướng thật sang trang tương ứng
-            function xemChiTietPhong() { window.location.href = '/ChiTietPhong'; }
+            function xemChiTietPhong() { window.location.href = 'Manager/ChiTietPhong'; }
             function xemPhongDangThue() { window.location.href = '/ChiTietPhong?trangThai=dang-thue'; }
             function xemPhongTrong() { window.location.href = '/ChiTietPhong?trangThai=trong'; }
             function xemDoanhThu() { window.location.href = '/BaoCao'; }
