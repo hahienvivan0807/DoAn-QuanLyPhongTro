@@ -60,3 +60,9 @@ function luuTaiKhoanQuanLy() {
     hienThongBao(`Đã tạo tài khoản cho "${ten}" thành công!`, 'thanh-cong');
     dongModal('modal-tai-khoan-quan-ly');
 }
+// ===== HÀM: Mở chỉnh sửa người thuê (placeholder) =====
+function moChinhSuaNguoiThue() {
+    if (!nguoiThueHienTai) return;
+    // TODO: Mở form chỉnh sửa / kết nối API
+    alert('Chức năng chỉnh sửa người thuê "' + nguoiThueHienTai.hoTen + '" sẽ được tích hợp với backend.');
+}

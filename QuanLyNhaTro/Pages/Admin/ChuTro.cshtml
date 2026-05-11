@@ -18,6 +18,7 @@
     <script src="/js/ChuTro/chuTro-bieuDo.js"></script>
     <script src="/js/ChuTro/chuTro-cauHinh.js"></script>
     <script src="/js/ChuTro/chuTro-pheDuyet.js"></script>
+    <script src="/js/ChuTro/ChuTro-NguoiThue.js"></script>
   <style>
     /* =========================================================
        BIẾN MÀU & FONT TOÀN CỤC
@@ -789,9 +790,10 @@
     <i class="fas fa-user-shield"></i>
     <span>Tài khoản quản lý</span>
   </div>
-  <div class="muc-menu" onclick="moModal('modal-phan-quyen')">
-    <i class="fas fa-key"></i>
-    <span>Phân quyền</span>
+  <!-- THAY: Phân quyền → Quản lý người thuê -->
+  <div class="muc-menu" onclick="moModalQuanLyNguoiThue()">
+    <i class="fas fa-users"></i>
+    <span>Quản lý người thuê</span>
   </div>
   <div class="muc-menu" onclick="moModal('modal-cau-hinh-gia')">
     <i class="fas fa-sliders-h"></i>
@@ -988,14 +990,16 @@
         <span class="the-tinh-nang">3 quản lý đang hoạt động</span>
       </div>
 
-      <!-- Tính năng 2: Phân quyền -->
-      <div class="card-tinh-nang" onclick="moModal('modal-phan-quyen')">
-        <div class="dau-tinh-nang mau-tim-nhat"><i class="fas fa-key"></i></div>
+      <!-- =============================================
+           THAY: Tính năng 2 – Phân quyền → Quản lý người thuê
+      ============================================= -->
+      <div class="card-tinh-nang" onclick="moModalQuanLyNguoiThue()">
+        <div class="dau-tinh-nang mau-tim-nhat"><i class="fas fa-users"></i></div>
         <div>
-          <div class="ten-tinh-nang">Phân quyền quản lý</div>
-          <div class="mo-ta-tinh-nang">Thiết lập quyền hạn chi tiết cho từng quản lý theo module chức năng.</div>
+          <div class="ten-tinh-nang">Quản lý người thuê</div>
+          <div class="mo-ta-tinh-nang">Quản lý danh sách người thuê và thông tin phòng.</div>
         </div>
-        <span class="the-tinh-nang">Cập nhật lần cuối: hôm nay</span>
+        <span class="the-tinh-nang">Xem danh sách người thuê</span>
       </div>
 
       <!-- Tính năng 3: Cấu hình giá thuê -->
@@ -1289,106 +1293,271 @@
 
 
 <!-- =============================================
-     MODAL 2: PHÂN QUYỀN CHI TIẾT CHO QUẢN LÝ
-     Checkbox từng module, lưu vào DB
-     ⚙️ BACKEND: PUT /api/quan-ly/{id}/quyen
+     THÊM MỚI – MODAL QUẢN LÝ NGƯỜI THUÊ (thay modal-phan-quyen cũ)
+     Gồm: danh sách người thuê + tìm kiếm realtime
 ============================================= -->
-<div class="lop-phu-modal" id="modal-phan-quyen" onclick="dongModalNhapNgoai(event,'modal-phan-quyen')">
-  <div class="hop-modal rong">
+<div class="lop-phu-modal" id="modal-quan-ly-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-quan-ly-nguoi-thue')">
+  <div class="hop-modal" style="width:600px;">
     <div class="tieu-de-modal">
       <h3>
-        <span style="width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;"><i class="fas fa-key"></i></span>
-        Phân quyền quản lý
+        <span style="width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">
+          <i class="fas fa-users"></i>
+        </span>
+        Quản lý người thuê
       </h3>
-      <button class="nut-dong-modal" onclick="dongModal('modal-phan-quyen')">✕</button>
+      <button class="nut-dong-modal" onclick="dongModal('modal-quan-ly-nguoi-thue')">✕</button>
     </div>
 
-    <!-- Chọn quản lý cần phân quyền -->
-    <div class="nhom-nhap" style="margin-bottom:16px;">
-      <label class="nhan-nhap">Chọn tài khoản quản lý *</label>
-      <!-- ⚙️ BACKEND: Load danh sách quản lý -->
-      <select class="o-nhap o-chon" id="chon-quan-ly-phan-quyen" onchange="taiQuyenQuanLy(this.value)">
-        <option value="">-- Chọn quản lý --</option>
-        <option value="NTL">Nguyễn Thị Lan</option>
-        <option value="TVT">Trần Văn Toàn</option>
-        <option value="PTH">Phạm Thị Hoa</option>
-      </select>
+    <!-- Thanh tìm kiếm + nút thêm người thuê -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <div style="flex:1;display:flex;align-items:center;gap:8px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:10px;padding:8px 14px;transition:border-color 0.2s;"
+           onfocusin="this.style.borderColor='var(--mau-chu-de)'" onfocusout="this.style.borderColor='var(--mau-vien)'">
+        <i class="fas fa-search" style="color:var(--mau-chu-phu);font-size:12px;"></i>
+        <!-- Ô tìm kiếm – lọc realtime theo tên/phòng -->
+        <input type="text" id="input-tim-nguoi-thue"
+          placeholder="Tìm theo tên hoặc số phòng (VD: P101)..."
+          oninput="locDanhSachNguoiThue(this.value)"
+          style="border:none;background:none;outline:none;font-size:13px;width:100%;font-family:inherit;color:var(--mau-chu);" />
+      </div>
+      <!-- Nút thêm người thuê -->
+      <button onclick="moModal('modal-them-nguoi-thue')"
+        style="background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(201,129,10,0.3);transition:all 0.2s;"
+        onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
+        <i class="fas fa-plus"></i> Thêm người thuê
+      </button>
     </div>
 
-    <hr class="duong-ke-modal" />
-
-    <!-- Nhóm quyền: Phòng trọ -->
-    <div class="tieu-de-muc-modal">Module: Phòng trọ</div>
-    <div class="luoi-quyen" style="margin-bottom:16px;">
-      <label class="dong-quyen">
-        <input type="checkbox" checked />
-        <div><div class="nhan-quyen">Xem danh sách phòng</div><div class="mo-ta-quyen">Truy cập module phòng</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" checked />
-        <div><div class="nhan-quyen">Thêm phòng mới</div><div class="mo-ta-quyen">Tạo hồ sơ phòng trọ</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" />
-        <div><div class="nhan-quyen">Sửa thông tin phòng</div><div class="mo-ta-quyen">Chỉnh sửa giá, trạng thái</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" />
-        <div><div class="nhan-quyen">Xóa phòng</div><div class="mo-ta-quyen">Xóa vĩnh viễn khỏi hệ thống</div></div>
-      </label>
+    <!-- Số lượng -->
+    <div style="font-size:11px;color:var(--mau-chu-phu);margin-bottom:12px;" id="so-luong-nguoi-thue">
+      Đang hiển thị <strong id="dem-nguoi-thue">0</strong> người thuê
     </div>
 
-    <!-- Nhóm quyền: Hóa đơn -->
-    <div class="tieu-de-muc-modal">Module: Hóa đơn & Thu tiền</div>
-    <div class="luoi-quyen" style="margin-bottom:16px;">
-      <label class="dong-quyen">
-        <input type="checkbox" checked />
-        <div><div class="nhan-quyen">Xem hóa đơn</div><div class="mo-ta-quyen">Tra cứu lịch sử thu tiền</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" checked />
-        <div><div class="nhan-quyen">Tạo hóa đơn mới</div><div class="mo-ta-quyen">Phát sinh hóa đơn hàng tháng</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" />
-        <div><div class="nhan-quyen">Thu tiền mặt</div><div class="mo-ta-quyen">Xác nhận thanh toán tiền mặt</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" />
-        <div><div class="nhan-quyen">Xuất báo cáo</div><div class="mo-ta-quyen">In / xuất file báo cáo</div></div>
-      </label>
+    <!-- Danh sách người thuê – render bằng JS -->
+    <div id="ds-nguoi-thue-trong-modal"
+         style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;padding-right:4px;">
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     THÊM MỚI – MODAL CHI TIẾT NGƯỜI THUÊ
+     Hiển thị đầy đủ thông tin + nút Chỉnh sửa
+============================================= -->
+<div class="lop-phu-modal" id="modal-chi-tiet-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-chi-tiet-nguoi-thue')">
+  <div class="hop-modal" style="width:480px;">
+    <div class="tieu-de-modal">
+      <h3>
+        <span style="width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">
+          <i class="fas fa-id-card"></i>
+        </span>
+        Chi tiết người thuê
+      </h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-chi-tiet-nguoi-thue')">✕</button>
     </div>
 
-    <!-- Nhóm quyền: Hợp đồng -->
-    <div class="tieu-de-muc-modal">Module: Hợp đồng</div>
-    <div class="luoi-quyen" style="margin-bottom:16px;">
-      <label class="dong-quyen">
-        <input type="checkbox" checked />
-        <div><div class="nhan-quyen">Xem hợp đồng</div><div class="mo-ta-quyen">Tra cứu hợp đồng hiện hành</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" />
-        <div><div class="nhan-quyen">Tạo hợp đồng</div><div class="mo-ta-quyen">Soạn và lưu hợp đồng mới</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" />
-        <div><div class="nhan-quyen">Ký/hủy hợp đồng</div><div class="mo-ta-quyen">⚠️ Cần phê duyệt chủ trọ</div></div>
-      </label>
-      <label class="dong-quyen">
-        <input type="checkbox" />
-        <div><div class="nhan-quyen">Xóa hợp đồng</div><div class="mo-ta-quyen">⚠️ Yêu cầu phê duyệt chủ trọ</div></div>
-      </label>
-    </div>
+    <!-- Nội dung chi tiết – render bằng JS -->
+    <div id="noi-dung-chi-tiet-nguoi-thue"></div>
 
+    <!-- Nút chỉnh sửa góc dưới phải -->
     <div class="nhom-nut-duoi-modal">
-      <button class="nut-huy-modal" onclick="dongModal('modal-phan-quyen')">Hủy</button>
-      <!-- ⚙️ BACKEND: PUT /api/quan-ly/{id}/quyen -->
-      <button class="nut-luu-modal" onclick="luuPhanQuyen()">
-        <i class="fas fa-save"></i> Lưu phân quyền
+      <button class="nut-huy-modal" onclick="dongModal('modal-chi-tiet-nguoi-thue')">Đóng</button>
+      <button class="nut-luu-modal"
+        style="background:linear-gradient(135deg,#7c3aed,#a78bfa);"
+        onclick="moChinhSuaNguoiThue()">
+        <i class="fas fa-edit"></i> Chỉnh sửa
       </button>
     </div>
   </div>
 </div>
+
+<!-- =============================================
+     THÊM MỚI – MODAL THÊM NGƯỜI THUÊ
+     Form nhập liệu, role cố định = "Người thuê"
+============================================= -->
+<div class="lop-phu-modal" id="modal-them-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-them-nguoi-thue')">
+  <div class="hop-modal" style="width:500px;">
+    <div class="tieu-de-modal">
+      <h3>
+        <span style="width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">
+          <i class="fas fa-user-plus"></i>
+        </span>
+        Thêm người thuê mới
+      </h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-them-nguoi-thue')">✕</button>
+    </div>
+
+    <!-- Form thêm người thuê -->
+    <div class="luoi-form-2">
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Họ và tên *</label>
+        <input class="o-nhap" type="text" id="nt-hoten" placeholder="VD: Nguyễn Văn A" />
+      </div>
+       <div class="nhom-nhap">
+        <label class="nhan-nhap">Username *</label>
+        <input class="o-nhap" type="tel" id="username-thue" placeholder="VD: pinvutru" />
+      </div>
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Số phòng *</label>
+        <input class="o-nhap" type="text" id="nt-sophong" placeholder="VD: P101" />
+      </div>
+
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Số điện thoại *</label>
+        <input class="o-nhap" type="tel" id="nt-sdt" placeholder="VD: 0901234567" />
+      </div>
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Mật khẩu *</label>
+        <input class="o-nhap" type="password" id="nt-matkhau" placeholder="Nhập mật khẩu..." />
+      </div>
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Chỉ số điện đầu kỳ *</label>
+        <input class="o-nhap" type="number" id="nt-dien-dau-ky" placeholder="VD: 1250" min="0" />
+      </div>
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Chỉ số nước đầu kỳ *</label>
+        <input class="o-nhap" type="number" id="nt-nuoc-dau-ky" placeholder="VD: 45" min="0" />
+      </div>
+      <!-- Role cố định – readonly, không cho chỉnh sửa -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Vai trò (Role)</label>
+        <input class="o-nhap" type="text" value="Người thuê" readonly
+          style="background:var(--mau-nen);color:var(--mau-chu-phu);cursor:not-allowed;opacity:0.7;" />
+      </div>
+    </div>
+
+
+    <div class="nhom-nut-duoi-modal">
+      <button class="nut-huy-modal" onclick="dongModal('modal-them-nguoi-thue')">Hủy</button>
+      <button class="nut-luu-modal"
+        style="background:linear-gradient(135deg,#7c3aed,#a78bfa);"
+        onclick="themNguoiThue()">
+        <i class="fas fa-user-plus"></i> Thêm người thuê
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     THÊM MỚI – SCRIPT QUẢN LÝ NGƯỜI THUÊ
+     Dữ liệu gán cứng JS, tìm kiếm realtime,
+     hiển thị chi tiết, thêm mới
+============================================= -->
+<script>
+
+// ===== HÀM: Mở modal danh sách người thuê =====
+function moModalQuanLyNguoiThue() {
+  renderDanhSachNguoiThue(danhSachNguoiThue);
+  moModal('modal-quan-ly-nguoi-thue');
+}
+
+// ===== HÀM: Render danh sách người thuê dạng card =====
+function renderDanhSachNguoiThue(ds) {
+  var container = document.getElementById('ds-nguoi-thue-trong-modal');
+  var demEl = document.getElementById('dem-nguoi-thue');
+  if (!container) return;
+
+  demEl.textContent = ds.length;
+
+  if (ds.length === 0) {
+    container.innerHTML =
+      '<div style="text-align:center;padding:32px;color:var(--mau-chu-phu);">' +
+        '<i class="fas fa-user-slash" style="font-size:28px;margin-bottom:10px;display:block;opacity:0.4;"></i>' +
+        'Không tìm thấy người thuê nào.' +
+      '</div>';
+    return;
+  }
+
+  // Tạo từng card người thuê
+  container.innerHTML = ds.map(function(nt) {
+    var mauBg = [
+      'linear-gradient(135deg,#7c3aed,#a78bfa)',
+      'linear-gradient(135deg,#c9810a,#f5a623)',
+      'linear-gradient(135deg,#059669,#34d399)',
+      'linear-gradient(135deg,#1a56db,#60a5fa)',
+      'linear-gradient(135deg,#e11d48,#f87171)',
+      'linear-gradient(135deg,#0891b2,#22d3ee)'
+    ];
+    var bg = mauBg[(nt.id - 1) % mauBg.length];
+    var chu = nt.hoTen.split(' ').pop()[0].toUpperCase(); // Lấy chữ cái đầu họ tên
+
+    return '<div onclick="xemChiTietNguoiThue(' + nt.id + ')"' +
+      ' style="display:flex;align-items:center;gap:14px;padding:12px 14px;' +
+        'background:var(--mau-trang);border:1.5px solid var(--mau-vien);border-radius:12px;' +
+        'cursor:pointer;transition:all 0.2s;"' +
+      ' onmouseover="this.style.borderColor=\'var(--mau-chu-de)\';this.style.transform=\'translateX(3px)\'"' +
+      ' onmouseout="this.style.borderColor=\'var(--mau-vien)\';this.style.transform=\'none\'">' +
+      // Avatar chữ cái
+      '<div style="width:42px;height:42px;border-radius:12px;background:' + bg + ';' +
+        'display:flex;align-items:center;justify-content:center;color:#fff;' +
+        'font-size:16px;font-weight:800;flex-shrink:0;">' + chu + '</div>' +
+      // Tên + phòng
+      '<div style="flex:1;">' +
+        '<div style="font-size:13.5px;font-weight:700;color:var(--mau-chu);">' + nt.hoTen + '</div>' +
+        '<div style="font-size:11.5px;color:var(--mau-chu-phu);margin-top:2px;">' +
+          '<i class="fas fa-door-open" style="font-size:10px;margin-right:4px;"></i>Phòng ' + nt.soPhong +
+        '</div>' +
+      '</div>' +
+      // Badge phòng
+      '<span style="background:var(--mau-chu-de-nhat);color:var(--mau-chu-de);' +
+        'font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;' +
+        'border:1px solid rgba(201,129,10,0.2);white-space:nowrap;">' + nt.soPhong + '</span>' +
+      '<i class="fas fa-chevron-right" style="color:var(--mau-chu-phu);font-size:11px;"></i>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== HÀM: Lọc realtime theo tên / số phòng =====
+function locDanhSachNguoiThue(tuKhoa) {
+  var kq = danhSachNguoiThue.filter(function(nt) {
+    var tk = tuKhoa.toLowerCase().trim();
+    return nt.hoTen.toLowerCase().includes(tk) || nt.soPhong.toLowerCase().includes(tk);
+  });
+  renderDanhSachNguoiThue(kq);
+}
+
+// ===== HÀM: Xem chi tiết một người thuê =====
+function xemChiTietNguoiThue(id) {
+  var nt = danhSachNguoiThue.find(function(x) { return x.id === id; });
+  if (!nt) return;
+  nguoiThueHienTai = nt;
+
+  var html =
+    // Thông tin phòng
+    '<div style="background:var(--mau-nen);border-radius:12px;padding:16px;margin-bottom:14px;">' +
+      '<div style="font-size:11px;font-weight:800;color:var(--mau-chu-de);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">' +
+        '<i class="fas fa-door-open" style="margin-right:6px;"></i>Thông tin phòng' +
+      '</div>' +
+      '<div class="luoi-form-2" style="gap:10px;">' +
+        taoTruong('Số phòng', nt.soPhong) +
+        taoTruong('Giá phòng', nt.giaPhong) +
+        taoTruong('Tiền điện', nt.tienDien) +
+        taoTruong('Tiền nước', nt.tienNuoc) +
+        taoTruong('Tiền rác', nt.tienRac) +
+      '</div>' +
+    '</div>' +
+    // Thông tin cá nhân
+    '<div style="background:var(--mau-nen);border-radius:12px;padding:16px;">' +
+      '<div style="font-size:11px;font-weight:800;color:#7c3aed;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">' +
+        '<i class="fas fa-id-card" style="margin-right:6px;"></i>Thông tin cá nhân' +
+      '</div>' +
+      '<div class="luoi-form-2" style="gap:10px;">' +
+        taoTruong('Họ và tên', nt.hoTen) +
+        taoTruong('CCCD', nt.cccd) +
+        taoTruong('Số điện thoại', nt.sdt) +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('noi-dung-chi-tiet-nguoi-thue').innerHTML = html;
+  moModal('modal-chi-tiet-nguoi-thue');
+}
+
+// Helper tạo trường hiển thị
+function taoTruong(nhan, giatri) {
+  return '<div><div style="font-size:11px;color:var(--mau-chu-phu);font-weight:600;">' + nhan + '</div>' +
+         '<div style="font-weight:800;margin-top:3px;font-size:13px;">' + giatri + '</div></div>';
+}
+
+</script>
 
 
 <!-- =============================================
@@ -2009,6 +2178,168 @@
       <button class="nut-dong-modal" onclick="dongModal('modal-chi-tiet-quan-ly')">✕</button>
     </div>
     <div id="noi-dung-chi-tiet-quan-ly"></div>
+  </div>
+</div>
+<!-- MODAL: CHỈNH SỬA NGƯỜI THUÊ -->
+<div class="lop-phu-modal" id="modal-chinh-sua-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-chinh-sua-nguoi-thue')">
+  <div class="hop-modal rong" style="width:620px;">
+    <div class="tieu-de-modal">
+      <h3>
+        <span style="width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">
+          <i class="fas fa-user-edit"></i>
+        </span>
+        Chỉnh sửa người thuê
+      </h3>
+      <button class="nut-dong-modal" onclick="dongModal('modal-chinh-sua-nguoi-thue')">✕</button>
+    </div>
+
+    <div class="luoi-form-2">
+
+      <!-- Họ và tên -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Họ và tên *</label>
+        <input class="o-nhap" type="text" id="cs-hoten" placeholder="VD: Nguyễn Văn A" />
+      </div>
+
+      <!-- Username -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Username *</label>
+        <input class="o-nhap" type="text" id="cs-username" placeholder="VD: nguyenvana" />
+      </div>
+
+      <!-- Số điện thoại -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Số điện thoại *</label>
+        <input class="o-nhap" type="tel" id="cs-sdt" placeholder="VD: 0901234567" />
+      </div>
+
+      <!-- Mật khẩu -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">
+          Mật khẩu
+          <span style="font-weight:400;color:var(--mau-chu-phu);">(để trống nếu không đổi)</span>
+        </label>
+        <input class="o-nhap" type="password" id="cs-matkhau" placeholder="Nhập mật khẩu mới..." />
+      </div>
+
+      <!-- Chọn số phòng – dropdown phòng trống -->
+        <div class="nhom-nhap" style="position:relative;">
+          <label class="nhan-nhap">Số phòng *</label>
+          <div style="position:relative;">
+            <input
+              class="o-nhap"
+              type="text"
+              id="cs-sophong"
+              placeholder="VD: P101"
+              readonly
+              style="cursor:pointer;padding-right:40px;"
+              onclick="moPopupPhongTrong()"
+            />
+            <!-- Icon trigger mở popup -->
+            <span
+              onclick="moPopupPhongTrong()"
+              style="
+                position:absolute; right:12px; top:50%; transform:translateY(-50%);
+                color:var(--mau-chu-de); cursor:pointer; font-size:15px;
+                transition:opacity 0.2s;
+              "
+              title="Chọn phòng trống"
+            >
+              <i class="fas fa-door-open"></i>
+            </span>
+          </div>
+
+      <!-- Vai trò – readonly -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Vai trò (Role)</label>
+        <input class="o-nhap" type="text" value="Người thuê" readonly
+          style="background:var(--mau-nen);color:var(--mau-chu-phu);cursor:not-allowed;opacity:0.7;" />
+      </div>
+
+      <!-- Chỉ số điện đầu kỳ -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Chỉ số điện đầu kỳ *</label>
+        <input class="o-nhap" type="number" id="cs-dien-dau-ky" placeholder="VD: 1250" min="0" />
+      </div>
+
+      <!-- Chỉ số nước đầu kỳ -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">Chỉ số nước đầu kỳ *</label>
+        <input class="o-nhap" type="number" id="cs-nuoc-dau-ky" placeholder="VD: 45" min="0" />
+      </div>
+
+    </div>
+
+    <div class="nhom-nut-duoi-modal">
+      <button class="nut-huy-modal" onclick="dongModal('modal-chinh-sua-nguoi-thue')">Hủy</button>
+      <button class="nut-luu-modal"
+        style="background:linear-gradient(135deg,#7c3aed,#a78bfa);"
+        onclick="luuChinhSuaNguoiThue()">
+        <i class="fas fa-save"></i> Lưu thay đổi
+      </button>
+    </div>
+  </div>
+</div>
+
+  <!-- Popup danh sách phòng trống -->
+  <div
+    id="popup-phong-trong"
+    style="
+      display:none;
+      position:absolute; top:calc(100% + 6px); left:0; right:0;
+      background:#fff;
+      border:1.5px solid var(--mau-chu-de);
+      border-radius:12px;
+      box-shadow:0 8px 32px rgba(201,129,10,0.18);
+      z-index:9999;
+      overflow:hidden;
+      animation: hien-modal 0.2s ease;
+    "
+  >
+    <!-- Thanh tìm kiếm lọc phòng -->
+    <div style="padding:10px 12px;border-bottom:1px solid var(--mau-vien);display:flex;align-items:center;gap:8px;background:var(--mau-nen);">
+      <i class="fas fa-search" style="color:var(--mau-chu-phu);font-size:11px;flex-shrink:0;"></i>
+      <input
+        type="text"
+        id="input-loc-phong"
+        placeholder="Lọc nhanh tên phòng..."
+        oninput="locPhongTrong(this.value)"
+        style="border:none;background:none;outline:none;font-size:12px;width:100%;font-family:inherit;color:var(--mau-chu);"
+      />
+    </div>
+
+    <!-- Danh sách phòng trống – backend render vào đây -->
+    <div
+      id="ds-phong-trong-popup"
+      style="max-height:200px;overflow-y:auto;padding:6px;"
+    >
+      <!-- ⚙️ BACKEND: Render danh sách phòng trống từ API /api/phong?trang-thai=trong -->
+      <!-- Mỗi item dùng cấu trúc sau:
+        <div
+          class="item-phong-trong"
+          data-phong="P101"
+          onclick="chonPhongTrong('P101')"
+          style="
+            display:flex; align-items:center; gap:10px;
+            padding:9px 10px; border-radius:8px; cursor:pointer;
+            transition:background 0.15s; font-size:13px;
+          "
+          onmouseover="this.style.background='var(--mau-chu-de-nhat)'"
+          onmouseout="this.style.background='transparent'"
+        >
+          <i class="fas fa-door-open" style="color:var(--mau-chu-de);font-size:12px;width:16px;text-align:center;"></i>
+          <span style="font-weight:700;">P101</span>
+          <span style="font-size:11px;color:var(--mau-chu-phu);margin-left:auto;">Phòng đơn · 2.5M/tháng</span>
+        </div>
+      -->
+    </div>
+
+    <!-- Trạng thái rỗng – hiển thị khi không có phòng trống -->
+    <div id="phong-trong-rong" style="display:none;padding:20px;text-align:center;color:var(--mau-chu-phu);">
+      <i class="fas fa-door-closed" style="font-size:22px;opacity:0.35;display:block;margin-bottom:8px;"></i>
+      <span style="font-size:12px;">Hiện không có phòng trống</span>
+    </div>
+
   </div>
 </div>
 </body>

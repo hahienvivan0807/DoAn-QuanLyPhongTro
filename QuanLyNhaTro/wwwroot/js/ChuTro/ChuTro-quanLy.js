@@ -364,7 +364,51 @@ function xacNhanXoaQuanLy(maQL) {
 function taiQuyenQuanLy(maQL) {
     console.log('Tải quyền cho quản lý:', maQL);
 }
+// ===== HÀM: Thêm người thuê mới =====
+function themNguoiThue() {
+    var hoTen = document.getElementById('nt-hoten').value.trim();
+    var soPhong = document.getElementById('nt-sophong').value.trim();
+    var cccd = document.getElementById('nt-cccd').value.trim();
+    var sdt = document.getElementById('nt-sdt').value.trim();
+    var mk = document.getElementById('nt-matkhau').value.trim();
 
+   
+}
+function moChinhSuaNguoiThue() {
+    if (!nguoiThueHienTai) return;
+    var nt = nguoiThueHienTai;
+    // Điền dữ liệu hiện tại vào form
+    document.getElementById('cs-hoten').value = nt.hoTen;
+    document.getElementById('cs-sophong').value = nt.soPhong;
+    document.getElementById('cs-cccd').value = nt.cccd;
+    document.getElementById('cs-sdt').value = nt.sdt;
+    document.getElementById('cs-matkhau').value = '';
+    moModal('modal-chinh-sua-nguoi-thue');
+}
+
+function luuChinhSuaNguoiThue() {
+    if (!nguoiThueHienTai) return;
+    var hoTen = document.getElementById('cs-hoten').value.trim();
+    var soPhong = document.getElementById('cs-sophong').value.trim();
+    var cccd = document.getElementById('cs-cccd').value.trim();
+    var sdt = document.getElementById('cs-sdt').value.trim();
+    if (!hoTen || !soPhong || !cccd || !sdt) {
+        alert('Vui lòng điền đầy đủ thông tin bắt buộc!'); return;
+    }
+    // Cập nhật vào mảng dữ liệu
+    }
+    dongModal('modal-chinh-sua-nguoi-thue');
+    // Cập nhật lại modal chi tiết đang mở
+    xemChiTietNguoiThue(nguoiThueHienTai.id);
+    // Refresh danh sách nếu đang mở
+    renderDanhSachNguoiThue(danhSachNguoiThue);
+    alert('Đã cập nhật thông tin "' + hoTen + '" thành công!');
+}
+
+// ===== Khởi tạo danh sách ngay khi tải trang =====
+document.addEventListener('DOMContentLoaded', function () {
+    renderDanhSachNguoiThue(danhSachNguoiThue);
+});
   // ===== TOAST THÔNG BÁO NHỎ (không dùng alert) =====
 
 // Style animation toast
