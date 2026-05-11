@@ -39,6 +39,10 @@
       --mau-tim-nhat:       #ede9fe;
       --mau-cyan:           #0891b2;
       --mau-cyan-nhat:      #cffafe;
+      --mau-vang:           #d97706;
+      --mau-vang-nhat:      #fef9c3;
+      --mau-hong:           #db2777;
+      --mau-hong-nhat:      #fce7f3;
       --bong-card:          0 4px 24px rgba(26,86,219,0.10);
       --bong-card-hover:    0 8px 32px rgba(26,86,219,0.18);
     }
@@ -54,7 +58,7 @@
     }
 
     /* =============================================
-       SIDEBAR — giống KhachThue.cshtml
+       SIDEBAR
     ============================================= */
     #thanh-sidebar {
       width: 220px; min-width: 220px;
@@ -209,11 +213,15 @@
     .page-heading p { font-size: 13px; color: var(--mau-chu-phu); margin-top: 4px; }
 
     /* =============================================
-       LƯỚI 2 DỊCH VỤ
+       LƯỚI DỊCH VỤ — 3 CỘT HÀNG ĐẦU, 1 CỘT RỘNG SAU
     ============================================= */
     .dv-grid {
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 24px; animation: fadeUp 0.4s ease both;
+    }
+    /* Card điện nước chiếm full row */
+    .dv-card.full-width {
+      grid-column: 1 / -1;
     }
     @@keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -234,6 +242,7 @@
     .dv-accent { height: 5px; border-radius: 20px 20px 0 0; }
     .dv-accent.tim   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
     .dv-accent.cyan  { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+    .dv-accent.dien-nuoc { background: linear-gradient(90deg, #d97706, #f59e0b, #0891b2, #22d3ee); }
 
     .dv-card-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -248,6 +257,7 @@
     }
     .dv-icon-wrap.tim  { background: var(--mau-tim-nhat); color: var(--mau-tim); }
     .dv-icon-wrap.cyan { background: var(--mau-cyan-nhat); color: var(--mau-cyan); }
+    .dv-icon-wrap.vang { background: var(--mau-vang-nhat); color: var(--mau-vang); }
     .dv-card-header h3 { font-size: 15px; font-weight: 800; color: var(--mau-chu); }
     .dv-card-header .sub { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 2px; }
 
@@ -266,7 +276,7 @@
     .dv-card-body { padding: 20px 22px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
 
     /* =============================================
-       MÔ TẢ DỊCH VỤ (hiển thị khi chưa mở form)
+       MÔ TẢ DỊCH VỤ
     ============================================= */
     .dv-desc-box {
       background: #f8faff; border: 1.5px dashed #c7d2fe;
@@ -274,6 +284,7 @@
       display: flex; flex-direction: column; gap: 10px;
     }
     .dv-desc-box.cyan-bg { background: #f0fdff; border-color: #a5f3fc; }
+    .dv-desc-box.dn-bg   { background: linear-gradient(135deg, #fffbeb, #f0fdff); border-color: #fde68a; border-style: solid; }
 
     .dv-feature-row {
       display: flex; align-items: center; gap: 10px;
@@ -304,9 +315,16 @@
     .dv-btn-open.cyan:hover {
       transform: translateY(-2px); box-shadow: 0 8px 24px rgba(8,145,178,0.45);
     }
+    .dv-btn-open.dien-nuoc {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: #fff; box-shadow: 0 5px 18px rgba(217,119,6,0.35);
+    }
+    .dv-btn-open.dien-nuoc:hover {
+      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(217,119,6,0.45);
+    }
 
     /* =============================================
-       FORM DỊCH VỤ (ẩn mặc định)
+       FORM DỊCH VỤ
     ============================================= */
     .dv-form-wrap { display: none; flex-direction: column; gap: 14px; animation: slideDown 0.3s ease; }
     .dv-form-wrap.hien { display: flex; }
@@ -315,7 +333,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Trường nhập */
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-label {
       font-size: 12px; font-weight: 700; color: var(--mau-chu);
@@ -335,18 +352,15 @@
     }
     .form-input.disabled { background: #f8faff; color: var(--mau-chu-phu); cursor: not-allowed; }
 
-    /* 2 cột nhỏ */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
-    /* Thông tin cố định giặt sấy */
-    .gs-info-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    }
+    .gs-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .gs-info-item {
-      background: var(--mau-tim-nhat); border-radius: 10px;
-      padding: 10px 12px;
+      background: var(--mau-tim-nhat); border-radius: 10px; padding: 10px 12px;
     }
     .gs-info-item.cyan-theme { background: var(--mau-cyan-nhat); }
+    .gs-info-item.vang-theme { background: var(--mau-vang-nhat); }
     .gs-info-label { font-size: 10.5px; font-weight: 600; color: var(--mau-chu-phu); margin-bottom: 3px; }
     .gs-info-val   { font-size: 13px; font-weight: 800; color: var(--mau-chu); }
 
@@ -371,7 +385,6 @@
       border-radius: 2px; z-index: 1;
       transition: width 0.6s ease;
     }
-
     .dt-step {
       flex: 1; display: flex; flex-direction: column; align-items: center;
       gap: 7px; position: relative; z-index: 2;
@@ -406,7 +419,6 @@
                  display: flex; align-items: center; gap: 7px; }
     .ncb-amount { font-size: 20px; font-weight: 800; color: var(--mau-xanh-la); }
 
-    /* Nút xác nhận nhận hàng */
     .btn-xac-nhan-hang {
       padding: 11px 18px; background: linear-gradient(135deg, #059669, #10b981);
       color: #fff; border: none; border-radius: 10px;
@@ -417,7 +429,6 @@
     }
     .btn-xac-nhan-hang:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(5,150,105,0.4); }
 
-    /* Thông báo chờ quản lý gửi tiền (giặt sấy) */
     .waiting-box {
       display: none; align-items: center; gap: 12px;
       background: var(--mau-cam-nhat); border: 1.5px solid #fcd34d;
@@ -428,7 +439,6 @@
     .wb-text { font-size: 12.5px; color: #92400e; font-weight: 600; line-height: 1.5; }
     .wb-text strong { color: var(--mau-cam); }
 
-    /* Box giá gửi từ quản lý (giặt sấy) */
     .gs-price-box {
       display: none; flex-direction: column; gap: 12px;
       background: #f0fdf4; border: 1.5px solid #6ee7b7;
@@ -436,7 +446,6 @@
     }
     .gs-price-box.hien { display: flex; animation: fadeUp 0.3s ease; }
 
-    /* Nút gửi form */
     .dv-btn-submit {
       width: 100%; padding: 13px;
       border: none; border-radius: 13px; cursor: pointer;
@@ -455,8 +464,12 @@
       color: #fff; box-shadow: 0 5px 18px rgba(8,145,178,0.3);
     }
     .dv-btn-submit.cyan:hover { transform: translateY(-2px); }
+    .dv-btn-submit.vang {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: #fff; box-shadow: 0 5px 18px rgba(217,119,6,0.3);
+    }
+    .dv-btn-submit.vang:hover { transform: translateY(-2px); }
 
-    /* Nút huỷ form */
     .dv-btn-cancel {
       width: 100%; padding: 11px;
       background: #f1f5f9; color: #475569;
@@ -469,7 +482,153 @@
     .dv-btn-cancel:hover { background: var(--mau-vien); }
 
     /* =============================================
-       MODAL THANH TOÁN (dùng chung / riêng lẻ)
+       CARD ĐIỆN NƯỚC — LAYOUT 2 CỘT BÊN TRONG
+    ============================================= */
+    .dn-two-col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+
+    /* Panel điện / nước con */
+    .dn-panel {
+      border-radius: 14px; padding: 16px;
+      border: 1.5px solid;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .dn-panel.dien {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: #fde68a;
+    }
+    .dn-panel.nuoc-lanh {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border-color: #bfdbfe;
+    }
+
+    .dn-panel-header {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 13px; font-weight: 800;
+    }
+    .dn-panel-header .icon-dien {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #fff; flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(217,119,6,0.35);
+    }
+    .dn-panel-header .icon-nuoc {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #fff; flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(26,86,219,0.35);
+    }
+
+    .dn-chip-mien-phi {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #dcfce7; color: #15803d;
+      font-size: 10px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+      border: 1px solid #86efac;
+    }
+
+    /* Trường chỉ số điện nước */
+    .dn-chi-so-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .dn-chi-so-item { display: flex; flex-direction: column; gap: 4px; }
+    .dn-chi-so-label {
+      font-size: 10.5px; font-weight: 700; color: var(--mau-chu-phu);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .dn-chi-so-input {
+      padding: 9px 12px; border: 1.5px solid var(--mau-vien);
+      border-radius: 9px; font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--mau-chu);
+      background: #fff; width: 100%;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .dn-chi-so-input:focus {
+      outline: none; border-color: #d97706;
+      box-shadow: 0 0 0 3px rgba(217,119,6,0.12);
+    }
+    .dn-chi-so-input.nuoc-focus:focus {
+      border-color: #1a56db;
+      box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+    }
+    .dn-chi-so-input.disabled-field {
+      background: #f8faff; color: var(--mau-chu-phu); cursor: not-allowed;
+    }
+
+    /* Tóm tắt tính tiền */
+    .dn-tong-box {
+      background: #fff; border-radius: 10px; padding: 10px 12px;
+      border: 1px solid var(--mau-vien);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .dn-tong-label { font-size: 11px; font-weight: 600; color: var(--mau-chu-phu); }
+    .dn-tong-val   { font-size: 16px; font-weight: 800; }
+    .dn-tong-val.vang { color: var(--mau-vang); }
+    .dn-tong-val.xanh { color: var(--mau-chu-de); }
+
+    /* Upload ảnh minh chứng điện nước (trong card) */
+    .dn-upload-zone {
+      border: 2px dashed #d97706; border-radius: 12px;
+      background: #fffbeb; padding: 14px;
+      text-align: center; cursor: pointer;
+      transition: all 0.22s; position: relative;
+    }
+    .dn-upload-zone:hover { border-color: #b45309; background: #fef3c7; }
+    .dn-upload-zone.drag-over { background: #fef3c7; transform: scale(1.01); }
+    .dn-upload-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .dn-upload-zone .up-icon { font-size: 24px; color: #d97706; display: block; margin-bottom: 5px; }
+    .dn-upload-zone .up-title { font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 2px; }
+    .dn-upload-zone .up-hint  { font-size: 10.5px; color: #b45309; }
+    .dn-upload-zone .up-hint span { color: var(--mau-chu-de); font-weight: 700; }
+    .dn-upload-preview { display: none; position: relative; }
+    .dn-upload-preview img {
+      width: 100%; max-height: 130px; object-fit: cover;
+      border-radius: 8px; border: 1.5px solid var(--mau-vien); display: block;
+    }
+    .dn-btn-remove {
+      position: absolute; top: 4px; right: 4px;
+      background: rgba(220,38,38,0.9); color: #fff; border: none;
+      border-radius: 50%; width: 24px; height: 24px; font-size: 10px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .dn-preview-fname { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 4px; font-style: italic; }
+
+    /* Section tiêu đề trong form điện nước */
+    .dn-section-title {
+      font-size: 12px; font-weight: 700; color: var(--mau-chu);
+      display: flex; align-items: center; gap: 6px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--mau-vien);
+    }
+
+    /* Thông tin tóm tắt gộp (hiện phía dưới 2 panel) */
+    .dn-summary-bar {
+      background: linear-gradient(135deg, #fefce8, #eff6ff);
+      border: 1.5px solid #fde68a; border-radius: 13px; padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .dn-summary-item { display: flex; flex-direction: column; gap: 2px; }
+    .dn-sum-label { font-size: 10.5px; font-weight: 600; color: var(--mau-chu-phu); }
+    .dn-sum-val   { font-size: 15px; font-weight: 800; color: var(--mau-chu); }
+    .dn-sum-val.highlight { color: #d97706; }
+
+    /* Thông tin phòng (readonly row) */
+    .dn-phong-row {
+      display: flex; align-items: center; gap: 10px;
+      background: #f8faff; border: 1px solid var(--mau-vien);
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .dn-phong-row i { color: var(--mau-chu-de); font-size: 14px; }
+    .dn-phong-row span { font-size: 13px; color: var(--mau-chu-phu); }
+    .dn-phong-row strong { color: var(--mau-chu-de); font-size: 14px; font-weight: 800; }
+
+    /* =============================================
+       MODAL THANH TOÁN
     ============================================= */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 9999;
@@ -533,7 +692,6 @@
       font-size: 18px; color: #fff; box-shadow: 0 4px 12px rgba(26,86,219,0.3);
     }
 
-    /* Chi tiết từng dịch vụ trong hoá đơn chung */
     .modal-dv-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
     .modal-dv-item {
       display: flex; justify-content: space-between; align-items: center;
@@ -545,7 +703,6 @@
     .mdi-left i { font-size: 14px; }
     .mdi-price { font-size: 14px; font-weight: 800; color: var(--mau-chu); }
 
-    /* QR section trong modal */
     .qr-section {
       background: #f8faff; border: 2px solid #e2e8f0;
       border-radius: 16px; padding: 16px; text-align: center; margin-bottom: 14px;
@@ -582,7 +739,6 @@
     .noi-dung-ck .nd-label { color: #92400e; font-weight: 600; }
     .noi-dung-ck .nd-val   { font-weight: 800; color: #b45309; }
 
-    /* Upload bill trong modal */
     .upload-zone {
       border: 2px dashed #bfdbfe; border-radius: 12px;
       background: #f8faff; padding: 16px; text-align: center;
@@ -628,7 +784,6 @@
     .btn-modal-gui.active { opacity: 1; pointer-events: auto; }
     .btn-modal-gui.active:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(5,150,105,0.4); }
 
-    /* Trạng thái thành công */
     .modal-success {
       display: none; flex-direction: column; align-items: center;
       text-align: center; gap: 10px; padding: 32px 24px;
@@ -671,19 +826,11 @@
       background: linear-gradient(135deg, #1a56db, #3b82f6); color: #fff;
       box-shadow: 0 4px 14px rgba(26,86,219,0.30);
     }
-    .tt-bar-icon.gop {
-      background: linear-gradient(135deg, #7c3aed, #0891b2);
-    }
-    .tt-bar-label {
-      font-size: 14px; font-weight: 800; color: var(--mau-chu);
-    }
-    .tt-bar-breakdown {
-      font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 3px;
-    }
+    .tt-bar-icon.gop { background: linear-gradient(135deg, #7c3aed, #0891b2); }
+    .tt-bar-label { font-size: 14px; font-weight: 800; color: var(--mau-chu); }
+    .tt-bar-breakdown { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 3px; }
     .tt-bar-right { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
-    .tt-bar-total {
-      font-size: 22px; font-weight: 800; color: var(--mau-chu-de); letter-spacing: -0.5px;
-    }
+    .tt-bar-total { font-size: 22px; font-weight: 800; color: var(--mau-chu-de); letter-spacing: -0.5px; }
     .tt-bar-btn {
       padding: 11px 22px;
       background: linear-gradient(135deg, #1a56db, #3b82f6);
@@ -695,8 +842,7 @@
     }
     .tt-bar-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,86,219,0.40); }
 
-    /* Scrollbar
-    ============================================= */
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -704,10 +850,15 @@
     /* =============================================
        RESPONSIVE
     ============================================= */
-    @@media (max-width: 1000px) { .dv-grid { grid-template-columns: 1fr; } }
+    @@media (max-width: 1100px) {
+      .dv-grid { grid-template-columns: 1fr; }
+      .dv-card.full-width { grid-column: 1; }
+      .dn-two-col { grid-template-columns: 1fr; }
+    }
     @@media (max-width: 768px) {
       #thanh-sidebar { width: 0; min-width: 0; }
       #noi-dung-chinh { padding: 16px; }
+      .form-row-3 { grid-template-columns: 1fr 1fr; }
     }
 
   </style>
@@ -808,7 +959,7 @@
       </div>
 
       @* ==========================================
-         LƯỚI 2 DỊCH VỤ NẰM KẾ NHAU
+         LƯỚI DỊCH VỤ
       ========================================== *@
       <div class="dv-grid">
 
@@ -831,8 +982,6 @@
           </div>
 
           <div class="dv-card-body">
-
-            @* Mô tả hiển thị trước khi mở form *@
             <div class="dv-desc-box" id="gs-desc">
               <div class="dv-feature-row">
                 <i class="fas fa-clock" style="color:#7c3aed;"></i>
@@ -852,10 +1001,7 @@
               </div>
             </div>
 
-            @* Form đặt giặt sấy (ẩn mặc định) *@
             <div class="dv-form-wrap" id="gs-form">
-
-              @* Số phòng (readonly — bind từ SQL: @Model.SoPhong) *@
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
                 @* TODO: value="@Model.SoPhong" *@
@@ -863,7 +1009,6 @@
                        value="Phòng 201" readonly />
               </div>
 
-              @* Loại dịch vụ *@
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-tshirt"></i>Loại dịch vụ</label>
                 <select class="form-input" id="gs-loai">
@@ -874,7 +1019,6 @@
                 </select>
               </div>
 
-              @* Thông tin cố định giờ giao nhận *@
               <div>
                 <div class="form-label" style="margin-bottom:8px;">
                   <i class="fas fa-info-circle" style="color:#7c3aed;"></i>
@@ -882,40 +1026,22 @@
                 </div>
                 <div class="gs-info-grid">
                   <div class="gs-info-item">
-                    <div class="gs-info-label">🌅 Buổi sáng</div>
+                    <div class="gs-info-label">Buổi sáng</div>
                     <div class="gs-info-val">7:00 – 8:30</div>
                   </div>
                   <div class="gs-info-item">
-                    <div class="gs-info-label">🌆 Buổi tối</div>
+                    <div class="gs-info-label">Buổi tối</div>
                     <div class="gs-info-val">18:00 – 20:00</div>
                   </div>
                 </div>
               </div>
 
-              @* Khách thuê chọn khung giờ nhận lại đồ *@
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-clock"></i>Bạn muốn nhận lại đồ vào khung giờ nào?</label>
-                <select class="form-input" id="gs-khung-gio">
-                  <option value="">-- Chọn khung giờ --</option>
-                  <option value="sang">Buổi sáng (7:00 – 8:30)</option>
-                  <option value="toi">Buổi tối (18:00 – 20:00)</option>
-                </select>
-              </div>
-
-              @* Ngày nhận lại *@
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-calendar-alt"></i>Ngày nhận lại đồ</label>
-                <input class="form-input" type="date" id="gs-ngay-nhan" />
-              </div>
-
-              @* Ghi chú *@
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-comment"></i>Ghi chú (tuỳ chọn)</label>
                 <textarea class="form-input" id="gs-ghi-chu" rows="2"
                           placeholder="VD: 2 áo trắng cần giặt riêng..."></textarea>
               </div>
 
-              @* Thông báo chờ quản lý báo giá *@
               <div class="waiting-box" id="gs-waiting">
                 <i class="fas fa-hourglass-half"></i>
                 <div class="wb-text">
@@ -924,7 +1050,6 @@
                 </div>
               </div>
 
-              @* Box hiện khi quản lý gửi giá — JS toggle khi nhận từ API *@
               <div class="gs-price-box" id="gs-price-box">
                 <div style="font-size:13px;font-weight:800;color:#065f46;display:flex;align-items:center;gap:7px;">
                   <i class="fas fa-tag" style="color:#059669;"></i>
@@ -936,7 +1061,6 @@
                 </div>
               </div>
 
-              @* Nút gửi đơn + huỷ *@
               <div id="gs-btn-group" style="display:flex;flex-direction:column;gap:8px;">
                 <button class="dv-btn-submit tim" onclick="guiDonGS()">
                   <i class="fas fa-paper-plane"></i> Đặt dịch vụ giặt sấy
@@ -945,15 +1069,11 @@
                   <i class="fas fa-times"></i> Huỷ
                 </button>
               </div>
-
             </div>
-            @* -- kết thúc gs-form -- *@
 
-            @* Nút mở form (ẩn khi form mở) *@
             <button class="dv-btn-open tim" id="gs-btn-open" onclick="moFormGS()">
               <i class="fas fa-plus-circle"></i> Đặt dịch vụ giặt sấy
             </button>
-
           </div>
         </div>
         @* -- kết thúc dịch vụ giặt sấy -- *@
@@ -978,8 +1098,6 @@
           </div>
 
           <div class="dv-card-body">
-
-            @* Mô tả *@
             <div class="dv-desc-box cyan-bg" id="nuoc-desc">
               <div class="dv-feature-row">
                 <i class="fas fa-water" style="color:#0891b2;"></i>
@@ -999,10 +1117,7 @@
               </div>
             </div>
 
-            @* Form đặt nước (ẩn mặc định) *@
             <div class="dv-form-wrap" id="nuoc-form">
-
-              @* Số phòng (readonly) *@
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
                 @* TODO: value="@Model.SoPhong" *@
@@ -1010,7 +1125,6 @@
                        value="Phòng 201" readonly />
               </div>
 
-              @* Số lượng bình *@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label"><i class="fas fa-sort-numeric-up"></i>Số lượng bình</label>
@@ -1026,21 +1140,18 @@
                 </div>
               </div>
 
-              @* Dự tính tiền *@
               <div style="background:#f0fdff;border:1.5px solid #a5f3fc;border-radius:12px;padding:12px 16px;
                           display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-size:12px;font-weight:600;color:#164e63;">Dự tính tiền thanh toán</span>
                 <span style="font-size:18px;font-weight:800;color:#0891b2;" id="nuoc-du-tinh">30,000 đ</span>
               </div>
 
-              @* Ghi chú *@
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-comment"></i>Ghi chú (tuỳ chọn)</label>
                 <textarea class="form-input" id="nuoc-ghi-chu" rows="2"
                           placeholder="VD: Để trước cửa phòng nếu không có nhà..."></textarea>
               </div>
 
-              @* Thanh trạng thái giao hàng (ẩn trước khi đặt) *@
               <div class="delivery-track" id="nuoc-track" style="display:none;">
                 <div class="dt-title"><i class="fas fa-shipping-fast"></i> Trạng thái giao hàng</div>
                 <div class="dt-steps" id="dt-steps-wrap">
@@ -1064,7 +1175,6 @@
                 </div>
               </div>
 
-              @* Khu xác nhận nhận hàng + thanh toán *@
               <div class="nuoc-confirm-box" id="nuoc-confirm">
                 <div class="ncb-title">
                   <i class="fas fa-truck-loading" style="color:#059669;"></i>
@@ -1081,7 +1191,6 @@
                 </div>
               </div>
 
-              @* Nhóm nút gửi + huỷ *@
               <div id="nuoc-btn-group" style="display:flex;flex-direction:column;gap:8px;">
                 <button class="dv-btn-submit cyan" onclick="guiDonNuoc()">
                   <i class="fas fa-paper-plane"></i> Đặt bình nước
@@ -1090,24 +1199,303 @@
                   <i class="fas fa-times"></i> Huỷ
                 </button>
               </div>
-
             </div>
-            @* -- kết thúc nuoc-form -- *@
 
-            @* Nút mở form *@
             <button class="dv-btn-open cyan" id="nuoc-btn-open" onclick="moFormNuoc()">
               <i class="fas fa-plus-circle"></i> Đặt bình nước
+            </button>
+          </div>
+        </div>
+        @* -- kết thúc dịch vụ nước -- *@
+
+
+        @* ==========================================
+           DỊCH VỤ 3 — GỬI CHỈ SỐ ĐIỆN NƯỚC (FULL ROW)
+        ========================================== *@
+        <div class="dv-card full-width">
+          <div class="dv-accent dien-nuoc"></div>
+          <div class="dv-card-header">
+            <div class="dv-header-left">
+              <div class="dv-icon-wrap vang"><i class="fas fa-bolt"></i></div>
+              <div>
+                <h3>Báo Chỉ Số Điện &amp; Nước</h3>
+                <div class="sub">Gửi ảnh đồng hồ minh chứng · Xử lý trong ngày</div>
+              </div>
+            </div>
+            <div class="dv-status-badge dsb-none" id="dn-badge">
+              <span class="dsb-dot"></span>Chưa gửi
+            </div>
+          </div>
+
+          <div class="dv-card-body">
+
+            @* Mô tả hiển thị trước khi mở form *@
+            <div class="dv-desc-box dn-bg" id="dn-desc">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div>
+                  <div style="font-size:11.5px;font-weight:700;color:#92400e;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+                    <i class="fas fa-bolt" style="color:#d97706;"></i> Điện
+                  </div>
+                  <div class="dv-feature-row">
+                    <i class="fas fa-tachometer-alt" style="color:#d97706;"></i>
+                    <span>Nhập chỉ số đồng hồ điện cuối kỳ</span>
+                  </div>
+                  <div class="dv-feature-row">
+                    <i class="fas fa-calculator" style="color:#d97706;"></i>
+                    <span>Hệ thống tự tính số kWh tiêu thụ</span>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:11.5px;font-weight:700;color:#1e40af;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+                    <i class="fas fa-faucet" style="color:#1a56db;"></i> Nước sinh hoạt
+                  </div>
+                  <div class="dv-feature-row">
+                    <i class="fas fa-tachometer-alt" style="color:#1a56db;"></i>
+                    <span>Nhập chỉ số đồng hồ nước cuối kỳ</span>
+                  </div>
+                  <div class="dv-feature-row">
+                    <i class="fas fa-recycle" style="color:#059669;"></i>
+                    <span>Tiền rác: <strong style="color:#059669;">Miễn phí</strong></span>
+                  </div>
+                </div>
+              </div>
+              <div class="dv-feature-row" style="margin-top:4px;">
+                <i class="fas fa-camera" style="color:#d97706;"></i>
+                <span>Đính kèm ảnh chụp đồng hồ để xác minh — bắt buộc</span>
+              </div>
+            </div>
+
+            @* Form gửi chỉ số điện nước *@
+            <div class="dv-form-wrap" id="dn-form">
+
+              @* Số phòng — lấy từ SQL, không cho nhập *@
+              <div class="dn-phong-row">
+                <i class="fas fa-door-open"></i>
+                <span>Số phòng:</span>
+                @* TODO: value="@Model.SoPhong" — lấy từ SQL *@
+                <strong id="dn-so-phong">Phòng 201</strong>
+                <span style="margin-left:auto;font-size:11px;color:var(--mau-chu-phu);">
+                  <i class="fas fa-lock" style="font-size:10px;"></i> Tự động từ hệ thống
+                </span>
+              </div>
+
+              @* 2 panel điện / nước *@
+              <div class="dn-two-col">
+
+                @* Panel Điện *@
+                <div class="dn-panel dien">
+                  <div class="dn-panel-header">
+                    <div class="icon-dien"><i class="fas fa-bolt"></i></div>
+                    <div>
+                      <div style="font-size:13px;font-weight:800;color:#92400e;">Đồng hồ Điện</div>
+                      <div style="font-size:10.5px;color:#b45309;">Đơn vị: kWh</div>
+                    </div>
+                  </div>
+
+                  <div class="dn-chi-so-row">
+                    <div class="dn-chi-so-item">
+                      <div class="dn-chi-so-label">
+                        <i class="fas fa-history" style="color:#b45309;"></i> Chỉ số cũ
+                      </div>
+                      @* TODO: value="@Model.ChiSoDienCu" — lấy từ SQL *@
+                      <input class="dn-chi-so-input disabled-field" type="number"
+                             id="dn-dien-cu" value="1240" readonly
+                             title="Chỉ số kỳ trước — lấy từ hệ thống" />
+                    </div>
+                    <div class="dn-chi-so-item">
+                      <div class="dn-chi-so-label">
+                        <i class="fas fa-pencil-alt" style="color:#d97706;"></i> Chỉ số mới
+                      </div>
+                      <input class="dn-chi-so-input" type="number"
+                             id="dn-dien-moi" min="0" placeholder="Nhập..."
+                             oninput="tinhTienDienNuoc()" />
+                    </div>
+                  </div>
+
+                  <div class="dn-tong-box">
+                    <div>
+                      <div class="dn-tong-label">Số kWh tiêu thụ</div>
+                      <div class="dn-tong-val vang" id="dn-dien-so-kwh">— kWh</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div class="dn-tong-label">Thành tiền (3,500đ/kWh)</div>
+                      <div class="dn-tong-val vang" id="dn-dien-tien">— đ</div>
+                    </div>
+                  </div>
+
+                  @* Upload ảnh đồng hồ điện *@
+                  <div>
+                    <div class="dn-section-title">
+                      <i class="fas fa-camera" style="color:#d97706;"></i>
+                      Ảnh đồng hồ điện <span style="color:#dc2626;margin-left:4px;">*</span>
+                    </div>
+                    <div style="margin-top:8px;" class="dn-upload-zone" id="dn-dien-upload-zone"
+                         ondragover="dnDragOver(event,'dien')" ondragleave="dnDragLeave(event,'dien')"
+                         ondrop="dnDrop(event,'dien')"
+                         onclick="document.getElementById('dn-dien-file').click()">
+                      <input type="file" id="dn-dien-file" accept="image/*"
+                             onchange="dnFileChosen(this,'dien')" />
+                      <div id="dn-dien-upload-prompt">
+                        <i class="fas fa-bolt up-icon"></i>
+                        <div class="up-title">Tải ảnh đồng hồ điện</div>
+                        <div class="up-hint">Kéo thả hoặc <span>nhấn chọn</span> · JPG, PNG – tối đa 10MB</div>
+                      </div>
+                      <div class="dn-upload-preview" id="dn-dien-preview">
+                        <img src="" alt="Ảnh đồng hồ điện" id="dn-dien-preview-img" />
+                        <button class="dn-btn-remove" type="button"
+                                onclick="dnXoaAnh(event,'dien')">
+                          <i class="fas fa-times"></i>
+                        </button>
+                        <div class="dn-preview-fname" id="dn-dien-fname"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @* -- kết thúc panel điện -- *@
+
+                @* Panel Nước sinh hoạt *@
+                <div class="dn-panel nuoc-lanh">
+                  <div class="dn-panel-header">
+                    <div class="icon-nuoc"><i class="fas fa-faucet"></i></div>
+                    <div>
+                      <div style="font-size:13px;font-weight:800;color:#1e3a8a;">Đồng hồ Nước</div>
+                      <div style="font-size:10.5px;color:#1e40af;">Đơn vị: m³</div>
+                    </div>
+                  </div>
+
+                  <div class="dn-chi-so-row">
+                    <div class="dn-chi-so-item">
+                      <div class="dn-chi-so-label">
+                        <i class="fas fa-history" style="color:#1e40af;"></i> Chỉ số cũ
+                      </div>
+                      @* TODO: value="@Model.ChiSoNuocCu" — lấy từ SQL *@
+                      <input class="dn-chi-so-input nuoc-focus disabled-field" type="number"
+                             id="dn-nuoc-cu" value="85" readonly
+                             title="Chỉ số kỳ trước — lấy từ hệ thống" />
+                    </div>
+                    <div class="dn-chi-so-item">
+                      <div class="dn-chi-so-label">
+                        <i class="fas fa-pencil-alt" style="color:#1a56db;"></i> Chỉ số mới
+                      </div>
+                      <input class="dn-chi-so-input nuoc-focus" type="number"
+                             id="dn-nuoc-moi" min="0" placeholder="Nhập..."
+                             oninput="tinhTienDienNuoc()" />
+                    </div>
+                  </div>
+
+                  <div class="dn-tong-box">
+                    <div>
+                      <div class="dn-tong-label">Số m³ tiêu thụ</div>
+                      <div class="dn-tong-val xanh" id="dn-nuoc-so-m3">— m³</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div class="dn-tong-label">Thành tiền (15,000đ/m³)</div>
+                      <div class="dn-tong-val xanh" id="dn-nuoc-tien">— đ</div>
+                    </div>
+                  </div>
+
+                  @* Tiền rác miễn phí — không cần nhập *@
+                  <div style="display:flex;align-items:center;justify-content:space-between;
+                              background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 12px;">
+                    <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#15803d;">
+                      <i class="fas fa-recycle"></i> Tiền rác
+                    </div>
+                    <span class="dn-chip-mien-phi">
+                      <i class="fas fa-check-circle"></i> Miễn phí
+                    </span>
+                  </div>
+
+                  @* Upload ảnh đồng hồ nước *@
+                  <div>
+                    <div class="dn-section-title">
+                      <i class="fas fa-camera" style="color:#1a56db;"></i>
+                      Ảnh đồng hồ nước <span style="color:#dc2626;margin-left:4px;">*</span>
+                    </div>
+                    <div style="margin-top:8px;" class="dn-upload-zone"
+                         style="border-color:#bfdbfe;background:#eff6ff;"
+                         id="dn-nuoc-upload-zone"
+                         ondragover="dnDragOver(event,'nuoc')" ondragleave="dnDragLeave(event,'nuoc')"
+                         ondrop="dnDrop(event,'nuoc')"
+                         onclick="document.getElementById('dn-nuoc-file').click()">
+                      <input type="file" id="dn-nuoc-file" accept="image/*"
+                             onchange="dnFileChosen(this,'nuoc')" />
+                      <div id="dn-nuoc-upload-prompt">
+                        <i class="fas fa-faucet up-icon" style="color:#1a56db;"></i>
+                        <div class="up-title">Tải ảnh đồng hồ nước</div>
+                        <div class="up-hint">Kéo thả hoặc <span>nhấn chọn</span> · JPG, PNG – tối đa 10MB</div>
+                      </div>
+                      <div class="dn-upload-preview" id="dn-nuoc-preview">
+                        <img src="" alt="Ảnh đồng hồ nước" id="dn-nuoc-preview-img" />
+                        <button class="dn-btn-remove" type="button"
+                                onclick="dnXoaAnh(event,'nuoc')">
+                          <i class="fas fa-times"></i>
+                        </button>
+                        <div class="dn-preview-fname" id="dn-nuoc-fname"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @* -- kết thúc panel nước -- *@
+
+              </div>
+              @* -- kết thúc dn-two-col -- *@
+
+              @* Tóm tắt tổng cộng *@
+              <div class="dn-summary-bar" id="dn-summary-bar">
+                <div class="dn-summary-item">
+                  <div class="dn-sum-label"><i class="fas fa-bolt" style="color:#d97706;"></i> Tiền điện</div>
+                  <div class="dn-sum-val" id="dn-sum-dien">— đ</div>
+                </div>
+                <div class="dn-summary-item">
+                  <div class="dn-sum-label"><i class="fas fa-faucet" style="color:#1a56db;"></i> Tiền nước</div>
+                  <div class="dn-sum-val" id="dn-sum-nuoc">— đ</div>
+                </div>
+                <div class="dn-summary-item">
+                  <div class="dn-sum-label"><i class="fas fa-recycle" style="color:#059669;"></i> Tiền rác</div>
+                  <div class="dn-sum-val" style="color:#059669;">Miễn phí</div>
+                </div>
+                <div class="dn-summary-item" style="text-align:right;">
+                  <div class="dn-sum-label">Tổng dự kiến</div>
+                  <div class="dn-sum-val highlight" id="dn-sum-tong" style="font-size:20px;">— đ</div>
+                </div>
+              </div>
+
+              @* Ghi chú *@
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-comment"></i>Ghi chú cho quản lý (tuỳ chọn)
+                </label>
+                <textarea class="form-input" id="dn-ghi-chu" rows="2"
+                          placeholder="VD: Đồng hồ bị mờ, vui lòng kiểm tra trực tiếp..."></textarea>
+              </div>
+
+              @* Nút gửi + huỷ *@
+              <div id="dn-btn-group" style="display:flex;flex-direction:column;gap:8px;">
+                <button class="dv-btn-submit vang" id="dn-btn-gui" onclick="guiDonDienNuoc()">
+                  <i class="fas fa-paper-plane"></i> Gửi chỉ số điện &amp; nước
+                </button>
+                <button class="dv-btn-cancel" onclick="dongFormDN()">
+                  <i class="fas fa-times"></i> Huỷ
+                </button>
+              </div>
+
+            </div>
+            @* -- kết thúc dn-form -- *@
+
+            @* Nút mở form *@
+            <button class="dv-btn-open dien-nuoc" id="dn-btn-open" onclick="moFormDN()">
+              <i class="fas fa-bolt"></i> Báo chỉ số điện &amp; nước
             </button>
 
           </div>
         </div>
-        @* -- kết thúc dịch vụ nước -- *@
+        @* -- kết thúc dịch vụ điện nước -- *@
 
       </div>
       @* -- kết thúc dv-grid -- *@
 
       @* ==========================================
-         THANH TOÁN THỐNG NHẤT — hiển thị khi có ≥1 dịch vụ cần TT
+         THANH TOÁN THỐNG NHẤT
       ========================================== *@
       <div class="tt-bar" id="tt-bar" style="display:none;">
         <div class="tt-bar-left">
@@ -1133,8 +1521,6 @@
 
   @* =============================================
      MODAL THANH TOÁN
-     - thanh-toan-le  : thanh toán riêng lẻ 1 dịch vụ
-     - thanh-toan-chung: thanh toán gộp 2 dịch vụ cùng lúc
   ============================================= *@
   <div class="modal-overlay" id="modal-overlay" onclick="dongModalNeuNgoai(event)">
     <div class="modal-box" role="dialog" aria-modal="true">
@@ -1154,11 +1540,9 @@
         <button class="modal-close" onclick="dongModal()"><i class="fas fa-times"></i></button>
       </div>
 
-      @* --- Nội dung thanh toán (ẩn khi thành công) --- *@
       <div id="modal-pay-body">
         <div class="modal-body">
 
-          @* Số tiền *@
           <div class="modal-amount-bar">
             <div>
               <div class="modal-amount-label">Tổng tiền cần thanh toán</div>
@@ -1167,7 +1551,6 @@
             <div class="modal-wallet-icon"><i class="fas fa-wallet"></i></div>
           </div>
 
-          @* Chi tiết từng dịch vụ (chỉ hiện khi gộp 2) *@
           <div class="modal-dv-list" id="modal-dv-list" style="display:none;">
             <div class="modal-dv-item tim-bg">
               <div class="mdi-left" style="color:#7c3aed;">
@@ -1183,7 +1566,6 @@
             </div>
           </div>
 
-          @* QR code *@
           <div class="qr-section">
             <img id="modal-qr-img" src="" alt="Mã QR chuyển khoản"
                  onerror="this.style.display='none';document.getElementById('qr-fallback-box').style.display='flex';" />
@@ -1210,7 +1592,6 @@
             </div>
           </div>
 
-          @* Nội dung CK *@
           <div class="noi-dung-ck">
             <div>
               <div class="nd-label">Nội dung chuyển khoản</div>
@@ -1219,7 +1600,6 @@
             <button class="copy-btn" onclick="saoChep('modal-nd-ck')"><i class="fas fa-copy"></i></button>
           </div>
 
-          @* Upload bill *@
           <div class="upload-zone" id="modal-upload-zone"
                ondragover="upDragOver(event)" ondragleave="upDragLeave(event)" ondrop="upDrop(event)"
                onclick="document.getElementById('modal-file-input').click()">
@@ -1251,7 +1631,6 @@
         </div>
       </div>
 
-      @* Trạng thái thành công *@
       <div class="modal-success" id="modal-success">
         <div class="success-icon"><i class="fas fa-check-circle"></i></div>
         <h4>Thanh toán đã được xác nhận!</h4>
@@ -1272,6 +1651,167 @@
      JAVASCRIPT
   ============================================= *@
   <script src="~/js/Khach/DichVu.js"></script>
+
+  <script>
+    /* =============================================
+       ĐIỆN NƯỚC — JS nội trang
+       (Back-end logic giữ nguyên trong DichVu.js;
+        đây chỉ là UI helper cho card mới)
+    ============================================= */
+
+    /* Hằng số đơn giá */
+    const GIA_DIEN_KWH  = 3500;
+    const GIA_NUOC_M3   = 15000;
+
+    /* Định dạng tiền VND */
+    function formatVND(n) {
+      if (isNaN(n) || n < 0) return '— đ';
+      return n.toLocaleString('vi-VN') + ' đ';
+    }
+
+    /* Mở / đóng form điện nước */
+    function moFormDN() {
+      document.getElementById('dn-desc').style.display    = 'none';
+      document.getElementById('dn-btn-open').style.display = 'none';
+      document.getElementById('dn-form').classList.add('hien');
+      document.getElementById('dn-badge').className = 'dv-status-badge dsb-pending';
+      document.getElementById('dn-badge').innerHTML = '<span class="dsb-dot"></span>Đang nhập';
+    }
+    function dongFormDN() {
+      document.getElementById('dn-desc').style.display    = '';
+      document.getElementById('dn-btn-open').style.display = '';
+      document.getElementById('dn-form').classList.remove('hien');
+      document.getElementById('dn-badge').className = 'dv-status-badge dsb-none';
+      document.getElementById('dn-badge').innerHTML = '<span class="dsb-dot"></span>Chưa gửi';
+      // Reset preview
+      dnResetPreview('dien');
+      dnResetPreview('nuoc');
+      // Reset chỉ số
+      document.getElementById('dn-dien-moi').value = '';
+      document.getElementById('dn-nuoc-moi').value = '';
+      tinhTienDienNuoc();
+    }
+
+    /* Tính tiền theo chỉ số */
+    function tinhTienDienNuoc() {
+      const dienCu  = parseFloat(document.getElementById('dn-dien-cu').value)  || 0;
+      const dienMoi = parseFloat(document.getElementById('dn-dien-moi').value) || null;
+      const nuocCu  = parseFloat(document.getElementById('dn-nuoc-cu').value)  || 0;
+      const nuocMoi = parseFloat(document.getElementById('dn-nuoc-moi').value) || null;
+
+      let dienKWh = null, dienTien = null;
+      let nuocM3  = null, nuocTien = null;
+
+      if (dienMoi !== null && dienMoi >= dienCu) {
+        dienKWh = dienMoi - dienCu;
+        dienTien = dienKWh * GIA_DIEN_KWH;
+      }
+      if (nuocMoi !== null && nuocMoi >= nuocCu) {
+        nuocM3  = nuocMoi - nuocCu;
+        nuocTien = nuocM3 * GIA_NUOC_M3;
+      }
+
+      document.getElementById('dn-dien-so-kwh').textContent = dienKWh !== null ? dienKWh + ' kWh' : '— kWh';
+      document.getElementById('dn-dien-tien').textContent   = formatVND(dienTien);
+      document.getElementById('dn-nuoc-so-m3').textContent  = nuocM3  !== null ? nuocM3  + ' m³'  : '— m³';
+      document.getElementById('dn-nuoc-tien').textContent   = formatVND(nuocTien);
+
+      document.getElementById('dn-sum-dien').textContent = formatVND(dienTien);
+      document.getElementById('dn-sum-nuoc').textContent = formatVND(nuocTien);
+
+      const tong = (dienTien || 0) + (nuocTien || 0);
+      document.getElementById('dn-sum-tong').textContent = (dienTien !== null || nuocTien !== null)
+        ? formatVND(tong) : '— đ';
+    }
+
+    /* Upload ảnh đồng hồ */
+    function dnFileChosen(input, loai) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('dn-' + loai + '-preview-img').src = e.target.result;
+        document.getElementById('dn-' + loai + '-upload-prompt').style.display = 'none';
+        document.getElementById('dn-' + loai + '-preview').style.display = 'block';
+        document.getElementById('dn-' + loai + '-fname').textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    }
+    function dnXoaAnh(event, loai) {
+      event.stopPropagation();
+      dnResetPreview(loai);
+    }
+    function dnResetPreview(loai) {
+      const inp = document.getElementById('dn-' + loai + '-file');
+      if (inp) inp.value = '';
+      const img = document.getElementById('dn-' + loai + '-preview-img');
+      if (img) img.src = '';
+      const prompt = document.getElementById('dn-' + loai + '-upload-prompt');
+      if (prompt) prompt.style.display = '';
+      const preview = document.getElementById('dn-' + loai + '-preview');
+      if (preview) preview.style.display = 'none';
+      const fname = document.getElementById('dn-' + loai + '-fname');
+      if (fname) fname.textContent = '';
+    }
+    function dnDragOver(event, loai) {
+      event.preventDefault();
+      document.getElementById('dn-' + loai + '-upload-zone').classList.add('drag-over');
+    }
+    function dnDragLeave(event, loai) {
+      document.getElementById('dn-' + loai + '-upload-zone').classList.remove('drag-over');
+    }
+    function dnDrop(event, loai) {
+      event.preventDefault();
+      document.getElementById('dn-' + loai + '-upload-zone').classList.remove('drag-over');
+      if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+        const fakeInput = { files: event.dataTransfer.files };
+        dnFileChosen(fakeInput, loai);
+      }
+    }
+
+    /* Gửi đơn điện nước */
+    function guiDonDienNuoc() {
+      const dienMoi = document.getElementById('dn-dien-moi').value;
+      const nuocMoi = document.getElementById('dn-nuoc-moi').value;
+      const dienFile = document.getElementById('dn-dien-file').files[0];
+      const nuocFile = document.getElementById('dn-nuoc-file').files[0];
+
+      if (!dienMoi && !nuocMoi) {
+        alert('Vui lòng nhập ít nhất một chỉ số điện hoặc nước.');
+        return;
+      }
+      if (dienMoi && !dienFile) {
+        alert('Vui lòng đính kèm ảnh đồng hồ điện để xác minh.');
+        return;
+      }
+      if (nuocMoi && !nuocFile) {
+        alert('Vui lòng đính kèm ảnh đồng hồ nước để xác minh.');
+        return;
+      }
+
+      /* --- Gọi back-end submit tại đây (TODO: tích hợp @Model handler) --- */
+      // Ví dụ: POST form với FormData
+
+      // Cập nhật badge
+      document.getElementById('dn-badge').className = 'dv-status-badge dsb-active';
+      document.getElementById('dn-badge').innerHTML = '<span class="dsb-dot"></span>Đã gửi';
+      // Ẩn nút gửi + huỷ
+      document.getElementById('dn-btn-group').style.display = 'none';
+
+      // Hiện thông báo thành công tạm thời
+      const wb = document.createElement('div');
+      wb.className = 'waiting-box hien';
+      wb.innerHTML = `<i class="fas fa-check-circle" style="color:#059669;"></i>
+        <div class="wb-text">
+          Chỉ số đã được gửi thành công! Quản lý sẽ <strong>xác nhận và tính tiền</strong>
+          trong vòng 24 giờ. Cảm ơn bạn.
+        </div>`;
+      wb.style.background = '#d1fae5';
+      wb.style.borderColor = '#6ee7b7';
+      document.getElementById('dn-btn-group').insertAdjacentElement('beforebegin', wb);
+    }
+
+  </script>
 
 </body>
 </html>
