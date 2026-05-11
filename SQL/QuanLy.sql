@@ -137,8 +137,19 @@ create table THONGKE_DOANHTHU_THANG
     constraint PK_THONGKE_DOANHTHU primary key(IDThongKe),
     constraint UQ_NAM_THANG         unique(Nam, Thang)
 )
-USE QUANLY_KHUTRO;
-GO
+CREATE TABLE BAOCAO_SUCO (
+    IDSuCo VARCHAR(20) PRIMARY KEY,
+    IDUser int NOT NULL,
+    IDPhong int NOT NULL,
+    TieuDe NVARCHAR(100) NOT NULL,
+    NoiDung NVARCHAR(500),
+    TheLoai NVARCHAR(50),
+    TrangThai NVARCHAR(30) DEFAULT N'Chờ xử lý',
+    AnhMinhChung VARCHAR(255) NULL,
+    NgayBao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (IDUser) REFERENCES ACCOUNT(IDUser),
+    FOREIGN KEY (IDPhong) REFERENCES PHONG(IDPhong)
+);
 
 -- =======================================================
 -- 1. THÊM 20 DỮ LIỆU BẢNG ACCOUNT
