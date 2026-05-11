@@ -13,6 +13,7 @@ CREATE TABLE ACCOUNT (
     Username VARCHAR(50) NOT NULL UNIQUE,
     Passwords VARCHAR(255) NOT NULL,
     FullName NVARCHAR(100) NOT NULL,
+    CCCD VARCHAR(12) NOT NULL,
     Phone VARCHAR(15) NOT NULL,
     Roles VARCHAR(20) NOT NULL, -- 'Tenant', 'Manager', 'Admin'
     QR_Link VARCHAR(255) NULL, -- Chỉ Manager/Admin cần để hiện mã QR nhận tiền
