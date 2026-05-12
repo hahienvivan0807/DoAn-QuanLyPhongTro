@@ -2,6 +2,60 @@
 let phongAllData = [];
 let phongCurFilter = 'all';
 let phongSelectedId = null;
+
+//Loại Thông báo (fail,warn,info,success)
+const cfg = {
+    success: { bg: '#EAF3DE', ic: '#3B6D11', bar: '#639922', ring: '#639922', icon: 'ti-check', label: 'Thành công' },
+    fail: { bg: '#FCEBEB', ic: '#A32D2D', bar: '#E24B4A', ring: '#E24B4A', icon: 'ti-x', label: 'Thất bại' },
+    warn: { bg: '#FAEEDA', ic: '#854F0B', bar: '#EF9F27', ring: '#EF9F27', icon: 'ti-alert-triangle', label: 'Cảnh báo' },
+    info: { bg: '#E6F1FB', ic: '#185FA5', bar: '#378ADD', ring: '#378ADD', icon: 'ti-info-circle', label: 'Thông tin' },
+};
+const dur = 4000;
+function showToast(type, title, msg) {
+    const c = cfg[type];
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+
+    const spinSvg = (type === 'success' || type === 'fail') ? `
+  <svg class="ring-svg" width="36" height="36" viewBox="0 0 36 36" style="position:absolute;top:0;left:0;">
+    <circle cx="18" cy="18" r="14" fill="none" stroke="${c.ring}" stroke-width="2" stroke-dasharray="6 4" opacity="0.5"/>
+  </svg>`: '';
+
+    const drawSvg = type === 'success' ? `
+  <svg width="18" height="18" viewBox="0 0 18 18" style="position:relative;z-index:1;">
+    <polyline class="check-path" points="3,9 7,13 15,5" fill="none" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`: type === 'fail' ? `
+  <svg width="18" height="18" viewBox="0 0 18 18" style="position:relative;z-index:1;">
+    <line class="x-path" x1="4" y1="4" x2="14" y2="14" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round"/>
+    <line class="x-path" x1="14" y1="4" x2="4" y2="14" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>`: `<i class="ti ${c.icon} ${type === 'warn' ? 'warn-icon' : 'info-icon'}" style="font-size:17px;color:${c.ic};"></i>`;
+
+    el.innerHTML = `
+    <div class="toast-icon-wrap" style="background:${c.bg};">
+      ${spinSvg}${drawSvg}
+    </div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      <div class="toast-msg">${msg}</div>
+    </div>
+    <button class="toast-close" onclick="removeToast(this.closest('.toast'))"><i class="ti ti-x"></i></button>
+    <div class="toast-progress" style="background:${c.bar};animation-duration:${dur}ms;"></div>
+  `;
+
+    const container = document.getElementById('toastContainer');
+    container.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+
+    const t = setTimeout(() => removeToast(el), dur);
+    el._timer = t;
+}
+function removeToast(el) {
+    if (!el) return;
+    clearTimeout(el._timer);
+    el.classList.remove('show');
+    el.classList.add('hide');
+    setTimeout(() => el.remove(), 300);
+}
 function openModal() {
     document.getElementById('backdrop').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -85,6 +139,7 @@ function handleSelectRoom(el) {
     const btn = document.getElementById('roomBtn');
     btn.textContent = `✓ Phòng ${soPhong} đã chọn`;
     btn.classList.add('picked');
+    btn.dataset.sophong = soPhong;
 
     // Cập nhật giá thuê
     const priceVal = document.getElementById('priceVal');
@@ -157,25 +212,82 @@ function capNhatSoDem() {
     if (elDaThue) elDaThue.innerHTML = `<i class="fas fa-user-check" style="font-size:9px;"></i> Đã thuê (${daThue})`;
     if (elSua) elSua.innerHTML = `<i class="fas fa-tools" style="font-size:9px;"></i> Đang sửa (${dangSua})`;
 }
-async function themNguoiThue() {
-    const hoTen = document.getElementById('nt-hoten').value.trim();
-    const soPhong = document.getElementById('nt-sophong').value.trim();
-    const sdt = document.getElementById('nt-sdt').value.trim();
-    const mk = document.getElementById('nt-matkhau').value.trim();
-    const dienDauKy = document.getElementById('nt-dien-dau-ky').value.trim();
-    const nuocDauKy = document.getElementById('nt-nuoc-dau-ky').value.trim();
-    const username = document.getElementById('username-thue').value.trim();
+function resetFormThemNguoiThue() {
+    // ===== SECTION 1: TÀI KHOẢN =====
+    document.getElementById("nt-hoten").value = "";
+    document.getElementById("nt-un").value = "";
+    document.getElementById("nt-sdt").value = "";
+    document.getElementById("nt-pw").value = "";
+    document.getElementById("nt-email").value = "";
 
+    // Reset icon mắt password
+    document.getElementById("pw-ico").className = "fas fa-eye";
+    document.getElementById("nt-pw").type = "password";
+
+    // ===== SECTION 2: PHÒNG & HĐ =====
+    // Reset room picker
+    document.getElementById("roomBtn").textContent = "Nhấn để chọn phòng trống...";
+    document.getElementById("roomBtn").dataset.sophong = "";
+    document.getElementById("roomPanel").classList.remove("open"); // hoặc style display none tuỳ bạn
+    document.getElementById("rp-q").value = "";
+
+    // Reset ngày, tiền cọc
+    document.getElementById("nt-start").value = "";
+    document.getElementById("nt-end").value = "";
+    document.getElementById("nt-coc").value = "";
+
+    // Reset giá thuê
+    const priceVal = document.getElementById("priceVal");
+    priceVal.textContent = "Chưa chọn phòng";
+    priceVal.style.color = "var(--muted)";
+
+    // ===== SECTION 3: ĐIỆN NƯỚC =====
+    document.getElementById("nt-dien").value = "";
+    document.getElementById("nt-nuoc").value = "";
+}
+async function themNguoiThue() {
     const duLieu = {
-        hoTen: hoTen,
-        soPhong: soPhong,
-        sdt: sdt,
-        matKhau: mk,
-        dienDauKy: parseInt(dienDauKy) || 0,
-        nuocDauKy: parseInt(nuocDauKy) || 0,
-        username: username
+        HoTen: document.getElementById("nt-hoten").value.trim(),
+        Username: document.getElementById("nt-un").value.trim(),
+        SoDienThoai: document.getElementById("nt-sdt").value.trim(),
+        MatKhau: document.getElementById("nt-pw").value,
+        SoPhong: document.getElementById("roomBtn").dataset.sophong,
+        Email: document.getElementById("nt-email").value.trim(),
+        NgayBatDau: document.getElementById("nt-start").value,
+        NgayKetThuc: document.getElementById("nt-end").value,
+        TienCoc: Number(document.getElementById("nt-coc").value),
+        GiaThue: Number(document.getElementById("priceVal").innerText.replace(/[^\d]/g, "")),
+        ChiSoDien: Number(document.getElementById("nt-dien").value),
+        ChiSoNuoc: Number(document.getElementById("nt-nuoc").value),
     };
-    let respone = await fetch('api/ChuTroThemNguoiThue')
+    ngayBatDau = document.getElementById("nt-start").value;
+    soPhong = document.getElementById("roomBtn").dataset.sophong;
+    if (!ngayBatDau) {
+        showToast('warn', 'Thiếu thông tin', 'Vui lòng chọn ngày bắt đầu hợp đồng!');
+        return;
+    }
+    if (!soPhong) {
+        showToast('warn', 'Thiếu thông tin', 'Vui lòng chọn phòng!');
+        return;
+    }
+    try {
+        let respone = await fetch('/api/ChuTroThemNguoiThue/them-nguoi-thue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(duLieu)
+        });
+        const data = await respone.json();
+        if (respone.ok) {
+            showToast('success', 'Thêm thành công', data.message || 'Thêm thành công.');
+            resetFormThemNguoiThue();
+        } else {
+            console.log("data trả về:", data);      
+            console.log("data.message:", data.message); 
+            showToast('warn', 'Thêm thất bại!', data.message || 'Có lỗi xảy ra.');
+        }
+    } catch (error) {
+        showToast('fail', 'Lỗi kết nối', 'Không kết nối được với máy chủ' )
+    }
 }
 function phongSetFilter(f) {
     phongCurFilter = f;

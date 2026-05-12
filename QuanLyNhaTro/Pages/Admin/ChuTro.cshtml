@@ -20,6 +20,7 @@
   <script src="/js/ChuTro/ChuTro-pheDuyet.js"></script>
   <script src="/js/ChuTro/ChuTro-NguoiThue.js"></script>
   <style>
+
     /* =========================================================
        IMPORT FONT
     ========================================================= */
@@ -776,23 +777,6 @@
     .don-vi-gia { font-size: 11px; color: var(--mau-chu-phu); font-weight: 600; white-space: nowrap; }
 
     /* =========================================================
-       THÔNG BÁO TOAST
-    ========================================================= */
-    .hop-thong-bao {
-      position: fixed; top: 24px; right: 24px;
-      background: #fff;
-      border-left: 4px solid var(--mau-chu-de-sang);
-      padding: 14px 18px; border-radius: var(--radius-md);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      min-width: 280px; max-width: 340px;
-      z-index: 99999;
-      opacity: 0; transform: translateX(110px);
-      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .hop-thong-bao.hien { opacity: 1; transform: translateX(0); }
-    .noi-dung-thong-bao { font-size: 13.5px; font-weight: 600; color: var(--mau-chu); }
-
-    /* =========================================================
        SCROLLBAR TOÀN CỤC
     ========================================================= */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -1070,21 +1054,34 @@
 }
 .btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(124,58,237,0.46);}
 
-/* Toast */
-.toast{
-  position:fixed;top:22px;right:24px;
-  background:var(--white);
-  border-left:4px solid var(--purple);
-  padding:13px 17px;border-radius:var(--r);
-  box-shadow:0 8px 32px rgba(0,0,0,0.13);
-  font-size:13px;font-weight:600;color:var(--text);
-  z-index:99999;opacity:0;transform:translateX(110px);
-  transition:all 0.32s cubic-bezier(0.34,1.56,0.64,1);
-  min-width:260px;
-}
-.toast.show{opacity:1;transform:translateX(0);}
-.toast.gold-toast{border-left-color:var(--gold);}
-  </style>
+/* ===== TOAST MỚI ===== */
+.toast-container{position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;pointer-events:none;}
+.toast{pointer-events:all;min-width:280px;max-width:340px;background:#fff;border:0.5px solid #e5e9f5;border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;transform:translateX(120%);opacity:0;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.25s ease;position:relative;overflow:hidden;}
+.toast.show{transform:translateX(0);opacity:1;}
+.toast.hide{transform:translateX(120%);opacity:0;transition:transform 0.25s ease,opacity 0.2s ease;}
+.toast-icon-wrap{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.toast-body{flex:1;}
+.toast-title{font-size:13.5px;font-weight:600;color:#111827;margin-bottom:2px;}
+.toast-msg{font-size:12px;color:#6b7a99;line-height:1.5;}
+.toast-close{background:none;border:none;cursor:pointer;color:#6b7a99;font-size:14px;padding:2px;}
+.toast-progress{position:absolute;bottom:0;left:0;height:2.5px;animation:progress linear forwards;}
+@@keyframes progress{from{width:100%;}to{width:0%;}}
+.toast-success .toast-icon-wrap{background:#EAF3DE;}
+.toast-fail .toast-icon-wrap{background:#FCEBEB;}
+.toast-warn .toast-icon-wrap{background:#FAEEDA;}
+.toast-info .toast-icon-wrap{background:#E6F1FB;}
+.toast-success .toast-progress{background:#639922;}
+.toast-fail .toast-progress{background:#E24B4A;}
+.toast-warn .toast-progress{background:#EF9F27;}
+.toast-info .toast-progress{background:#378ADD;}
+@@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@@keyframes drawCheck{from{stroke-dashoffset:40;}to{stroke-dashoffset:0;}}
+@@keyframes drawX{from{stroke-dashoffset:30;}to{stroke-dashoffset:0;}}
+.ring-svg{animation:spin 0.7s ease forwards;}
+.check-path{stroke-dasharray:40;stroke-dashoffset:40;animation:drawCheck 0.4s 0.5s ease forwards;}
+.x-path{stroke-dasharray:30;stroke-dashoffset:30;animation:drawX 0.3s 0.5s ease forwards;}
+
+</style>
 </head>
 <body>
 
@@ -1692,36 +1689,40 @@
       <div class="fg2">
         <div class="field">
           <label class="f-lbl">Họ và tên <span class="req">*</span></label>
-          <input class="inp" type="text" id="nt-hoten" placeholder="VD: Nguyễn Văn A" oninput="syncStep()"/>
+          <input class="inp" type="text" id="nt-hoten" placeholder="VD: Nguyễn Văn A" />
+          <div class="f-note">Không ký tự đặc biệt</div>
         </div>
         <div class="field">
           <label class="f-lbl">Username <span class="req">*</span></label>
-          <input class="inp" type="text" id="nt-un" placeholder="VD: nguyenvana" oninput="syncStep()"/>
+          <input class="inp" type="text" id="nt-un" placeholder="VD: nguyenvana" />
           <div class="f-note">Chỉ chữ thường và số, không dấu cách</div>
         </div>
         <div class="field">
           <label class="f-lbl">Số điện thoại <span class="req">*</span></label>
-          <input class="inp" type="tel" id="nt-sdt" placeholder="VD: 0901234567" oninput="syncStep()"/>
+          <input class="inp" type="tel" id="nt-sdt" placeholder="VD: 0901234567" />
         </div>
         <div class="field">
           <label class="f-lbl">Mật khẩu <span class="req">*</span></label>
           <div class="inp-pw">
-            <input class="inp" type="password" id="nt-pw" placeholder="Tối thiểu 6 ký tự" style="padding-right:40px;" oninput="syncStep()"/>
+            <input class="inp" type="password" id="nt-pw" placeholder="Tối thiểu 6 ký tự" style="padding-right:40px;" />
             <button class="btn-pw" type="button" onclick="togglePw()">
               <i class="fas fa-eye" id="pw-ico"></i>
             </button>
           </div>
         </div>
-        <div class="field f-span2">
-          <label class="f-lbl">Vai trò <em>(cố định)</em></label>
+        <div class="field">
+            <label class="f-lbl">Email <span class="req">*</span></label>
+            <input class="inp" type="tel" id="nt-email" placeholder="VD: abc@gmail.com" />
+        </div>
+        </div>
+        <div class="field f-span2" style="margin-top:5px;">
+          <label class="f-lbl">Vai trò </label>
           <div class="ro-box">
             <i class="fas fa-user-tag"></i>
             <span class="val">Người thuê (Tenant)</span>
             <span class="vtag">Mặc định</span>
           </div>
         </div>
-      </div>
-
       <div class="mdiv"></div>
 
       <!-- ===== SECTION 2: PHÒNG & HĐ ===== -->
@@ -1813,7 +1814,7 @@
       <div class="req-note"><span>*</span> Trường bắt buộc</div>
       <div class="ft-btns">
         <button class="btn-cancel" onclick="closeModal()">Hủy</button>
-        <button class="btn-submit" onclick="submitForm()">
+        <button class="btn-submit" onclick="themNguoiThue()">
           <i class="fas fa-user-plus"></i> Thêm người thuê
         </button>
       </div>
@@ -1821,10 +1822,6 @@
 
   </div><!-- /modal -->
 </div><!-- /backdrop -->
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
 
 <script>
 
@@ -2485,12 +2482,8 @@ function taoTruong(nhan, giatri) {
 
 </div>
 </div>
-
-
-<script>
-<!-- =============================================
-     JAVASCRIPT – XỬ LÝ TƯƠNG TÁC
-============================================= -->
+<!-- Thông báo-->
+<div class="toast-container" id="toastContainer" style="position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;"></div>
 <script>
   // ===== CẬP NHẬT NGÀY GIỜ =====
   (function capNhatNgayGio() {
