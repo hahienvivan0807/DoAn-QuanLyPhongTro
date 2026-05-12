@@ -86,23 +86,99 @@ namespace QuanLyNhaTro.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "Tạo tài khoản thành công" });
         }
-        // GET /api/ChuTro/danh-sach-quan-ly
         [HttpGet("danh-sach-quan-ly")]
         public async Task<IActionResult> LayDanhSachQuanLy()
         {
-            var danhSach = await _context.ACCOUNT
-                .Where(u => u.Roles == "QuanLy")
+            var ds = await _context.ACCOUNT
+                .Where(u => u.Roles == "Manager" && u.IsActive)   // ✅ "Manager", có lọc IsActive
+                .OrderBy(u => u.FullName)
                 .Select(u => new {
                     u.IDUser,
                     u.Username,
                     u.FullName,
                     u.Phone,
-                    u.Roles,
                     u.CreatedAt
                 })
                 .ToListAsync();
 
-            return Ok(danhSach);
+            return Ok(ds);
+        }
+        [HttpGet("danh-sach-nguoi-thue")]
+        public async Task<IActionResult> LayDanhSachNguoiThue()
+        {
+            var ds = await _context.ACCOUNT
+                .Where(u => u.Roles == "Tenant" && u.IsActive)
+                .OrderBy(u => u.FullName)
+                .Select(u => new {
+                    u.IDUser,
+                    u.Username,
+                    u.FullName,
+                    u.Phone,
+                    u.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(ds);
+        }
+        [HttpGet("chi-tiet-nguoi-thue/{id}")]
+        public async Task<IActionResult> LayChiTietNguoiThue(int id)
+        {
+            // 1. JOIN Account -> HopDong -> Phong để lấy thông tin phòng hiện tại
+            var chiTiet = await _context.ACCOUNT
+                .Where(u => u.IDUser == id && u.Roles == "Tenant" && u.IsActive)
+                .Select(u => new
+                {
+                    u.IDUser,
+                    u.FullName,
+                    u.Phone,
+                    u.Username,
+                    u.Email,
+                    // Tìm hợp đồng đang hiệu lực của người này để lấy thông tin phòng
+                    HopDongHienTai = u.HopDongTenants
+                        .Where(hd => hd.TrangThaiHD == "Đang hiệu lực")
+                        .Select(hd => new
+                        {
+                            hd.Phong.SoPhong,
+                            hd.Phong.GiaPhongFix
+                        }).FirstOrDefault() // Mỗi người thường chỉ có 1 hợp đồng đang active
+                })
+                .FirstOrDefaultAsync();
+
+            if (chiTiet == null)
+            {
+                return NotFound(new { message = "Không tìm thấy người thuê hoặc tài khoản đã bị khóa." });
+            }
+
+            // 2. Lấy đơn giá điện, nước, rác từ bảng CONFIG_GIA (nếu có)
+            var configGia = await _context.CONFIG_GIA
+                .Where(c => c.IsActive)
+                .ToListAsync();
+
+            // Dựa vào MaDichVu của bạn để lấy đúng giá (Giả sử mã của bạn là DIEN, NUOC, RAC)
+            var giaDien = configGia.FirstOrDefault(c => c.MaDichVu == "DIEN")?.DonGia ?? 0;
+            var giaNuoc = configGia.FirstOrDefault(c => c.MaDichVu == "NUOC")?.DonGia ?? 0;
+            var giaRac = configGia.FirstOrDefault(c => c.MaDichVu == "RAC")?.DonGia ?? 0;
+
+            // 3. Map dữ liệu thành object JSON khớp chính xác với biến JS ở Frontend
+            var result = new
+            {
+                idUser = chiTiet.IDUser,
+                fullName = chiTiet.FullName,
+                sdt = chiTiet.Phone, // Frontend của bạn đang gọi nt.sdt nên ở đây trả về 'sdt'
+                cccd = "Chưa cập nhật (Thiếu trong DB)", // TODO: Thêm cột CCCD vào DB
+        
+                // Trích xuất từ Hợp Đồng/Phòng
+                soPhong = chiTiet.HopDongHienTai != null ? chiTiet.HopDongHienTai.SoPhong : "Chưa xếp phòng",
+                giaPhong = chiTiet.HopDongHienTai != null ? chiTiet.HopDongHienTai.GiaPhongFix : 0,
+        
+                // Trích xuất từ Config Giá
+                tienDien = giaDien,
+                tienNuoc = giaNuoc,
+                tienRac = giaRac,
+                email = chiTiet.Email
+            };
+
+            return Ok(result);
         }
     }
 

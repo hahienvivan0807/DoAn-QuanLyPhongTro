@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace QuanLyNhaTro.Pages.KhachThue
 {
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "Tenant")]
     public class KhachThueModel : PageModel
     {
         public void OnGet()

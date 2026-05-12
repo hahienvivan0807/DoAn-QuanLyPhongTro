@@ -92,5 +92,65 @@ async function xuLyDangNhap(event) {
         hienThiThongBao('loi', 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau!');
     }
 }
+async function xuLyDangKy() {
+    console.log("Hàm xuLyDangKy đã được kích hoạt!"); // Để kiểm tra xem nút có ăn hay không
+
+    const messageDiv = document.getElementById('message');
+
+    // Lấy dữ liệu từ các ô nhập
+    const userVal = document.getElementById('username').value;
+    const passVal = document.getElementById('password').value;
+    const nameVal = document.getElementById('fullName').value;
+    const phoneVal = document.getElementById('phone').value;
+    const emailVal = document.getElementById('email').value;
+    const roleVal = document.getElementById('roles').value;
+
+    // Kiểm tra nhanh xem có bỏ trống trường bắt buộc không
+    if (!userVal || !passVal || !nameVal || !phoneVal) {
+        alert("Vui lòng điền đầy đủ các thông tin bắt buộc!");
+        return;
+    }
+
+    const registerData = {
+        username: userVal,
+        passwords: passVal,
+        fullName: nameVal,
+        phone: phoneVal,
+        email: emailVal,
+        roles: roleVal
+    };
+
+    try {
+        const response = await fetch('/api/Account/Register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(registerData)
+        });
+
+        // Đọc dữ liệu trả về từ server
+        const result = await response.json();
+
+        if (response.ok) {
+            // Nếu dùng hàm hiển thị thông báo cũ của bạn:
+            if (typeof hienThiThongBao === "function") {
+                hienThiThongBao('thanh-cong', result.message);
+            } else {
+                alert("Thành công: " + result.message);
+            }
+            document.getElementById('registerForm').reset();
+        } else {
+            if (typeof hienThiThongBao === "function") {
+                hienThiThongBao('loi', result.message || "Đăng ký thất bại");
+            } else {
+                alert("Lỗi: " + (result.message || "Đăng ký thất bại"));
+            }
+        }
+    } catch (error) {
+        console.error("Lỗi kết nối:", error);
+        alert("Không thể kết nối đến máy chủ. Kiểm tra lại Backend nhé!");
+    }
+}
 
 console.log("File Login.js đã được tải thành công.");
