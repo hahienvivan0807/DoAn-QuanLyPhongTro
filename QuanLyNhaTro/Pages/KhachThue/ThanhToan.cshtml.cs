@@ -25,6 +25,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
 
         // ── Thông tin quản lý (dùng cho QR + ngân hàng) ──────────────
         public ACCOUNT? QuanLy { get; set; }
+        public ACCOUNT? ChuTro { get; set; }
+
 
         /*
          * ═══════════════════════════════════════════════════════════════
@@ -72,7 +74,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
             // 1. Lấy IDUser của khách đang đăng nhập từ Claims
             var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(idUserStr, out int idUser))
-                return RedirectToPage("/Login");
+                return RedirectToPage("/Index");
 
             KhachThue = await _db.ACCOUNT.FindAsync(idUser);
             if (KhachThue == null) return NotFound();
@@ -108,12 +110,11 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 .FirstOrDefaultAsync();
 
             QuanLy = phongManager?.Manager;
+            ChuTro = await _db.ACCOUNT
+            .Where(a => a.Roles == "Admin" && a.IsActive)
+            .FirstOrDefaultAsync()
+            ?? new ACCOUNT { FullName = "Trần Minh Quân", Phone = "0900111222" };
 
-            /*
-             * [GHI CHÚ] Sau khi thêm cột NganHang / SoTaiKhoan vào ACCOUNT:
-             *   NganHang   = QuanLy?.NganHang   ?? "";
-             *   SoTaiKhoan = QuanLy?.SoTaiKhoan ?? "";
-             */
             NganHang = "";  // TODO: QuanLy?.NganHang
             SoTaiKhoan = "";  // TODO: QuanLy?.SoTaiKhoan
 

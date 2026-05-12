@@ -26,6 +26,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
         public ACCOUNT? TenantInfo { get; set; }
         public HOPDONG? HopDongHienTai { get; set; }
         public PHONG? PhongHienTai { get; set; }
+        
 
         // ── Thống kê nhanh ────────────────────────────────────────────
         public int SoThangDaThue { get; set; }

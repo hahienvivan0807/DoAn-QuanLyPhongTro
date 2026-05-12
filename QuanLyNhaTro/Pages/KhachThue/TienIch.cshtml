@@ -668,7 +668,7 @@
 
     .modal-box {
       background: #fff; border-radius: 24px;
-      width: 100%; max-width: 460px; margin: 16px;
+      width: 100%; max-width: 400px; margin: 16px; /* [CHỈNH] Thu nhỏ modal: giảm max-width 460→400px */
       box-shadow: 0 24px 64px rgba(9,20,41,0.35);
       overflow: hidden;
       transform: translateY(20px) scale(0.97);
@@ -677,20 +677,18 @@
     .modal-overlay.hien .modal-box { transform: translateY(0) scale(1); }
 
     .modal-accent { height: 6px; }
-    .modal-accent.xanh-la { background: linear-gradient(90deg, #059669, #34d399); }
-    .modal-accent.chung   { background: linear-gradient(90deg, #7c3aed, #0891b2, #34d399); }
+    /* (màu modal-accent & icon-badge được định nghĩa trong block CSS bên dưới) */
 
     .modal-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 22px 14px; border-bottom: 1px solid #f1f5f9;
+      padding: 14px 18px 12px; border-bottom: 1px solid #f1f5f9; /* [CHỈNH] Giảm padding header modal */
     }
     .modal-header-left { display: flex; align-items: center; gap: 12px; }
     .modal-icon-badge {
       width: 42px; height: 42px; border-radius: 11px;
       display: flex; align-items: center; justify-content: center; font-size: 18px;
     }
-    .modal-icon-badge.xanh-la { background: var(--mau-xanh-la-nhat); color: var(--mau-xanh-la); }
-    .modal-icon-badge.chung   { background: var(--mau-tim-nhat); color: var(--mau-tim); }
+    /* (màu icon-badge định nghĩa trong block CSS bên dưới) */
     .modal-title { font-size: 15px; font-weight: 800; color: #1e293b; }
     .modal-sub   { font-size: 11.5px; color: #64748b; margin-top: 2px; }
     .modal-close {
@@ -701,13 +699,13 @@
     }
     .modal-close:hover { background: #fee2e2; color: #dc2626; }
 
-    .modal-body { padding: 18px 22px; }
+    .modal-body { padding: 12px 18px; } /* [CHỈNH] Giảm padding trong modal-body */
 
     .modal-amount-bar {
       display: flex; align-items: center; justify-content: space-between;
       background: linear-gradient(135deg, #eff6ff, #dbeafe);
       border: 1.5px solid #bfdbfe; border-radius: 14px;
-      padding: 14px 18px; margin-bottom: 16px;
+      padding: 10px 14px; margin-bottom: 12px; /* [CHỈNH] Giảm padding & margin amount-bar */
     }
     .modal-amount-label { font-size: 12px; font-weight: 600; color: #64748b; }
     .modal-amount-val   { font-size: 22px; font-weight: 800; color: #1a56db; letter-spacing: -0.5px; }
@@ -731,10 +729,10 @@
 
     .qr-section {
       background: #f8faff; border: 2px solid #e2e8f0;
-      border-radius: 16px; padding: 16px; text-align: center; margin-bottom: 14px;
+      border-radius: 16px; padding: 10px; text-align: center; margin-bottom: 10px; /* [CHỈNH] Giảm padding qr-section */
     }
     #modal-qr-img {
-      width: 160px; height: 160px; object-fit: contain;
+      width: 160px; height: 100px; object-fit: contain; /* [CHỈNH] Thu nhỏ ảnh QR 200x125→160x100 */
       border-radius: 8px; display: block; margin: 0 auto 10px;
     }
     .qr-fallback {
@@ -759,7 +757,7 @@
     .noi-dung-ck {
       display: flex; align-items: center; justify-content: space-between;
       background: #fefce8; border: 1px solid #fde68a;
-      border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;
+      border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; /* [CHỈNH] Giảm padding & margin nội dung chuyển khoản */
       font-size: 12.5px;
     }
     .noi-dung-ck .nd-label { color: #92400e; font-weight: 600; }
@@ -767,13 +765,13 @@
 
     .upload-zone {
       border: 2px dashed #bfdbfe; border-radius: 12px;
-      background: #f8faff; padding: 16px; text-align: center;
-      cursor: pointer; transition: all 0.22s; position: relative; margin-bottom: 14px;
+      background: #f8faff; padding: 10px; text-align: center; /* [CHỈNH] Giảm padding upload-zone */
+      cursor: pointer; transition: all 0.22s; position: relative; margin-bottom: 10px; /* [CHỈNH] Giảm margin-bottom upload-zone */
     }
     .upload-zone:hover { border-color: #1a56db; }
     .upload-zone.drag-over { border-color: #1a56db; background: #eff6ff; transform: scale(1.01); }
     .upload-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .upload-icon  { font-size: 28px; color: #93c5fd; display: block; margin-bottom: 6px; }
+    .upload-icon  { font-size: 22px; color: #93c5fd; display: block; margin-bottom: 4px; } /* [CHỈNH] Thu nhỏ icon upload */
     .upload-title { font-size: 12.5px; font-weight: 700; color: var(--mau-chu); margin-bottom: 3px; }
     .upload-hint  { font-size: 11px; color: var(--mau-chu-phu); }
     .upload-hint span { color: var(--mau-chu-de); font-weight: 700; }
@@ -790,7 +788,7 @@
     }
     .upload-fname { font-size: 11px; color: var(--mau-chu-phu); margin-top: 5px; font-style: italic; }
 
-    .modal-footer { padding: 0 22px 22px; display: flex; gap: 10px; }
+    .modal-footer { padding: 0 18px 16px; display: flex; gap: 10px; } /* [CHỈNH] Giảm padding footer modal */
     .btn-modal-huy {
       flex: 1; padding: 12px; background: #f1f5f9; color: #475569;
       border: 1.5px solid #e2e8f0; border-radius: 12px;
@@ -868,6 +866,37 @@
     }
     .tt-bar-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,86,219,0.40); }
 
+    /* Nút Thanh toán riêng lẻ trong card — ẩn mặc định */
+    .dv-btn-thanh-toan {
+      display: none; width: 100%; padding: 13px;
+      border: none; border-radius: 13px; cursor: pointer;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 14px; font-weight: 700;
+      align-items: center; justify-content: center; gap: 9px;
+      transition: all 0.22s; animation: fadeUp 0.35s ease;
+    }
+    .dv-btn-thanh-toan.tim {
+      background: linear-gradient(135deg, #059669, #34d399);
+      color: #fff; box-shadow: 0 5px 18px rgba(5,150,105,0.35);
+    }
+    .dv-btn-thanh-toan.tim:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(5,150,105,0.45); }
+    .dv-btn-thanh-toan.cyan {
+      background: linear-gradient(135deg, #059669, #34d399);
+      color: #fff; box-shadow: 0 5px 18px rgba(5,150,105,0.35);
+    }
+    .dv-btn-thanh-toan.cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(5,150,105,0.45); }
+
+    /* tt-bar icon màu nước */
+    .tt-bar-icon.nuoc { background: linear-gradient(135deg, #0891b2, #22d3ee); }
+
+    /* Modal accent + icon badge — màu tím (GS), cyan (nước), gộp */
+    .modal-accent.tim   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .modal-accent.cyan  { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+    .modal-accent.gop   { background: linear-gradient(90deg, #7c3aed, #0891b2, #34d399); }
+    .modal-icon-badge.tim  { background: var(--mau-tim-nhat);  color: var(--mau-tim);  }
+    .modal-icon-badge.cyan { background: var(--mau-cyan-nhat); color: var(--mau-cyan); }
+    .modal-icon-badge.gop  { background: var(--mau-tim-nhat);  color: var(--mau-tim);  }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -900,7 +929,7 @@
         <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
       </div>
       <div class="ten-logo">
-        <strong>NHÀ TRỌ Bà Năm</strong>
+        <strong>Nhà Trọ Bà Năm</strong>
         <span>Cổng khách thuê</span>
       </div>
     </div>
@@ -1098,6 +1127,13 @@
                 </div>
               </div>
 
+              @* Nút Thanh toán Giặt sấy — hiện sau khi quản lý báo giá *@
+              <button class="dv-btn-thanh-toan tim" id="gs-btn-thanh-toan"
+                      onclick="moThanhToanGS()"
+                      style="@(Model.DonGiatSay?.TrangThai_DV == "Chờ thanh toán" ? "display:flex;" : "display:none;")">
+                <i class="fas fa-qrcode"></i> Thanh toán Giặt Sấy
+              </button>
+
               <div id="gs-btn-group" style="display:flex;flex-direction:column;gap:8px;">
                 <button class="dv-btn-submit tim" onclick="guiDonGS()">
                   <i class="fas fa-paper-plane"></i> Đặt dịch vụ giặt sấy
@@ -1230,6 +1266,13 @@
                   </button>
                 </div>
               </div>
+
+              @* Nút Thanh toán Bình Nước — hiện sau khi quản lý đã giao *@
+              <button class="dv-btn-thanh-toan cyan" id="nuoc-btn-thanh-toan"
+                      onclick="moThanhToanNuoc()"
+                      style="@(Model.DonNuocBinh?.TrangThai_DV == "Chờ thanh toán" ? "display:flex;" : "display:none;")">
+                <i class="fas fa-qrcode"></i> Thanh toán Bình Nước
+              </button>
 
               <div id="nuoc-btn-group" style="display:flex;flex-direction:column;gap:8px;">
                 <button class="dv-btn-submit cyan" onclick="guiDonNuoc()">
@@ -1603,31 +1646,27 @@
             </div>
           </div>
 
-          <div class="qr-section">
-            <img id="modal-qr-img" src="@(Model.QrLink ?? "")" alt="Mã QR chuyển khoản"
-                 onerror="this.style.display='none';document.getElementById('qr-fallback-box').style.display='flex';" />
-            <div id="qr-fallback-box" class="qr-fallback" style="@(string.IsNullOrEmpty(Model.QrLink) ? "" : "display:none;")">
-              <i class="fas fa-image" style="font-size:32px;color:#bfdbfe;"></i>
-              Chờ kết nối dữ liệu
-            </div>
-            <div class="qr-bank-rows">
-              <div class="qr-br">
-                <span class="lbl">Ngân hàng</span>
-                <span class="val" id="qr-ngan-hang">@Model.NganHang</span>
-              </div>
-              <div class="qr-br">
-                <span class="lbl">Số tài khoản</span>
-                <span class="val">
-                  <span id="qr-so-tk">@Model.SoTaiKhoan</span>
-                  <button class="copy-btn" onclick="saoChep('qr-so-tk')"><i class="fas fa-copy"></i></button>
-                </span>
-              </div>
-              <div class="qr-br">
-                <span class="lbl">Chủ tài khoản</span>
-                <span class="val" id="qr-chu-tk">@Model.ChuTaiKhoan</span>
-              </div>
-            </div>
-          </div>
+<div class="qr-section">
+<img id="modal-qr-img" 
+     src="@(string.IsNullOrEmpty(Model.QrLink) ? "" : "/images/qr/" + Model.QrLink)" 
+     data-qr-base="/images/qr/"
+     alt="Mã QR chuyển khoản"
+     onerror="this.style.display='none';document.getElementById('qr-fallback-box').style.display='flex';" 
+     style="display: @(string.IsNullOrEmpty(Model.QrLink) ? "none" : "block");" />
+
+    <div id="qr-fallback-box" class="qr-fallback" 
+         style="@(string.IsNullOrEmpty(Model.QrLink) ? "display:flex;" : "display:none;")">
+        <i class="fas fa-image" style="font-size:32px;color:#bfdbfe;"></i>
+        Chờ kết nối dữ liệu
+    </div>
+
+    <div class="qr-bank-rows">
+        <div class="qr-br">
+            <span class="lbl">Chủ tài khoản</span>
+            <span class="val" id="qr-chu-tk">@Model.ChuTaiKhoan</span>
+        </div>
+    </div>
+</div>
 
           <div class="noi-dung-ck">
             <div>
@@ -1635,7 +1674,7 @@
               @{
                   var soPhongRaw = Model.SoPhong.Replace("Phòng ", "").Trim();
               }
-              <div class="nd-val" id="modal-nd-ck">P@(soPhongRaw) TIEN ICH</div>
+              <div class="nd-val" id="modal-nd-ck" data-phong="P@(soPhongRaw)">P@(soPhongRaw) TIEN ICH</div>
             </div>
             <button class="copy-btn" onclick="saoChep('modal-nd-ck')"><i class="fas fa-copy"></i></button>
           </div>
@@ -1665,7 +1704,7 @@
           <button class="btn-modal-huy" onclick="dongModal()">
             <i class="fas fa-arrow-left" style="margin-right:5px;"></i>Quay lại
           </button>
-          <button class="btn-modal-gui active" id="modal-btn-gui" onclick="guiXacNhan()">
+          <button class="btn-modal-gui" id="modal-btn-gui" onclick="guiXacNhan()">
             <i class="fas fa-paper-plane"></i> Gửi xác nhận thanh toán
           </button>
         </div>
@@ -1690,168 +1729,11 @@
   @* =============================================
      JAVASCRIPT
   ============================================= *@
+  @* Token chống CSRF — dùng cho các POST fetch trong JS *@
+  @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+  <input type="hidden" name="__RequestVerificationToken"
+         value="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
+
   <script src="~/js/Khach/DichVu.js"></script>
-
-  <script>
-    /* =============================================
-       ĐIỆN NƯỚC — JS nội trang
-       (Back-end logic giữ nguyên trong DichVu.js;
-        đây chỉ là UI helper cho card mới)
-    ============================================= */
-
-    /* Hằng số đơn giá */
-    const GIA_DIEN_KWH  = 3500;
-    const GIA_NUOC_M3   = 15000;
-
-    /* Định dạng tiền VND */
-    function formatVND(n) {
-      if (isNaN(n) || n < 0) return '— đ';
-      return n.toLocaleString('vi-VN') + ' đ';
-    }
-
-    /* Mở / đóng form điện nước */
-    function moFormDN() {
-      document.getElementById('dn-desc').style.display    = 'none';
-      document.getElementById('dn-btn-open').style.display = 'none';
-      document.getElementById('dn-form').classList.add('hien');
-      document.getElementById('dn-badge').className = 'dv-status-badge dsb-pending';
-      document.getElementById('dn-badge').innerHTML = '<span class="dsb-dot"></span>Đang nhập';
-    }
-    function dongFormDN() {
-      document.getElementById('dn-desc').style.display    = '';
-      document.getElementById('dn-btn-open').style.display = '';
-      document.getElementById('dn-form').classList.remove('hien');
-      document.getElementById('dn-badge').className = 'dv-status-badge dsb-none';
-      document.getElementById('dn-badge').innerHTML = '<span class="dsb-dot"></span>Chưa gửi';
-      // Reset preview
-      dnResetPreview('dien');
-      dnResetPreview('nuoc');
-      // Reset chỉ số
-      document.getElementById('dn-dien-moi').value = '';
-      document.getElementById('dn-nuoc-moi').value = '';
-      tinhTienDienNuoc();
-    }
-
-    /* Tính tiền theo chỉ số */
-    function tinhTienDienNuoc() {
-      const dienCu  = parseFloat(document.getElementById('dn-dien-cu').value)  || 0;
-      const dienMoi = parseFloat(document.getElementById('dn-dien-moi').value) || null;
-      const nuocCu  = parseFloat(document.getElementById('dn-nuoc-cu').value)  || 0;
-      const nuocMoi = parseFloat(document.getElementById('dn-nuoc-moi').value) || null;
-
-      let dienKWh = null, dienTien = null;
-      let nuocM3  = null, nuocTien = null;
-
-      if (dienMoi !== null && dienMoi >= dienCu) {
-        dienKWh = dienMoi - dienCu;
-        dienTien = dienKWh * GIA_DIEN_KWH;
-      }
-      if (nuocMoi !== null && nuocMoi >= nuocCu) {
-        nuocM3  = nuocMoi - nuocCu;
-        nuocTien = nuocM3 * GIA_NUOC_M3;
-      }
-
-      document.getElementById('dn-dien-so-kwh').textContent = dienKWh !== null ? dienKWh + ' kWh' : '— kWh';
-      document.getElementById('dn-dien-tien').textContent   = formatVND(dienTien);
-      document.getElementById('dn-nuoc-so-m3').textContent  = nuocM3  !== null ? nuocM3  + ' m³'  : '— m³';
-      document.getElementById('dn-nuoc-tien').textContent   = formatVND(nuocTien);
-
-      document.getElementById('dn-sum-dien').textContent = formatVND(dienTien);
-      document.getElementById('dn-sum-nuoc').textContent = formatVND(nuocTien);
-
-      const tong = (dienTien || 0) + (nuocTien || 0);
-      document.getElementById('dn-sum-tong').textContent = (dienTien !== null || nuocTien !== null)
-        ? formatVND(tong) : '— đ';
-    }
-
-    /* Upload ảnh đồng hồ */
-    function dnFileChosen(input, loai) {
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('dn-' + loai + '-preview-img').src = e.target.result;
-        document.getElementById('dn-' + loai + '-upload-prompt').style.display = 'none';
-        document.getElementById('dn-' + loai + '-preview').style.display = 'block';
-        document.getElementById('dn-' + loai + '-fname').textContent = file.name;
-      };
-      reader.readAsDataURL(file);
-    }
-    function dnXoaAnh(event, loai) {
-      event.stopPropagation();
-      dnResetPreview(loai);
-    }
-    function dnResetPreview(loai) {
-      const inp = document.getElementById('dn-' + loai + '-file');
-      if (inp) inp.value = '';
-      const img = document.getElementById('dn-' + loai + '-preview-img');
-      if (img) img.src = '';
-      const prompt = document.getElementById('dn-' + loai + '-upload-prompt');
-      if (prompt) prompt.style.display = '';
-      const preview = document.getElementById('dn-' + loai + '-preview');
-      if (preview) preview.style.display = 'none';
-      const fname = document.getElementById('dn-' + loai + '-fname');
-      if (fname) fname.textContent = '';
-    }
-    function dnDragOver(event, loai) {
-      event.preventDefault();
-      document.getElementById('dn-' + loai + '-upload-zone').classList.add('drag-over');
-    }
-    function dnDragLeave(event, loai) {
-      document.getElementById('dn-' + loai + '-upload-zone').classList.remove('drag-over');
-    }
-    function dnDrop(event, loai) {
-      event.preventDefault();
-      document.getElementById('dn-' + loai + '-upload-zone').classList.remove('drag-over');
-      if (event.dataTransfer.files && event.dataTransfer.files[0]) {
-        const fakeInput = { files: event.dataTransfer.files };
-        dnFileChosen(fakeInput, loai);
-      }
-    }
-
-    /* Gửi đơn điện nước */
-    function guiDonDienNuoc() {
-      const dienMoi = document.getElementById('dn-dien-moi').value;
-      const nuocMoi = document.getElementById('dn-nuoc-moi').value;
-      const dienFile = document.getElementById('dn-dien-file').files[0];
-      const nuocFile = document.getElementById('dn-nuoc-file').files[0];
-
-      if (!dienMoi && !nuocMoi) {
-        alert('Vui lòng nhập ít nhất một chỉ số điện hoặc nước.');
-        return;
-      }
-      if (dienMoi && !dienFile) {
-        alert('Vui lòng đính kèm ảnh đồng hồ điện để xác minh.');
-        return;
-      }
-      if (nuocMoi && !nuocFile) {
-        alert('Vui lòng đính kèm ảnh đồng hồ nước để xác minh.');
-        return;
-      }
-
-      /* --- Gọi back-end submit tại đây (tích hợp @Model handler) --- */
-      // Ví dụ: POST form với FormData
-
-      // Cập nhật badge
-      document.getElementById('dn-badge').className = 'dv-status-badge dsb-active';
-      document.getElementById('dn-badge').innerHTML = '<span class="dsb-dot"></span>Đã gửi';
-      // Ẩn nút gửi + huỷ
-      document.getElementById('dn-btn-group').style.display = 'none';
-
-      // Hiện thông báo thành công tạm thời
-      const wb = document.createElement('div');
-      wb.className = 'waiting-box hien';
-      wb.innerHTML = `<i class="fas fa-check-circle" style="color:#059669;"></i>
-        <div class="wb-text">
-          Chỉ số đã được gửi thành công! Quản lý sẽ <strong>xác nhận và tính tiền</strong>
-          trong vòng 24 giờ. Cảm ơn bạn.
-        </div>`;
-      wb.style.background = '#d1fae5';
-      wb.style.borderColor = '#6ee7b7';
-      document.getElementById('dn-btn-group').insertAdjacentElement('beforebegin', wb);
-    }
-
-  </script>
-
 </body>
 </html>

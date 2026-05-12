@@ -437,7 +437,7 @@
   <div class="logo-sidebar">
     <img src="~/images/logo.png" alt="Logo Nhà Trọ Bà Năm" class="logo-img" />
     <div class="ten-logo">
-      <strong>NHÀ TRỌ Bà Năm</strong>
+      <strong>Nhà Trọ Bà Năm</strong>
       <span>Cổng khách thuê</span>
     </div>
   </div>
@@ -774,7 +774,8 @@
     if (!data) return;
     document.getElementById('modal-ten-thong-bao').textContent = data.ten;
     document.getElementById('modal-the-loai').className = 'the-loai-thong-bao ' + data.loaiClass;
-    document.getElementById('modal-the-loai').textContent = data.loaiNhan;
+   document.getElementById('modal-the-loai').innerHTML = data.loaiNhan;
+
     document.getElementById('modal-thoi-gian').textContent = data.thoiGian;
     document.getElementById('modal-noi-dung').innerHTML = data.noiDung;
 

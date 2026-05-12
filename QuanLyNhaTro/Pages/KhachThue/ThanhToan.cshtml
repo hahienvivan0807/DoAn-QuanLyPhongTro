@@ -7,7 +7,7 @@
     var dn    = Model.DienNuoc;         // DIENNUOC (có thể null)
     var khach = Model.KhachThue;        // ACCOUNT (tenant)
     var phong = Model.Phong;            // PHONG
-    var ql    = Model.QuanLy;           // ACCOUNT (manager – có QR_Link)
+    var ct    = Model.ChuTro;           // ACCOUNT (manager – có QR_Link)
 
     // Tính số ngày còn lại đến hạn
     int soNgayCon = hd != null ? (hd.HanDong - DateTime.Today).Days : 0;
@@ -33,12 +33,12 @@
     // Tên ngân hàng / số tài khoản — lưu tạm trong FullName của manager
     // (Xem ghi chú SQL bên dưới để biết cách mở rộng bảng ACCOUNT)
     // Lấy QR_Link từ DB; nếu chưa có thì dùng ảnh tĩnh mặc định
-    string qrUrl     = !string.IsNullOrEmpty(ql?.QR_Link)
-                         ? ql!.QR_Link
-                         : "/images/qr/qrquanly.jpg";
+    string qrUrl     = !string.IsNullOrEmpty(ct?.QR_Link)
+                         ? ct!.QR_Link
+                         : "/images/qr/qrchutro.jpg";
     string nganHang  = Model.NganHang;       // string từ PageModel (xem ghi chú)
     string soTaiKhoan= Model.SoTaiKhoan;
-    string chuTaiKhoan = ql?.FullName ?? "";
+    string chuTaiKhoan = ct?.FullName ?? "";
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -502,7 +502,7 @@
     .qr-modal {
       background: #fff;
       border-radius: 24px;
-      width: 100%; max-width: 420px;
+      width: 100%; max-width: 360px; /* ← Giảm từ 420px → 360px để modal nhỏ gọn hơn */
       margin: 16px;
       box-shadow: 0 24px 64px rgba(9,20,41,0.35), 0 0 0 1px rgba(255,255,255,0.06);
       overflow: hidden;
@@ -520,7 +520,7 @@
 
     .qr-modal-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 22px 14px;
+      padding: 14px 18px 10px; /* ← Giảm từ 20px 22px 14px → 14px 18px 10px */
       border-bottom: 1px solid #f1f5f9;
     }
     .qr-modal-header-left {
@@ -544,22 +544,22 @@
     }
     .qr-modal-close:hover { background: #fee2e2; color: #dc2626; }
 
-    .qr-modal-body { padding: 20px 22px 24px; }
+    .qr-modal-body { padding: 14px 18px 18px; } /* ← Giảm từ 20px 22px 24px → 14px 18px 18px */
 
     .qr-amount-bar {
       display: flex; align-items: center; justify-content: space-between;
       background: linear-gradient(135deg, #eff6ff, #dbeafe);
       border: 1.5px solid #bfdbfe;
-      border-radius: 14px; padding: 14px 18px;
-      margin-bottom: 18px;
+      border-radius: 14px; padding: 10px 14px; /* ← Giảm từ 14px 18px → 10px 14px */
+      margin-bottom: 14px; /* ← Giảm từ 18px → 14px */
     }
     .qr-amount-label { font-size: 12px; font-weight: 600; color: #64748b; }
-    .qr-amount-value { font-size: 22px; font-weight: 800; color: #1a56db; letter-spacing: -0.5px; }
+    .qr-amount-value { font-size: 19px; font-weight: 800; color: #1a56db; letter-spacing: -0.5px; } /* ← Giảm từ 22px → 19px */
     .qr-amount-icon {
-      width: 42px; height: 42px; border-radius: 11px;
+      width: 36px; height: 36px; border-radius: 11px; /* ← Giảm từ 42px → 36px */
       background: linear-gradient(135deg, #1a56db, #3b82f6);
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff;
+      font-size: 16px; color: #fff; /* ← Giảm từ 18px → 16px */
       box-shadow: 0 4px 12px rgba(26,86,219,0.3);
     }
 
@@ -568,9 +568,9 @@
       background: #f8faff;
       border: 2px solid #e2e8f0;
       border-radius: 18px;
-      padding: 16px;
+      padding: 10px; /* ← Giảm từ 16px → 10px */
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px; /* ← Giảm từ 16px → 12px */
       overflow: hidden;
     }
     .qr-image-wrap::before {
@@ -593,8 +593,8 @@
      * ═══════════════════════════════════════════════
      */
     #qr-img {
-      width: 200px;
-      height: 200px;
+      width: 160px;  /* ← Giảm từ 200px → 160px */
+      height: 160px; /* ← Giảm từ 200px → 160px */
       object-fit: contain;
       border-radius: 10px;
       display: block;
@@ -650,7 +650,7 @@
     .qr-noi-dung .nd-copy:hover { background: #fde68a; }
 
     .qr-modal-footer {
-      padding: 0 22px 22px;
+      padding: 0 18px 18px; /* ← Giảm từ 0 22px 22px → 0 18px 18px */
       display: flex; gap: 10px;
     }
     .qr-btn-dong {
@@ -805,7 +805,7 @@
         <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
       </div>
       <div class="ten-logo">
-        <strong>NHÀ TRỌ Bà Năm</strong>
+        <strong>Nhà Trọ Bà Năm</strong>
         <span>Cổng khách thuê</span>
       </div>
     </div>
@@ -1222,8 +1222,8 @@
             alt="Mã QR chuyển khoản của quản lý"
             width="200"
             height="200"
-            data-quan-ly-id="@ql?.IDUser"
-            onerror="this.src='/images/qr/qrquanly.jpg';"
+            data-quan-ly-id="@ct?.IDUser"
+            onerror="this.src='/images/qr/qrchutro.jpg';"
           />
 
           @* Thông tin tài khoản ngân hàng *@

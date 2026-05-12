@@ -383,139 +383,111 @@
     }
 
     /* Mức độ khẩn cấp */
-    .nhom-muc-do { display: flex; gap: 8px; margin-top: 2px; }
+    .nhom-muc-do { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
     .chip-muc-do {
-      flex: 1; padding: 9px 10px;
-      border: 1.5px solid var(--mau-vien); border-radius: 9px;
-      cursor: pointer; text-align: center;
-      font-size: 12px; font-weight: 600; font-family: 'Be Vietnam Pro', sans-serif;
-      transition: all 0.2s; background: var(--mau-trang); color: var(--mau-chu-phu);
+      padding: 7px 16px; border-radius: 20px;
+      border: 1.5px solid var(--mau-vien);
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; background: var(--mau-trang);
+      font-family: 'Be Vietnam Pro', sans-serif;
     }
-    .chip-muc-do.chon-thap    { border-color: #059669; background: #d1fae5; color: #059669; }
-    .chip-muc-do.chon-trung   { border-color: #d97706; background: #fef3c7; color: #d97706; }
-    .chip-muc-do.chon-khan-cap { border-color: #ef4444; background: #fee2e2; color: #ef4444; }
+    .chip-muc-do:hover { border-color: var(--mau-chu-de-sang); }
+    .chip-muc-do.chon-thap    { background: #d1fae5; border-color: #059669; color: #065f46; }
+    .chip-muc-do.chon-trung   { background: #fef3c7; border-color: #d97706; color: #92400e; }
+    .chip-muc-do.chon-khan-cap{ background: #fee2e2; border-color: #ef4444; color: #991b1b; }
 
-    /* Chọn dịch vụ vi phạm (loại 1) */
-    .nhom-dich-vu-vi-pham {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px;
-    }
+    /* Dịch vụ vi phạm */
+    .nhom-dich-vu-vi-pham { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
     .chip-dich-vu {
-      padding: 10px 12px;
-      border: 1.5px solid var(--mau-vien); border-radius: 9px;
-      cursor: pointer;
-      font-size: 12.5px; font-weight: 600; font-family: 'Be Vietnam Pro', sans-serif;
-      transition: all 0.2s; background: var(--mau-trang); color: var(--mau-chu-phu);
-      display: flex; align-items: center; gap: 8px;
+      padding: 7px 14px; border-radius: 20px;
+      border: 1.5px solid var(--mau-vien);
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; background: var(--mau-trang);
+      display: flex; align-items: center; gap: 6px;
     }
-    .chip-dich-vu:hover { border-color: #d97706; background: #fffbeb; color: #d97706; }
-    .chip-dich-vu.chon { border-color: #d97706; background: #fffbeb; color: #d97706; font-weight: 700; }
-    .chip-dich-vu i { font-size: 14px; }
+    .chip-dich-vu:hover { border-color: var(--mau-chu-de-sang); background: var(--mau-xanh-nhat); }
+    .chip-dich-vu.chon { background: #dbeafe; border-color: #1a56db; color: #1e40af; }
 
-    /* Khu vực ảnh đính kèm */
+    /* Khu ảnh đính kèm */
     .khu-anh-dinh-kem {
-      border: 2px dashed var(--mau-vien);
-      border-radius: 10px; padding: 20px;
-      text-align: center; cursor: pointer;
-      transition: all 0.2s; margin-top: 2px;
+      border: 2px dashed var(--mau-vien); border-radius: 12px;
+      padding: 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; background: var(--mau-nen);
     }
     .khu-anh-dinh-kem:hover { border-color: var(--mau-chu-de-sang); background: var(--mau-xanh-nhat); }
-    .khu-anh-dinh-kem i { font-size: 24px; color: var(--mau-chu-phu); margin-bottom: 6px; }
-    .khu-anh-dinh-kem p { font-size: 12px; color: var(--mau-chu-phu); }
-    .khu-anh-dinh-kem span { font-size: 11px; color: var(--mau-chu-phu); opacity: 0.7; }
-    .xem-truoc-anh { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .thumb-anh {
-      width: 64px; height: 64px; border-radius: 8px;
-      object-fit: cover; border: 2px solid var(--mau-vien);
-      position: relative;
-    }
+    .khu-anh-dinh-kem i { font-size: 24px; color: var(--mau-chu-phu); margin-bottom: 8px; display: block; }
+    .khu-anh-dinh-kem p { font-size: 13px; font-weight: 600; color: var(--mau-chu); margin-bottom: 4px; }
+    .khu-anh-dinh-kem span { font-size: 11px; color: var(--mau-chu-phu); }
+    .xem-truoc-anh { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; justify-content: center; }
+    .thumb-anh { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid var(--mau-vien); }
 
     /* Nút gửi */
-    .nhom-nut-gui { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+    .nhom-nut-gui { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
     .nut-huy {
       background: var(--mau-nen); color: var(--mau-chu-phu);
-      border: none; padding: 11px 22px; border-radius: 10px;
-      cursor: pointer; font-size: 13px; font-weight: 600;
+      border: none; padding: 11px 20px; border-radius: 10px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
       transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif;
     }
     .nut-huy:hover { background: var(--mau-vien); }
-    .nut-gui-dich-vu {
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      color: #fff; border: none; padding: 11px 28px;
-      border-radius: 10px; cursor: pointer;
-      font-size: 13px; font-weight: 700;
-      box-shadow: 0 4px 12px rgba(217,119,6,0.3);
-      transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif;
+    .nut-gui-dich-vu, .nut-gui-hu-hong {
+      color: #fff; border: none; padding: 11px 24px;
+      border-radius: 10px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Be Vietnam Pro', sans-serif;
       display: flex; align-items: center; gap: 8px;
     }
-    .nut-gui-dich-vu:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(217,119,6,0.4); }
-    .nut-gui-hu-hong {
-      background: linear-gradient(135deg, #ef4444, #f97316);
-      color: #fff; border: none; padding: 11px 28px;
-      border-radius: 10px; cursor: pointer;
-      font-size: 13px; font-weight: 700;
-      box-shadow: 0 4px 12px rgba(239,68,68,0.3);
-      transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .nut-gui-hu-hong:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239,68,68,0.4); }
+    .nut-gui-dich-vu { background: linear-gradient(135deg,#d97706,#fbbf24); box-shadow: 0 4px 12px rgba(217,119,6,0.3); }
+    .nut-gui-hu-hong  { background: linear-gradient(135deg,#ef4444,#f97316); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+    .nut-gui-dich-vu:hover, .nut-gui-hu-hong:hover { transform: translateY(-2px); }
 
-    /* Ẩn/Hiện form */
-    .phan-form { display: none; }
-    .phan-form.hien { display: block; }
-
-    /* ===== LỊCH SỬ BÁO CÁO (cột phải) ===== */
-    .ds-lich-su { list-style: none; }
+    /* Lịch sử báo cáo */
+    .ds-lich-su { list-style: none; display: flex; flex-direction: column; gap: 0; }
     .item-lich-su {
-      padding: 13px 0;
-      border-bottom: 1px solid var(--mau-vien);
-      display: flex; align-items: flex-start; gap: 11px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--mau-vien);
     }
     .item-lich-su:last-child { border-bottom: none; }
     .dot-loai {
-      width: 36px; height: 36px; border-radius: 10px;
+      width: 32px; height: 32px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; flex-shrink: 0; margin-top: 2px;
+      font-size: 12px; flex-shrink: 0;
     }
-    .dot-loai.dich-vu { background: #fffbeb; color: #d97706; }
-    .dot-loai.hu-hong  { background: #fee2e2; color: #ef4444; }
+    .dot-loai.dich-vu { background: #fef3c7; color: #d97706; }
     .dot-loai.hoan-tat { background: #d1fae5; color: #059669; }
-    .item-lich-su .ten-su-co { font-size: 13px; font-weight: 700; line-height: 1.3; }
-    .item-lich-su .ngay-su-co { font-size: 11px; color: var(--mau-chu-phu); margin-top: 3px; }
+    .dot-loai.huy { background: #fee2e2; color: #ef4444; }
+    .ten-su-co { font-size: 13px; font-weight: 700; }
+    .ngay-su-co { font-size: 11px; color: var(--mau-chu-phu); margin-top: 2px; }
     .badge-trang-thai {
-      margin-left: auto; flex-shrink: 0;
-      font-size: 10px; font-weight: 700;
-      padding: 3px 9px; border-radius: 20px;
+      font-size: 10.5px; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; white-space: nowrap;
     }
-    .badge-trang-thai.dang-xu-ly { background: #fef3c7; color: #d97706; }
-    .badge-trang-thai.hoan-tat    { background: #d1fae5; color: #059669; }
-    .badge-trang-thai.cho-xu-ly   { background: #fee2e2; color: #ef4444; }
+    .badge-trang-thai.cho-xu-ly  { background: #fef3c7; color: #92400e; }
+    .badge-trang-thai.dang-xu-ly { background: #dbeafe; color: #1e40af; }
+    .badge-trang-thai.hoan-tat   { background: #d1fae5; color: #065f46; }
+    .badge-trang-thai.da-huy     { background: #fee2e2; color: #991b1b; }
 
-    /* Thông tin liên hệ */
+    /* Hộp liên hệ */
     .hop-lien-he {
-      background: linear-gradient(135deg, #eff6ff 0%, #ede9fe 100%);
-      border-radius: 12px; padding: 16px;
-      border: 1px solid #dbeafe; margin-top: 0;
+      background: var(--mau-nen); border-radius: 12px; padding: 16px;
     }
-    .hop-lien-he .tieu-de-lh {
-      font-size: 13px; font-weight: 800; margin-bottom: 12px;
-      display: flex; align-items: center; gap: 7px; color: #1e3a8a;
+    .tieu-de-lh {
+      font-size: 12px; font-weight: 800; color: var(--mau-chu);
+      display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
     }
     .hang-lh {
       display: flex; align-items: center; gap: 10px;
-      padding: 9px 0; border-bottom: 1px solid rgba(219,234,254,0.7);
-      font-size: 12px;
+      padding: 6px 0; border-bottom: 1px solid var(--mau-vien); font-size: 12.5px;
     }
     .hang-lh:last-child { border-bottom: none; }
-    .hang-lh i { color: #1a56db; width: 16px; text-align: center; }
-    .hang-lh .lh-nhan { color: #64748b; font-weight: 600; min-width: 70px; }
-    .hang-lh .lh-gia-tri { font-weight: 700; color: #1e3a8a; }
+    .hang-lh i { color: var(--mau-chu-de); width: 16px; text-align: center; }
+    .lh-nhan { color: var(--mau-chu-phu); min-width: 80px; }
+    .lh-gia-tri { font-weight: 700; color: var(--mau-chu); }
 
-    /* Ghi chú quan trọng */
+    /* Ghi chú */
     .hop-ghi-chu {
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      border-radius: 12px; padding: 14px 16px;
-      margin-bottom: 16px;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
     }
     .hop-ghi-chu .tieu-de-gc {
       font-size: 12px; font-weight: 800; color: #c2410c;
@@ -596,6 +568,10 @@
     .nut-luu { background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang)); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(26,86,219,0.3); transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif; }
     .nut-luu:hover { transform: translateY(-2px); }
 
+    /* Phần form ẩn/hiện */
+    .phan-form { display: none; }
+    .phan-form.hien { display: block; }
+
     /* ===== SCROLLBAR ===== */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -629,7 +605,7 @@
   <div class="logo-sidebar">
     <img src="~/images/logo.png" alt="Logo" class="logo-img" />
     <div class="ten-logo">
-      <strong>NHÀ TRỌ Bà Năm</strong>
+      <strong>Nhà Trọ Bà Năm</strong>
       <span>Cổng khách thuê</span>
     </div>
   </div>
@@ -642,19 +618,27 @@
   <div class="nhan-nhom">Dịch vụ</div>
   <a href="/KhachThue/ThanhToan" class="menu-item" onclick="chuyenTrang('thanh-toan', this); return false;">
     <i class="fas fa-credit-card"></i><span>Thanh toán</span>
-    <span class="huy-hieu-menu">1</span>
+    @* Số hóa đơn chưa đóng: Model.SoHoaDonChuaDong từ HDTHANG *@
+    @if (Model.SoHoaDonChuaDong > 0)
+    {
+      <span class="huy-hieu-menu">@Model.SoHoaDonChuaDong</span>
+    }
   </a>
   <a href="/KhachThue/TienIch" class="menu-item" onclick="chuyenTrang('tien-ich', this); return false;">
     <i class="fas fa-bolt"></i><span>Dịch vụ & Tiện ích</span>
   </a>
-  <a href="/KhacThue/BaoSuCo" class="menu-item dang-chon" onclick="chuyenTrang('bao-su-co', this); return false;">
+  <a href="/KhachThue/BaoSuCo" class="menu-item dang-chon" onclick="chuyenTrang('bao-su-co', this); return false;">
     <i class="fas fa-tools"></i><span>Báo sự cố</span>
   </a>
 
   <div class="nhan-nhom">Cá nhân</div>
   <a href="/KhachThue/ThongBao" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
     <i class="fas fa-bell"></i><span>Thông báo</span>
-    <span class="huy-hieu-menu">4</span>
+    @* Số thông báo chưa đọc: Model.SoThongBaoChuaDoc từ THONGBAO *@
+    @if (Model.SoThongBaoChuaDoc > 0)
+    {
+      <span class="huy-hieu-menu">@Model.SoThongBaoChuaDoc</span>
+    }
   </a>
   <a href="/KhachThue/HoSo" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
     <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
@@ -663,11 +647,11 @@
     <i class="fas fa-cog"></i><span>Cài đặt</span>
   </a>
 
-  <div class="khach-thue-footer">
-    <div class="anh-khach online-badge">T</div>
+  <div class="khach-thue-footer" onclick="moHoSo()">
+    <div class="anh-khach online-badge">@Model.KhachThue.FullName[0]</div>
     <div class="ten-khach">
-      <strong>Trần Duy Hơn</strong>
-      <span>Phòng 201 · Tầng 2</span>
+      <strong>@Model.KhachThue.FullName</strong>
+      <span>Phòng @Model.SoPhongHienTai · Tầng @Model.TangHienTai</span>
     </div>
   </div>
 </nav>
@@ -690,15 +674,18 @@
     </div>
     <div class="header-phai">
       <div class="hdr-date" id="headerDate"></div>
-      <button class="nut-thong-bao" onclick="alert('4 thông báo chưa đọc')">
+      <button class="nut-thong-bao" onclick="alert('@Model.SoThongBaoChuaDoc thông báo chưa đọc')">
         <i class="fas fa-bell"></i>
-        <span class="so-thong-bao">4</span>
+        @if (Model.SoThongBaoChuaDoc > 0)
+        {
+          <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
+        }
       </button>
       <div class="thong-tin-khach" onclick="moHoSo()">
-        <div class="anh-dai-dien">T</div>
+        <div class="anh-dai-dien">@Model.KhachThue.FullName[0]</div>
         <div>
-          <div class="ten">Trần Duy Hơn</div>
-          <div class="phong-so">Phòng 201</div>
+          <div class="ten">@Model.KhachThue.FullName</div>
+          <div class="phong-so">Phòng @Model.SoPhongHienTai</div>
         </div>
         <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
       </div>
@@ -716,26 +703,26 @@
       </div>
     </div>
 
-    <!-- Thống kê nhanh -->
+    <!-- Thống kê nhanh: đếm từ DONDV theo IDUser + TrangThai_DV -->
     <div class="hang-thong-ke">
       <div class="card-thong-ke mau-cam">
         <div class="bieu-tuong-card"><i class="fas fa-exclamation-triangle"></i></div>
         <div class="so-lieu">
-          <div class="con-so">2</div>
+          <div class="con-so">@Model.TongSuCoDaGui</div>
           <div class="ten-thong-ke">Sự cố đã gửi</div>
         </div>
       </div>
       <div class="card-thong-ke mau-xanh">
         <div class="bieu-tuong-card"><i class="fas fa-spinner"></i></div>
         <div class="so-lieu">
-          <div class="con-so">1</div>
+          <div class="con-so">@Model.SuCoDangXuLy</div>
           <div class="ten-thong-ke">Đang xử lý</div>
         </div>
       </div>
       <div class="card-thong-ke mau-xanh-la">
         <div class="bieu-tuong-card"><i class="fas fa-check-circle"></i></div>
         <div class="so-lieu">
-          <div class="con-so">1</div>
+          <div class="con-so">@Model.SuCoHoanTat</div>
           <div class="ten-thong-ke">Đã hoàn tất</div>
         </div>
       </div>
@@ -787,29 +774,34 @@
 
             <!-- =========================================
                  PHẦN FORM DỊCH VỤ (Loại 1)
+                 POST → OnPostDichVu()
+                 Lưu vào DONDV: LoaiDV='Dịch vụ', IDUser, IDPhong, NoiDung, MucDo
+                 AnhBienLai → lưu file vào wwwroot/uploads/su-co/ (xem hướng dẫn cuối file)
             ========================================= -->
             <div class="phan-form hien" id="form-dich-vu">
 
-              <!-- Số phòng (từ SQL) -->
+              <!-- Số phòng: load từ PHONG join HOPDONG theo IDUser đang đăng nhập -->
               <div class="hang-form-2">
                 <div class="nhom-truong">
                   <label class="nhan-truong">Số phòng <span class="bat-buoc">*</span></label>
-                  <select class="truong-nhap" id="phong-dich-vu">
+                  <select class="truong-nhap" id="phong-dich-vu" name="PhongDichVu">
                     <option value="">-- Chọn phòng --</option>
-                    @* Lấy từ SQL: foreach (var phong in Model.DanhSachPhong) *@
-                    <option value="101" selected>Phòng 101</option>
-                    <option value="102">Phòng 102</option>
-                    <option value="103">Phòng 103</option>
-                    <option value="201">Phòng 201</option>
-                    <option value="202">Phòng 202</option>
-                    <option value="203">Phòng 203</option>
-                    <option value="301">Phòng 301</option>
-                    <option value="302">Phòng 302</option>
+                    @foreach (var phong in Model.DanhSachPhong)
+                    {
+                      if (phong.IDPhong == Model.IDPhongHienTai)
+                      {
+                        <option value="@phong.IDPhong" selected="selected">Phòng @phong.SoPhong</option>
+                      }
+                      else
+                      {
+                        <option value="@phong.IDPhong">Phòng @phong.SoPhong</option>
+                      }
+                    }
                   </select>
                 </div>
                 <div class="nhom-truong">
                   <label class="nhan-truong">Ngày xảy ra <span class="bat-buoc">*</span></label>
-                  <input type="date" class="truong-nhap" id="ngay-dich-vu" />
+                  <input type="date" class="truong-nhap" id="ngay-dich-vu" name="NgayDichVu" />
                 </div>
               </div>
 
@@ -836,14 +828,14 @@
                     <i class="fas fa-ellipsis-h"></i> Dịch vụ khác
                   </div>
                 </div>
-                <input type="hidden" id="dich-vu-da-chon" value="" />
+                <input type="hidden" id="dich-vu-da-chon" name="DichVuDaChon" value="" />
               </div>
 
               <!-- Buổi không thực hiện -->
               <div class="hang-form-2">
                 <div class="nhom-truong">
                   <label class="nhan-truong">Buổi không thực hiện</label>
-                  <select class="truong-nhap" id="buoi-dich-vu">
+                  <select class="truong-nhap" id="buoi-dich-vu" name="BuoiDichVu">
                     <option value="">-- Chọn buổi --</option>
                     <option>Sáng (6h–12h)</option>
                     <option>Chiều (12h–18h)</option>
@@ -853,7 +845,7 @@
                 </div>
                 <div class="nhom-truong">
                   <label class="nhan-truong">Đã nhắc nhở quản lý?</label>
-                  <select class="truong-nhap" id="da-nhac">
+                  <select class="truong-nhap" id="da-nhac" name="DaNhac">
                     <option value="chua">Chưa nhắc</option>
                     <option value="roi">Đã nhắc nhưng chưa xử lý</option>
                     <option value="nhieu-lan">Đã nhắc nhiều lần</option>
@@ -864,7 +856,7 @@
               <!-- Mô tả chi tiết -->
               <div class="hang-form-1">
                 <label class="nhan-truong">Mô tả chi tiết <span class="bat-buoc">*</span></label>
-                <textarea class="truong-nhap" rows="4" id="mo-ta-dich-vu-text"
+                <textarea class="truong-nhap" rows="4" id="mo-ta-dich-vu-text" name="MoTaDichVu"
                   placeholder="Ví dụ: Hôm nay ngày 10/05, quản lý không giao nước dù đã đặt từ hôm qua. Tôi đã nhắn tin lúc 8h sáng nhưng không có phản hồi..."></textarea>
               </div>
 
@@ -882,7 +874,7 @@
                     🔴 Khẩn cấp
                   </button>
                 </div>
-                <input type="hidden" id="muc-do-dich-vu" value="trung" />
+                <input type="hidden" id="muc-do-dich-vu" name="MucDoDichVu" value="trung" />
               </div>
 
               <!-- Ảnh đính kèm -->
@@ -894,7 +886,8 @@
                   <span>PNG, JPG, WEBP · Tối đa 5MB mỗi ảnh</span>
                   <div class="xem-truoc-anh" id="xem-truoc-dv"></div>
                 </div>
-                <input type="file" id="file-anh-dv" accept="image/*" multiple style="display:none"
+                @* Upload ảnh → lưu vào DONDV.AnhBienLai (xem hướng dẫn SQL + File cuối trang) *@
+                <input type="file" id="file-anh-dv" name="FileAnhDichVu" accept="image/*" multiple style="display:none"
                   onchange="xemTruocAnh(this,'xem-truoc-dv')" />
               </div>
 
@@ -910,6 +903,9 @@
 
             <!-- =========================================
                  PHẦN FORM HƯ HỎNG (Loại 2)
+                 POST → OnPostHuHong()
+                 Lưu vào DONDV: LoaiDV='Hư hỏng', IDUser, IDPhong, NoiDung, MucDo
+                 AnhBienLai → lưu file vào wwwroot/uploads/su-co/ (xem hướng dẫn cuối file)
             ========================================= -->
             <div class="phan-form" id="form-hu-hong">
 
@@ -917,22 +913,24 @@
               <div class="hang-form-2">
                 <div class="nhom-truong">
                   <label class="nhan-truong">Số phòng <span class="bat-buoc">*</span></label>
-                  <select class="truong-nhap" id="phong-hu-hong">
+                  <select class="truong-nhap" id="phong-hu-hong" name="PhongHuHong">
                     <option value="">-- Chọn phòng --</option>
-                    @* Lấy từ SQL: foreach (var phong in Model.DanhSachPhong) *@
-                    <option value="101">Phòng 101</option>
-                    <option value="102">Phòng 102</option>
-                    <option value="103">Phòng 103</option>
-                    <option value="201" selected>Phòng 201</option>
-                    <option value="202">Phòng 202</option>
-                    <option value="203">Phòng 203</option>
-                    <option value="301">Phòng 301</option>
-                    <option value="302">Phòng 302</option>
+                    @foreach (var phong in Model.DanhSachPhong)
+                    {
+                      if (phong.IDPhong == Model.IDPhongHienTai)
+                      {
+                        <option value="@phong.IDPhong" selected="selected">Phòng @phong.SoPhong</option>
+                      }
+                      else
+                      {
+                        <option value="@phong.IDPhong">Phòng @phong.SoPhong</option>
+                      }
+                    }
                   </select>
                 </div>
                 <div class="nhom-truong">
                   <label class="nhan-truong">Ngày phát hiện <span class="bat-buoc">*</span></label>
-                  <input type="date" class="truong-nhap" id="ngay-hu-hong" />
+                  <input type="date" class="truong-nhap" id="ngay-hu-hong" name="NgayHuHong" />
                 </div>
               </div>
 
@@ -940,7 +938,7 @@
               <div class="hang-form-2">
                 <div class="nhom-truong">
                   <label class="nhan-truong">Loại hư hỏng <span class="bat-buoc">*</span></label>
-                  <select class="truong-nhap" id="loai-hu-hong">
+                  <select class="truong-nhap" id="loai-hu-hong" name="LoaiHuHong">
                     <option value="">-- Chọn loại --</option>
                     <optgroup label="Hệ thống nước">
                       <option>Vòi nước bị rỉ / hỏng</option>
@@ -970,7 +968,7 @@
                 </div>
                 <div class="nhom-truong">
                   <label class="nhan-truong">Vị trí hư hỏng</label>
-                  <select class="truong-nhap" id="vi-tri-hu-hong">
+                  <select class="truong-nhap" id="vi-tri-hu-hong" name="ViTriHuHong">
                     <option value="">-- Chọn vị trí --</option>
                     <option>Trong phòng</option>
                     <option>Nhà vệ sinh / phòng tắm</option>
@@ -982,10 +980,10 @@
                 </div>
               </div>
 
-              <!-- Mô tả do người thuê nhập -->
+              <!-- Mô tả -->
               <div class="hang-form-1">
                 <label class="nhan-truong">Mô tả hư hỏng chi tiết <span class="bat-buoc">*</span></label>
-                <textarea class="truong-nhap" rows="4" id="mo-ta-hu-hong-text"
+                <textarea class="truong-nhap" rows="4" id="mo-ta-hu-hong-text" name="MoTaHuHong"
                   placeholder="Mô tả cụ thể hư hỏng bạn phát hiện. Ví dụ: Vòi nước trong phòng tắm bị rỉ liên tục từ 2 ngày nay, nước chảy không tắt được dù đã vặn chặt..."></textarea>
               </div>
 
@@ -1003,10 +1001,10 @@
                     🔴 Nghiêm trọng
                   </button>
                 </div>
-                <input type="hidden" id="muc-do-hu-hong" value="trung" />
+                <input type="hidden" id="muc-do-hu-hong" name="MucDoHuHong" value="trung" />
               </div>
 
-              <!-- Ảnh đính kèm -->
+              <!-- Ảnh hư hỏng -->
               <div class="hang-form-1">
                 <label class="nhan-truong">Ảnh hư hỏng <span style="color:var(--mau-chu-phu);font-weight:500;">(rất khuyến khích)</span></label>
                 <div class="khu-anh-dinh-kem" onclick="document.getElementById('file-anh-hh').click()">
@@ -1015,7 +1013,8 @@
                   <span>PNG, JPG, WEBP · Tối đa 5MB mỗi ảnh · Tối đa 5 ảnh</span>
                   <div class="xem-truoc-anh" id="xem-truoc-hh"></div>
                 </div>
-                <input type="file" id="file-anh-hh" accept="image/*" multiple style="display:none"
+                @* Upload ảnh → lưu vào DONDV.AnhBienLai (xem hướng dẫn SQL + File cuối trang) *@
+                <input type="file" id="file-anh-hh" name="FileAnhHuHong" accept="image/*" multiple style="display:none"
                   onchange="xemTruocAnh(this,'xem-truoc-hh')" />
               </div>
 
@@ -1036,7 +1035,7 @@
       <!-- CỘT PHẢI: LỊCH SỬ + LIÊN HỆ -->
       <div style="display:flex;flex-direction:column;gap:20px;">
 
-        <!-- Lịch sử báo cáo -->
+        <!-- Lịch sử báo cáo: load từ DONDV theo IDUser, sắp xếp NgayTao DESC -->
         <div class="card accent-xanh">
           <div class="card-header">
             <div class="icon-header"><i class="fas fa-history"></i></div>
@@ -1044,22 +1043,21 @@
           </div>
           <div class="card-body" style="padding-top:8px;">
             <ul class="ds-lich-su">
-              <li class="item-lich-su">
-                <div class="dot-loai dich-vu"><i class="fas fa-tint"></i></div>
-                <div style="flex:1">
-                  <div class="ten-su-co">Chưa giao nước uống</div>
-                  <div class="ngay-su-co">Dịch vụ · 08/05/2025</div>
-                </div>
-                <span class="badge-trang-thai dang-xu-ly">Đang xử lý</span>
-              </li>
-              <li class="item-lich-su">
-                <div class="dot-loai hoan-tat"><i class="fas fa-check"></i></div>
-                <div style="flex:1">
-                  <div class="ten-su-co">Vòi nước phòng tắm rỉ</div>
-                  <div class="ngay-su-co">Hư hỏng · 20/04/2025</div>
-                </div>
-                <span class="badge-trang-thai hoan-tat">Hoàn tất</span>
-              </li>
+              @foreach (var don in Model.LichSuBaoCao)
+              {
+                <li class="item-lich-su">
+                  <div class="dot-loai @(don.TrangThai_DV == "Thành công" ? "hoan-tat" : don.TrangThai_DV == "Đã hủy" ? "huy" : "dich-vu")">
+                    <i class="fas @(don.TrangThai_DV == "Thành công" ? "fa-check" : don.TrangThai_DV == "Đã hủy" ? "fa-times" : "fa-tint")"></i>
+                  </div>
+                  <div style="flex:1">
+                    <div class="ten-su-co">@don.NoiDung</div>
+                    <div class="ngay-su-co">@don.LoaiDV · @don.NgayTao.ToString("dd/MM/yyyy")</div>
+                  </div>
+                  <span class="badge-trang-thai @(don.TrangThai_DV == "Thành công" ? "hoan-tat" : don.TrangThai_DV == "Đang xử lý" ? "dang-xu-ly" : don.TrangThai_DV == "Đã hủy" ? "da-huy" : "cho-xu-ly")">
+                    @don.TrangThai_DV
+                  </span>
+                </li>
+              }
             </ul>
             <div style="text-align:center;padding-top:10px;">
               <button class="nut-huy" style="font-size:12px;padding:7px 16px;">
@@ -1069,7 +1067,7 @@
           </div>
         </div>
 
-        <!-- Liên hệ khẩn cấp -->
+        <!-- Liên hệ trực tiếp: load từ ACCOUNT (Roles='Manager') qua PHONG_MANAGER -->
         <div class="card accent-cam">
           <div class="card-header">
             <div class="icon-header"><i class="fas fa-phone-alt"></i></div>
@@ -1081,22 +1079,22 @@
               <div class="hang-lh">
                 <i class="fas fa-user"></i>
                 <span class="lh-nhan">Quản lý:</span>
-                <span class="lh-gia-tri">Nguyễn Văn A</span>
+                <span class="lh-gia-tri">@Model.ThongTinQuanLy.FullName</span>
               </div>
               <div class="hang-lh">
                 <i class="fas fa-phone"></i>
                 <span class="lh-nhan">Điện thoại:</span>
-                <span class="lh-gia-tri">0909 123 456</span>
+                <span class="lh-gia-tri">@Model.ThongTinQuanLy.Phone</span>
               </div>
               <div class="hang-lh">
                 <i class="fas fa-home"></i>
                 <span class="lh-nhan">Chủ trọ:</span>
-                <span class="lh-gia-tri">Bà Nguyễn T. Năm</span>
+                <span class="lh-gia-tri">@Model.ThongTinChuTro.FullName</span>
               </div>
               <div class="hang-lh">
                 <i class="fas fa-phone"></i>
                 <span class="lh-nhan">Điện thoại:</span>
-                <span class="lh-gia-tri">0912 345 678</span>
+                <span class="lh-gia-tri">@Model.ThongTinChuTro.Phone</span>
               </div>
               <div class="hang-lh">
                 <i class="fas fa-clock"></i>
@@ -1144,21 +1142,23 @@
       <button class="nut-dong-modal" onclick="document.getElementById('modal-ho-so').classList.remove('hien')">✕</button>
     </div>
     <div style="display:flex;align-items:center;gap:16px;padding:14px 0 18px;border-bottom:1px solid var(--mau-vien);margin-bottom:16px;">
-      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#60a5fa);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;border:3px solid #dbeafe;">T</div>
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#60a5fa);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;border:3px solid #dbeafe;">
+        @Model.KhachThue.FullName[0]
+      </div>
       <div>
-        <div style="font-size:18px;font-weight:800;">Trần Duy Hơn</div>
-        <div style="font-size:12px;color:var(--mau-chu-phu);margin-top:3px;">Phòng 201 · Nhà Trọ Bà Năm</div>
+        <div style="font-size:18px;font-weight:800;">@Model.KhachThue.FullName</div>
+        <div style="font-size:12px;color:var(--mau-chu-phu);margin-top:3px;">Phòng @Model.SoPhongHienTai · Nhà Trọ Bà Năm</div>
         <span style="display:inline-block;background:#dcfce7;color:#16a34a;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;margin-top:5px;">● Đang hoạt động</span>
       </div>
     </div>
     <div class="hang-form">
       <div class="nhom-truong-nhap">
         <label class="nhan-truong-nhap">Họ và tên</label>
-        <input class="truong-nhap-modal" type="text" value="Trần Duy Hơn" />
+        <input class="truong-nhap-modal" type="text" value="@Model.KhachThue.FullName" />
       </div>
       <div class="nhom-truong-nhap">
         <label class="nhan-truong-nhap">Số điện thoại</label>
-        <input class="truong-nhap-modal" type="text" value="0312.345.678" />
+        <input class="truong-nhap-modal" type="text" value="@Model.KhachThue.Phone" />
       </div>
     </div>
     <div class="nhom-nut-modal">
@@ -1215,14 +1215,11 @@
 
   // ===== CHỌN LOẠI BÁO CÁO =====
   function chonLoai(loai, btn) {
-    // Tabs
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    // Mô tả
     document.getElementById('mo-ta-dich-vu').classList.remove('hien');
     document.getElementById('mo-ta-hu-hong').classList.remove('hien');
     document.getElementById('mo-ta-' + loai).classList.add('hien');
-    // Form
     document.querySelectorAll('.phan-form').forEach(f => f.classList.remove('hien'));
     document.getElementById('form-' + loai).classList.add('hien');
   }
@@ -1267,8 +1264,10 @@
     });
   }
 
-  // ===== GỬI BÁO CÁO =====
-  function guiBaoCao(loai) {
+  // ===== GỬI BÁO CÁO (AJAX POST) =====
+  async function guiBaoCao(loai) {
+    let isValid = true;
+
     if (loai === 'dich-vu') {
       const phong = document.getElementById('phong-dich-vu').value;
       const ngay  = document.getElementById('ngay-dich-vu').value;
@@ -1279,9 +1278,6 @@
       if (!ngay)  { alert('Vui lòng chọn ngày xảy ra!'); return; }
       if (!dv)    { alert('Vui lòng chọn dịch vụ không được thực hiện!'); return; }
       if (!moTa)  { alert('Vui lòng mô tả chi tiết sự cố!'); return; }
-
-      document.getElementById('noi-dung-thanh-cong').innerHTML =
-        `Báo cáo <strong>dịch vụ</strong> của bạn đã được gửi đến quản lý và chủ trọ.<br>Chúng tôi sẽ xử lý trong vòng <strong>24 giờ</strong>.`;
     } else {
       const phong   = document.getElementById('phong-hu-hong').value;
       const ngay    = document.getElementById('ngay-hu-hong').value;
@@ -1292,26 +1288,62 @@
       if (!ngay)    { alert('Vui lòng chọn ngày phát hiện!'); return; }
       if (!loaiHH)  { alert('Vui lòng chọn loại hư hỏng!'); return; }
       if (!moTa)    { alert('Vui lòng mô tả hư hỏng chi tiết!'); return; }
-
-      document.getElementById('noi-dung-thanh-cong').innerHTML =
-        `Báo cáo <strong>hư hỏng</strong> của bạn đã được gửi đến quản lý và chủ trọ.<br>Chúng tôi sẽ liên hệ và xử lý sớm nhất có thể.`;
     }
 
-    // Tạo mã báo cáo
-    const ma = '#SC-2025-' + String(Math.floor(Math.random() * 9000) + 1000);
-    document.getElementById('ma-bao-cao-hien-thi').textContent = ma;
-    document.getElementById('modal-thanh-cong').classList.add('hien');
+    // Build FormData để gửi kèm file ảnh
+    const formData = new FormData();
+    formData.append('loai', loai);
+
+    if (loai === 'dich-vu') {
+      formData.append('PhongDichVu',    document.getElementById('phong-dich-vu').value);
+      formData.append('NgayDichVu',     document.getElementById('ngay-dich-vu').value);
+      formData.append('DichVuDaChon',   document.getElementById('dich-vu-da-chon').value);
+      formData.append('BuoiDichVu',     document.getElementById('buoi-dich-vu').value);
+      formData.append('DaNhac',         document.getElementById('da-nhac').value);
+      formData.append('MoTaDichVu',     document.getElementById('mo-ta-dich-vu-text').value);
+      formData.append('MucDoDichVu',    document.getElementById('muc-do-dich-vu').value);
+      const filesDV = document.getElementById('file-anh-dv').files;
+      for (let f of filesDV) formData.append('FileAnhDichVu', f);
+    } else {
+      formData.append('PhongHuHong',    document.getElementById('phong-hu-hong').value);
+      formData.append('NgayHuHong',     document.getElementById('ngay-hu-hong').value);
+      formData.append('LoaiHuHong',     document.getElementById('loai-hu-hong').value);
+      formData.append('ViTriHuHong',    document.getElementById('vi-tri-hu-hong').value);
+      formData.append('MoTaHuHong',     document.getElementById('mo-ta-hu-hong-text').value);
+      formData.append('MucDoHuHong',    document.getElementById('muc-do-hu-hong').value);
+      const filesHH = document.getElementById('file-anh-hh').files;
+      for (let f of filesHH) formData.append('FileAnhHuHong', f);
+    }
+
+    formData.append('__RequestVerificationToken',
+      document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '');
+
+    try {
+      const res  = await fetch('?handler=GuiBaoCao', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (data.success) {
+        const loaiText = loai === 'dich-vu' ? 'dịch vụ' : 'hư hỏng';
+        document.getElementById('noi-dung-thanh-cong').innerHTML =
+          `Báo cáo <strong>${loaiText}</strong> của bạn đã được gửi đến quản lý và chủ trọ.<br>Chúng tôi sẽ xử lý trong vòng <strong>24 giờ</strong>.`;
+        document.getElementById('ma-bao-cao-hien-thi').textContent = data.maBaoCao;
+        document.getElementById('modal-thanh-cong').classList.add('hien');
+      } else {
+        alert('Gửi thất bại: ' + data.message);
+      }
+    } catch (err) {
+      alert('Có lỗi xảy ra, vui lòng thử lại!');
+    }
   }
 
   function dongThanhCong() {
     document.getElementById('modal-thanh-cong').classList.remove('hien');
-    // Có thể reload hoặc reset form
+    window.location.reload();
   }
 
   // ===== ĐẶT LẠI FORM =====
   function datLaiForm(loai) {
     if (loai === 'dich-vu') {
-      document.getElementById('phong-dich-vu').value = '101';
       document.getElementById('mo-ta-dich-vu-text').value = '';
       document.getElementById('buoi-dich-vu').value = '';
       document.getElementById('da-nhac').value = 'chua';
@@ -1325,7 +1357,6 @@
       document.querySelector('#form-dich-vu .chip-muc-do:nth-child(2)').classList.add('chon-trung');
       document.getElementById('muc-do-dich-vu').value = 'trung';
     } else {
-      document.getElementById('phong-hu-hong').value = '201';
       document.getElementById('loai-hu-hong').value = '';
       document.getElementById('vi-tri-hu-hong').value = '';
       document.getElementById('mo-ta-hu-hong-text').value = '';
@@ -1343,6 +1374,8 @@
     document.getElementById('modal-ho-so').classList.add('hien');
   }
 </script>
+
+@Html.AntiForgeryToken()
 
 </body>
 </html>
