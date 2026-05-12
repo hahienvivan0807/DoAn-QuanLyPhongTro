@@ -115,9 +115,71 @@ function xoaQuanLy(id, ten) {
 }
 
 // ---- Modal helper (dùng lại modal có sẵn) ----
-function moModalDanhSachQuanLy() {
-    taiDanhSachQuanLy();          // load fresh
+async function moModalDanhSachQuanLy() {
     moModal('modal-danh-sach-quan-ly');
+
+    const container = document.getElementById('ds-quan-ly-trong-modal');
+    const soLuongEl = document.getElementById('so-luong-quan-ly');
+
+    // Hiện loading
+    container.innerHTML = `
+        <div style="text-align:center;padding:32px;color:var(--mau-chu-phu);">
+            <i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:8px;display:block;"></i>
+            Đang tải danh sách...
+        </div>`;
+
+    try {
+        const res = await fetch('/api/ChuTro/danh-sach-quan-ly', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        // Cập nhật số lượng
+        if (soLuongEl) {
+            soLuongEl.innerHTML = `Đang hiển thị <strong>${data.length}</strong> quản lý`;
+        }
+
+        // Render vào modal
+        if (!data || data.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:24px;color:var(--mau-chu-phu);font-size:12px;">
+                    <i class="fas fa-user-slash" style="font-size:24px;opacity:0.35;display:block;margin-bottom:8px;"></i>
+                    Chưa có quản lý nào.
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = data.map((ql, idx) => {
+            const bg = GRADIENT_POOL[idx % GRADIENT_POOL.length];
+            const chu = (ql.fullName || ql.username || '?').trim().split(' ').pop()[0].toUpperCase();
+            return `
+                <div class="dong-quan-ly">
+                    <div class="anh-quan-ly" style="background:${bg};">${chu}</div>
+                    <div class="thong-tin-quan-ly">
+                        <div class="ten-quan-ly">${ql.fullName}</div>
+                        <div class="quyen-quan-ly">${ql.phone} · @${ql.username}</div>
+                    </div>
+                    <span class="the-quyen day-du">Quản lý</span>
+                    <div class="nhom-nut-quan-ly">
+                        <button class="nut-sua-ql" title="Chỉnh sửa" onclick="suaQuanLy(${ql.idUser})">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="nut-xoa-ql" title="Xóa" onclick="xoaQuanLy(${ql.idUser}, '${ql.fullName.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>`;
+        }).join('');
+
+    } catch (err) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:20px;color:#dc2626;font-size:12px;">
+                <i class="fas fa-exclamation-circle" style="display:block;font-size:22px;margin-bottom:6px;"></i>
+                Không thể tải danh sách quản lý.
+            </div>`;
+        console.error('[QuanLy Modal]', err);
+    }
 }
 
 // ---- Tự động render khi trang load ----
