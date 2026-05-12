@@ -180,6 +180,24 @@ namespace QuanLyNhaTro.Controllers
 
             return Ok(result);
         }
+        [HttpGet("DanhSachPhong")]
+        public async Task<IActionResult> DanhSachPhong()
+        {
+            var DSPhong = await _context.PHONG
+             .OrderBy(u => u.Tang)      
+             .ThenBy(u => u.SoPhong)
+             .Select(u => new
+            {
+                u.IDPhong,
+                u.SoPhong,
+                u.Tang,
+                u.DienTich,
+                u.GiaPhongFix,
+                u.MoTa,
+                u.TrangThai
+            }).ToListAsync();
+            return Ok(DSPhong);
+        }
     }
 
 }
