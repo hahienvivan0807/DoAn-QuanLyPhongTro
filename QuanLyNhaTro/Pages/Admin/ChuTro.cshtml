@@ -6,45 +6,76 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hệ Thống Quản Lý – Chủ Trọ</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="/css/ChuTro.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Javascript-->
-    <script src="/js/ChuTro/chuTro-core.js"></script>
-    <script src="/js/ChuTro/chuTro-quanLy.js"></script>
-    <script src="/js/ChuTro/chuTro-bieuDo.js"></script>
-    <script src="/js/ChuTro/chuTro-cauHinh.js"></script>
-    <script src="/js/ChuTro/chuTro-pheDuyet.js"></script>
-    <script src="/js/ChuTro/ChuTro-NguoiThue.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ Thống Quản Lý – Chủ Trọ</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/css/ChuTro.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Javascript-->
+  <script src="/js/ChuTro/ChuTro-core.js"></script>
+  <script src="/js/ChuTro/ChuTro-quanLy.js"></script>
+  <script src="/js/ChuTro/ChuTro-bieuDo.js"></script>
+  <script src="/js/ChuTro/ChuTro-cauHinh.js"></script>
+  <script src="/js/ChuTro/ChuTro-pheDuyet.js"></script>
+  <script src="/js/ChuTro/ChuTro-NguoiThue.js"></script>
   <style>
     /* =========================================================
-       BIẾN MÀU & FONT TOÀN CỤC
+       IMPORT FONT
     ========================================================= */
-    @@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+    @@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
 
+    /* =========================================================
+       BIẾN MÀU & THIẾT KẾ TOÀN CỤC
+    ========================================================= */
     :root {
-      --mau-sidebar:        #0a1628;
-      --mau-sidebar-dam:    #060e1a;
-      --mau-chu-de:         #c9810a;       /* vàng đồng – màu sắc đặc trưng chủ trọ */
-      --mau-chu-de-sang:    #f5a623;
-      --mau-chu-de-nhat:    #fff8ee;
-      --mau-nen:            #f4f6fb;
+      /* Màu chủ đề – vàng đồng sang trọng */
+      --mau-chu-de:         #b8720a;
+      --mau-chu-de-sang:    #e8971c;
+      --mau-chu-de-nhat:    #fdf6e3;
+      --mau-chu-de-vien:    rgba(184,114,10,0.15);
+
+      /* Sidebar */
+      --mau-sidebar:        #0d1b2e;
+      --mau-sidebar-dam:    #081020;
+      --mau-sidebar-vien:   rgba(255,255,255,0.06);
+      --mau-sidebar-hover:  rgba(232,151,28,0.12);
+      --mau-sidebar-active: rgba(232,151,28,0.18);
+
+      /* Nền & nội dung */
+      --mau-nen:            #f0f2f8;
+      --mau-nen-card:       #f8f9fd;
       --mau-trang:          #ffffff;
-      --mau-chu:            #1a2236;
+      --mau-chu:            #111827;
       --mau-chu-phu:        #6b7a99;
-      --mau-vien:           #e4e9f2;
-      --mau-xanh-nhat:      #f0f4ff;
-      --bong-card:          0 4px 24px rgba(201,129,10,0.08);
-      --bong-card-hover:    0 8px 32px rgba(201,129,10,0.18);
+      --mau-vien:           #e5e9f5;
+
+      /* Trạng thái */
+      --mau-xanh:           #0ea271;
+      --mau-xanh-nhat:      #ecfdf5;
+      --mau-do:             #e53e3e;
+      --mau-do-nhat:        #fff5f5;
+      --mau-xanh-bien:      #2563eb;
+      --mau-xanh-bien-nhat: #eff6ff;
+
+      /* Bóng đổ */
+      --bong-card:          0 2px 12px rgba(13,27,46,0.06), 0 1px 3px rgba(13,27,46,0.04);
+      --bong-card-hover:    0 8px 28px rgba(184,114,10,0.14), 0 2px 8px rgba(13,27,46,0.08);
+      --bong-sidebar:       6px 0 32px rgba(0,0,0,0.3);
+      --bong-header:        0 1px 0 var(--mau-vien), 0 2px 16px rgba(13,27,46,0.04);
+
+      /* Bo góc */
+      --radius-sm:   8px;
+      --radius-md:   12px;
+      --radius-lg:   16px;
+      --radius-xl:   20px;
+      --radius-full: 9999px;
     }
 
     /* =========================================================
        RESET & CƠ BẢN
     ========================================================= */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Be Vietnam Pro', sans-serif;
@@ -53,26 +84,29 @@
       display: flex;
       height: 100vh;
       overflow: clip;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* =========================================================
        SIDEBAR – THANH ĐIỀU HƯỚNG TRÁI
     ========================================================= */
     #thanh-sidebar {
-      width: 230px;
-      min-width: 230px;
-      background: linear-gradient(175deg, #0a1628 0%, #060e1a 100%);
+      width: 248px;
+      min-width: 248px;
+      background: var(--mau-sidebar);
       display: flex;
       flex-direction: column;
       height: 100vh;
       z-index: 100;
-      box-shadow: 4px 0 32px rgba(0,0,0,0.28);
+      box-shadow: var(--bong-sidebar);
       overflow-y: auto;
       transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
       position: relative;
+      border-right: 1px solid rgba(255,255,255,0.04);
     }
     #thanh-sidebar.an { width: 0; min-width: 0; overflow: hidden; }
-    /* Sidebar thu gọn */
+
+    /* Thu gọn sidebar */
     .ten-logo, .thong-tin-chu-tro .ten-chu {
       transition: opacity 0.2s, max-width 0.35s;
       max-width: 160px; overflow: hidden;
@@ -87,104 +121,116 @@
     }
     #thanh-sidebar.thu-gon .muc-menu span:not(.huy-hieu) { opacity: 0; max-width: 0; }
     #thanh-sidebar.thu-gon .huy-hieu { opacity: 0; width: 0; overflow: hidden; padding: 0; }
-    #thanh-sidebar.thu-gon .muc-menu { padding: 10px 0; justify-content: center; border-radius: 10px; margin: 2px 8px; width: calc(100% - 12px);  }
+    #thanh-sidebar.thu-gon .muc-menu { padding: 10px 0; justify-content: center; border-radius: 10px; margin: 2px 8px; width: calc(100% - 12px); }
     #thanh-sidebar.thu-gon .thong-tin-chu-tro { justify-content: center; }
-    #thanh-sidebar.thu-gon .muc-menu i {
-    width: auto;               /* ← thêm dòng này */
-    font-size: 16px;
-    }
+    #thanh-sidebar.thu-gon .muc-menu i { width: auto; font-size: 16px; }
 
-    /* Logo – khu vực trên cùng sidebar */
+    /* Thanh cuộn sidebar */
+    #thanh-sidebar::-webkit-scrollbar { width: 0; }
+
+    /* Logo – khu vực trên cùng */
     .khu-vuc-logo {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 26px 18px 22px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--mau-sidebar-vien);
     }
     .bieu-tuong-logo {
-      width: 44px; height: 44px; flex-shrink: 0;
+      width: 40px; height: 40px; flex-shrink: 0;
       background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px; color: #fff;
-      box-shadow: 0 4px 16px rgba(201,129,10,0.4);
+      font-size: 17px; color: #fff;
+      box-shadow: 0 4px 14px rgba(184,114,10,0.45);
     }
-    .ten-logo strong { display: block; color: #fff; font-size: 14px; font-weight: 800; letter-spacing: 0.3px; }
-    .ten-logo span   { font-size: 10px; color: rgba(255,255,255,0.38); }
+    .ten-logo strong { display: block; color: #fff; font-size: 13.5px; font-weight: 800; letter-spacing: 0.2px; }
+    .ten-logo span   { font-size: 10px; color: rgba(255,255,255,0.32); letter-spacing: 0.3px; }
 
     /* Nhãn nhóm menu */
     .nhan-nhom-menu {
-      font-size: 9.5px; font-weight: 800; letter-spacing: 1.8px;
-      color: rgba(255,255,255,0.25);
+      font-size: 9px; font-weight: 800; letter-spacing: 2px;
+      color: rgba(255,255,255,0.22);
       text-transform: uppercase;
-      padding: 14px 18px 6px;
-      margin-top: 4px;
+      padding: 18px 20px 6px;
     }
 
     /* Mỗi mục menu */
     .muc-menu {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 18px;
-      color: rgba(255,255,255,0.6);
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px 9px 16px;
+      color: rgba(255,255,255,0.52);
       cursor: pointer;
-      border-radius: 0 28px 28px 0;
-      margin: 2px 10px 2px 0;
-      transition: all 0.2s;
-      font-size: 13.5px;
+      border-radius: 0 var(--radius-full) var(--radius-full) 0;
+      margin: 1px 12px 1px 0;
+      transition: all 0.18s ease;
+      font-size: 13px;
+      font-weight: 500;
       text-decoration: none;
       position: relative;
     }
-    .muc-menu i { width: 20px; text-align: center; font-size: 14px; }
-    .muc-menu:hover { background: rgba(201,129,10,0.13); color: #fff; }
+    .muc-menu i {
+      width: 18px; text-align: center; font-size: 13px;
+      opacity: 0.75; flex-shrink: 0;
+      transition: opacity 0.18s;
+    }
+    .muc-menu:hover {
+      background: var(--mau-sidebar-hover);
+      color: rgba(255,255,255,0.9);
+    }
+    .muc-menu:hover i { opacity: 1; }
 
     /* Menu đang chọn */
     .muc-menu.dang-chon {
-      background: linear-gradient(90deg, rgba(201,129,10,0.85) 0%, rgba(245,166,35,0.55) 100%);
-      color: #fff; font-weight: 700;
-      box-shadow: 0 4px 16px rgba(201,129,10,0.25);
+      background: var(--mau-sidebar-active);
+      color: #fff;
+      font-weight: 700;
     }
+    .muc-menu.dang-chon i { opacity: 1; color: var(--mau-chu-de-sang); }
     .muc-menu.dang-chon::before {
       content: '';
       position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-      height: 65%; width: 4px;
+      height: 60%; width: 3px;
       background: var(--mau-chu-de-sang);
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 3px 3px 0;
     }
 
     /* Badge số */
     .huy-hieu {
       margin-left: auto;
-      background: #ef4444; color: #fff;
-      font-size: 10px; font-weight: 700;
-      border-radius: 20px; padding: 1px 7px; min-width: 20px; text-align: center;
+      background: rgba(239,68,68,0.85);
+      color: #fff;
+      font-size: 9.5px; font-weight: 800;
+      border-radius: var(--radius-full);
+      padding: 2px 7px; min-width: 18px; text-align: center;
     }
     .huy-hieu.vang { background: var(--mau-chu-de); }
 
     /* Thông tin chủ trọ dưới đáy */
     .thong-tin-chu-tro {
       margin-top: auto;
-      padding: 16px 14px;
-      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 14px 16px;
+      border-top: 1px solid var(--mau-sidebar-vien);
       display: flex;
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      flex-shrink: 0;             /* ← thêm dòng này: không bị ép thu nhỏ */
-      position: sticky;           /* ← thêm: luôn dính đáy */
+      flex-shrink: 0;
+      position: sticky;
       bottom: 0;
-      background: #060e1a;        /* ← thêm: che nội dung cuộn phía sau */
+      background: var(--mau-sidebar-dam);
       z-index: 1;
+      transition: background 0.18s;
     }
+    .thong-tin-chu-tro:hover { background: rgba(255,255,255,0.04); }
     .anh-chu-tro {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
       background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 17px; font-weight: 800;
-      border: 2px solid rgba(255,255,255,0.15);
+      color: #fff; font-size: 15px; font-weight: 800;
     }
-    .ten-chu strong { display: block; color: #fff; font-size: 13px; font-weight: 700; }
-    .ten-chu span   { color: rgba(255,255,255,0.4); font-size: 10.5px; }
+    .ten-chu strong { display: block; color: #fff; font-size: 12.5px; font-weight: 700; }
+    .ten-chu span   { color: rgba(255,255,255,0.35); font-size: 10px; }
 
     /* =========================================================
        KHU VỰC CHÍNH
@@ -196,322 +242,350 @@
     /* HEADER */
     #thanh-header {
       background: var(--mau-trang);
-      padding: 0 28px; height: 64px;
+      padding: 0 28px;
+      height: 62px;
       display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--mau-vien);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      box-shadow: var(--bong-header);
       flex-shrink: 0;
+      z-index: 50;
     }
     .header-trai { display: flex; align-items: center; gap: 14px; }
     .nut-ham-burger {
       background: none; border: none; cursor: pointer;
-      font-size: 19px; color: var(--mau-chu-phu);
-      padding: 7px; border-radius: 8px; transition: background 0.2s;
+      font-size: 18px; color: var(--mau-chu-phu);
+      padding: 8px; border-radius: var(--radius-sm); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
     }
     .nut-ham-burger:hover { background: var(--mau-chu-de-nhat); color: var(--mau-chu-de); }
-    .tieu-de-header     { font-size: 15px; font-weight: 800; }
-    .duong-dan-header   { font-size: 11px; color: var(--mau-chu-phu); }
 
-    .header-phai { display: flex; align-items: center; gap: 14px; }
+    .tieu-de-header {
+      font-size: 14.5px; font-weight: 800; color: var(--mau-chu);
+      font-family: 'Lexend', sans-serif;
+    }
+    .duong-dan-header { font-size: 11px; color: var(--mau-chu-phu); margin-top: 1px; }
 
-    /* Ô tìm kiếm header */
+    .header-phai { display: flex; align-items: center; gap: 10px; }
+
+    /* Ô tìm kiếm */
     .o-tim-kiem {
       display: flex; align-items: center; gap: 8px;
-      background: var(--mau-nen); border: 1px solid var(--mau-vien);
-      border-radius: 24px; padding: 7px 16px; transition: all 0.2s;
+      background: var(--mau-nen); border: 1.5px solid var(--mau-vien);
+      border-radius: var(--radius-full); padding: 7px 16px; transition: all 0.2s;
     }
-    .o-tim-kiem:focus-within { border-color: var(--mau-chu-de); background: #fff; }
-    .o-tim-kiem input { border: none; background: none; outline: none; font-size: 13px; width: 175px; color: var(--mau-chu); font-family: inherit; }
-    .o-tim-kiem i { color: var(--mau-chu-phu); font-size: 13px; }
+    .o-tim-kiem:focus-within { border-color: var(--mau-chu-de); background: #fff; box-shadow: 0 0 0 3px var(--mau-chu-de-vien); }
+    .o-tim-kiem input { border: none; background: none; outline: none; font-size: 12.5px; width: 170px; color: var(--mau-chu); font-family: inherit; }
+    .o-tim-kiem input::placeholder { color: var(--mau-chu-phu); }
+    .o-tim-kiem i { color: var(--mau-chu-phu); font-size: 12px; }
 
-    /* Chuông thông báo */
+    /* Chuông */
     .nut-chuong {
       position: relative; background: none; border: none;
-      cursor: pointer; font-size: 17px; color: var(--mau-chu-phu);
-      padding: 8px; border-radius: 50%; transition: all 0.2s;
+      cursor: pointer; font-size: 16px; color: var(--mau-chu-phu);
+      padding: 8px; border-radius: var(--radius-full); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
     }
     .nut-chuong:hover { background: var(--mau-chu-de-nhat); color: var(--mau-chu-de); }
     .so-chuong {
       position: absolute; top: 2px; right: 2px;
-      background: #ef4444; color: #fff; font-size: 9px; font-weight: 700;
-      border-radius: 50%; width: 16px; height: 16px;
+      background: var(--mau-do); color: #fff;
+      font-size: 8.5px; font-weight: 800;
+      border-radius: var(--radius-full);
+      width: 15px; height: 15px;
       display: flex; align-items: center; justify-content: center;
       border: 2px solid #fff;
     }
 
-    /* Avatar admin header */
+    /* Tag CHỦ TRỌ */
+    .the-chu-tro {
+      background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+      color: #fff; font-size: 9.5px; font-weight: 800;
+      padding: 3px 10px; border-radius: var(--radius-full);
+      letter-spacing: 0.8px; text-transform: uppercase;
+    }
+
+    /* Avatar header */
     .khoi-admin-header {
       display: flex; align-items: center; gap: 9px;
-      cursor: pointer; padding: 5px 12px; border-radius: 24px; transition: background 0.2s;
+      cursor: pointer; padding: 5px 10px; border-radius: var(--radius-full);
+      transition: background 0.2s;
     }
     .khoi-admin-header:hover { background: var(--mau-chu-de-nhat); }
     .anh-dai-dien-header {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: var(--radius-sm);
       background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 14px; font-weight: 800;
+      color: #fff; font-size: 13px; font-weight: 800;
     }
-    .ten-admin-header { font-size: 13px; font-weight: 700; }
-    .vai-tro-header  { font-size: 10.5px; color: var(--mau-chu-phu); }
+    .ten-admin-header { font-size: 12.5px; font-weight: 700; }
+    .vai-tro-header { font-size: 10px; color: var(--mau-chu-phu); }
 
-    /* TAG "Chủ trọ" nổi bật */
-    .the-chu-tro {
-      background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      color: #fff; font-size: 10px; font-weight: 800;
-      padding: 2px 9px; border-radius: 20px; letter-spacing: 0.5px;
+    /* Đường phân cách header */
+    .header-divider {
+      width: 1px; height: 22px; background: var(--mau-vien); margin: 0 2px;
     }
 
     /* =========================================================
-       NỘI DUNG DASHBOARD
+       NỘI DUNG DASHBOARD CHÍNH
     ========================================================= */
     #noi-dung-chinh {
-      flex: 1; overflow-y: auto; padding: 24px 28px;
+      flex: 1; overflow-y: auto; padding: 24px 28px 32px;
     }
+    #noi-dung-chinh::-webkit-scrollbar { width: 5px; }
+    #noi-dung-chinh::-webkit-scrollbar-track { background: transparent; }
+    #noi-dung-chinh::-webkit-scrollbar-thumb { background: #d4d9e6; border-radius: 3px; }
 
-    /* Dòng chào mừng đầu trang */
+    /* Dòng chào mừng */
     .dong-tieu-de-trang {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 22px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 24px;
     }
-    .dong-tieu-de-trang h2 { font-size: 20px; font-weight: 900; }
-    .dong-tieu-de-trang p  { font-size: 12.5px; color: var(--mau-chu-phu); margin-top: 3px; }
+    .dong-tieu-de-trang h2 {
+      font-size: 21px; font-weight: 900;
+      font-family: 'Lexend', sans-serif;
+      color: var(--mau-chu);
+    }
+    .dong-tieu-de-trang p  { font-size: 12px; color: var(--mau-chu-phu); margin-top: 4px; }
 
     /* Nút hành động chính */
     .nut-hanh-dong-chinh {
       background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      color: #fff; border: none; border-radius: 10px;
+      color: #fff; border: none; border-radius: var(--radius-md);
       padding: 10px 20px; font-size: 13px; font-weight: 700;
       cursor: pointer; display: flex; align-items: center; gap: 8px;
-      box-shadow: 0 4px 14px rgba(201,129,10,0.35);
+      box-shadow: 0 4px 14px rgba(184,114,10,0.3);
       transition: all 0.2s; font-family: inherit;
     }
-    .nut-hanh-dong-chinh:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(201,129,10,0.45); }
+    .nut-hanh-dong-chinh:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(184,114,10,0.42); }
 
     /* =========================================================
-       HÀNG 1 – 4 CARD THỐNG KÊ TỔNG QUAN
+       HÀNG 1 – 4 CARD THỐNG KÊ
     ========================================================= */
     .hang-thong-ke-tong-quan {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;
     }
 
     .card-thong-ke {
-      background: var(--mau-trang); border-radius: 16px; padding: 20px;
+      background: var(--mau-trang); border-radius: var(--radius-lg); padding: 20px 22px;
       box-shadow: var(--bong-card); cursor: pointer;
-      transition: all 0.25s; border: 1px solid transparent; position: relative; overflow: hidden;
+      transition: all 0.22s ease; border: 1.5px solid transparent;
+      position: relative; overflow: hidden;
     }
-    .card-thong-ke:hover { transform: translateY(-4px); box-shadow: var(--bong-card-hover); }
-    .card-thong-ke::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0;
+    .card-thong-ke:hover { transform: translateY(-3px); box-shadow: var(--bong-card-hover); }
+    .card-thong-ke::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 
-    /* Màu vệt sáng */
-    .mau-vang::before   { background: linear-gradient(90deg, #c9810a, #f5a623); }
-    .mau-vang           { border-color: #fef3c7; }
-    .mau-vang .bieu-tuong-card { background: #fff8ee; color: #c9810a; }
+    /* Màu sắc card */
+    .mau-vang::after   { background: linear-gradient(90deg, var(--mau-chu-de), var(--mau-chu-de-sang)); }
+    .mau-vang          { border-color: rgba(232,151,28,0.14); }
+    .mau-vang .bieu-tuong-card { background: var(--mau-chu-de-nhat); color: var(--mau-chu-de); }
 
-    .mau-xanh-bien::before { background: linear-gradient(90deg, #1a56db, #60a5fa); }
-    .mau-xanh-bien         { border-color: #dbeafe; }
-    .mau-xanh-bien .bieu-tuong-card { background: #eff6ff; color: #1a56db; }
+    .mau-xanh-bien::after { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+    .mau-xanh-bien        { border-color: rgba(37,99,235,0.1); }
+    .mau-xanh-bien .bieu-tuong-card { background: var(--mau-xanh-bien-nhat); color: var(--mau-xanh-bien); }
 
-    .mau-xanh-la::before { background: linear-gradient(90deg, #059669, #34d399); }
-    .mau-xanh-la         { border-color: #d1fae5; }
-    .mau-xanh-la .bieu-tuong-card { background: #ecfdf5; color: #059669; }
+    .mau-xanh-la::after { background: linear-gradient(90deg, #059669, #34d399); }
+    .mau-xanh-la        { border-color: rgba(5,150,105,0.1); }
+    .mau-xanh-la .bieu-tuong-card { background: var(--mau-xanh-nhat); color: #059669; }
 
-    .mau-do::before { background: linear-gradient(90deg, #dc2626, #f87171); }
-    .mau-do         { border-color: #fee2e2; }
-    .mau-do .bieu-tuong-card { background: #fef2f2; color: #dc2626; }
+    .mau-do::after { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .mau-do        { border-color: rgba(220,38,38,0.1); }
+    .mau-do .bieu-tuong-card { background: var(--mau-do-nhat); color: #dc2626; }
 
-    .noi-dung-card-thong-ke { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+    .noi-dung-card-thong-ke { display: flex; align-items: center; gap: 16px; }
     .bieu-tuong-card {
-      width: 52px; height: 52px; border-radius: 14px;
+      width: 50px; height: 50px; border-radius: var(--radius-md);
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px; flex-shrink: 0;
+      font-size: 20px; flex-shrink: 0;
     }
-    .so-lieu-card .con-so     { font-size: 28px; font-weight: 900; line-height: 1; }
-    .so-lieu-card .nhan-card  { font-size: 12px; color: var(--mau-chu-phu); margin-top: 4px; }
+    .so-lieu-card .con-so {
+      font-size: 26px; font-weight: 900; line-height: 1;
+      font-family: 'Lexend', sans-serif;
+    }
+    .so-lieu-card .nhan-card { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 5px; }
     .the-ty-le {
-      font-size: 11px; font-weight: 700; padding: 3px 8px;
-      border-radius: 20px; margin-top: 5px; display: inline-block;
+      font-size: 10.5px; font-weight: 700; padding: 2px 8px;
+      border-radius: var(--radius-full); margin-top: 6px; display: inline-block;
     }
     .the-ty-le.tang { background: #dcfce7; color: #16a34a; }
     .the-ty-le.giam { background: #fee2e2; color: #dc2626; }
 
     /* =========================================================
-       HÀNG 2 – TÍNH NĂNG ĐẶC BIỆT CỦA CHỦ TRỌ (grid 3 cột icon lớn)
+       HÀNG 2 – TÍNH NĂNG CHỦ TRỌ
     ========================================================= */
     .hang-tinh-nang-chu-tro {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;
     }
 
-    /* Mỗi card tính năng chủ trọ */
     .card-tinh-nang {
-      background: var(--mau-trang); border-radius: 16px; padding: 22px 18px;
+      background: var(--mau-trang); border-radius: var(--radius-lg); padding: 20px;
       box-shadow: var(--bong-card); cursor: pointer;
-      transition: all 0.25s; border: 1.5px solid var(--mau-vien);
-      display: flex; flex-direction: column; gap: 12px;
+      transition: all 0.22s ease; border: 1.5px solid var(--mau-vien);
+      display: flex; flex-direction: column; gap: 10px;
       position: relative; overflow: hidden;
     }
-    .card-tinh-nang:hover { transform: translateY(-3px); box-shadow: var(--bong-card-hover); border-color: var(--mau-chu-de); }
+    .card-tinh-nang:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--bong-card-hover);
+      border-color: var(--mau-chu-de);
+    }
     .card-tinh-nang::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2.5px;
       background: linear-gradient(90deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      transform: scaleX(0); transition: transform 0.25s;
-      border-radius: 0 0 16px 16px;
+      transform: scaleX(0); transition: transform 0.22s;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
     .card-tinh-nang:hover::after { transform: scaleX(1); }
 
     .dau-tinh-nang {
-      width: 48px; height: 48px; border-radius: 12px;
+      width: 44px; height: 44px; border-radius: 11px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
+      font-size: 18px; flex-shrink: 0;
     }
-    /* Màu icon từng tính năng */
-    .mau-cam-nhat  { background: #fff8ee; color: #c9810a; }
+    /* Icon màu sắc */
+    .mau-cam-nhat  { background: #fff8ee; color: var(--mau-chu-de); }
     .mau-tim-nhat  { background: #f5f3ff; color: #7c3aed; }
     .mau-hong-nhat { background: #fff1f2; color: #e11d48; }
     .mau-cyan-nhat { background: #ecfeff; color: #0891b2; }
     .mau-luc-nhat  { background: #f0fdf4; color: #15803d; }
     .mau-xanh-nhat-icon { background: #eff6ff; color: #1d4ed8; }
 
-    .ten-tinh-nang  { font-size: 14px; font-weight: 800; }
-    .mo-ta-tinh-nang { font-size: 12px; color: var(--mau-chu-phu); line-height: 1.5; }
+    .ten-tinh-nang   { font-size: 13.5px; font-weight: 800; font-family: 'Lexend', sans-serif; }
+    .mo-ta-tinh-nang { font-size: 11.5px; color: var(--mau-chu-phu); line-height: 1.6; margin-top: 2px; }
     .the-tinh-nang {
       background: var(--mau-chu-de-nhat); color: var(--mau-chu-de);
-      font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
-      display: inline-block; width: fit-content; border: 1px solid rgba(201,129,10,0.2);
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full);
+      display: inline-block; width: fit-content; border: 1px solid rgba(184,114,10,0.15);
     }
 
     /* =========================================================
-       HÀNG 3 – BIỂU ĐỒ + BÁO CÁO TÀI CHÍNH
+       HÀNG 3 – BIỂU ĐỒ + BÁO CÁO
     ========================================================= */
     .hang-bieu-do-tai-chinh {
       display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;
     }
 
-    /* Card chứa biểu đồ */
-    .card-bieu-do-lon {
-      background: var(--mau-trang); border-radius: 16px; padding: 22px;
-      box-shadow: var(--bong-card); border: 1px solid var(--mau-vien);
+    .card-bieu-do-lon, .card-bao-cao-tai-chinh {
+      background: var(--mau-trang); border-radius: var(--radius-lg); padding: 22px;
+      box-shadow: var(--bong-card); border: 1.5px solid var(--mau-vien);
       position: relative; overflow: hidden;
     }
-    .card-bieu-do-lon::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-      background: linear-gradient(90deg, #c9810a, #f5a623, #fbbf24);
-      border-radius: 16px 16px 0 0;
+    .card-bieu-do-lon::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--mau-chu-de), var(--mau-chu-de-sang), #fbbf24);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
-
-    /* Card báo cáo thu/chi tháng */
-    .card-bao-cao-tai-chinh {
-      background: var(--mau-trang); border-radius: 16px; padding: 22px;
-      box-shadow: var(--bong-card); border: 1px solid var(--mau-vien);
-      position: relative; overflow: hidden;
-    }
-    .card-bao-cao-tai-chinh::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    .card-bao-cao-tai-chinh::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
       background: linear-gradient(90deg, #059669, #34d399, #60a5fa);
-      border-radius: 16px 16px 0 0;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 
-    /* Tiêu đề card chung */
+    /* Tiêu đề card */
     .tieu-de-card {
       display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
     }
-    .tieu-de-card h3 { font-size: 14.5px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-    .tieu-de-card h3 i { color: var(--mau-chu-de); font-size: 14px; }
+    .tieu-de-card h3 {
+      font-size: 14px; font-weight: 800;
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Lexend', sans-serif;
+    }
+    .tieu-de-card h3 i { color: var(--mau-chu-de); font-size: 13px; }
     .nut-xem-them {
-      background: none; border: 1px solid var(--mau-vien);
-      color: var(--mau-chu-de); font-size: 11.5px; font-weight: 700;
-      border-radius: 8px; padding: 5px 12px; cursor: pointer;
+      background: none; border: 1.5px solid var(--mau-vien);
+      color: var(--mau-chu-de); font-size: 11px; font-weight: 700;
+      border-radius: var(--radius-md); padding: 5px 12px; cursor: pointer;
       transition: all 0.2s; font-family: inherit;
     }
     .nut-xem-them:hover { background: var(--mau-chu-de-nhat); border-color: var(--mau-chu-de); }
 
-    /* Dòng thu/chi trong báo cáo */
+    /* Dòng thu/chi */
     .dong-tai-chinh {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 11px 0; border-bottom: 1px solid var(--mau-vien); cursor: pointer;
-      transition: background 0.15s; border-radius: 8px; padding: 11px 8px;
-      margin: 0 -8px;
+      padding: 10px 8px; margin: 0 -8px;
+      border-bottom: 1px solid var(--mau-vien);
+      cursor: pointer; transition: background 0.15s;
+      border-radius: var(--radius-sm);
     }
     .dong-tai-chinh:hover { background: var(--mau-nen); }
-    .dong-tai-chinh:last-child { border-bottom: none; }
+    .dong-tai-chinh:last-of-type { border-bottom: none; }
     .nhan-tai-chinh { display: flex; align-items: center; gap: 10px; }
-    .dot-tai-chinh  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .dot-xanh  { background: #10b981; box-shadow: 0 0 0 3px #d1fae5; }
-    .dot-do    { background: #ef4444; box-shadow: 0 0 0 3px #fee2e2; }
-    .dot-vang  { background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
-    .ten-dong { font-size: 13px; font-weight: 600; }
-    .phu-dong { font-size: 11px; color: var(--mau-chu-phu); margin-top: 1px; }
-    .so-tien-dong { font-size: 13px; font-weight: 800; }
+    .dot-tai-chinh { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .dot-xanh { background: #10b981; box-shadow: 0 0 0 3px #d1fae5; }
+    .dot-do   { background: #ef4444; box-shadow: 0 0 0 3px #fee2e2; }
+    .dot-vang { background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
+    .ten-dong  { font-size: 12.5px; font-weight: 600; }
+    .phu-dong  { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 1px; }
+    .so-tien-dong { font-size: 12.5px; font-weight: 800; }
     .so-tien-dong.thu { color: #059669; }
     .so-tien-dong.chi { color: #dc2626; }
 
-    /* Tổng kết cuối card báo cáo */
+    /* Tổng kết */
     .tong-ket-tai-chinh {
       background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      border-radius: 12px; padding: 14px 16px; margin-top: 14px;
+      border-radius: var(--radius-md); padding: 14px 16px; margin-top: 14px;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .tong-ket-tai-chinh .nhan { color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 600; }
-    .tong-ket-tai-chinh .so   { color: #fff; font-size: 18px; font-weight: 900; }
+    .tong-ket-tai-chinh .nhan { color: rgba(255,255,255,0.75); font-size: 11.5px; font-weight: 600; }
+    .tong-ket-tai-chinh .so   { color: #fff; font-size: 17px; font-weight: 900; font-family: 'Lexend', sans-serif; }
 
     /* =========================================================
-       HÀNG 4 – PHÊ DUYỆT + QUẢN LÝ TÀI KHOẢN
+       HÀNG 4 – PHÊ DUYỆT + QUẢN LÝ
     ========================================================= */
     .hang-phe-duyet-quan-ly {
       display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
     }
 
-    /* Card phê duyệt */
     .card-phe-duyet {
-      background: var(--mau-trang); border-radius: 16px; padding: 22px;
-      box-shadow: var(--bong-card); border: 1px solid var(--mau-vien);
+      background: var(--mau-trang); border-radius: var(--radius-lg); padding: 22px;
+      box-shadow: var(--bong-card); border: 1.5px solid var(--mau-vien);
       position: relative; overflow: hidden;
     }
-    .card-phe-duyet.vien-do::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    .card-phe-duyet.vien-do::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
       background: linear-gradient(90deg, #dc2626, #f87171);
-      border-radius: 16px 16px 0 0;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
-    .card-phe-duyet.vien-tim::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    .card-phe-duyet.vien-tim::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
       background: linear-gradient(90deg, #7c3aed, #a78bfa);
-      border-radius: 16px 16px 0 0;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 
-    /* Mỗi dòng phê duyệt */
     .dong-phe-duyet {
       display: flex; align-items: flex-start; gap: 12px;
       padding: 10px 0; border-bottom: 1px solid var(--mau-vien);
     }
     .dong-phe-duyet:last-child { border-bottom: none; }
     .bieu-tuong-phe-duyet {
-      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 15px;
+      width: 36px; height: 36px; border-radius: var(--radius-sm); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
     }
     .noi-dung-phe-duyet { flex: 1; }
-    .tieu-de-phe-duyet { font-size: 13px; font-weight: 700; }
-    .mo-ta-phe-duyet   { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 2px; }
-    .nhom-nut-phe-duyet { display: flex; gap: 6px; margin-top: 7px; }
+    .tieu-de-phe-duyet { font-size: 12.5px; font-weight: 700; }
+    .mo-ta-phe-duyet   { font-size: 11px; color: var(--mau-chu-phu); margin-top: 2px; }
+    .nhom-nut-phe-duyet { display: flex; gap: 6px; margin-top: 8px; }
     .nut-duyet {
       background: #dcfce7; color: #16a34a; border: none;
-      font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px;
-      cursor: pointer; transition: all 0.2s; font-family: inherit;
+      font-size: 11px; font-weight: 700; padding: 4px 12px;
+      border-radius: var(--radius-full); cursor: pointer; transition: all 0.2s; font-family: inherit;
     }
     .nut-duyet:hover { background: #16a34a; color: #fff; }
     .nut-tu-choi {
       background: #fee2e2; color: #dc2626; border: none;
-      font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px;
-      cursor: pointer; transition: all 0.2s; font-family: inherit;
+      font-size: 11px; font-weight: 700; padding: 4px 12px;
+      border-radius: var(--radius-full); cursor: pointer; transition: all 0.2s; font-family: inherit;
     }
     .nut-tu-choi:hover { background: #dc2626; color: #fff; }
     .nut-xem-chi-tiet-pd {
-      background: none; border: 1px solid var(--mau-vien); color: var(--mau-chu-de);
-      font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px;
-      cursor: pointer; transition: all 0.2s; font-family: inherit;
+      background: none; border: 1.5px solid var(--mau-vien); color: var(--mau-chu-de);
+      font-size: 11px; font-weight: 700; padding: 4px 12px;
+      border-radius: var(--radius-full); cursor: pointer; transition: all 0.2s; font-family: inherit;
     }
-    .nut-xem-chi-tiet-pd:hover { background: var(--mau-chu-de-nhat); }
-    .tieu-de-phe-duyet-muc { font-size: 11px; color: var(--mau-chu-phu); white-space: nowrap; }
+    .nut-xem-chi-tiet-pd:hover { background: var(--mau-chu-de-nhat); border-color: var(--mau-chu-de); }
+    .tieu-de-phe-duyet-muc { font-size: 10.5px; color: var(--mau-chu-phu); white-space: nowrap; }
 
     /* Danh sách quản lý */
     .dong-quan-ly {
@@ -520,23 +594,23 @@
     }
     .dong-quan-ly:last-child { border-bottom: none; }
     .anh-quan-ly {
-      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: var(--radius-sm); flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 15px; font-weight: 800;
+      color: #fff; font-size: 14px; font-weight: 800;
     }
     .thong-tin-quan-ly { flex: 1; }
-    .ten-quan-ly  { font-size: 13px; font-weight: 700; }
-    .quyen-quan-ly { font-size: 11px; color: var(--mau-chu-phu); margin-top: 2px; }
+    .ten-quan-ly   { font-size: 12.5px; font-weight: 700; }
+    .quyen-quan-ly { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 2px; }
     .the-quyen {
-      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+      font-size: 9.5px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-full);
     }
     .the-quyen.day-du   { background: #dcfce7; color: #16a34a; }
     .the-quyen.gioi-han { background: #fef3c7; color: #d97706; }
     .the-quyen.chi-doc  { background: #dbeafe; color: #1d4ed8; }
-    .nhom-nut-quan-ly { display: flex; gap: 6px; }
+    .nhom-nut-quan-ly { display: flex; gap: 4px; }
     .nut-sua-ql, .nut-xoa-ql {
       background: none; border: none; cursor: pointer; padding: 5px 8px;
-      border-radius: 6px; font-size: 12px; transition: all 0.2s;
+      border-radius: var(--radius-sm); font-size: 12px; transition: all 0.2s;
     }
     .nut-sua-ql { color: var(--mau-chu-de); }
     .nut-sua-ql:hover { background: var(--mau-chu-de-nhat); }
@@ -548,48 +622,55 @@
     ========================================================= */
     .lop-phu-modal {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 9999;
+      background: rgba(10,20,40,0.55); z-index: 9999;
       align-items: center; justify-content: center;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
     }
     .lop-phu-modal.hien { display: flex; }
 
     .hop-modal {
-      background: var(--mau-trang); border-radius: 20px; padding: 28px;
+      background: var(--mau-trang); border-radius: var(--radius-xl); padding: 28px;
       width: 540px; max-width: 96vw; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.22);
-      animation: hien-modal 0.3s ease;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2), 0 2px 12px rgba(0,0,0,0.08);
+      animation: hien-modal 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      border: 1px solid rgba(255,255,255,0.8);
     }
     .hop-modal.rong { width: 700px; }
     .hop-modal.nho  { width: 420px; }
 
     @@keyframes hien-modal {
-      from { opacity: 0; transform: scale(0.92) translateY(-16px); }
+      from { opacity: 0; transform: scale(0.9) translateY(-20px); }
       to   { opacity: 1; transform: none; }
     }
 
     .tieu-de-modal {
       display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;
     }
-    .tieu-de-modal h3 { font-size: 17px; font-weight: 900; display: flex; align-items: center; gap: 9px; }
+    .tieu-de-modal h3 {
+      font-size: 16px; font-weight: 900;
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Lexend', sans-serif;
+    }
     .nut-dong-modal {
-      background: none; border: none; font-size: 19px; cursor: pointer;
-      color: var(--mau-chu-phu); border-radius: 50%; width: 32px; height: 32px;
+      background: var(--mau-nen); border: none; font-size: 14px; cursor: pointer;
+      color: var(--mau-chu-phu); border-radius: var(--radius-full);
+      width: 32px; height: 32px;
       display: flex; align-items: center; justify-content: center; transition: all 0.2s;
     }
-    .nut-dong-modal:hover { background: var(--mau-nen); color: var(--mau-chu); }
+    .nut-dong-modal:hover { background: #fee2e2; color: #dc2626; }
 
-    /* Form chung trong modal */
+    /* Form trong modal */
     .luoi-form-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .luoi-form-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-    .nhom-nhap    { margin-bottom: 4px; }
-    .nhan-nhap    { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--mau-chu); }
+    .nhom-nhap    { margin-bottom: 2px; }
+    .nhan-nhap    { display: block; font-size: 11.5px; font-weight: 700; margin-bottom: 7px; color: var(--mau-chu); }
     .o-nhap {
       width: 100%; padding: 10px 14px; border: 1.5px solid var(--mau-vien);
-      border-radius: 10px; font-size: 13px; outline: none;
-      transition: border-color 0.2s; color: var(--mau-chu); font-family: inherit;
+      border-radius: var(--radius-md); font-size: 13px; outline: none;
+      transition: all 0.2s; color: var(--mau-chu); font-family: inherit;
+      background: #fff;
     }
-    .o-nhap:focus { border-color: var(--mau-chu-de); box-shadow: 0 0 0 3px rgba(201,129,10,0.12); }
+    .o-nhap:focus { border-color: var(--mau-chu-de); box-shadow: 0 0 0 3px var(--mau-chu-de-vien); }
     .o-chon {
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -598,33 +679,34 @@
     .nhom-nut-duoi-modal { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
     .nut-huy-modal {
       background: var(--mau-nen); color: var(--mau-chu-phu); border: none;
-      padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700;
-      transition: all 0.2s; font-family: inherit;
+      padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer;
+      font-size: 13px; font-weight: 700; transition: all 0.2s; font-family: inherit;
     }
     .nut-huy-modal:hover { background: var(--mau-vien); }
     .nut-luu-modal {
       background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      color: #fff; border: none; padding: 10px 24px; border-radius: 10px;
+      color: #fff; border: none; padding: 10px 24px; border-radius: var(--radius-md);
       cursor: pointer; font-size: 13px; font-weight: 700;
-      box-shadow: 0 4px 14px rgba(201,129,10,0.35);
+      box-shadow: 0 4px 14px rgba(184,114,10,0.3);
       transition: all 0.2s; font-family: inherit;
     }
-    .nut-luu-modal:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(201,129,10,0.45); }
+    .nut-luu-modal:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,114,10,0.42); }
 
-    /* Đường kẻ phân cách trong modal */
+    /* Đường phân cách */
     .duong-ke-modal { border: none; border-top: 1px solid var(--mau-vien); margin: 18px 0; }
 
     /* Tiêu đề mục nhỏ trong modal */
     .tieu-de-muc-modal {
-      font-size: 12px; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 1px; color: var(--mau-chu-phu); margin-bottom: 12px;
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--mau-chu-phu); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
     }
 
-    /* Bảng trong modal chi tiết báo cáo */
-    .bang-chi-tiet-modal { width: 100%; border-collapse: collapse; font-size: 13px; }
+    /* Bảng chi tiết modal */
+    .bang-chi-tiet-modal { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     .bang-chi-tiet-modal th {
       text-align: left; padding: 8px 10px;
-      color: var(--mau-chu-phu); font-weight: 700; font-size: 11px;
+      color: var(--mau-chu-phu); font-weight: 700; font-size: 10.5px;
       text-transform: uppercase; letter-spacing: 0.5px;
       border-bottom: 2px solid var(--mau-vien);
     }
@@ -632,16 +714,16 @@
     .bang-chi-tiet-modal tr:last-child td { border-bottom: none; }
     .bang-chi-tiet-modal tr:hover td { background: var(--mau-nen); }
 
-    /* Khung tóm tắt trong modal báo cáo */
+    /* Khung tóm tắt */
     .khung-tom-tat {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px;
     }
     .o-tom-tat {
-      background: var(--mau-nen); border-radius: 10px; padding: 14px;
-      text-align: center; border: 1px solid var(--mau-vien);
+      background: var(--mau-nen); border-radius: var(--radius-md); padding: 14px;
+      text-align: center; border: 1.5px solid var(--mau-vien);
     }
-    .o-tom-tat .so { font-size: 18px; font-weight: 900; }
-    .o-tom-tat .nhan { font-size: 11px; color: var(--mau-chu-phu); margin-top: 3px; }
+    .o-tom-tat .so { font-size: 18px; font-weight: 900; font-family: 'Lexend', sans-serif; }
+    .o-tom-tat .nhan { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 3px; }
     .o-tom-tat.xanh .so { color: #059669; }
     .o-tom-tat.do .so   { color: #dc2626; }
     .o-tom-tat.vang .so { color: var(--mau-chu-de); }
@@ -651,32 +733,54 @@
     .dong-quyen {
       display: flex; align-items: center; gap: 8px;
       padding: 10px 12px; background: var(--mau-nen);
-      border-radius: 8px; border: 1.5px solid var(--mau-vien); cursor: pointer;
+      border-radius: var(--radius-sm); border: 1.5px solid var(--mau-vien); cursor: pointer;
       transition: all 0.2s;
     }
     .dong-quyen:hover { border-color: var(--mau-chu-de); background: var(--mau-chu-de-nhat); }
     .dong-quyen input[type=checkbox] { accent-color: var(--mau-chu-de); width: 15px; height: 15px; cursor: pointer; }
-    .dong-quyen .nhan-quyen { font-size: 12.5px; font-weight: 600; }
-    .dong-quyen .mo-ta-quyen { font-size: 11px; color: var(--mau-chu-phu); }
+    .dong-quyen .nhan-quyen { font-size: 12px; font-weight: 600; }
+    .dong-quyen .mo-ta-quyen { font-size: 10.5px; color: var(--mau-chu-phu); }
 
-    /* Thẻ cấu hình giá */
+    /* Cấu hình giá */
     .luoi-cau-hinh-gia { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .o-cau-hinh-gia {
-      background: var(--mau-nen); border-radius: 12px; padding: 14px 16px;
+      background: var(--mau-nen); border-radius: var(--radius-md); padding: 14px 16px;
       border: 1.5px solid var(--mau-vien); transition: border-color 0.2s;
     }
-    .o-cau-hinh-gia:focus-within { border-color: var(--mau-chu-de); }
+    .o-cau-hinh-gia:focus-within { border-color: var(--mau-chu-de); background: #fff; }
     .nhan-gia { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
     .nhan-gia i { color: var(--mau-chu-de); }
     .hang-nhap-gia { display: flex; align-items: center; gap: 8px; }
-    .hang-nhap-gia input { flex: 1; border: none; background: #fff; border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 700; outline: none; border: 1.5px solid var(--mau-vien); font-family: inherit; }
+    .hang-nhap-gia input {
+      flex: 1; border: 1.5px solid var(--mau-vien); background: #fff;
+      border-radius: var(--radius-sm); padding: 8px 12px;
+      font-size: 14px; font-weight: 700; outline: none; font-family: inherit;
+      transition: border-color 0.2s;
+    }
     .hang-nhap-gia input:focus { border-color: var(--mau-chu-de); }
     .don-vi-gia { font-size: 11px; color: var(--mau-chu-phu); font-weight: 600; white-space: nowrap; }
 
     /* =========================================================
-       SCROLLBAR
+       THÔNG BÁO TOAST
     ========================================================= */
-    ::-webkit-scrollbar { width: 5px; }
+    .hop-thong-bao {
+      position: fixed; top: 24px; right: 24px;
+      background: #fff;
+      border-left: 4px solid var(--mau-chu-de-sang);
+      padding: 14px 18px; border-radius: var(--radius-md);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      min-width: 280px; max-width: 340px;
+      z-index: 99999;
+      opacity: 0; transform: translateX(110px);
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .hop-thong-bao.hien { opacity: 1; transform: translateX(0); }
+    .noi-dung-thong-bao { font-size: 13.5px; font-weight: 600; color: var(--mau-chu); }
+
+    /* =========================================================
+       SCROLLBAR TOÀN CỤC
+    ========================================================= */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #d4d9e6; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #b0b9ce; }
@@ -684,52 +788,33 @@
     /* =========================================================
        RESPONSIVE
     ========================================================= */
-    @@media (max-width: 1200px) {
+    @@media (max-width: 1280px) {
       .hang-thong-ke-tong-quan { grid-template-columns: repeat(2, 1fr); }
       .hang-tinh-nang-chu-tro  { grid-template-columns: repeat(2, 1fr); }
       .hang-bieu-do-tai-chinh, .hang-phe-duyet-quan-ly { grid-template-columns: 1fr; }
     }
     @@media (max-width: 768px) {
       #thanh-sidebar { width: 0; min-width: 0; overflow: hidden; }
-      #thanh-sidebar.mo { width: 230px; min-width: 230px; }
+      #thanh-sidebar.mo { width: 248px; min-width: 248px; }
       .hang-thong-ke-tong-quan { grid-template-columns: 1fr 1fr; }
       .hang-tinh-nang-chu-tro  { grid-template-columns: 1fr; }
-    }
-    /* HỘP THÔNG BÁO */
-    .hop-thong-bao{
-        position: fixed;
-        top: 25px;
-        right: 25px;
-
-        background: #ffffff;
-        border-left: 5px solid #f59e0b;
-
-        padding: 14px 18px;
-        border-radius: 12px;
-
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-
-        min-width: 280px;
-        max-width: 350px;
-
-        z-index: 99999;
-
-        opacity: 0;
-        transform: translateX(100px);
-
-        transition: all 0.4s ease;
+      #noi-dung-chinh { padding: 16px; }
+      #thanh-header { padding: 0 16px; }
+      .o-tim-kiem { display: none; }
     }
 
-    /* HIỆN THÔNG BÁO */
-    .hop-thong-bao.hien{
-        opacity: 1;
-        transform: translateX(0);
+    /* =========================================================
+       HIỆU ỨNG SKELETON LOADING
+    ========================================================= */
+    @@keyframes skeleton-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
-
-    .noi-dung-thong-bao{
-        font-size: 15px;
-        font-weight: 500;
-        color: #333;
+    .skeleton {
+      background: linear-gradient(90deg, #e8ecf4 25%, #f2f5fa 50%, #e8ecf4 75%);
+      background-size: 200% 100%;
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+      border-radius: var(--radius-sm);
     }
   </style>
 </head>
@@ -737,23 +822,21 @@
 
 <!-- =============================================
      SIDEBAR – THANH ĐIỀU HƯỚNG TRÁI
-     Chứa logo, menu điều hướng và thông tin chủ trọ
 ============================================= -->
 <nav id="thanh-sidebar">
 
-  <!-- Khối logo và tên hệ thống -->
+  <!-- Logo -->
   <div class="khu-vuc-logo">
     <div class="bieu-tuong-logo">
       <i class="fas fa-crown"></i>
     </div>
     <div class="ten-logo">
-      <!-- ⚠️ Đổi tên thương hiệu nhà trọ ở đây -->
       <strong>NHÀ TRỌ ABC</strong>
       <span>Cổng Chủ Trọ</span>
     </div>
   </div>
 
-  <!-- Nhóm menu: Tổng quan -->
+  <!-- Nhóm: Tổng quan -->
   <div class="nhan-nhom-menu">Tổng quan</div>
 
   <div class="muc-menu dang-chon" onclick="chuyenMenu('trang-chu', this)">
@@ -761,7 +844,7 @@
     <span>Trang chủ</span>
   </div>
 
-  <!-- Nhóm menu: Vận hành -->
+  <!-- Nhóm: Vận hành -->
   <div class="nhan-nhom-menu">Vận hành</div>
 
   <div class="muc-menu" onclick="chuyenMenu('quan-ly-phong', this)">
@@ -775,7 +858,6 @@
   <div class="muc-menu" onclick="chuyenMenu('hop-dong', this)">
     <i class="fas fa-file-contract"></i>
     <span>Hợp đồng</span>
-    <!-- Badge số hợp đồng cần duyệt -->
     <span class="huy-hieu vang">2</span>
   </div>
   <div class="muc-menu" onclick="chuyenMenu('hoa-don', this)">
@@ -783,14 +865,13 @@
     <span>Hóa đơn & Thu tiền</span>
   </div>
 
-  <!-- Nhóm menu: Quản trị (chỉ Chủ trọ mới có) -->
+  <!-- Nhóm: Quản trị chủ trọ -->
   <div class="nhan-nhom-menu">Quản trị chủ trọ</div>
 
   <div class="muc-menu" onclick="moModal('modal-tai-khoan-quan-ly')">
     <i class="fas fa-user-shield"></i>
     <span>Tài khoản quản lý</span>
   </div>
-  <!-- THAY: Phân quyền → Quản lý người thuê -->
   <div class="muc-menu" onclick="moModalQuanLyNguoiThue()">
     <i class="fas fa-users"></i>
     <span>Quản lý người thuê</span>
@@ -808,7 +889,7 @@
     <span>Quy định đặt cọc</span>
   </div>
 
-  <!-- Nhóm menu: Hỗ trợ -->
+  <!-- Nhóm: Hỗ trợ -->
   <div class="nhan-nhom-menu">Hỗ trợ</div>
 
   <div class="muc-menu" onclick="chuyenMenu('sua-chua', this)">
@@ -825,14 +906,10 @@
     <span>Cài đặt hệ thống</span>
   </div>
 
-  <!-- Thông tin chủ trọ dưới đáy sidebar -->
+  <!-- Thông tin chủ trọ -->
   <div class="thong-tin-chu-tro">
-    <div class="anh-chu-tro">
-      <!-- ⚠️ Thay bằng ảnh thật: <img src="..."> -->
-      C
-    </div>
+    <div class="anh-chu-tro">C</div>
     <div class="ten-chu">
-      <!-- ⚙️ BACKEND: Lấy tên chủ trọ từ session -->
       <strong>Chủ Trọ ABC</strong>
       <span>Chủ sở hữu</span>
     </div>
@@ -842,14 +919,13 @@
 
 
 <!-- =============================================
-     KHU VỰC CHÍNH: HEADER + NỘI DUNG
+     KHU VỰC CHÍNH
 ============================================= -->
 <div id="khu-vuc-chinh">
 
-  <!-- ===== HEADER TRÊN CÙNG ===== -->
+  <!-- HEADER -->
   <header id="thanh-header">
     <div class="header-trai">
-      <!-- Nút ≡ bật/tắt sidebar -->
       <button class="nut-ham-burger" onclick="dongMoSidebar()">
         <i class="fas fa-bars"></i>
       </button>
@@ -860,66 +936,59 @@
     </div>
 
     <div class="header-phai">
-      <!-- Ô tìm kiếm -->
+      <!-- Tìm kiếm -->
       <div class="o-tim-kiem">
         <i class="fas fa-search"></i>
-        <!-- ⚙️ BACKEND: Kết nối API tìm kiếm -->
         <input type="text" placeholder="Tìm phòng, người thuê, HĐ..." />
       </div>
 
-      <!-- Chuông thông báo -->
+      <!-- Chuông -->
       <button class="nut-chuong">
         <i class="fas fa-bell"></i>
-        <!-- ⚙️ BACKEND: Lấy số thông báo chưa đọc -->
         <span class="so-chuong">7</span>
       </button>
 
-      <!-- Thẻ vai trò chủ trọ -->
-      <span class="the-chu-tro"><i class="fas fa-crown" style="margin-right:4px;"></i>CHỦ TRỌ</span>
+      <div class="header-divider"></div>
 
-      <!-- Avatar + tên chủ trọ header -->
+      <!-- Tag vai trò -->
+      <span class="the-chu-tro"><i class="fas fa-crown" style="margin-right:4px;font-size:8px;"></i>CHỦ TRỌ</span>
+
+      <!-- Avatar + tên -->
       <div class="khoi-admin-header">
         <div class="anh-dai-dien-header">C</div>
         <div>
-          <!-- ⚙️ BACKEND: Lấy tên chủ trọ từ session đăng nhập -->
           <div class="ten-admin-header">Nguyễn Văn Chủ</div>
           <div class="vai-tro-header">Chủ sở hữu</div>
         </div>
-        <i class="fas fa-chevron-down" style="font-size:10px;color:var(--mau-chu-phu);margin-left:2px;"></i>
+        <i class="fas fa-chevron-down" style="font-size:9px;color:var(--mau-chu-phu);margin-left:2px;"></i>
       </div>
     </div>
-  </header><!-- Kết thúc HEADER -->
-
+  </header>
 
   <!-- =============================================
-       NỘI DUNG DASHBOARD CHÍNH
+       NỘI DUNG DASHBOARD
   ============================================= -->
   <main id="noi-dung-chinh">
 
-    <!-- Dòng tiêu đề + nút thêm mới -->
+    <!-- Tiêu đề trang -->
     <div class="dong-tieu-de-trang">
       <div>
         <h2>Xin chào, Chủ Trọ! 👑</h2>
-        <!-- ⚙️ BACKEND: Ngày giờ thực -->
         <p id="ngay-gio-chu-tro">Đang tải...</p>
       </div>
     </div>
 
     <!-- =============================================
-         HÀNG 1 – 4 CARD THỐNG KÊ TỔNG QUAN
-         (Tổng phòng | Doanh thu | Phòng trống | Sự cố)
+         HÀNG 1 – 4 CARD THỐNG KÊ
     ============================================= -->
     <div class="hang-thong-ke-tong-quan">
 
-      <!-- Card 1: Doanh thu tháng này -->
+      <!-- Card 1: Doanh thu -->
       <div class="card-thong-ke mau-vang">
         <div class="noi-dung-card-thong-ke">
           <div class="bieu-tuong-card"><i class="fas fa-coins"></i></div>
           <div class="so-lieu-card">
-            <div class="con-so" style="font-size:22px;">
-              <!-- ⚙️ BACKEND: Tổng doanh thu tháng hiện tại -->
-              58.5M
-            </div>
+            <div class="con-so" style="font-size:22px;">58.5M</div>
             <div class="nhan-card">Doanh thu tháng 5</div>
             <span class="the-ty-le tang">↑ +12% tháng trước</span>
           </div>
@@ -931,25 +1000,19 @@
         <div class="noi-dung-card-thong-ke">
           <div class="bieu-tuong-card"><i class="fas fa-building"></i></div>
           <div class="so-lieu-card">
-            <div class="con-so">
-              <!-- ⚙️ BACKEND: Tổng số phòng trong DB -->
-              48
-            </div>
+            <div class="con-so">48</div>
             <div class="nhan-card">Tổng số phòng</div>
             <span class="the-ty-le tang">↑ 81% lấp đầy</span>
           </div>
         </div>
       </div>
 
-      <!-- Card 3: Lợi nhuận ròng -->
+      <!-- Card 3: Lợi nhuận -->
       <div class="card-thong-ke mau-xanh-la">
         <div class="noi-dung-card-thong-ke">
           <div class="bieu-tuong-card"><i class="fas fa-chart-line"></i></div>
           <div class="so-lieu-card">
-            <div class="con-so" style="font-size:22px;">
-              <!-- ⚙️ BACKEND: Lợi nhuận = Thu - Chi -->
-              44.2M
-            </div>
+            <div class="con-so" style="font-size:22px;">44.2M</div>
             <div class="nhan-card">Lợi nhuận ròng</div>
             <span class="the-ty-le tang">↑ +8% tháng trước</span>
           </div>
@@ -961,12 +1024,9 @@
         <div class="noi-dung-card-thong-ke">
           <div class="bieu-tuong-card"><i class="fas fa-clock"></i></div>
           <div class="so-lieu-card">
-            <div class="con-so">
-              <!-- ⚙️ BACKEND: Tổng yêu cầu chờ phê duyệt -->
-              5
-            </div>
+            <div class="con-so">5</div>
             <div class="nhan-card">Chờ phê duyệt</div>
-            <span class="the-ty-le giam">↑ 2 hợp đồng, 3 sửa chữa</span>
+            <span class="the-ty-le giam">↑ 2 HĐ, 3 sửa chữa</span>
           </div>
         </div>
       </div>
@@ -975,12 +1035,10 @@
 
 
     <!-- =============================================
-         HÀNG 2 – CÁC TÍNH NĂNG ĐẶC BIỆT CỦA CHỦ TRỌ
-         (6 card icon lớn, mỗi cái mở modal riêng)
+         HÀNG 2 – TÍNH NĂNG CHỦ TRỌ
     ============================================= -->
     <div class="hang-tinh-nang-chu-tro">
 
-      <!-- Tính năng 1: Tài khoản quản lý -->
       <div class="card-tinh-nang" onclick="moModal('modal-tai-khoan-quan-ly')">
         <div class="dau-tinh-nang mau-cam-nhat"><i class="fas fa-user-shield"></i></div>
         <div>
@@ -990,9 +1048,6 @@
         <span class="the-tinh-nang">3 quản lý đang hoạt động</span>
       </div>
 
-      <!-- =============================================
-           THAY: Tính năng 2 – Phân quyền → Quản lý người thuê
-      ============================================= -->
       <div class="card-tinh-nang" onclick="moModalQuanLyNguoiThue()">
         <div class="dau-tinh-nang mau-tim-nhat"><i class="fas fa-users"></i></div>
         <div>
@@ -1002,7 +1057,6 @@
         <span class="the-tinh-nang">Xem danh sách người thuê</span>
       </div>
 
-      <!-- Tính năng 3: Cấu hình giá thuê -->
       <div class="card-tinh-nang" onclick="moModal('modal-cau-hinh-gia')">
         <div class="dau-tinh-nang mau-cyan-nhat"><i class="fas fa-tags"></i></div>
         <div>
@@ -1012,7 +1066,6 @@
         <span class="the-tinh-nang">3 mức giá đang áp dụng</span>
       </div>
 
-      <!-- Tính năng 4: Cấu hình dịch vụ (điện/nước/internet) -->
       <div class="card-tinh-nang" onclick="moModal('modal-chi-phi-dich-vu')">
         <div class="dau-tinh-nang mau-luc-nhat"><i class="fas fa-bolt"></i></div>
         <div>
@@ -1022,7 +1075,6 @@
         <span class="the-tinh-nang">Cập nhật tháng 5/2025</span>
       </div>
 
-      <!-- Tính năng 5: Quy định đặt cọc -->
       <div class="card-tinh-nang" onclick="moModal('modal-dat-coc')">
         <div class="dau-tinh-nang mau-hong-nhat"><i class="fas fa-hand-holding-usd"></i></div>
         <div>
@@ -1032,7 +1084,6 @@
         <span class="the-tinh-nang">Cọc = 2 tháng tiền thuê</span>
       </div>
 
-      <!-- Tính năng 6: Phê duyệt sửa chữa lớn -->
       <div class="card-tinh-nang" onclick="moModal('modal-phe-duyet-sua-chua')">
         <div class="dau-tinh-nang mau-xanh-nhat-icon"><i class="fas fa-hammer"></i></div>
         <div>
@@ -1042,39 +1093,35 @@
         <span class="the-tinh-nang" style="background:#fee2e2;color:#dc2626;border-color:#fecaca;">3 yêu cầu chờ duyệt</span>
       </div>
 
-    </div><!-- Kết thúc HÀNG 2 – Tính năng chủ trọ -->
+    </div><!-- Kết thúc HÀNG 2 -->
 
 
     <!-- =============================================
-         HÀNG 3 – BIỂU ĐỒ DOANH THU + BÁO CÁO THU/CHI
+         HÀNG 3 – BIỂU ĐỒ + BÁO CÁO
     ============================================= -->
     <div class="hang-bieu-do-tai-chinh">
 
-      <!-- Card biểu đồ doanh thu & chi phí -->
+      <!-- Biểu đồ doanh thu -->
       <div class="card-bieu-do-lon">
         <div class="tieu-de-card">
           <h3><i class="fas fa-chart-area"></i> Doanh thu & Chi phí theo tháng</h3>
           <div style="display:flex;gap:8px;align-items:center;">
-            <!-- ⚙️ BACKEND: Bộ lọc năm, reload biểu đồ -->
             <select class="o-nhap o-chon" style="padding:5px 10px;font-size:12px;width:90px;">
               <option>2025</option><option>2024</option>
             </select>
             <button class="nut-xem-them" onclick="moModal('modal-bao-cao-chi-tiet')">Chi tiết</button>
           </div>
         </div>
-        <!-- Canvas Chart.js biểu đồ -->
         <canvas id="bieu-do-chu-tro" height="115"></canvas>
       </div>
 
-      <!-- Card báo cáo thu/chi tháng -->
+      <!-- Báo cáo thu/chi tháng -->
       <div class="card-bao-cao-tai-chinh">
         <div class="tieu-de-card">
           <h3><i class="fas fa-balance-scale" style="color:#059669;"></i> Báo cáo tháng 5/2025</h3>
           <button class="nut-xem-them" onclick="moModal('modal-bao-cao-chi-tiet')">Chi tiết</button>
         </div>
 
-        <!-- Dòng thu: Tiền thuê phòng – click mở modal chi tiết -->
-        <!-- ⚙️ BACKEND: Load dữ liệu thu/chi từ API /api/bao-cao/thang -->
         <div class="dong-tai-chinh" onclick="moModal('modal-bao-cao-chi-tiet')">
           <div class="nhan-tai-chinh">
             <div class="dot-tai-chinh dot-xanh"></div>
@@ -1086,7 +1133,6 @@
           <div class="so-tien-dong thu">+58.5M</div>
         </div>
 
-        <!-- Dòng chi: Điện nước -->
         <div class="dong-tai-chinh" onclick="moModal('modal-bao-cao-chi-tiet')">
           <div class="nhan-tai-chinh">
             <div class="dot-tai-chinh dot-do"></div>
@@ -1098,7 +1144,6 @@
           <div class="so-tien-dong chi">−7.0M</div>
         </div>
 
-        <!-- Dòng chi: Sửa chữa -->
         <div class="dong-tai-chinh" onclick="moModal('modal-bao-cao-chi-tiet')">
           <div class="nhan-tai-chinh">
             <div class="dot-tai-chinh dot-do"></div>
@@ -1110,7 +1155,6 @@
           <div class="so-tien-dong chi">−3.8M</div>
         </div>
 
-        <!-- Dòng thu: Tiền đặt cọc mới -->
         <div class="dong-tai-chinh" onclick="moModal('modal-bao-cao-chi-tiet')">
           <div class="nhan-tai-chinh">
             <div class="dot-tai-chinh dot-vang"></div>
@@ -1122,7 +1166,6 @@
           <div class="so-tien-dong thu">+7.0M</div>
         </div>
 
-        <!-- Dòng chi: Chi phí quản lý / lương -->
         <div class="dong-tai-chinh" onclick="moModal('modal-bao-cao-chi-tiet')">
           <div class="nhan-tai-chinh">
             <div class="dot-tai-chinh dot-do"></div>
@@ -1134,13 +1177,11 @@
           <div class="so-tien-dong chi">−10.5M</div>
         </div>
 
-        <!-- Tổng kết thu/chi -->
         <div class="tong-ket-tai-chinh">
           <div>
             <div class="nhan">Lợi nhuận ròng tháng 5</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">Thu: 65.5M · Chi: 21.3M</div>
+            <div style="font-size:10.5px;color:rgba(255,255,255,0.6);margin-top:2px;">Thu: 65.5M · Chi: 21.3M</div>
           </div>
-          <!-- ⚙️ BACKEND: Thu - Chi -->
           <div class="so">44.2M ↑</div>
         </div>
 
@@ -1150,20 +1191,17 @@
 
 
     <!-- =============================================
-         HÀNG 4 – PHÊ DUYỆT HỢP ĐỒNG + QUẢN LÝ NHÂN SỰ
+         HÀNG 4 – PHÊ DUYỆT + QUẢN LÝ NHÂN SỰ
     ============================================= -->
     <div class="hang-phe-duyet-quan-ly">
 
-      <!-- Card phê duyệt hợp đồng xóa/hủy -->
+      <!-- Card phê duyệt hợp đồng -->
       <div class="card-phe-duyet vien-do">
         <div class="tieu-de-card">
           <h3><i class="fas fa-file-contract" style="color:#dc2626;"></i> Phê duyệt hợp đồng</h3>
           <button class="nut-xem-them" onclick="chuyenMenu('hop-dong', null)">Xem tất cả</button>
         </div>
 
-        <!-- ⚙️ BACKEND: Lấy danh sách hợp đồng cần phê duyệt từ API -->
-
-        <!-- Yêu cầu HĐ 1: Hủy hợp đồng -->
         <div class="dong-phe-duyet">
           <div class="bieu-tuong-phe-duyet mau-hong-nhat">
             <i class="fas fa-file-times" style="color:#e11d48;"></i>
@@ -1180,7 +1218,6 @@
           <div class="tieu-de-phe-duyet-muc">2 giờ trước</div>
         </div>
 
-        <!-- Yêu cầu HĐ 2: Gia hạn hợp đồng -->
         <div class="dong-phe-duyet">
           <div class="bieu-tuong-phe-duyet mau-cyan-nhat">
             <i class="fas fa-redo" style="color:#0891b2;"></i>
@@ -1197,56 +1234,45 @@
           <div class="tieu-de-phe-duyet-muc">5 giờ trước</div>
         </div>
 
-        <!-- Thêm nút phê duyệt sửa chữa lớn trong card này -->
-        <div class="dong-phe-duyet" style="background:var(--mau-nen);border-radius:10px;padding:12px;border:1px solid var(--mau-vien);margin-top:4px;">
+        <div class="dong-phe-duyet" style="background:var(--mau-nen);border-radius:10px;padding:12px;border:1.5px solid var(--mau-vien);margin-top:4px;">
           <i class="fas fa-hammer" style="color:#7c3aed;font-size:18px;"></i>
           <div style="flex:1;margin-left:12px;">
             <div style="font-size:12.5px;font-weight:700;">Sửa chữa lớn đang chờ duyệt</div>
-            <div style="font-size:11.5px;color:var(--mau-chu-phu);">3 yêu cầu · Chi phí ước tính: 12.5M</div>
+            <div style="font-size:11px;color:var(--mau-chu-phu);">3 yêu cầu · Chi phí ước tính: 12.5M</div>
           </div>
           <button class="nut-hanh-dong-chinh" style="font-size:12px;padding:7px 14px;" onclick="moModal('modal-phe-duyet-sua-chua')">
             Xem duyệt
           </button>
         </div>
 
-      </div><!-- Kết thúc card phê duyệt hợp đồng -->
+      </div>
 
-      <!-- Card danh sách quản lý + thao tác nhanh -->
+      <!-- Card danh sách quản lý -->
       <div class="card-phe-duyet vien-tim" onclick="moModalDanhSachQuanLy()">
         <div class="tieu-de-card">
           <h3><i class="fas fa-users-cog" style="color:#7c3aed;"></i> Quản lý hệ thống</h3>
           <button class="nut-xem-them" onclick="moModalDanhSachQuanLy()">Quản lý</button>
         </div>
 
-        <!-- ⚙️ BACKEND: Load danh sách tài khoản quản lý từ DB -->
-
-        <!-- Quản lý 1 -->
         <div id="danh-sach-quan-ly-container">
-            <!-- JS sẽ render vào đây -->
+          <!-- JS sẽ render vào đây -->
         </div>
 
-
-      </div><!-- Kết thúc card danh sách quản lý -->
+      </div>
 
     </div><!-- Kết thúc HÀNG 4 -->
 
-  </main><!-- Kết thúc NỘI DUNG CHÍNH -->
+  </main>
 
 </div><!-- Kết thúc KHU VỰC CHÍNH -->
 
 
 <!-- =======================================================
-     CÁC MODAL POPUP – MỖI TÍNH NĂNG MỘT MODAL RIÊNG
-     Mỗi modal có lớp phủ tối bên ngoài, hộp nội dung bên trong
+     CÁC MODAL POPUP
 ======================================================= -->
 
-<!-- =============================================
-     MODAL 1: QUẢN LÝ TÀI KHOẢN QUẢN LÝ
-     Thêm / Sửa / Xóa tài khoản quản lý
-     ⚙️ BACKEND: POST/PUT/DELETE /api/quan-ly
-============================================= -->
+<!-- MODAL 1: TÀI KHOẢN QUẢN LÝ -->
 <div class="lop-phu-modal" id="modal-tai-khoan-quan-ly" onclick="dongModalNhapNgoai(event,'modal-tai-khoan-quan-ly')">
-
 <div class="hop-modal rong">
     <div class="tieu-de-modal">
       <h3>
@@ -1276,8 +1302,8 @@
       <div class="nhom-nhap">
         <label class="nhan-nhap">Vai trò (Role) *</label>
         <select class="o-nhap o-chon" id="role-moi">
-          <option value="NguoiThue">Người thuê</option>
-          <option value="QuanLy">Quản lý</option>
+          <option value="Tenant">Người thuê</option>
+          <option value="Manager">Quản lý</option>
         </select>
       </div>
     </div>
@@ -1292,10 +1318,7 @@
 </div>
 
 
-<!-- =============================================
-     THÊM MỚI – MODAL QUẢN LÝ NGƯỜI THUÊ (thay modal-phan-quyen cũ)
-     Gồm: danh sách người thuê + tìm kiếm realtime
-============================================= -->
+<!-- MODAL: QUẢN LÝ NGƯỜI THUÊ -->
 <div class="lop-phu-modal" id="modal-quan-ly-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-quan-ly-nguoi-thue')">
   <div class="hop-modal" style="width:600px;">
     <div class="tieu-de-modal">
@@ -1308,41 +1331,33 @@
       <button class="nut-dong-modal" onclick="dongModal('modal-quan-ly-nguoi-thue')">✕</button>
     </div>
 
-    <!-- Thanh tìm kiếm + nút thêm người thuê -->
     <div style="display:flex;gap:10px;margin-bottom:16px;">
       <div style="flex:1;display:flex;align-items:center;gap:8px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:10px;padding:8px 14px;transition:border-color 0.2s;"
            onfocusin="this.style.borderColor='var(--mau-chu-de)'" onfocusout="this.style.borderColor='var(--mau-vien)'">
         <i class="fas fa-search" style="color:var(--mau-chu-phu);font-size:12px;"></i>
-        <!-- Ô tìm kiếm – lọc realtime theo tên/phòng -->
         <input type="text" id="input-tim-nguoi-thue"
           placeholder="Tìm theo tên hoặc số phòng (VD: P101)..."
           oninput="locDanhSachNguoiThue(this.value)"
           style="border:none;background:none;outline:none;font-size:13px;width:100%;font-family:inherit;color:var(--mau-chu);" />
       </div>
-      <!-- Nút thêm người thuê -->
       <button onclick="moModal('modal-them-nguoi-thue')"
-        style="background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(201,129,10,0.3);transition:all 0.2s;"
+        style="background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(184,114,10,0.3);transition:all 0.2s;"
         onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
         <i class="fas fa-plus"></i> Thêm người thuê
       </button>
     </div>
 
-    <!-- Số lượng -->
     <div style="font-size:11px;color:var(--mau-chu-phu);margin-bottom:12px;" id="so-luong-nguoi-thue">
       Đang hiển thị <strong id="dem-nguoi-thue">0</strong> người thuê
     </div>
 
-    <!-- Danh sách người thuê – render bằng JS -->
     <div id="ds-nguoi-thue-trong-modal"
          style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;padding-right:4px;">
     </div>
   </div>
 </div>
 
-<!-- =============================================
-     THÊM MỚI – MODAL CHI TIẾT NGƯỜI THUÊ
-     Hiển thị đầy đủ thông tin + nút Chỉnh sửa
-============================================= -->
+<!-- MODAL CHI TIẾT NGƯỜI THUÊ -->
 <div class="lop-phu-modal" id="modal-chi-tiet-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-chi-tiet-nguoi-thue')">
   <div class="hop-modal" style="width:480px;">
     <div class="tieu-de-modal">
@@ -1354,11 +1369,7 @@
       </h3>
       <button class="nut-dong-modal" onclick="dongModal('modal-chi-tiet-nguoi-thue')">✕</button>
     </div>
-
-    <!-- Nội dung chi tiết – render bằng JS -->
     <div id="noi-dung-chi-tiet-nguoi-thue"></div>
-
-    <!-- Nút chỉnh sửa góc dưới phải -->
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-chi-tiet-nguoi-thue')">Đóng</button>
       <button class="nut-luu-modal"
@@ -1370,10 +1381,7 @@
   </div>
 </div>
 
-<!-- =============================================
-     THÊM MỚI – MODAL THÊM NGƯỜI THUÊ
-     Form nhập liệu, role cố định = "Người thuê"
-============================================= -->
+<!-- MODAL THÊM NGƯỜI THUÊ -->
 <div class="lop-phu-modal" id="modal-them-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-them-nguoi-thue')">
   <div class="hop-modal" style="width:500px;">
     <div class="tieu-de-modal">
@@ -1385,14 +1393,12 @@
       </h3>
       <button class="nut-dong-modal" onclick="dongModal('modal-them-nguoi-thue')">✕</button>
     </div>
-
-    <!-- Form thêm người thuê -->
     <div class="luoi-form-2">
       <div class="nhom-nhap">
         <label class="nhan-nhap">Họ và tên *</label>
         <input class="o-nhap" type="text" id="nt-hoten" placeholder="VD: Nguyễn Văn A" />
       </div>
-       <div class="nhom-nhap">
+      <div class="nhom-nhap">
         <label class="nhan-nhap">Username *</label>
         <input class="o-nhap" type="tel" id="username-thue" placeholder="VD: pinvutru" />
       </div>
@@ -1400,7 +1406,6 @@
         <label class="nhan-nhap">Số phòng *</label>
         <input class="o-nhap" type="text" id="nt-sophong" placeholder="VD: P101" />
       </div>
-
       <div class="nhom-nhap">
         <label class="nhan-nhap">Số điện thoại *</label>
         <input class="o-nhap" type="tel" id="nt-sdt" placeholder="VD: 0901234567" />
@@ -1417,15 +1422,12 @@
         <label class="nhan-nhap">Chỉ số nước đầu kỳ *</label>
         <input class="o-nhap" type="number" id="nt-nuoc-dau-ky" placeholder="VD: 45" min="0" />
       </div>
-      <!-- Role cố định – readonly, không cho chỉnh sửa -->
       <div class="nhom-nhap">
         <label class="nhan-nhap">Vai trò (Role)</label>
         <input class="o-nhap" type="text" value="Người thuê" readonly
           style="background:var(--mau-nen);color:var(--mau-chu-phu);cursor:not-allowed;opacity:0.7;" />
       </div>
     </div>
-
-
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-them-nguoi-thue')">Hủy</button>
       <button class="nut-luu-modal"
@@ -1437,134 +1439,16 @@
   </div>
 </div>
 
-<!-- =============================================
-     THÊM MỚI – SCRIPT QUẢN LÝ NGƯỜI THUÊ
-     Dữ liệu gán cứng JS, tìm kiếm realtime,
-     hiển thị chi tiết, thêm mới
-============================================= -->
 <script>
 
-// ===== HÀM: Mở modal danh sách người thuê =====
-function moModalQuanLyNguoiThue() {
-  renderDanhSachNguoiThue(danhSachNguoiThue);
-  moModal('modal-quan-ly-nguoi-thue');
-}
-
-// ===== HÀM: Render danh sách người thuê dạng card =====
-function renderDanhSachNguoiThue(ds) {
-  var container = document.getElementById('ds-nguoi-thue-trong-modal');
-  var demEl = document.getElementById('dem-nguoi-thue');
-  if (!container) return;
-
-  demEl.textContent = ds.length;
-
-  if (ds.length === 0) {
-    container.innerHTML =
-      '<div style="text-align:center;padding:32px;color:var(--mau-chu-phu);">' +
-        '<i class="fas fa-user-slash" style="font-size:28px;margin-bottom:10px;display:block;opacity:0.4;"></i>' +
-        'Không tìm thấy người thuê nào.' +
-      '</div>';
-    return;
-  }
-
-  // Tạo từng card người thuê
-  container.innerHTML = ds.map(function(nt) {
-    var mauBg = [
-      'linear-gradient(135deg,#7c3aed,#a78bfa)',
-      'linear-gradient(135deg,#c9810a,#f5a623)',
-      'linear-gradient(135deg,#059669,#34d399)',
-      'linear-gradient(135deg,#1a56db,#60a5fa)',
-      'linear-gradient(135deg,#e11d48,#f87171)',
-      'linear-gradient(135deg,#0891b2,#22d3ee)'
-    ];
-    var bg = mauBg[(nt.id - 1) % mauBg.length];
-    var chu = nt.hoTen.split(' ').pop()[0].toUpperCase(); // Lấy chữ cái đầu họ tên
-
-    return '<div onclick="xemChiTietNguoiThue(' + nt.id + ')"' +
-      ' style="display:flex;align-items:center;gap:14px;padding:12px 14px;' +
-        'background:var(--mau-trang);border:1.5px solid var(--mau-vien);border-radius:12px;' +
-        'cursor:pointer;transition:all 0.2s;"' +
-      ' onmouseover="this.style.borderColor=\'var(--mau-chu-de)\';this.style.transform=\'translateX(3px)\'"' +
-      ' onmouseout="this.style.borderColor=\'var(--mau-vien)\';this.style.transform=\'none\'">' +
-      // Avatar chữ cái
-      '<div style="width:42px;height:42px;border-radius:12px;background:' + bg + ';' +
-        'display:flex;align-items:center;justify-content:center;color:#fff;' +
-        'font-size:16px;font-weight:800;flex-shrink:0;">' + chu + '</div>' +
-      // Tên + phòng
-      '<div style="flex:1;">' +
-        '<div style="font-size:13.5px;font-weight:700;color:var(--mau-chu);">' + nt.hoTen + '</div>' +
-        '<div style="font-size:11.5px;color:var(--mau-chu-phu);margin-top:2px;">' +
-          '<i class="fas fa-door-open" style="font-size:10px;margin-right:4px;"></i>Phòng ' + nt.soPhong +
-        '</div>' +
-      '</div>' +
-      // Badge phòng
-      '<span style="background:var(--mau-chu-de-nhat);color:var(--mau-chu-de);' +
-        'font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;' +
-        'border:1px solid rgba(201,129,10,0.2);white-space:nowrap;">' + nt.soPhong + '</span>' +
-      '<i class="fas fa-chevron-right" style="color:var(--mau-chu-phu);font-size:11px;"></i>' +
-    '</div>';
-  }).join('');
-}
-
-// ===== HÀM: Lọc realtime theo tên / số phòng =====
-function locDanhSachNguoiThue(tuKhoa) {
-  var kq = danhSachNguoiThue.filter(function(nt) {
-    var tk = tuKhoa.toLowerCase().trim();
-    return nt.hoTen.toLowerCase().includes(tk) || nt.soPhong.toLowerCase().includes(tk);
-  });
-  renderDanhSachNguoiThue(kq);
-}
-
-// ===== HÀM: Xem chi tiết một người thuê =====
-function xemChiTietNguoiThue(id) {
-  var nt = danhSachNguoiThue.find(function(x) { return x.id === id; });
-  if (!nt) return;
-  nguoiThueHienTai = nt;
-
-  var html =
-    // Thông tin phòng
-    '<div style="background:var(--mau-nen);border-radius:12px;padding:16px;margin-bottom:14px;">' +
-      '<div style="font-size:11px;font-weight:800;color:var(--mau-chu-de);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">' +
-        '<i class="fas fa-door-open" style="margin-right:6px;"></i>Thông tin phòng' +
-      '</div>' +
-      '<div class="luoi-form-2" style="gap:10px;">' +
-        taoTruong('Số phòng', nt.soPhong) +
-        taoTruong('Giá phòng', nt.giaPhong) +
-        taoTruong('Tiền điện', nt.tienDien) +
-        taoTruong('Tiền nước', nt.tienNuoc) +
-        taoTruong('Tiền rác', nt.tienRac) +
-      '</div>' +
-    '</div>' +
-    // Thông tin cá nhân
-    '<div style="background:var(--mau-nen);border-radius:12px;padding:16px;">' +
-      '<div style="font-size:11px;font-weight:800;color:#7c3aed;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">' +
-        '<i class="fas fa-id-card" style="margin-right:6px;"></i>Thông tin cá nhân' +
-      '</div>' +
-      '<div class="luoi-form-2" style="gap:10px;">' +
-        taoTruong('Họ và tên', nt.hoTen) +
-        taoTruong('CCCD', nt.cccd) +
-        taoTruong('Số điện thoại', nt.sdt) +
-      '</div>' +
-    '</div>';
-
-  document.getElementById('noi-dung-chi-tiet-nguoi-thue').innerHTML = html;
-  moModal('modal-chi-tiet-nguoi-thue');
-}
-
-// Helper tạo trường hiển thị
 function taoTruong(nhan, giatri) {
   return '<div><div style="font-size:11px;color:var(--mau-chu-phu);font-weight:600;">' + nhan + '</div>' +
          '<div style="font-weight:800;margin-top:3px;font-size:13px;">' + giatri + '</div></div>';
 }
-
 </script>
 
 
-<!-- =============================================
-     MODAL 3: CẤU HÌNH GIÁ THUÊ MẶC ĐỊNH
-     Đặt giá theo loại phòng
-     ⚙️ BACKEND: PUT /api/cau-hinh/gia-thue
-============================================= -->
+<!-- MODAL 3: CẤU HÌNH GIÁ THUÊ -->
 <div class="lop-phu-modal" id="modal-cau-hinh-gia" onclick="dongModalNhapNgoai(event,'modal-cau-hinh-gia')">
   <div class="hop-modal">
     <div class="tieu-de-modal">
@@ -1579,20 +1463,14 @@ function taoTruong(nhan, giatri) {
       Giá thiết lập ở đây sẽ là giá mặc định khi tạo phòng mới. Quản lý có thể điều chỉnh cho từng phòng cụ thể.
     </p>
 
-    <!-- Cấu hình giá từng loại phòng -->
     <div class="luoi-cau-hinh-gia">
-
-      <!-- Phòng đơn -->
       <div class="o-cau-hinh-gia">
         <div class="nhan-gia"><i class="fas fa-bed"></i> Phòng đơn (≤15m²)</div>
         <div class="hang-nhap-gia">
-          <!-- ⚙️ BACKEND: GET giá hiện tại khi mở modal -->
           <input type="number" value="2500000" id="gia-phong-don" />
           <span class="don-vi-gia">đ / tháng</span>
         </div>
       </div>
-
-      <!-- Phòng đôi -->
       <div class="o-cau-hinh-gia">
         <div class="nhan-gia"><i class="fas fa-door-open"></i> Phòng đôi (15–20m²)</div>
         <div class="hang-nhap-gia">
@@ -1600,8 +1478,6 @@ function taoTruong(nhan, giatri) {
           <span class="don-vi-gia">đ / tháng</span>
         </div>
       </div>
-
-      <!-- Phòng cao cấp -->
       <div class="o-cau-hinh-gia">
         <div class="nhan-gia"><i class="fas fa-star"></i> Phòng cao cấp (>20m²)</div>
         <div class="hang-nhap-gia">
@@ -1609,8 +1485,6 @@ function taoTruong(nhan, giatri) {
           <span class="don-vi-gia">đ / tháng</span>
         </div>
       </div>
-
-      <!-- Phòng studio -->
       <div class="o-cau-hinh-gia">
         <div class="nhan-gia"><i class="fas fa-couch"></i> Phòng studio (có bếp)</div>
         <div class="hang-nhap-gia">
@@ -1618,12 +1492,10 @@ function taoTruong(nhan, giatri) {
           <span class="don-vi-gia">đ / tháng</span>
         </div>
       </div>
-
     </div>
 
     <hr class="duong-ke-modal" />
 
-    <!-- Cấu hình tăng giá theo năm -->
     <div class="tieu-de-muc-modal">Chính sách tăng giá hàng năm</div>
     <div class="luoi-form-2">
       <div class="nhom-nhap">
@@ -1642,7 +1514,6 @@ function taoTruong(nhan, giatri) {
 
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-cau-hinh-gia')">Hủy</button>
-      <!-- ⚙️ BACKEND: PUT /api/cau-hinh/gia-thue với các giá mới -->
       <button class="nut-luu-modal" onclick="luuCauHinhGia()">
         <i class="fas fa-save"></i> Lưu cấu hình giá
       </button>
@@ -1650,18 +1521,16 @@ function taoTruong(nhan, giatri) {
   </div>
 </div>
 
-<!-- THÔNG BÁO -->
+
+<!-- THÔNG BÁO TOAST -->
 <div id="hop-thong-bao" class="hop-thong-bao">
     <div class="noi-dung-thong-bao">
         <span id="text-thong-bao"></span>
     </div>
 </div>
 
-<!-- =============================================
-     MODAL 4: CẤU HÌNH CHI PHÍ DỊCH VỤ
-     Điện, nước, internet, vệ sinh
-     ⚙️ BACKEND: PUT /api/cau-hinh/dich-vu
-============================================= -->
+
+<!-- MODAL 4: CHI PHÍ DỊCH VỤ -->
 <div class="lop-phu-modal" id="modal-chi-phi-dich-vu" onclick="dongModalNhapNgoai(event,'modal-chi-phi-dich-vu')">
   <div class="hop-modal">
     <div class="tieu-de-modal">
@@ -1672,12 +1541,10 @@ function taoTruong(nhan, giatri) {
       <button class="nut-dong-modal" onclick="dongModal('modal-chi-phi-dich-vu')">✕</button>
     </div>
 
-    <!-- Tiền điện -->
     <div class="tieu-de-muc-modal"><i class="fas fa-bolt" style="color:#f59e0b;"></i> Tiền điện</div>
     <div class="luoi-form-3" style="margin-bottom:16px;">
       <div class="nhom-nhap">
         <label class="nhan-nhap">Giá điện (đ/kWh)</label>
-        <!-- ⚙️ BACKEND: GET /api/cau-hinh/dich-vu để prefill -->
         <input class="o-nhap" type="number" id="gia-dien" value="3500" placeholder="3500" />
       </div>
       <div class="nhom-nhap">
@@ -1694,7 +1561,6 @@ function taoTruong(nhan, giatri) {
       </div>
     </div>
 
-    <!-- Tiền nước -->
     <div class="tieu-de-muc-modal"><i class="fas fa-tint" style="color:#3b82f6;"></i> Tiền nước</div>
     <div class="luoi-form-3" style="margin-bottom:16px;">
       <div class="nhom-nhap">
@@ -1715,7 +1581,6 @@ function taoTruong(nhan, giatri) {
       </div>
     </div>
 
-    <!-- Internet + Vệ sinh -->
     <div class="tieu-de-muc-modal"><i class="fas fa-wifi" style="color:#8b5cf6;"></i> Internet & Vệ sinh</div>
     <div class="luoi-form-2" style="margin-bottom:4px;">
       <div class="nhom-nhap">
@@ -1738,7 +1603,6 @@ function taoTruong(nhan, giatri) {
 
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-chi-phi-dich-vu')">Hủy</button>
-      <!-- ⚙️ BACKEND: PUT /api/cau-hinh/dich-vu -->
       <button class="nut-luu-modal" onclick="luuCauHinhDichVu()">
         <i class="fas fa-save"></i> Lưu cấu hình dịch vụ
       </button>
@@ -1747,11 +1611,7 @@ function taoTruong(nhan, giatri) {
 </div>
 
 
-<!-- =============================================
-     MODAL 5: QUY ĐỊNH ĐẶT CỌC
-     Tỷ lệ cọc, điều kiện hoàn trả, khấu trừ
-     ⚙️ BACKEND: PUT /api/cau-hinh/dat-coc
-============================================= -->
+<!-- MODAL 5: QUY ĐỊNH ĐẶT CỌC -->
 <div class="lop-phu-modal" id="modal-dat-coc" onclick="dongModalNhapNgoai(event,'modal-dat-coc')">
   <div class="hop-modal">
     <div class="tieu-de-modal">
@@ -1766,7 +1626,6 @@ function taoTruong(nhan, giatri) {
     <div class="luoi-form-2" style="margin-bottom:16px;">
       <div class="nhom-nhap">
         <label class="nhan-nhap">Số tháng đặt cọc</label>
-        <!-- ⚙️ BACKEND: GET giá trị hiện tại từ DB khi mở modal -->
         <select class="o-nhap o-chon" id="so-thang-dat-coc">
           <option>1 tháng tiền thuê</option>
           <option selected>2 tháng tiền thuê</option>
@@ -1797,7 +1656,6 @@ function taoTruong(nhan, giatri) {
     </div>
 
     <div class="tieu-de-muc-modal">Điều kiện khấu trừ tiền cọc</div>
-    <!-- Các checkbox điều kiện khấu trừ -->
     <div class="luoi-quyen" style="margin-bottom:12px;">
       <label class="dong-quyen">
         <input type="checkbox" checked />
@@ -1824,7 +1682,6 @@ function taoTruong(nhan, giatri) {
 
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-dat-coc')">Hủy</button>
-      <!-- ⚙️ BACKEND: PUT /api/cau-hinh/dat-coc -->
       <button class="nut-luu-modal" onclick="luuQuyDinhDatCoc()">
         <i class="fas fa-save"></i> Lưu quy định đặt cọc
       </button>
@@ -1833,11 +1690,7 @@ function taoTruong(nhan, giatri) {
 </div>
 
 
-<!-- =============================================
-     MODAL 6: PHÊ DUYỆT SỬA CHỮA LỚN
-     Danh sách yêu cầu sửa chữa có chi phí cao
-     ⚙️ BACKEND: GET /api/sua-chua?loai=lon&trang-thai=cho-duyet
-============================================= -->
+<!-- MODAL 6: PHÊ DUYỆT SỬA CHỮA LỚN -->
 <div class="lop-phu-modal" id="modal-phe-duyet-sua-chua" onclick="dongModalNhapNgoai(event,'modal-phe-duyet-sua-chua')">
   <div class="hop-modal rong">
     <div class="tieu-de-modal">
@@ -1852,9 +1705,7 @@ function taoTruong(nhan, giatri) {
       Các yêu cầu sửa chữa có chi phí ước tính trên <strong>2,000,000 đ</strong> cần chủ trọ phê duyệt trước khi thực hiện.
     </p>
 
-    <!-- ⚙️ BACKEND: Render từng yêu cầu sửa chữa lớn từ API -->
-
-    <!-- Yêu cầu sửa chữa 1 -->
+    <!-- Yêu cầu 1 -->
     <div style="background:var(--mau-nen);border-radius:14px;padding:16px;margin-bottom:12px;border:1.5px solid var(--mau-vien);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
         <div>
@@ -1876,7 +1727,7 @@ function taoTruong(nhan, giatri) {
       </div>
     </div>
 
-    <!-- Yêu cầu sửa chữa 2 -->
+    <!-- Yêu cầu 2 -->
     <div style="background:var(--mau-nen);border-radius:14px;padding:16px;margin-bottom:12px;border:1.5px solid var(--mau-vien);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
         <div>
@@ -1886,7 +1737,7 @@ function taoTruong(nhan, giatri) {
         <span style="background:#fef3c7;color:#d97706;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Trung bình</span>
       </div>
       <div style="font-size:13px;margin-bottom:10px;line-height:1.6;">
-        Hành lang tầng 3 & 4 xuống cấp, tường bong tróc. Cần sơn lại để đảm bảo thẩm mỹ.
+        Hành lang tầng 3 &amp; 4 xuống cấp, tường bong tróc. Cần sơn lại để đảm bảo thẩm mỹ.
         <br><strong>Chi phí ước tính: 3,200,000 đ</strong>
       </div>
       <div style="display:flex;gap:8px;">
@@ -1896,7 +1747,7 @@ function taoTruong(nhan, giatri) {
       </div>
     </div>
 
-    <!-- Yêu cầu sửa chữa 3 -->
+    <!-- Yêu cầu 3 -->
     <div style="background:var(--mau-nen);border-radius:14px;padding:16px;border:1.5px solid var(--mau-vien);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
         <div>
@@ -1926,11 +1777,7 @@ function taoTruong(nhan, giatri) {
 </div>
 
 
-<!-- =============================================
-     MODAL 7: BÁO CÁO THU/CHI CHI TIẾT THÁNG
-     Click vào dòng báo cáo trên dashboard sẽ mở modal này
-     ⚙️ BACKEND: GET /api/bao-cao/chi-tiet?thang=5&nam=2025
-============================================= -->
+<!-- MODAL 7: BÁO CÁO CHI TIẾT -->
 <div class="lop-phu-modal" id="modal-bao-cao-chi-tiet" onclick="dongModalNhapNgoai(event,'modal-bao-cao-chi-tiet')">
   <div class="hop-modal rong">
     <div class="tieu-de-modal">
@@ -1941,121 +1788,83 @@ function taoTruong(nhan, giatri) {
       <button class="nut-dong-modal" onclick="dongModal('modal-bao-cao-chi-tiet')">✕</button>
     </div>
 
-    <!-- Khung 3 ô tóm tắt tổng quan -->
     <div class="khung-tom-tat">
       <div class="o-tom-tat xanh">
-        <!-- ⚙️ BACKEND: Tổng thu tháng -->
         <div class="so">65.5M</div>
         <div class="nhan"><i class="fas fa-arrow-up"></i> Tổng thu</div>
       </div>
       <div class="o-tom-tat do">
-        <!-- ⚙️ BACKEND: Tổng chi tháng -->
         <div class="so">21.3M</div>
         <div class="nhan"><i class="fas fa-arrow-down"></i> Tổng chi</div>
       </div>
       <div class="o-tom-tat vang">
-        <!-- ⚙️ BACKEND: Lợi nhuận = Thu - Chi -->
         <div class="so">44.2M</div>
         <div class="nhan"><i class="fas fa-coins"></i> Lợi nhuận</div>
       </div>
     </div>
 
-    <!-- Bảng chi tiết từng khoản thu -->
     <div class="tieu-de-muc-modal" style="color:#059669;"><i class="fas fa-arrow-circle-up"></i> Chi tiết thu</div>
-    <!-- ⚙️ BACKEND: Render từng dòng từ bảng thu -->
     <table class="bang-chi-tiet-modal" style="margin-bottom:16px;">
       <thead>
         <tr>
-          <th>Khoản thu</th>
-          <th>Số phòng / đơn vị</th>
-          <th>Đơn giá</th>
-          <th>Thành tiền</th>
-          <th>Tỷ lệ</th>
+          <th>Khoản thu</th><th>Số phòng / đơn vị</th><th>Đơn giá</th><th>Thành tiền</th><th>Tỷ lệ</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><strong>Tiền thuê phòng</strong></td>
-          <td>39 phòng</td>
-          <td>Từ 2.5M – 4.5M</td>
-          <td style="font-weight:800;color:#059669;">58,500,000 đ</td>
-          <td>89.3%</td>
+          <td>39 phòng</td><td>Từ 2.5M – 4.5M</td>
+          <td style="font-weight:800;color:#059669;">58,500,000 đ</td><td>89.3%</td>
         </tr>
         <tr>
           <td><strong>Tiền đặt cọc mới</strong></td>
-          <td>2 hợp đồng mới</td>
-          <td>2 tháng tiền thuê</td>
-          <td style="font-weight:800;color:#059669;">7,000,000 đ</td>
-          <td>10.7%</td>
+          <td>2 hợp đồng mới</td><td>2 tháng tiền thuê</td>
+          <td style="font-weight:800;color:#059669;">7,000,000 đ</td><td>10.7%</td>
         </tr>
         <tr style="background:var(--mau-nen);">
           <td colspan="3"><strong>Tổng thu</strong></td>
-          <td style="font-weight:900;color:#059669;font-size:14px;">65,500,000 đ</td>
-          <td>100%</td>
+          <td style="font-weight:900;color:#059669;font-size:14px;">65,500,000 đ</td><td>100%</td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Bảng chi tiết từng khoản chi -->
     <div class="tieu-de-muc-modal" style="color:#dc2626;"><i class="fas fa-arrow-circle-down"></i> Chi tiết chi</div>
-    <!-- ⚙️ BACKEND: Render từng dòng từ bảng chi -->
     <table class="bang-chi-tiet-modal">
       <thead>
         <tr>
-          <th>Khoản chi</th>
-          <th>Số lượng</th>
-          <th>Đơn giá / Ghi chú</th>
-          <th>Thành tiền</th>
-          <th>Tỷ lệ</th>
+          <th>Khoản chi</th><th>Số lượng</th><th>Đơn giá / Ghi chú</th><th>Thành tiền</th><th>Tỷ lệ</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><strong>Tiền điện</strong></td>
-          <td>1,487 kWh</td>
-          <td>3,500 đ/kWh</td>
-          <td style="font-weight:800;color:#dc2626;">5,204,500 đ</td>
-          <td>24.4%</td>
+          <td><strong>Tiền điện</strong></td><td>1,487 kWh</td><td>3,500 đ/kWh</td>
+          <td style="font-weight:800;color:#dc2626;">5,204,500 đ</td><td>24.4%</td>
         </tr>
         <tr>
-          <td><strong>Tiền nước</strong></td>
-          <td>120 m³</td>
-          <td>15,000 đ/m³</td>
-          <td style="font-weight:800;color:#dc2626;">1,800,000 đ</td>
-          <td>8.5%</td>
+          <td><strong>Tiền nước</strong></td><td>120 m³</td><td>15,000 đ/m³</td>
+          <td style="font-weight:800;color:#dc2626;">1,800,000 đ</td><td>8.5%</td>
         </tr>
         <tr>
-          <td><strong>Internet</strong></td>
-          <td>39 phòng</td>
-          <td>100,000 đ/phòng</td>
-          <td style="font-weight:800;color:#dc2626;">3,900,000 đ</td>
-          <td>18.3%</td>
+          <td><strong>Internet</strong></td><td>39 phòng</td><td>100,000 đ/phòng</td>
+          <td style="font-weight:800;color:#dc2626;">3,900,000 đ</td><td>18.3%</td>
         </tr>
         <tr>
-          <td><strong>Lương quản lý</strong></td>
-          <td>3 người</td>
-          <td>3,000,000 đ/người</td>
-          <td style="font-weight:800;color:#dc2626;">9,000,000 đ</td>
-          <td>42.3%</td>
+          <td><strong>Lương quản lý</strong></td><td>3 người</td><td>3,000,000 đ/người</td>
+          <td style="font-weight:800;color:#dc2626;">9,000,000 đ</td><td>42.3%</td>
         </tr>
         <tr>
-          <td><strong>Vệ sinh chung</strong></td>
-          <td>1 tháng</td>
-          <td>Khoán trọn tháng</td>
-          <td style="font-weight:800;color:#dc2626;">1,500,000 đ</td>
-          <td>7.0%</td>
+          <td><strong>Vệ sinh chung</strong></td><td>1 tháng</td><td>Khoán trọn tháng</td>
+          <td style="font-weight:800;color:#dc2626;">1,500,000 đ</td><td>7.0%</td>
         </tr>
         <tr style="background:var(--mau-nen);">
           <td colspan="3"><strong>Tổng chi</strong></td>
-          <td style="font-weight:900;color:#dc2626;font-size:14px;">21,404,500 đ</td>
-          <td>100%</td>
+          <td style="font-weight:900;color:#dc2626;font-size:14px;">21,404,500 đ</td><td>100%</td>
         </tr>
       </tbody>
     </table>
 
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-bao-cao-chi-tiet')">Đóng</button>
-      <!-- ⚙️ BACKEND: API xuất PDF/Excel báo cáo -->
       <button class="nut-luu-modal" style="background:linear-gradient(135deg,#059669,#34d399);" onclick="xuatBaoCao()">
         <i class="fas fa-file-export"></i> Xuất báo cáo PDF
       </button>
@@ -2064,10 +1873,7 @@ function taoTruong(nhan, giatri) {
 </div>
 
 
-<!-- =============================================
-     MODAL 8: CHI TIẾT HỢP ĐỒNG (xem trước khi duyệt)
-     ⚙️ BACKEND: GET /api/hop-dong/{id}
-============================================= -->
+<!-- MODAL 8: CHI TIẾT HỢP ĐỒNG -->
 <div class="lop-phu-modal" id="modal-chi-tiet-hop-dong" onclick="dongModalNhapNgoai(event,'modal-chi-tiet-hop-dong')">
   <div class="hop-modal">
     <div class="tieu-de-modal">
@@ -2078,8 +1884,6 @@ function taoTruong(nhan, giatri) {
       <button class="nut-dong-modal" onclick="dongModal('modal-chi-tiet-hop-dong')">✕</button>
     </div>
 
-    <!-- Thông tin hợp đồng -->
-    <!-- ⚙️ BACKEND: Render thông tin HĐ từ API -->
     <div style="background:var(--mau-nen);border-radius:12px;padding:16px;margin-bottom:16px;">
       <div class="luoi-form-2" style="gap:10px;">
         <div><div style="font-size:11px;color:var(--mau-chu-phu);font-weight:600;">Mã hợp đồng</div><div style="font-weight:800;margin-top:3px;">HD-2025-302-05</div></div>
@@ -2108,7 +1912,6 @@ function taoTruong(nhan, giatri) {
     <div class="nhom-nut-duoi-modal">
       <button class="nut-huy-modal" onclick="dongModal('modal-chi-tiet-hop-dong')">Đóng</button>
       <button style="background:#fee2e2;color:#dc2626;border:none;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;" onclick="tuChoi('HD-302');dongModal('modal-chi-tiet-hop-dong')">✕ Từ chối</button>
-      <!-- ⚙️ BACKEND: POST /api/hop-dong/{id}/duyet -->
       <button class="nut-luu-modal" style="background:linear-gradient(135deg,#dc2626,#f87171);" onclick="pheDuyet('HD-302','xoa');dongModal('modal-chi-tiet-hop-dong')">
         ✓ Duyệt xóa hợp đồng
       </button>
@@ -2116,18 +1919,7 @@ function taoTruong(nhan, giatri) {
   </div>
 </div>
 
-<!-- =============================================
-     JAVASCRIPT – XỬ LÝ TƯƠNG TÁC
-============================================= -->
-<script>
-  // ===== CẬP NHẬT NGÀY GIỜ CHỦ TRỌ =====
-  (function capNhatNgayGio() {
-    const ngay = new Date();
-    const t = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
-    document.getElementById('ngay-gio-chu-tro').textContent =
-      `${t[ngay.getDay()]}, ${ngay.getDate()} tháng ${ngay.getMonth()+1} năm ${ngay.getFullYear()}`;
-  })();
-</script>
+
 <!-- MODAL: DANH SÁCH QUẢN LÝ -->
 <div class="lop-phu-modal" id="modal-danh-sach-quan-ly" onclick="dongModalNhapNgoai(event,'modal-danh-sach-quan-ly')">
   <div class="hop-modal" style="width:560px;">
@@ -2165,7 +1957,7 @@ function taoTruong(nhan, giatri) {
   </div>
 </div>
 
-<!-- MODAL: CHI TIẾT 1 QUẢN LÝ -->
+<!-- MODAL: CHI TIẾT QUẢN LÝ -->
 <div class="lop-phu-modal" id="modal-chi-tiet-quan-ly" onclick="dongModalNhapNgoai(event,'modal-chi-tiet-quan-ly')">
   <div class="hop-modal nho" style="width:420px;">
     <div class="tieu-de-modal">
@@ -2180,6 +1972,7 @@ function taoTruong(nhan, giatri) {
     <div id="noi-dung-chi-tiet-quan-ly"></div>
   </div>
 </div>
+
 <!-- MODAL: CHỈNH SỬA NGƯỜI THUÊ -->
 <div class="lop-phu-modal" id="modal-chinh-sua-nguoi-thue" onclick="dongModalNhapNgoai(event,'modal-chinh-sua-nguoi-thue')">
   <div class="hop-modal rong" style="width:620px;">
@@ -2194,26 +1987,18 @@ function taoTruong(nhan, giatri) {
     </div>
 
     <div class="luoi-form-2">
-
-      <!-- Họ và tên -->
       <div class="nhom-nhap">
         <label class="nhan-nhap">Họ và tên *</label>
         <input class="o-nhap" type="text" id="cs-hoten" placeholder="VD: Nguyễn Văn A" />
       </div>
-
-      <!-- Username -->
       <div class="nhom-nhap">
         <label class="nhan-nhap">Username *</label>
         <input class="o-nhap" type="text" id="cs-username" placeholder="VD: nguyenvana" />
       </div>
-
-      <!-- Số điện thoại -->
       <div class="nhom-nhap">
         <label class="nhan-nhap">Số điện thoại *</label>
         <input class="o-nhap" type="tel" id="cs-sdt" placeholder="VD: 0901234567" />
       </div>
-
-      <!-- Mật khẩu -->
       <div class="nhom-nhap">
         <label class="nhan-nhap">
           Mật khẩu
@@ -2222,50 +2007,59 @@ function taoTruong(nhan, giatri) {
         <input class="o-nhap" type="password" id="cs-matkhau" placeholder="Nhập mật khẩu mới..." />
       </div>
 
-      <!-- Chọn số phòng – dropdown phòng trống -->
-        <div class="nhom-nhap" style="position:relative;">
-          <label class="nhan-nhap">Số phòng *</label>
-          <div style="position:relative;">
-            <input
-              class="o-nhap"
-              type="text"
-              id="cs-sophong"
-              placeholder="VD: P101"
-              readonly
-              style="cursor:pointer;padding-right:40px;"
-              onclick="moPopupPhongTrong()"
-            />
-            <!-- Icon trigger mở popup -->
-            <span
-              onclick="moPopupPhongTrong()"
-              style="
-                position:absolute; right:12px; top:50%; transform:translateY(-50%);
-                color:var(--mau-chu-de); cursor:pointer; font-size:15px;
-                transition:opacity 0.2s;
-              "
-              title="Chọn phòng trống"
-            >
-              <i class="fas fa-door-open"></i>
-            </span>
+      <div class="nhom-nhap" style="position:relative;">
+        <label class="nhan-nhap">Số phòng *</label>
+        <div style="position:relative;">
+          <input
+            class="o-nhap"
+            type="text"
+            id="cs-sophong"
+            placeholder="VD: P101"
+            readonly
+            style="cursor:pointer;padding-right:40px;"
+            onclick="moPopupPhongTrong()"
+          />
+          <span
+            onclick="moPopupPhongTrong()"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--mau-chu-de);cursor:pointer;font-size:15px;"
+            title="Chọn phòng trống">
+            <i class="fas fa-door-open"></i>
+          </span>
+        </div>
+
+        <div class="nhom-nhap">
+          <label class="nhan-nhap">Vai trò (Role)</label>
+          <input class="o-nhap" type="text" value="Người thuê" readonly
+            style="background:var(--mau-nen);color:var(--mau-chu-phu);cursor:not-allowed;opacity:0.7;" />
+        </div>
+        <div class="nhom-nhap">
+          <label class="nhan-nhap">Chỉ số điện đầu kỳ *</label>
+          <input class="o-nhap" type="number" id="cs-dien-dau-ky" placeholder="VD: 1250" min="0" />
+        </div>
+        <div class="nhom-nhap">
+          <label class="nhan-nhap">Chỉ số nước đầu kỳ *</label>
+          <input class="o-nhap" type="number" id="cs-nuoc-dau-ky" placeholder="VD: 45" min="0" />
+        </div>
+
+        <!-- Popup phòng trống -->
+        <div
+          id="popup-phong-trong"
+          style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
+            background:#fff;border:1.5px solid var(--mau-chu-de);border-radius:12px;
+            box-shadow:0 8px 32px rgba(184,114,10,0.18);z-index:9999;overflow:hidden;
+            animation:hien-modal 0.2s ease;">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--mau-vien);display:flex;align-items:center;gap:8px;background:var(--mau-nen);">
+            <i class="fas fa-search" style="color:var(--mau-chu-phu);font-size:11px;flex-shrink:0;"></i>
+            <input type="text" id="input-loc-phong" placeholder="Lọc nhanh tên phòng..."
+              oninput="locPhongTrong(this.value)"
+              style="border:none;background:none;outline:none;font-size:12px;width:100%;font-family:inherit;color:var(--mau-chu);" />
           </div>
-
-      <!-- Vai trò – readonly -->
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Vai trò (Role)</label>
-        <input class="o-nhap" type="text" value="Người thuê" readonly
-          style="background:var(--mau-nen);color:var(--mau-chu-phu);cursor:not-allowed;opacity:0.7;" />
-      </div>
-
-      <!-- Chỉ số điện đầu kỳ -->
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Chỉ số điện đầu kỳ *</label>
-        <input class="o-nhap" type="number" id="cs-dien-dau-ky" placeholder="VD: 1250" min="0" />
-      </div>
-
-      <!-- Chỉ số nước đầu kỳ -->
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Chỉ số nước đầu kỳ *</label>
-        <input class="o-nhap" type="number" id="cs-nuoc-dau-ky" placeholder="VD: 45" min="0" />
+          <div id="ds-phong-trong-popup" style="max-height:200px;overflow-y:auto;padding:6px;"></div>
+          <div id="phong-trong-rong" style="display:none;padding:20px;text-align:center;color:var(--mau-chu-phu);">
+            <i class="fas fa-door-closed" style="font-size:22px;opacity:0.35;display:block;margin-bottom:8px;"></i>
+            <span style="font-size:12px;">Hiện không có phòng trống</span>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -2281,66 +2075,19 @@ function taoTruong(nhan, giatri) {
   </div>
 </div>
 
-  <!-- Popup danh sách phòng trống -->
-  <div
-    id="popup-phong-trong"
-    style="
-      display:none;
-      position:absolute; top:calc(100% + 6px); left:0; right:0;
-      background:#fff;
-      border:1.5px solid var(--mau-chu-de);
-      border-radius:12px;
-      box-shadow:0 8px 32px rgba(201,129,10,0.18);
-      z-index:9999;
-      overflow:hidden;
-      animation: hien-modal 0.2s ease;
-    "
-  >
-    <!-- Thanh tìm kiếm lọc phòng -->
-    <div style="padding:10px 12px;border-bottom:1px solid var(--mau-vien);display:flex;align-items:center;gap:8px;background:var(--mau-nen);">
-      <i class="fas fa-search" style="color:var(--mau-chu-phu);font-size:11px;flex-shrink:0;"></i>
-      <input
-        type="text"
-        id="input-loc-phong"
-        placeholder="Lọc nhanh tên phòng..."
-        oninput="locPhongTrong(this.value)"
-        style="border:none;background:none;outline:none;font-size:12px;width:100%;font-family:inherit;color:var(--mau-chu);"
-      />
-    </div>
 
-    <!-- Danh sách phòng trống – backend render vào đây -->
-    <div
-      id="ds-phong-trong-popup"
-      style="max-height:200px;overflow-y:auto;padding:6px;"
-    >
-      <!-- ⚙️ BACKEND: Render danh sách phòng trống từ API /api/phong?trang-thai=trong -->
-      <!-- Mỗi item dùng cấu trúc sau:
-        <div
-          class="item-phong-trong"
-          data-phong="P101"
-          onclick="chonPhongTrong('P101')"
-          style="
-            display:flex; align-items:center; gap:10px;
-            padding:9px 10px; border-radius:8px; cursor:pointer;
-            transition:background 0.15s; font-size:13px;
-          "
-          onmouseover="this.style.background='var(--mau-chu-de-nhat)'"
-          onmouseout="this.style.background='transparent'"
-        >
-          <i class="fas fa-door-open" style="color:var(--mau-chu-de);font-size:12px;width:16px;text-align:center;"></i>
-          <span style="font-weight:700;">P101</span>
-          <span style="font-size:11px;color:var(--mau-chu-phu);margin-left:auto;">Phòng đơn · 2.5M/tháng</span>
-        </div>
-      -->
-    </div>
+<!-- =============================================
+     JAVASCRIPT – XỬ LÝ TƯƠNG TÁC
+============================================= -->
+<script>
+  // ===== CẬP NHẬT NGÀY GIỜ =====
+  (function capNhatNgayGio() {
+    const ngay = new Date();
+    const t = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+    document.getElementById('ngay-gio-chu-tro').textContent =
+      `${t[ngay.getDay()]}, ${ngay.getDate()} tháng ${ngay.getMonth()+1} năm ${ngay.getFullYear()}`;
+  })();
+</script>
 
-    <!-- Trạng thái rỗng – hiển thị khi không có phòng trống -->
-    <div id="phong-trong-rong" style="display:none;padding:20px;text-align:center;color:var(--mau-chu-phu);">
-      <i class="fas fa-door-closed" style="font-size:22px;opacity:0.35;display:block;margin-bottom:8px;"></i>
-      <span style="font-size:12px;">Hiện không có phòng trống</span>
-    </div>
-
-  </div>
-</div>
 </body>
 </html>
