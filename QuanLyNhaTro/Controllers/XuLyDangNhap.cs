@@ -59,7 +59,9 @@ namespace QuanLyNhaTro.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Roles) // Quan trọng: roles này dùng để check [Authorize(Roles="...")]
+                new Claim(ClaimTypes.Role, user.Roles),// Quan trọng: roles này dùng để check [Authorize(Roles="...")]
+                new Claim(ClaimTypes.NameIdentifier, user.IDUser.ToString()),
+                new Claim("FullName", user.FullName)
             };
 
             // 2. Tạo Identity (Thẻ căn cước)
@@ -90,5 +92,6 @@ namespace QuanLyNhaTro.Controllers
             await HttpContext.SignOutAsync("MyCookieAuth");
             return Ok(new { message = "Đã đăng xuất" });
         }
+
     }
 }

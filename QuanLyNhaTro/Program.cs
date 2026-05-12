@@ -23,7 +23,7 @@ builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>
     {
         options.Cookie.Name = "MyCookieAuth";
-        options.LoginPath = "/Login";          // Trang chuyển hướng khi chưa đăng nhập
+        options.LoginPath = "/Index";          // Trang chuyển hướng khi chưa đăng nhập
         options.AccessDeniedPath = "/AccessDenied"; // Trang chuyển hướng khi sai quyền (403)
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie hết hạn sau 30p
         options.SlidingExpiration = true;      // Tự động gia hạn khi người dùng còn hoạt động

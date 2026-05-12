@@ -3,13 +3,49 @@
 @{
     ViewData["title"] = "Thanh Toán";
     Layout = null;
+    var hd    = Model.HoaDon;           // HDTHANG
+    var dn    = Model.DienNuoc;         // DIENNUOC (có thể null)
+    var khach = Model.KhachThue;        // ACCOUNT (tenant)
+    var phong = Model.Phong;            // PHONG
+    var ql    = Model.QuanLy;           // ACCOUNT (manager – có QR_Link)
+
+    // Tính số ngày còn lại đến hạn
+    int soNgayCon = hd != null ? (hd.HanDong - DateTime.Today).Days : 0;
+
+    // Chỉ số điện/nước
+    int soKwh   = (dn != null) ? (dn.SoDienMoi - dn.SoDienCu) : 0;
+    int soKhoi  = (dn != null) ? (dn.SoNuocMoi - dn.SoNuocCu) : 0;
+
+    // Đơn giá điện/nước lấy từ CONFIG
+    decimal donGiaDien  = Model.DonGiaDien;   // decimal từ CONFIG_GIA
+    decimal donGiaNuoc  = Model.DonGiaNuoc;
+
+    // Nội dung chuyển khoản tự động
+    string noiDungCK = hd != null
+        ? $"P{phong?.SoPhong} THANG {hd.KyThanhToan.Replace("/", " ")}"
+        : "";
+
+    // Chữ cái đầu tên khách (avatar fallback)
+    string avatarChar = khach?.FullName?.Length > 0
+        ? khach.FullName.Substring(0, 1).ToUpper()
+        : "?";
+
+    // Tên ngân hàng / số tài khoản — lưu tạm trong FullName của manager
+    // (Xem ghi chú SQL bên dưới để biết cách mở rộng bảng ACCOUNT)
+    // Lấy QR_Link từ DB; nếu chưa có thì dùng ảnh tĩnh mặc định
+    string qrUrl     = !string.IsNullOrEmpty(ql?.QR_Link)
+                         ? ql!.QR_Link
+                         : "/images/qr/qrquanly.jpg";
+    string nganHang  = Model.NganHang;       // string từ PageModel (xem ghi chú)
+    string soTaiKhoan= Model.SoTaiKhoan;
+    string chuTaiKhoan = ql?.FullName ?? "";
 }
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thanh Toán – Nhà Trọ Bà Năm</title>
+  <title>Thanh Toán – @(phong?.SoPhong ?? "")</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
@@ -79,12 +115,14 @@
     }
     .logo-sidebar .bieu-tuong {
       width: 42px; height: 42px;
-      background: var(--mau-chu-de);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff; font-weight: 800;
+      overflow: hidden;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(26,86,219,0.4);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-sidebar .bieu-tuong img {
+      width: 100%; height: 100%;
+      object-fit: cover;
     }
     .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; }
     .logo-sidebar .ten-logo span  { font-size: 11px; color: rgba(255,255,255,0.45); }
@@ -292,7 +330,6 @@
     }
     .tt-card:hover { box-shadow: var(--bong-card-hover); }
 
-    /* Thanh accent màu trên cùng */
     .tt-accent {
       height: 5px;
       border-radius: 20px 20px 0 0;
@@ -300,7 +337,6 @@
     .tt-accent.xanh { background: linear-gradient(90deg, #1a56db, #60a5fa); }
     .tt-accent.xanh-la { background: linear-gradient(90deg, #059669, #34d399); }
 
-    /* Header card */
     .tt-card-header {
       display: flex; align-items: center; gap: 12px;
       padding: 20px 24px 16px;
@@ -325,7 +361,6 @@
     ============================================= */
     .tt-invoice-body { padding: 20px 24px; flex: 1; }
 
-    /* Mỗi dòng chi phí */
     .tt-row {
       display: flex; justify-content: space-between; align-items: flex-start;
       padding: 12px 0; border-bottom: 1px solid var(--mau-vien); gap: 12px;
@@ -353,19 +388,17 @@
       font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 3px; font-weight: 500;
     }
     .tt-amount {
-      font-size: 14px; font-weight: 700; color: var(--mau-chu);
+      font-size: 14px; font-weight: 700; color:var(--mau-chu);
       white-space: nowrap; text-align: right; padding-top: 1px;
     }
     .tt-amount.mien-phi { color: var(--mau-xanh-la); font-size: 12.5px; }
 
-    /* Đường phân cách gradient */
     .tt-hr {
       height: 2px; margin: 6px 0 8px;
       background: linear-gradient(90deg, var(--mau-chu-de) 0%, transparent 70%);
       border-radius: 2px;
     }
 
-    /* Dòng tổng tiền */
     .tt-total {
       display: flex; justify-content: space-between; align-items: center;
       padding: 16px 18px;
@@ -384,7 +417,6 @@
       letter-spacing: -0.5px;
     }
 
-    /* Cảnh báo hạn thanh toán */
     .tt-deadline {
       display: flex; align-items: center; gap: 8px;
       margin-top: 14px; padding: 10px 16px;
@@ -409,7 +441,6 @@
       display: flex; flex-direction: column; gap: 16px;
     }
 
-    /* Tóm tắt số tiền */
     .tt-summary {
       display: flex; justify-content: space-between; align-items: center;
       padding: 18px 20px;
@@ -427,10 +458,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 24px; color: #fff;
       box-shadow: 0 6px 18px rgba(26,86,219,0.35);
-      flex-shrink: 0;
     }
 
-    /* Nút THANH TOÁN NHANH */
     .tt-btn-pay {
       width: 100%; padding: 15px;
       background: linear-gradient(135deg, #1a56db, #3b82f6);
@@ -484,13 +513,11 @@
       transform: translateY(0) scale(1);
     }
 
-    /* Thanh accent gradient đầu modal */
     .qr-modal-accent {
       height: 6px;
       background: linear-gradient(90deg, #1a56db 0%, #3b82f6 50%, #06b6d4 100%);
     }
 
-    /* Header modal */
     .qr-modal-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 20px 22px 14px;
@@ -517,10 +544,8 @@
     }
     .qr-modal-close:hover { background: #fee2e2; color: #dc2626; }
 
-    /* Body modal */
     .qr-modal-body { padding: 20px 22px 24px; }
 
-    /* Số tiền cần chuyển */
     .qr-amount-bar {
       display: flex; align-items: center; justify-content: space-between;
       background: linear-gradient(135deg, #eff6ff, #dbeafe);
@@ -538,7 +563,6 @@
       box-shadow: 0 4px 12px rgba(26,86,219,0.3);
     }
 
-    /* Khung ảnh QR */
     .qr-image-wrap {
       position: relative;
       background: #f8faff;
@@ -556,11 +580,18 @@
       pointer-events: none;
     }
 
-    /* === THẺ IMG QR — kết nối SQL sau này ===
-       src sẽ được bind từ Model.QrCodeUrl (C# Razor)
-       hoặc load qua fetch() từ API endpoint.
-       id="qr-img" dùng để JS cập nhật src động.
-    */
+    /*
+     * ═══════════════════════════════════════════════
+     * [GHI CHÚ] ẢNH QR CODE CỦA QUẢN LÝ
+     * ═══════════════════════════════════════════════
+     * Razor: src="@@qrUrl"  (string lấy từ ACCOUNT.QR_Link)
+     * SQL  : SELECT QR_Link FROM ACCOUNT WHERE IDUser = @@idManager
+     *
+     * Cách lưu QR lên SQL (xem hướng dẫn trong ThanhToan.cshtml.cs):
+     *   1. Upload file ảnh QR → lưu vào wwwroot/uploads/qr/{IDUser}.png
+     *   2. UPDATE ACCOUNT SET QR_Link = '/uploads/qr/{IDUser}.png' WHERE IDUser = @@id
+     * ═══════════════════════════════════════════════
+     */
     #qr-img {
       width: 200px;
       height: 200px;
@@ -568,7 +599,7 @@
       border-radius: 10px;
       display: block;
       margin: 0 auto 10px;
-      /* TODO: src="@@Model.QuanLy.QrCodeUrl" */
+      animation: qr-pulse 2.5s ease-in-out infinite;
     }
 
     .qr-bank-info {
@@ -592,7 +623,6 @@
     }
     .qr-copy-btn:hover { background: #eff6ff; }
 
-    /* Dòng hướng dẫn */
     .qr-guide {
       display: flex; align-items: flex-start; gap: 10px;
       background: #f0fdf4; border: 1px solid #bbf7d0;
@@ -602,7 +632,6 @@
     }
     .qr-guide i { font-size: 14px; color: #16a34a; flex-shrink: 0; margin-top: 1px; }
 
-    /* Nội dung chuyển khoản copy-to-clipboard */
     .qr-noi-dung {
       display: flex; align-items: center; justify-content: space-between;
       background: #fefce8; border: 1px solid #fde68a;
@@ -620,7 +649,6 @@
     }
     .qr-noi-dung .nd-copy:hover { background: #fde68a; }
 
-    /* Footer modal */
     .qr-modal-footer {
       padding: 0 22px 22px;
       display: flex; gap: 10px;
@@ -649,14 +677,11 @@
       box-shadow: 0 7px 20px rgba(5,150,105,0.4);
     }
 
-    /* Hiệu ứng pulse nhẹ trên QR */
     @@keyframes qr-pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(26,86,219,0.18); }
       50%       { box-shadow: 0 0 0 10px rgba(26,86,219,0); }
     }
-    #qr-img { animation: qr-pulse 2.5s ease-in-out infinite; }
 
-    /* Phân cách "hoặc" */
     .tt-sep {
       display: flex; align-items: center; gap: 10px;
       font-size: 11.5px; font-weight: 600; color: var(--mau-chu-phu);
@@ -681,7 +706,6 @@
     }
     .tt-upload-zone:hover { border-color: var(--mau-chu-de-sang); }
 
-    /* Input file ẩn — kích hoạt bởi toàn vùng */
     .tt-file-input {
       position: absolute; inset: 0;
       opacity: 0; cursor: pointer; width: 100%; height: 100%;
@@ -700,13 +724,11 @@
     }
     .tt-upload-hint span { color: var(--mau-chu-de); font-weight: 700; }
 
-    /* Preview ảnh đã chọn */
     .tt-preview { display: none; margin-top: 12px; position: relative; }
     .tt-preview img {
       width: 100%; max-height: 170px; object-fit: cover;
       border-radius: 10px; border: 1.5px solid var(--mau-vien); display: block;
     }
-    /* Nút xóa ảnh */
     .tt-btn-remove {
       position: absolute; top: 6px; right: 6px;
       background: rgba(220,38,38,0.9); color: #fff;
@@ -722,7 +744,6 @@
       margin-top: 6px; font-style: italic; text-align: center;
     }
 
-    /* Nút GỬI XÁC NHẬN */
     .tt-btn-send {
       width: 100%; padding: 13px;
       background: linear-gradient(135deg, #059669, #10b981);
@@ -732,7 +753,7 @@
       display: flex; align-items: center; justify-content: center; gap: 9px;
       box-shadow: 0 4px 14px rgba(5,150,105,0.3);
       transition: all 0.22s;
-      opacity: 0.45; pointer-events: none;   /* vô hiệu khi chưa có ảnh */
+      opacity: 0.45; pointer-events: none;
     }
     .tt-btn-send.active {
       opacity: 1; pointer-events: auto;
@@ -748,49 +769,27 @@
     .tt-success {
       display: none;
       flex-direction: column; align-items: center;
-      text-align: center; gap: 10px;
-      padding: 36px 24px;
-      animation: fadeUp 0.4s ease;
+      justify-content: center; gap: 14px;
+      padding: 40px 24px; text-align: center; flex: 1;
     }
     .tt-success-icon {
-      font-size: 52px; color: #059669;
-      animation: tt-bounce 0.5s ease;
-    }
-    @@keyframes tt-bounce {
-      0%  { transform: scale(0); }
-      70% { transform: scale(1.15); }
-      100%{ transform: scale(1); }
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--mau-xanh-la-nhat);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: var(--mau-xanh-la);
+      box-shadow: 0 0 0 12px rgba(5,150,105,0.1);
     }
     .tt-success h4 { font-size: 17px; font-weight: 800; color: var(--mau-chu); }
     .tt-success p  { font-size: 13px; color: var(--mau-chu-phu); line-height: 1.7; }
-    .tt-success .tt-btn-back {
-      margin-top: 8px; padding: 10px 24px;
-      background: var(--mau-xanh-nhat); color: var(--mau-chu-de);
-      border: 1.5px solid var(--mau-xanh-trung); border-radius: 10px;
+    .tt-btn-back {
+      margin-top: 8px; padding: 11px 28px;
+      background: var(--mau-chu-de); color: #fff;
+      border: none; border-radius: 12px;
       font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      transition: background 0.2s;
+      font-size: 13.5px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s;
     }
-    .tt-success .tt-btn-back:hover { background: var(--mau-xanh-trung); }
-
-    /* =============================================
-       SCROLLBAR
-    ============================================= */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-
-    /* =============================================
-       RESPONSIVE
-    ============================================= */
-    @@media (max-width: 1000px) {
-      .tt-grid { grid-template-columns: 1fr; }
-    }
-    @@media (max-width: 768px) {
-      #thanh-sidebar { width: 0; min-width: 0; }
-      #thanh-sidebar.mo { width: 220px; min-width: 220px; }
-      #noi-dung-chinh { padding: 16px; }
-    }
+    .tt-btn-back:hover { background: #1649c0; transform: translateY(-2px); }
 
   </style>
 </head>
@@ -802,9 +801,11 @@
   <nav id="thanh-sidebar">
 
     <div class="logo-sidebar">
-      <div class="bieu-tuong">A</div>
+      <div class="bieu-tuong">
+        <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
+      </div>
       <div class="ten-logo">
-        <strong>NHÀ TRỌ ABC</strong>
+        <strong>NHÀ TRỌ Bà Năm</strong>
         <span>Cổng khách thuê</span>
       </div>
     </div>
@@ -828,7 +829,10 @@
     <div class="nhan-nhom">Cá nhân</div>
     <a href="/KhachThue/ThongBao" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
       <i class="fas fa-bell"></i><span>Thông báo</span>
-      <span class="huy-hieu-menu">4</span>
+      @if (Model.SoThongBaoChua > 0)
+      {
+        <span class="huy-hieu-menu">@Model.SoThongBaoChua</span>
+      }
     </a>
     <a href="/KhachThue/HoSo" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
       <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
@@ -838,10 +842,10 @@
     </a>
 
     <div class="sidebar-footer">
-      <div class="anh-khach">T</div>
+      <div class="anh-khach">@avatarChar</div>
       <div class="ten-khach">
-        <strong>Trần Duy Hơn</strong>
-        <span>Phòng 201 · Tầng 2</span>
+        <strong>@khach?.FullName</strong>
+        <span>Phòng @phong?.SoPhong · Tầng @phong?.Tang</span>
       </div>
     </div>
   </nav>
@@ -860,7 +864,7 @@
         <div>
           <div class="tieu-de-trang">Thanh Toán</div>
           <div class="duong-dan">
-            <a href="#">Trang chủ</a>
+            <a href="/KhachThue/KhachThue">Trang chủ</a>
             &nbsp;/&nbsp; Thanh toán
           </div>
         </div>
@@ -869,13 +873,16 @@
         <div class="hdr-date" id="headerDate"></div>
         <button class="nut-thong-bao" aria-label="Thông báo">
           <i class="fas fa-bell"></i>
-          <span class="so-thong-bao">4</span>
+          @if (Model.SoThongBaoChua > 0)
+          {
+            <span class="so-thong-bao">@Model.SoThongBaoChua</span>
+          }
         </button>
         <div class="thong-tin-khach">
-          <div class="anh-dai-dien">T</div>
+          <div class="anh-dai-dien">@avatarChar</div>
           <div>
-            <div class="ten">Trần Duy Hơn</div>
-            <div class="phong-so">Phòng 201</div>
+            <div class="ten">@khach?.FullName</div>
+            <div class="phong-so">Phòng @phong?.SoPhong</div>
           </div>
           <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
         </div>
@@ -888,44 +895,45 @@
       @* Tiêu đề trang *@
       <div class="page-heading">
         <div>
-          <h2><i class="fas fa-file-invoice-dollar"></i> Hóa đơn tháng 5/2025</h2>
-          <p>Phòng 201 &nbsp;·&nbsp; Trần Duy Hơn &nbsp;·&nbsp; Nhà Trọ ABC</p>
+          <h2>
+            <i class="fas fa-file-invoice-dollar"></i>
+            Hóa đơn tháng @(hd?.KyThanhToan ?? "—")
+          </h2>
+          <p>
+            Phòng @phong?.SoPhong &nbsp;·&nbsp;
+            @khach?.FullName &nbsp;·&nbsp;
+            Nhà Trọ ABC
+          </p>
         </div>
         <div class="badge-chua-tt">
           <div class="badge-dot"></div>
-          Chưa thanh toán
+          @(hd?.TrangThai_TT ?? "Chưa đóng")
         </div>
       </div>
 
-      @* ==========================================
-         LƯỚI 2 KHỐI: HÓA ĐƠN + THANH TOÁN
-      ========================================== *@
+      @* LƯỚI 2 KHỐI *@
       <div class="tt-grid">
 
-        @* ------------------------------------------
-           KHỐI 1: CHI TIẾT HÓA ĐƠN THÁNG NÀY
-           Liệt kê từng khoản thu kèm chi tiết.
-        ------------------------------------------ *@
+        @* ----------------------------------------
+           KHỐI 1: CHI TIẾT HÓA ĐƠN
+        ---------------------------------------- *@
         <div class="tt-card">
-
-          @* Thanh accent xanh dương *@
           <div class="tt-accent xanh"></div>
-
-          @* Tiêu đề khối *@
           <div class="tt-card-header">
             <div class="tt-icon-wrap xanh">
               <i class="fas fa-file-invoice-dollar"></i>
             </div>
             <div>
               <h3>Chi tiết hóa đơn</h3>
-              <div class="sub">Tháng 5/2025 &nbsp;·&nbsp; Phòng 201</div>
+              <div class="sub">
+                Tháng @(hd?.KyThanhToan ?? "—") &nbsp;·&nbsp; Phòng @phong?.SoPhong
+              </div>
             </div>
           </div>
 
-          @* Danh sách các khoản phí *@
           <div class="tt-invoice-body">
 
-            @* --- Tiền phòng gốc --- *@
+            @* --- Tiền phòng --- *@
             <div class="tt-row">
               <div class="tt-row-left">
                 <span class="tt-dot dot-blue"></span>
@@ -935,10 +943,12 @@
                   </div>
                 </div>
               </div>
-              <div class="tt-amount">3,500,000 đ</div>
+              <div class="tt-amount">
+                @(hd != null ? hd.TienPhong.ToString("N0") + " đ" : "—")
+              </div>
             </div>
 
-            @* --- Tiền điện: số kWh & đơn giá --- *@
+            @* --- Tiền điện --- *@
             <div class="tt-row">
               <div class="tt-row-left">
                 <span class="tt-dot dot-yellow"></span>
@@ -946,13 +956,20 @@
                   <div class="tt-label-name">
                     <i class="fas fa-bolt" style="color:#f59e0b;"></i>Tiền điện
                   </div>
-                  <div class="tt-label-sub">120 kWh &times; 3.500 đ/kWh</div>
+                  @if (dn != null)
+                  {
+                    <div class="tt-label-sub">
+                      @soKwh kWh &times; @donGiaDien.ToString("N0") đ/kWh
+                    </div>
+                  }
                 </div>
               </div>
-              <div class="tt-amount">420,000 đ</div>
+              <div class="tt-amount">
+                @(hd != null ? hd.TienDienSum.ToString("N0") + " đ" : "—")
+              </div>
             </div>
 
-            @* --- Tiền nước: số khối & đơn giá --- *@
+            @* --- Tiền nước --- *@
             <div class="tt-row">
               <div class="tt-row-left">
                 <span class="tt-dot dot-cyan"></span>
@@ -960,13 +977,20 @@
                   <div class="tt-label-name">
                     <i class="fas fa-tint" style="color:#0ea5e9;"></i>Tiền nước
                   </div>
-                  <div class="tt-label-sub">4 khối &times; 20.000 đ/khối</div>
+                  @if (dn != null)
+                  {
+                    <div class="tt-label-sub">
+                      @soKhoi khối &times; @donGiaNuoc.ToString("N0") đ/khối
+                    </div>
+                  }
                 </div>
               </div>
-              <div class="tt-amount">80,000 đ</div>
+              <div class="tt-amount">
+                @(hd != null ? hd.TienNuocSum.ToString("N0") + " đ" : "—")
+              </div>
             </div>
 
-            @* --- Internet --- *@
+            @* --- Internet (lấy từ TienDV nếu > 0, hoặc CONFIG_GIA) --- *@
             <div class="tt-row">
               <div class="tt-row-left">
                 <span class="tt-dot dot-purple"></span>
@@ -977,10 +1001,10 @@
                   <div class="tt-label-sub">Gói cố định hàng tháng</div>
                 </div>
               </div>
-              <div class="tt-amount">100,000 đ</div>
+              <div class="tt-amount mien-phi">Miễn phí</div>
             </div>
 
-            @* --- Phí vệ sinh / rác --- *@
+            @* --- Phí vệ sinh / rác (miễn phí hoặc từ CONFIG_GIA) --- *@
             <div class="tt-row">
               <div class="tt-row-left">
                 <span class="tt-dot dot-green"></span>
@@ -988,48 +1012,49 @@
                   <div class="tt-label-name">
                     <i class="fas fa-recycle" style="color:#10b981;"></i>Phí vệ sinh / rác
                   </div>
-                  <div class="tt-label-sub">Dịch vụ chung tòa nhà</div>
+                  <div class="tt-label-sub">Dịch vụ chung Khu trọ</div>
                 </div>
               </div>
               <div class="tt-amount mien-phi">Miễn phí</div>
             </div>
 
-            @* Đường phân cách trước dòng tổng *@
             <div class="tt-hr"></div>
 
-            @* Dòng TỔNG TIỀN — nổi bật, in đậm *@
             <div class="tt-total">
               <div class="tt-total-label">
                 <i class="fas fa-receipt"></i>
                 Tổng tiền cần thanh toán
               </div>
-              <div class="tt-total-amount">4,100,000 đ</div>
+              <div class="tt-total-amount">
+                @(hd != null ? hd.TongCong.ToString("N0") + " đ" : "—")
+              </div>
             </div>
 
-            @* Cảnh báo hạn thanh toán *@
-            <div class="tt-deadline">
-              <i class="fas fa-clock"></i>
-              Hạn thanh toán:
-              <strong>15/05/2025</strong>
-              <span class="tt-days-left">Còn 5 ngày</span>
-            </div>
+            @* Hạn thanh toán *@
+            @if (hd != null)
+            {
+              <div class="tt-deadline">
+                <i class="fas fa-clock"></i>
+                Hạn thanh toán:
+                <strong>@hd.HanDong.ToString("dd/MM/yyyy")</strong>
+                <span class="tt-days-left">
+                  @if (soNgayCon > 0) { <text>Còn @soNgayCon ngày</text> }
+                  else if (soNgayCon == 0) { <text>Hôm nay</text> }
+                  else { <text>Quá hạn @(-soNgayCon) ngày</text> }
+                </span>
+              </div>
+            }
 
           </div>
         </div>
         @* -- KẾT THÚC KHỐI 1 -- *@
 
 
-        @* ------------------------------------------
+        @* ----------------------------------------
            KHỐI 2: HÀNH ĐỘNG THANH TOÁN + UPLOAD
-           Tóm tắt số tiền, nút Thanh toán ngay,
-           form kéo-thả ảnh bill, nút Gửi xác nhận.
-        ------------------------------------------ *@
+        ---------------------------------------- *@
         <div class="tt-card">
-
-          @* Thanh accent xanh lá *@
           <div class="tt-accent xanh-la"></div>
-
-          @* Tiêu đề khối *@
           <div class="tt-card-header">
             <div class="tt-icon-wrap xanh-la">
               <i class="fas fa-credit-card"></i>
@@ -1040,6 +1065,9 @@
             </div>
           </div>
 
+          @* CSRF token — dùng cho fetch() upload bill *@
+          @Html.AntiForgeryToken()
+
           @* Body thanh toán — ẩn khi thành công *@
           <div class="tt-pay-body" id="tt-pay-body">
 
@@ -1047,27 +1075,37 @@
             <div class="tt-summary">
               <div>
                 <div class="tt-sum-label">Số tiền cần thanh toán</div>
-                <div class="tt-sum-amount">4,100,000 đ</div>
+                <div class="tt-sum-amount">
+                  @(hd != null ? hd.TongCong.ToString("N0") + " đ" : "—")
+                </div>
               </div>
               <div class="tt-sum-icon">
                 <i class="fas fa-wallet"></i>
               </div>
             </div>
 
-            @* Nút THANH TOÁN NHANH
-               Onclick: mở modal QR code của quản lý *@
+            @* Nút THANH TOÁN NHANH — mở modal QR *@
             <button class="tt-btn-pay" onclick="ttMoQR()">
               <i class="fas fa-qrcode"></i>
               Thanh toán nhanh
             </button>
 
-            @* Phân cách "hoặc" *@
             <div class="tt-sep">hoặc đính kèm ảnh xác nhận chuyển khoản</div>
 
             @* -----------------------------------------
                FORM UPLOAD ẢNH BILL
-               Hỗ trợ click + kéo-thả (drag & drop).
-               Chỉ nhận file image/*.
+               ─────────────────────────────────────────
+               [GHI CHÚ] Ảnh bill được submit qua OnPost
+               bằng IFormFile BillImage, sau đó lưu vào:
+                 wwwroot/uploads/bills/{IDHDThang}_{timestamp}.jpg
+               Đường dẫn ghi vào: HDTHANG.AnhChuyenKhoan
+               SQL:
+                 UPDATE HDTHANG
+                 SET AnhChuyenKhoan = @duongDan,
+                     TrangThai_TT   = 'Chờ duyệt',
+                     UpdatedAt      = GETDATE()
+                 WHERE IDHDThang = @id
+               Xem hướng dẫn đầy đủ trong ThanhToan.cshtml.cs
             ----------------------------------------- *@
             <div class="tt-upload-zone"
                  id="tt-upload-zone"
@@ -1075,14 +1113,12 @@
                  ondragleave="ttDragLeave(event)"
                  ondrop="ttDrop(event)">
 
-              @* Input file ẩn, kích hoạt khi click vào vùng *@
               <input type="file"
                      class="tt-file-input"
                      id="tt-file-input"
                      accept="image/*"
                      onchange="ttFileChosen(this)" />
 
-              @* Hướng dẫn upload (hiển thị khi chưa chọn ảnh) *@
               <div id="tt-upload-prompt">
                 <i class="fas fa-cloud-upload-alt tt-upload-icon"></i>
                 <div class="tt-upload-title">Kéo &amp; thả ảnh vào đây</div>
@@ -1092,10 +1128,8 @@
                 </div>
               </div>
 
-              @* Preview ảnh (ẩn mặc định, JS hiện sau khi chọn) *@
               <div class="tt-preview" id="tt-preview">
                 <img src="" alt="Ảnh bill chuyển khoản" id="tt-preview-img" />
-                @* Nút xóa ảnh — stopPropagation tránh mở dialog lại *@
                 <button class="tt-btn-remove" type="button"
                         title="Xóa ảnh" onclick="ttXoaAnh(event)">
                   <i class="fas fa-times"></i>
@@ -1104,9 +1138,7 @@
               </div>
             </div>
 
-            @* Nút GỬI XÁC NHẬN
-               Mờ + vô hiệu cho đến khi người dùng chọn ảnh hợp lệ.
-               JS thêm class .active để kích hoạt. *@
+            @* Nút GỬI XÁC NHẬN *@
             <button class="tt-btn-send" id="tt-btn-send" onclick="ttGuiXacNhan()">
               <i class="fas fa-paper-plane"></i>
               Gửi xác nhận thanh toán
@@ -1115,7 +1147,7 @@
           </div>
           @* -- KẾT THÚC .tt-pay-body -- *@
 
-          @* Trạng thái thành công (ẩn ban đầu, JS hiển thị sau submit) *@
+          @* Trạng thái thành công *@
           <div class="tt-success" id="tt-success">
             <div class="tt-success-icon">
               <i class="fas fa-check-circle"></i>
@@ -1125,7 +1157,7 @@
               Chúng tôi đã nhận được ảnh bill chuyển khoản.<br />
               Hóa đơn sẽ được cập nhật trong vòng <strong>15 phút</strong>.
             </p>
-            <button class="tt-btn-back" onclick="window.location.href='#'">
+            <button class="tt-btn-back" onclick="window.location.href='/KhachThue/KhachThue'">
               <i class="fas fa-arrow-left" style="margin-right:6px;"></i>Về trang chủ
             </button>
           </div>
@@ -1143,8 +1175,11 @@
 
   @* =============================================
      MODAL THANH TOÁN NHANH — QR CODE
-     img#qr-img: src sẽ bind từ Model.QuanLy.QrCodeUrl
-     hoặc load qua fetch('/api/qrcode?managerId=...') sau khi tích hợp SQL
+     ─────────────────────────────────────────────
+     [GHI CHÚ] ẢNH QR CODE + THÔNG TIN NGÂN HÀNG
+     Razor bind từ Model.QuanLy.QR_Link (ACCOUNT.QR_Link)
+     Thông tin ngân hàng (NganHang, SoTaiKhoan) cần thêm
+     2 cột mới vào bảng ACCOUNT — xem ThanhToan.cshtml.cs
   ============================================= *@
   <div class="qr-modal-overlay" id="qr-modal-overlay" onclick="ttDongQR(event)">
     <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
@@ -1170,7 +1205,9 @@
         <div class="qr-amount-bar">
           <div>
             <div class="qr-amount-label">Số tiền cần chuyển</div>
-            <div class="qr-amount-value" id="qr-so-tien">4,100,000 đ</div>
+            <div class="qr-amount-value" id="qr-so-tien">
+              @(hd != null ? hd.TongCong.ToString("N0") + " đ" : "—")
+            </div>
           </div>
           <div class="qr-amount-icon"><i class="fas fa-wallet"></i></div>
         </div>
@@ -1178,39 +1215,27 @@
         @* Khung QR *@
         <div class="qr-image-wrap">
 
-          @* =====================================================
-             THẺ IMG QR — THUỘC TÍNH CHUẨN ĐỂ KẾT NỐI SQL SAU
-             -------------------------------------------------
-             Razor  :  src="@Model.QuanLy.QrCodeUrl"
-             API    :  id="qr-img" → JS gán src từ fetch response
-             Alt    :  mô tả cho accessibility
-             SQL    :  SELECT QrCodeUrl FROM QuanLy WHERE Id = @quanLyId
-          ===================================================== *@
+          @* ─── ẢNH QR ─── bind từ ACCOUNT.QR_Link; fallback về ảnh tĩnh *@
           <img
             id="qr-img"
-            src=""
+            src="@qrUrl"
             alt="Mã QR chuyển khoản của quản lý"
             width="200"
             height="200"
-            data-quan-ly-id=""
-            onerror="this.src='';this.style.display='none';document.getElementById('qr-fallback').style.display='flex';"
+            data-quan-ly-id="@ql?.IDUser"
+            onerror="this.src='/images/qr/qrquanly.jpg';"
           />
 
-          @* Fallback khi chưa có ảnh QR từ DB *@
-          <div id="qr-fallback" style="width:200px;height:200px;margin:0 auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;border:2px dashed #bfdbfe;background:#f8faff;color:#94a3b8;gap:8px;font-size:12px;font-weight:600;">
-            <i class="fas fa-image" style="font-size:36px;color:#bfdbfe;"></i>
-            Chờ kết nối dữ liệu
-          </div>
-
+          @* Thông tin tài khoản ngân hàng *@
           <div class="qr-bank-info">
             <div class="qr-bank-row">
               <span class="lbl">Ngân hàng</span>
-              <span class="val" id="qr-ngan-hang">— —</span>
+              <span class="val" id="qr-ngan-hang">@(nganHang ?? "— —")</span>
             </div>
             <div class="qr-bank-row">
               <span class="lbl">Số tài khoản</span>
               <span class="val">
-                <span id="qr-so-tk">— — — —</span>
+                <span id="qr-so-tk">@(soTaiKhoan ?? "— — — —")</span>
                 <button class="qr-copy-btn" onclick="ttCopy('qr-so-tk')" title="Sao chép số TK">
                   <i class="fas fa-copy"></i>
                 </button>
@@ -1218,7 +1243,7 @@
             </div>
             <div class="qr-bank-row">
               <span class="lbl">Chủ tài khoản</span>
-              <span class="val" id="qr-chu-tk">— — — —</span>
+              <span class="val" id="qr-chu-tk">@(chuTaiKhoan ?? "— — — —")</span>
             </div>
           </div>
         </div>
@@ -1227,7 +1252,7 @@
         <div class="qr-noi-dung">
           <div>
             <div class="nd-label">Nội dung CK</div>
-            <div class="nd-val" id="qr-nd-ck">P201 THANG 5 2025</div>
+            <div class="nd-val" id="qr-nd-ck">@noiDungCK</div>
           </div>
           <button class="nd-copy" onclick="ttCopy('qr-nd-ck')" title="Sao chép">
             <i class="fas fa-copy"></i>
@@ -1295,28 +1320,22 @@
     /* ==============================================
        UPLOAD ẢNH BILL
     ============================================== */
-
-    /* Biến lưu file đã chọn để gửi khi submit */
     let ttSelectedFile = null;
 
-    /* Gọi khi người dùng chọn file qua input click */
     function ttFileChosen(input) {
       const file = input.files && input.files[0];
       ttXuLyFile(file);
     }
 
-    /* Ngăn hành vi mặc định, thêm hiệu ứng drag-over */
     function ttDragOver(event) {
       event.preventDefault();
       document.getElementById('tt-upload-zone').classList.add('drag-over');
     }
 
-    /* Bỏ hiệu ứng khi kéo ra ngoài vùng */
     function ttDragLeave(event) {
       document.getElementById('tt-upload-zone').classList.remove('drag-over');
     }
 
-    /* Nhận file khi người dùng thả vào vùng upload */
     function ttDrop(event) {
       event.preventDefault();
       document.getElementById('tt-upload-zone').classList.remove('drag-over');
@@ -1324,24 +1343,17 @@
       ttXuLyFile(file);
     }
 
-    /* Hàm dùng chung: kiểm tra file, hiện preview, kích hoạt nút gửi */
     function ttXuLyFile(file) {
       if (!file) return;
-
-      /* Chỉ nhận ảnh */
       if (!file.type.startsWith('image/')) {
         alert('Vui lòng chọn file ảnh (JPG, PNG, HEIC...)!');
         return;
       }
-      /* Giới hạn 10 MB */
       if (file.size > 10 * 1024 * 1024) {
         alert('File quá lớn! Vui lòng chọn ảnh nhỏ hơn 10 MB.');
         return;
       }
-
       ttSelectedFile = file;
-
-      /* Đọc file và hiển thị preview */
       const reader = new FileReader();
       reader.onload = function (e) {
         document.getElementById('tt-preview-img').src = e.target.result;
@@ -1350,14 +1362,11 @@
         document.getElementById('tt-preview').style.display  = 'block';
       };
       reader.readAsDataURL(file);
-
-      /* Kích hoạt nút Gửi xác nhận */
       document.getElementById('tt-btn-send').classList.add('active');
     }
 
-    /* Xóa ảnh đã chọn và reset trạng thái */
     function ttXoaAnh(event) {
-      event.stopPropagation(); /* Tránh mở dialog chọn file */
+      event.stopPropagation();
       ttSelectedFile = null;
       document.getElementById('tt-file-input').value    = '';
       document.getElementById('tt-preview').style.display       = 'none';
@@ -1369,12 +1378,12 @@
 
     /* ==============================================
        GỬI XÁC NHẬN THANH TOÁN
-       TODO: Thay setTimeout bằng fetch() thật:
+       Thay setTimeout bằng fetch() thật:
 
        const fd = new FormData();
-       fd.append('billImage', ttSelectedFile);
-       fd.append('invoiceId', '@@Model.InvoiceId');
-       const res = await fetch('#/GuiXacNhan', {
+       fd.append('BillImage', ttSelectedFile);
+       fd.append('InvoiceId', '@(hd?.IDHDThang)');
+       const res = await fetch('?handler=GuiXacNhan', {
          method: 'POST',
          headers: { 'RequestVerificationToken':
            document.querySelector('[name=__RequestVerificationToken]').value },
@@ -1386,68 +1395,75 @@
       if (!ttSelectedFile) return;
 
       const btn = document.getElementById('tt-btn-send');
+      const invoiceId = '@(hd?.IDHDThang ?? 0)';
+
+      if (!invoiceId || invoiceId === '0') {
+        alert('Không tìm thấy hóa đơn. Vui lòng tải lại trang.');
+        return;
+      }
+
+      // Lấy CSRF token
+      const token = document.querySelector('input[name="__RequestVerificationToken"]');
+      if (!token) {
+        alert('Lỗi bảo mật: không tìm thấy token. Vui lòng tải lại trang.');
+        return;
+      }
+
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+      btn.disabled = true;
       btn.classList.remove('active');
 
       try {
-        /* Giả lập độ trễ mạng — xóa khi có API thật */
-        await new Promise(resolve => setTimeout(resolve, 1800));
+        const fd = new FormData();
+        fd.append('BillImage', ttSelectedFile);
+        fd.append('InvoiceId', invoiceId);
 
-        /* Ẩn form, hiện trạng thái thành công */
+        const res = await fetch('?handler=GuiXacNhan', {
+          method: 'POST',
+          headers: { 'RequestVerificationToken': token.value },
+          body: fd
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error('Lỗi ' + res.status + ': ' + (text || res.statusText));
+        }
+
+        const json = await res.json();
+        if (!json.success) throw new Error('Server trả về lỗi không xác định.');
+
+        // Thành công — hiện màn hình xác nhận
         document.getElementById('tt-pay-body').style.display = 'none';
         document.getElementById('tt-success').style.display  = 'flex';
 
       } catch (err) {
-        alert('Gửi xác nhận thất bại! Vui lòng thử lại. (' + err.message + ')');
+        alert('Gửi xác nhận thất bại! Vui lòng thử lại.\n(' + err.message + ')');
         btn.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi xác nhận thanh toán';
+        btn.disabled = false;
         btn.classList.add('active');
       }
     }
 
     /* ==============================================
-       THANH TOÁN NHANH — MÃ QR
-       Hàm ttMoQR(): mở modal và load thông tin QR từ DB
-       TODO: thay dữ liệu tĩnh bằng fetch() thật:
-
-       const res = await fetch('/api/QuanLy/QrInfo?phongId=@@Model.PhongId');
-       const info = await res.json();
-       document.getElementById('qr-img').src            = info.qrCodeUrl;
-       document.getElementById('qr-img').dataset.quanLyId = info.quanLyId;
-       document.getElementById('qr-ngan-hang').textContent = info.nganHang;
-       document.getElementById('qr-so-tk').textContent     = info.soTaiKhoan;
-       document.getElementById('qr-chu-tk').textContent    = info.chuTaiKhoan;
-       document.getElementById('qr-so-tien').textContent   = info.soTien;
-       document.getElementById('qr-nd-ck').textContent     = info.noiDungCK;
+       MODAL QR CODE
     ============================================== */
     function ttMoQR() {
       const overlay = document.getElementById('qr-modal-overlay');
       overlay.classList.add('hien');
       document.body.style.overflow = 'hidden';
-
-      /* Hiện fallback vì chưa có URL thật từ SQL */
-      const img = document.getElementById('qr-img');
-      const fallback = document.getElementById('qr-fallback');
-      if (!img.src || img.src === window.location.href) {
-        img.style.display = 'none';
-        fallback.style.display = 'flex';
-      }
     }
 
-    /* Đóng khi click overlay (không phải modal) */
     function ttDongQR(e) {
       if (e.target === document.getElementById('qr-modal-overlay')) {
         ttDongQRBtn();
       }
     }
 
-    /* Đóng modal */
     function ttDongQRBtn() {
-      const overlay = document.getElementById('qr-modal-overlay');
-      overlay.classList.remove('hien');
+      document.getElementById('qr-modal-overlay').classList.remove('hien');
       document.body.style.overflow = '';
     }
 
-    /* Đóng modal rồi cuộn xuống vùng upload bill */
     function ttDongVaUpload() {
       ttDongQRBtn();
       setTimeout(function () {
@@ -1456,7 +1472,6 @@
       }, 320);
     }
 
-    /* Sao chép nội dung phần tử vào clipboard */
     function ttCopy(elementId) {
       const el = document.getElementById(elementId);
       if (!el) return;
@@ -1470,7 +1485,6 @@
       });
     }
 
-    /* Phím ESC đóng modal */
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') ttDongQRBtn();
     });

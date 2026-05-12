@@ -95,7 +95,7 @@ function dongFormNuoc() {
 function tinhTienNuoc() {
     const sl = parseInt(document.getElementById('nuoc-so-luong').value) || 1;
     const tvo = parseInt(document.getElementById('nuoc-tra-vo').value) || 0;
-    const tien = sl * 30000 - (tvo ? sl * 5000 : 0);
+    const tien = sl * 10000 - (tvo ? sl * 5000 : 0);
     nuocTienThanhToan = tien;
     document.getElementById('nuoc-du-tinh').textContent = tien.toLocaleString('vi-VN') + ' đ';
     document.getElementById('nuoc-tong-tien').textContent = tien.toLocaleString('vi-VN') + ' đ';

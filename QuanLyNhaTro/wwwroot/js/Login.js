@@ -91,6 +91,9 @@ async function xuLyDangNhap(event) {
         console.error("Lỗi hệ thống:", error);
         hienThiThongBao('loi', 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau!');
     }
+
 }
+
+
 
 console.log("File Login.js đã được tải thành công.");

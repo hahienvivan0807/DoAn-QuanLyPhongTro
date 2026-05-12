@@ -3,6 +3,28 @@
 @{
     ViewData["title"] = "Dịch Vụ & Tiện Ích";
     Layout = null;
+
+    // Badge giặt sấy
+    string gsBadgeClass = "dv-status-badge dsb-none";
+    string gsBadgeHtml  = "<span class=\"dsb-dot\"></span>Chưa đặt";
+    if (Model.DonGiatSay != null)
+    {
+        gsBadgeClass = Model.DonGiatSay.TrangThai_DV == "Chờ xử lý"  ? "dv-status-badge dsb-pending"
+                     : Model.DonGiatSay.TrangThai_DV == "Đang xử lý" ? "dv-status-badge dsb-active"
+                     : "dv-status-badge dsb-none";
+        gsBadgeHtml = $"<span class=\"dsb-dot\"></span>{Model.DonGiatSay.TrangThai_DV}";
+    }
+
+    // Badge nước bình
+    string nuocBadgeClass = "dv-status-badge dsb-none";
+    string nuocBadgeHtml  = "<span class=\"dsb-dot\"></span>Chưa đặt";
+    if (Model.DonNuocBinh != null)
+    {
+        nuocBadgeClass = Model.DonNuocBinh.TrangThai_DV == "Chờ xử lý"  ? "dv-status-badge dsb-pending"
+                       : Model.DonNuocBinh.TrangThai_DV == "Đang xử lý" ? "dv-status-badge dsb-active"
+                       : "dv-status-badge dsb-none";
+        nuocBadgeHtml = $"<span class=\"dsb-dot\"></span>{Model.DonNuocBinh.TrangThai_DV}";
+    }
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -80,10 +102,14 @@
     }
     .logo-sidebar .bieu-tuong {
       width: 42px; height: 42px;
-      background: var(--mau-chu-de); border-radius: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff; font-weight: 800; flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(26,86,219,0.4);
+    }
+    .logo-sidebar .bieu-tuong img {
+      width: 100%; height: 100%;
+      object-fit: cover;
     }
     .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; }
     .logo-sidebar .ten-logo span  { font-size: 11px; color: rgba(255,255,255,0.45); }
@@ -870,9 +896,11 @@
   ============================================= *@
   <nav id="thanh-sidebar">
     <div class="logo-sidebar">
-      <div class="bieu-tuong">A</div>
+      <div class="bieu-tuong">
+        <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
+      </div>
       <div class="ten-logo">
-        <strong>NHÀ TRỌ ABC</strong>
+        <strong>NHÀ TRỌ Bà Năm</strong>
         <span>Cổng khách thuê</span>
       </div>
     </div>
@@ -896,7 +924,10 @@
     <div class="nhan-nhom">Cá nhân</div>
     <a href="/KhachThue/ThongBao" class="menu-item">
       <i class="fas fa-bell"></i><span>Thông báo</span>
-      <span class="huy-hieu-menu">4</span>
+      @if (Model.SoThongBaoChuaDoc > 0)
+      {
+          <span class="huy-hieu-menu">@Model.SoThongBaoChuaDoc</span>
+      }
     </a>
     <a href="/KhachThue/HoSo" class="menu-item">
       <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
@@ -906,10 +937,10 @@
     </a>
 
     <div class="sidebar-footer">
-      <div class="anh-khach">T</div>
+      <div class="anh-khach">@Model.ChuVietTat</div>
       <div class="ten-khach">
-        <strong>Trần Duy Hơn</strong>
-        <span>Phòng 201 · Tầng 2</span>
+        <strong>@Model.TenKhach</strong>
+        <span>@Model.SoPhong · @Model.TangPhong</span>
       </div>
     </div>
   </nav>
@@ -936,13 +967,16 @@
         <div class="hdr-date" id="headerDate"></div>
         <button class="nut-thong-bao" aria-label="Thông báo">
           <i class="fas fa-bell"></i>
-          <span class="so-thong-bao">4</span>
+          @if (Model.SoThongBaoChuaDoc > 0)
+          {
+              <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
+          }
         </button>
         <div class="thong-tin-khach">
-          <div class="anh-dai-dien">T</div>
+          <div class="anh-dai-dien">@Model.ChuVietTat</div>
           <div>
-            <div class="ten">Trần Duy Hơn</div>
-            <div class="phong-so">Phòng 201</div>
+            <div class="ten">@Model.TenKhach</div>
+            <div class="phong-so">@Model.SoPhong</div>
           </div>
           <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
         </div>
@@ -954,7 +988,7 @@
       <div class="page-heading">
         <div>
           <h2><i class="fas fa-concierge-bell"></i> Dịch vụ &amp; Tiện ích</h2>
-          <p>Đặt dịch vụ tiện ích ngay tại trang — Phòng 201 &nbsp;·&nbsp; Trần Duy Hơn</p>
+          <p>Đặt dịch vụ tiện ích ngay tại trang — @Model.SoPhong &nbsp;·&nbsp; @Model.TenKhach</p>
         </div>
       </div>
 
@@ -976,8 +1010,8 @@
                 <div class="sub">Giao nhận tại phòng · Xử lý trong ngày</div>
               </div>
             </div>
-            <div class="dv-status-badge dsb-none" id="gs-badge">
-              <span class="dsb-dot"></span>Chưa đặt
+            <div class="@gsBadgeClass" id="gs-badge">
+              @Html.Raw(gsBadgeHtml)
             </div>
           </div>
 
@@ -1004,9 +1038,8 @@
             <div class="dv-form-wrap" id="gs-form">
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
-                @* TODO: value="@Model.SoPhong" *@
                 <input class="form-input disabled" type="text" id="gs-so-phong"
-                       value="Phòng 201" readonly />
+                       value="@Model.SoPhong" readonly />
               </div>
 
               <div class="form-group">
@@ -1057,7 +1090,11 @@
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                   <span style="font-size:12px;color:var(--mau-chu-phu);">Tổng tiền cần thanh toán</span>
-                  <span style="font-size:20px;font-weight:800;color:var(--mau-xanh-la);" id="gs-gia-tien">— đ</span>
+                  <span style="font-size:20px;font-weight:800;color:var(--mau-xanh-la);" id="gs-gia-tien">
+                    @(Model.DonGiatSay?.TongTien > 0
+                        ? Model.DonGiatSay.TongTien.ToString("N0") + " đ"
+                        : "— đ")
+                  </span>
                 </div>
               </div>
 
@@ -1092,8 +1129,8 @@
                 <div class="sub">Bình 20L · Giao tận phòng</div>
               </div>
             </div>
-            <div class="dv-status-badge dsb-none" id="nuoc-badge">
-              <span class="dsb-dot"></span>Chưa đặt
+            <div class="@nuocBadgeClass" id="nuoc-badge">
+              @Html.Raw(nuocBadgeHtml)
             </div>
           </div>
 
@@ -1120,9 +1157,8 @@
             <div class="dv-form-wrap" id="nuoc-form">
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
-                @* TODO: value="@Model.SoPhong" *@
                 <input class="form-input disabled" type="text" id="nuoc-so-phong"
-                       value="Phòng 201" readonly />
+                       value="@Model.SoPhong" readonly />
               </div>
 
               <div class="form-row">
@@ -1143,7 +1179,7 @@
               <div style="background:#f0fdff;border:1.5px solid #a5f3fc;border-radius:12px;padding:12px 16px;
                           display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-size:12px;font-weight:600;color:#164e63;">Dự tính tiền thanh toán</span>
-                <span style="font-size:18px;font-weight:800;color:#0891b2;" id="nuoc-du-tinh">30,000 đ</span>
+                <span style="font-size:18px;font-weight:800;color:#0891b2;" id="nuoc-du-tinh">10,000 đ</span>
               </div>
 
               <div class="form-group">
@@ -1182,7 +1218,11 @@
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                   <span style="font-size:12px;color:#065f46;font-weight:600;">Tổng tiền thanh toán</span>
-                  <span class="ncb-amount" id="nuoc-tong-tien">30,000 đ</span>
+                  <span class="ncb-amount" id="nuoc-tong-tien">
+                    @(Model.DonNuocBinh?.TongTien > 0
+                        ? Model.DonNuocBinh.TongTien.ToString("N0") + " đ"
+                        : "30,000 đ")
+                  </span>
                 </div>
                 <div style="display:flex;gap:8px;">
                   <button class="btn-xac-nhan-hang" onclick="xacNhanNhanNuoc()" style="flex:1;">
@@ -1268,12 +1308,11 @@
             @* Form gửi chỉ số điện nước *@
             <div class="dv-form-wrap" id="dn-form">
 
-              @* Số phòng — lấy từ SQL, không cho nhập *@
+              @* Số phòng — lấy từ DB, không cho nhập *@
               <div class="dn-phong-row">
                 <i class="fas fa-door-open"></i>
                 <span>Số phòng:</span>
-                @* TODO: value="@Model.SoPhong" — lấy từ SQL *@
-                <strong id="dn-so-phong">Phòng 201</strong>
+                <strong id="dn-so-phong">@Model.SoPhong</strong>
                 <span style="margin-left:auto;font-size:11px;color:var(--mau-chu-phu);">
                   <i class="fas fa-lock" style="font-size:10px;"></i> Tự động từ hệ thống
                 </span>
@@ -1297,9 +1336,8 @@
                       <div class="dn-chi-so-label">
                         <i class="fas fa-history" style="color:#b45309;"></i> Chỉ số cũ
                       </div>
-                      @* TODO: value="@Model.ChiSoDienCu" — lấy từ SQL *@
                       <input class="dn-chi-so-input disabled-field" type="number"
-                             id="dn-dien-cu" value="1240" readonly
+                             id="dn-dien-cu" value="@Model.ChiSoDienCu" readonly
                              title="Chỉ số kỳ trước — lấy từ hệ thống" />
                     </div>
                     <div class="dn-chi-so-item">
@@ -1368,9 +1406,8 @@
                       <div class="dn-chi-so-label">
                         <i class="fas fa-history" style="color:#1e40af;"></i> Chỉ số cũ
                       </div>
-                      @* TODO: value="@Model.ChiSoNuocCu" — lấy từ SQL *@
                       <input class="dn-chi-so-input nuoc-focus disabled-field" type="number"
-                             id="dn-nuoc-cu" value="85" readonly
+                             id="dn-nuoc-cu" value="@Model.ChiSoNuocCu" readonly
                              title="Chỉ số kỳ trước — lấy từ hệ thống" />
                     </div>
                     <div class="dn-chi-so-item">
@@ -1567,27 +1604,27 @@
           </div>
 
           <div class="qr-section">
-            <img id="modal-qr-img" src="" alt="Mã QR chuyển khoản"
+            <img id="modal-qr-img" src="@(Model.QrLink ?? "")" alt="Mã QR chuyển khoản"
                  onerror="this.style.display='none';document.getElementById('qr-fallback-box').style.display='flex';" />
-            <div id="qr-fallback-box" class="qr-fallback">
+            <div id="qr-fallback-box" class="qr-fallback" style="@(string.IsNullOrEmpty(Model.QrLink) ? "" : "display:none;")">
               <i class="fas fa-image" style="font-size:32px;color:#bfdbfe;"></i>
               Chờ kết nối dữ liệu
             </div>
             <div class="qr-bank-rows">
               <div class="qr-br">
                 <span class="lbl">Ngân hàng</span>
-                <span class="val" id="qr-ngan-hang">— —</span>
+                <span class="val" id="qr-ngan-hang">@Model.NganHang</span>
               </div>
               <div class="qr-br">
                 <span class="lbl">Số tài khoản</span>
                 <span class="val">
-                  <span id="qr-so-tk">— — — —</span>
+                  <span id="qr-so-tk">@Model.SoTaiKhoan</span>
                   <button class="copy-btn" onclick="saoChep('qr-so-tk')"><i class="fas fa-copy"></i></button>
                 </span>
               </div>
               <div class="qr-br">
                 <span class="lbl">Chủ tài khoản</span>
-                <span class="val" id="qr-chu-tk">— — — —</span>
+                <span class="val" id="qr-chu-tk">@Model.ChuTaiKhoan</span>
               </div>
             </div>
           </div>
@@ -1595,7 +1632,10 @@
           <div class="noi-dung-ck">
             <div>
               <div class="nd-label">Nội dung chuyển khoản</div>
-              <div class="nd-val" id="modal-nd-ck">P201 TIEN ICH</div>
+              @{
+                  var soPhongRaw = Model.SoPhong.Replace("Phòng ", "").Trim();
+              }
+              <div class="nd-val" id="modal-nd-ck">P@(soPhongRaw) TIEN ICH</div>
             </div>
             <button class="copy-btn" onclick="saoChep('modal-nd-ck')"><i class="fas fa-copy"></i></button>
           </div>
@@ -1789,7 +1829,7 @@
         return;
       }
 
-      /* --- Gọi back-end submit tại đây (TODO: tích hợp @Model handler) --- */
+      /* --- Gọi back-end submit tại đây (tích hợp @Model handler) --- */
       // Ví dụ: POST form với FormData
 
       // Cập nhật badge

@@ -287,7 +287,6 @@
       box-shadow: var(--bong-card);
     }
     .item-thong-bao:hover { box-shadow: var(--bong-card-hover); transform: translateY(-2px); }
-    /* Thông báo chưa đọc – viền trái + nền nhạt */
     .item-thong-bao.chua-doc {
       border-left: 4px solid var(--mau-chu-de);
       background: var(--mau-xanh-nhat);
@@ -296,7 +295,6 @@
     .item-thong-bao.chua-doc.loai-nguy-hiem { border-left-color: var(--mau-do); background: #fff5f5; }
     .item-thong-bao.chua-doc.loai-thanh-cong { border-left-color: var(--mau-xanh-la); background: #f0fdf4; }
 
-    /* Biểu tượng loại thông báo */
     .bieu-tuong-thong-bao {
       width: 44px; height: 44px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
@@ -308,7 +306,6 @@
     .bt-thanh-cong { background: var(--mau-xanh-la-nhat); color: var(--mau-xanh-la); }
     .bt-he-thong   { background: var(--mau-tim-nhat);   color: var(--mau-tim); }
 
-    /* Nội dung thông báo */
     .noi-dung-thong-bao { flex: 1; min-width: 0; }
     .dong-tren-thong-bao {
       display: flex; align-items: center; justify-content: space-between;
@@ -337,7 +334,6 @@
     .the-loai-nguy-hiem  { background: var(--mau-do-nhat);    color: var(--mau-do); }
     .the-loai-thanh-cong { background: var(--mau-xanh-la-nhat); color: var(--mau-xanh-la); }
     .the-loai-he-thong   { background: var(--mau-tim-nhat);   color: var(--mau-tim); }
-    /* Chấm chưa đọc góc phải */
     .cham-chua-doc {
       position: absolute; top: 14px; right: 16px;
       width: 9px; height: 9px; border-radius: 50%;
@@ -434,13 +430,10 @@
 </head>
 <body>
 
-<!-- =============================================
-     SIDEBAR – THANH ĐIỀU HƯỚNG BÊN TRÁI
-     (Dùng chung với KhachThue, mục "thong-bao" được đánh dấu dang-chon)
-============================================= -->
+<!-- SIDEBAR -->
 <nav id="thanh-sidebar">
 
-  <!-- Logo nhà trọ -->
+  <!-- Logo nhà trọ – giữ nguyên -->
   <div class="logo-sidebar">
     <img src="~/images/logo.png" alt="Logo Nhà Trọ Bà Năm" class="logo-img" />
     <div class="ten-logo">
@@ -462,17 +455,17 @@
     <span class="huy-hieu-menu">1</span>
   </a>
   <a href="/KhachThue/TienIch" class="menu-item" onclick="chuyenTrang('tien-ich', this); return false;">
-    <i class="fas fa-bolt"></i><span>Dịch vụ & Tiện ích</span>
+    <i class="fas fa-bolt"></i><span>Dịch vụ &amp; Tiện ích</span>
   </a>
   <a href="/KhachThue/BaoSuCo" class="menu-item" onclick="chuyenTrang('bao-su-co', this); return false;">
     <i class="fas fa-tools"></i><span>Báo sự cố</span>
   </a>
 
-  <!-- Nhóm Cá nhân – mục Thông báo đang được chọn -->
+  <!-- Nhóm Cá nhân -->
   <div class="nhan-nhom">Cá nhân</div>
   <a href="/KhachThue/ThongBao" class="menu-item dang-chon" onclick="chuyenTrang('thong-bao', this); return false;">
     <i class="fas fa-bell"></i><span>Thông báo</span>
-    <span class="huy-hieu-menu" id="so-chua-doc-sidebar">4</span>
+    <span class="huy-hieu-menu" id="so-chua-doc-sidebar">@Model.SoChuaDoc</span>
   </a>
   <a href="/KhachThue/HoSo" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
     <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
@@ -481,23 +474,21 @@
     <i class="fas fa-cog"></i><span>Cài đặt</span>
   </a>
 
-  <!-- Footer sidebar: thông tin người dùng -->
+  <!-- Footer sidebar -->
   <div class="khach-thue-footer">
-    <div class="anh-khach online-badge">T</div>
+    <div class="anh-khach online-badge">@Model.KhachThue.FullName[0]</div>
     <div class="ten-khach">
-      <strong>Trần Duy Hơn</strong>
-      <span>Phòng 201 · Tầng 2</span>
+      <strong>@Model.KhachThue.FullName</strong>
+      <span>Phòng @Model.SoPhong · Tầng @Model.Tang</span>
     </div>
   </div>
 </nav>
 
 
-<!-- =============================================
-     KHU VỰC CHÍNH – NỘI DUNG TRANG THÔNG BÁO
-============================================= -->
+<!-- KHU VỰC CHÍNH -->
 <div id="khu-vuc-chinh">
 
-  <!-- HEADER TRÊN CÙNG -->
+  <!-- HEADER -->
   <header id="thanh-header">
     <div class="header-trai">
       <button class="nut-ham-menu" onclick="dongMoSidebar()" title="Ẩn/hiện menu">
@@ -511,47 +502,38 @@
 
     <div class="header-phai">
       <div class="hdr-date" id="headerDate"></div>
-      <!-- Chuông thông báo -->
       <button class="nut-thong-bao" title="Thông báo">
         <i class="fas fa-bell"></i>
-        <span class="so-thong-bao" id="so-chua-doc-header">4</span>
+        <span class="so-thong-bao" id="so-chua-doc-header">@Model.SoChuaDoc</span>
       </button>
-      <!-- Thông tin khách thuê -->
       <div class="thong-tin-khach" onclick="chuyenTrang('ho-so', this)">
-        <div class="anh-dai-dien">T</div>
+        <div class="anh-dai-dien">@Model.KhachThue.FullName[0]</div>
         <div>
-          <div class="ten">Trần Duy Hơn</div>
-          <div class="phong-so">Phòng 201</div>
+          <div class="ten">@Model.KhachThue.FullName</div>
+          <div class="phong-so">Phòng @Model.SoPhong</div>
         </div>
         <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
       </div>
     </div>
   </header>
 
-  <!-- NỘI DUNG CHÍNH TRANG THÔNG BÁO -->
+  <!-- NỘI DUNG CHÍNH -->
   <main id="noi-dung-chinh">
 
-    <!-- ==========================================
-         TIÊU ĐỀ TRANG + NÚT HÀNH ĐỘNG
-    ========================================== -->
+    <!-- TIÊU ĐỀ TRANG -->
     <div class="hang-tieu-de-trang">
       <div>
         <h2><i class="fas fa-bell" style="color:var(--mau-chu-de);margin-right:8px;"></i>Thông Báo</h2>
-        <p>Tổng <strong id="tong-thong-bao">8</strong> thông báo · <strong id="so-chua-doc-text" style="color:var(--mau-chu-de);">4 chưa đọc</strong></p>
+        <p>Tổng <strong id="tong-thong-bao">@Model.TongThongBao</strong> thông báo · <strong id="so-chua-doc-text" style="color:var(--mau-chu-de);">@Model.SoChuaDoc chưa đọc</strong></p>
       </div>
     </div>
 
-    <!-- ==========================================
-         THANH BỘ LỌC & TÌM KIẾM
-    ========================================== -->
+    <!-- THANH BỘ LỌC -->
     <div class="thanh-bo-loc">
-      <!-- Ô tìm kiếm thông báo -->
       <div class="o-tim-kiem">
         <i class="fas fa-search"></i>
         <input type="text" placeholder="Tìm kiếm thông báo..." id="o-nhap-tim-kiem" />
       </div>
-
-      <!-- Các nút lọc theo loại -->
       <div class="nhom-nut-loc">
         <button class="nut-loc dang-chon-loc" onclick="locThongBao('tat-ca', this)">Tất cả</button>
         <button class="nut-loc" onclick="locThongBao('chua-doc', this)">Chưa đọc</button>
@@ -559,207 +541,147 @@
         <button class="nut-loc" onclick="locThongBao('canh-bao', this)">Cảnh báo</button>
         <button class="nut-loc" onclick="locThongBao('thanh-toan', this)">Thanh toán</button>
       </div>
-
-      <!-- Nút đánh dấu tất cả đã đọc -->
       <button class="nut-danh-dau-het" onclick="danhDauHetDaDoc()">
         <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
       </button>
     </div>
 
-    <!-- ==========================================
-         DANH SÁCH THÔNG BÁO
-         Dữ liệu mẫu – sau này bind từ Model (Model.DanhSachThongBao)
-    ========================================== -->
+    <!-- DANH SÁCH THÔNG BÁO -->
     <div class="khu-vuc-danh-sach-thong-bao" id="danh-sach-thong-bao">
 
-      <!-- ----- NHÓM: HÔM NAY ----- -->
-      <div class="nhan-nhom-ngay">Hôm nay</div>
+      @if (!Model.DanhSachThongBao.Any())
+      {
+        <div class="khung-trong">
+          <i class="fas fa-bell-slash"></i>
+          <p>Không có thông báo nào</p>
+        </div>
+      }
+      else
+      {
+        @* Nhóm: Hôm nay *@
+        var homNay = Model.DanhSachThongBao.Where(tb => tb.NgayTao.Date == DateTime.Today).ToList();
+        if (homNay.Any())
+        {
+          <div class="nhan-nhom-ngay">Hôm nay</div>
+          foreach (var tb in homNay)
+          {
+            <div class="item-thong-bao @Model.GetItemChuaDocClass(tb)"
+                 data-loai="@tb.LoaiTB"
+                 data-da-doc="@(tb.DaDoc ? "true" : "false")"
+                 onclick="moChiTietThongBao(this, '@tb.IDThongBao')">
+              <div class="bieu-tuong-thong-bao @Model.GetBieuTuongClass(tb.LoaiTB)">
+                <i class="@Model.GetIconClass(tb.LoaiTB)"></i>
+              </div>
+              <div class="noi-dung-thong-bao">
+                <div class="dong-tren-thong-bao">
+                  <span class="tieu-de-thong-bao">@tb.TieuDe</span>
+                  <span class="thoi-gian-thong-bao">@Model.FormatThoiGian(tb.NgayTao)</span>
+                </div>
+                <p class="noi-dung-tom-tat">@tb.NoiDung</p>
+                <div class="dong-duoi-thong-bao">
+                  <span class="the-loai-thong-bao @Model.GetLoaiClass(tb.LoaiTB)">@Model.GetLoaiNhan(tb.LoaiTB)</span>
+                  <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
+                </div>
+              </div>
+              @if (!tb.DaDoc) { <div class="cham-chua-doc"></div> }
+            </div>
+          }
+        }
 
-      <!-- Thông báo 1: Chưa đọc – Nhắc nhở thanh toán (Cảnh báo) -->
-      <div class="item-thong-bao chua-doc loai-canh-bao"
-           data-loai="canh-bao" data-da-doc="false"
-           onclick="moChiTietThongBao(this, 'tb-01')">
-        <div class="bieu-tuong-thong-bao bt-canh-bao">
-          <i class="fas fa-file-invoice-dollar"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Nhắc nhở thanh toán tiền phòng tháng 5/2025</span>
-            <span class="thoi-gian-thong-bao">2 giờ trước</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Hóa đơn tháng 5/2025 của phòng 201 sắp đến hạn. Vui lòng thanh toán trước ngày 15/05/2025 để tránh phát sinh phí trễ hạn.
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-canh-bao">💰 Thanh toán</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-        <div class="cham-chua-doc"></div>
-      </div>
+        @* Nhóm: Hôm qua *@
+        var homQua = Model.DanhSachThongBao.Where(tb => tb.NgayTao.Date == DateTime.Today.AddDays(-1)).ToList();
+        if (homQua.Any())
+        {
+          <div class="nhan-nhom-ngay">Hôm qua</div>
+          foreach (var tb in homQua)
+          {
+            <div class="item-thong-bao @Model.GetItemChuaDocClass(tb)"
+                 data-loai="@tb.LoaiTB"
+                 data-da-doc="@(tb.DaDoc ? "true" : "false")"
+                 onclick="moChiTietThongBao(this, '@tb.IDThongBao')">
+              <div class="bieu-tuong-thong-bao @Model.GetBieuTuongClass(tb.LoaiTB)">
+                <i class="@Model.GetIconClass(tb.LoaiTB)"></i>
+              </div>
+              <div class="noi-dung-thong-bao">
+                <div class="dong-tren-thong-bao">
+                  <span class="tieu-de-thong-bao">@tb.TieuDe</span>
+                  <span class="thoi-gian-thong-bao">@Model.FormatThoiGian(tb.NgayTao)</span>
+                </div>
+                <p class="noi-dung-tom-tat">@tb.NoiDung</p>
+                <div class="dong-duoi-thong-bao">
+                  <span class="the-loai-thong-bao @Model.GetLoaiClass(tb.LoaiTB)">@Model.GetLoaiNhan(tb.LoaiTB)</span>
+                  <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
+                </div>
+              </div>
+              @if (!tb.DaDoc) { <div class="cham-chua-doc"></div> }
+            </div>
+          }
+        }
 
-      <!-- Thông báo 2: Chưa đọc – Cúp điện bảo trì (Cảnh báo) -->
-      <div class="item-thong-bao chua-doc loai-canh-bao"
-           data-loai="canh-bao" data-da-doc="false"
-           onclick="moChiTietThongBao(this, 'tb-02')">
-        <div class="bieu-tuong-thong-bao bt-canh-bao">
-          <i class="fas fa-bolt"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Lịch cúp điện bảo trì – 11/05/2025</span>
-            <span class="thoi-gian-thong-bao">5 giờ trước</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Toàn bộ tòa nhà sẽ bị cúp điện từ 08:00 – 12:00 ngày 11/05/2025 để bảo trì hệ thống điện. Bạn vui lòng chủ động sắp xếp công việc.
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-canh-bao">⚡ Cảnh báo</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-        <div class="cham-chua-doc"></div>
-      </div>
+        @* Nhóm: Tuần trước *@
+        var tuanTruoc = Model.DanhSachThongBao
+          .Where(tb => tb.NgayTao.Date < DateTime.Today.AddDays(-1) && tb.NgayTao.Date >= DateTime.Today.AddDays(-7))
+          .ToList();
+        if (tuanTruoc.Any())
+        {
+          <div class="nhan-nhom-ngay">Tuần trước</div>
+          foreach (var tb in tuanTruoc)
+          {
+            <div class="item-thong-bao @Model.GetItemChuaDocClass(tb)"
+                 data-loai="@tb.LoaiTB"
+                 data-da-doc="@(tb.DaDoc ? "true" : "false")"
+                 onclick="moChiTietThongBao(this, '@tb.IDThongBao')">
+              <div class="bieu-tuong-thong-bao @Model.GetBieuTuongClass(tb.LoaiTB)">
+                <i class="@Model.GetIconClass(tb.LoaiTB)"></i>
+              </div>
+              <div class="noi-dung-thong-bao">
+                <div class="dong-tren-thong-bao">
+                  <span class="tieu-de-thong-bao">@tb.TieuDe</span>
+                  <span class="thoi-gian-thong-bao">@Model.FormatThoiGian(tb.NgayTao)</span>
+                </div>
+                <p class="noi-dung-tom-tat">@tb.NoiDung</p>
+                <div class="dong-duoi-thong-bao">
+                  <span class="the-loai-thong-bao @Model.GetLoaiClass(tb.LoaiTB)">@Model.GetLoaiNhan(tb.LoaiTB)</span>
+                  <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
+                </div>
+              </div>
+              @if (!tb.DaDoc) { <div class="cham-chua-doc"></div> }
+            </div>
+          }
+        }
 
-      <!-- Thông báo 3: Chưa đọc – Nội quy mới (Thông tin) -->
-      <div class="item-thong-bao chua-doc"
-           data-loai="thong-tin" data-da-doc="false"
-           onclick="moChiTietThongBao(this, 'tb-03')">
-        <div class="bieu-tuong-thong-bao bt-thong-tin">
-          <i class="fas fa-clipboard-list"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Cập nhật nội quy nhà trọ tháng 5/2025</span>
-            <span class="thoi-gian-thong-bao">8 giờ trước</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Chủ nhà trọ đã cập nhật một số điều khoản trong nội quy, đặc biệt về giờ giấc ra vào và quy định để xe. Bạn vui lòng đọc và ký xác nhận.
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-thong-tin">📋 Thông tin</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-        <div class="cham-chua-doc"></div>
-      </div>
-
-      <!-- Thông báo 4: Chưa đọc – Sự cố được xử lý (Thành công) -->
-      <div class="item-thong-bao chua-doc loai-thanh-cong"
-           data-loai="thanh-cong" data-da-doc="false"
-           onclick="moChiTietThongBao(this, 'tb-04')">
-        <div class="bieu-tuong-thong-bao bt-thanh-cong">
-          <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Sự cố vòi nước phòng 201 đã được khắc phục</span>
-            <span class="thoi-gian-thong-bao">10 giờ trước</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Kỹ thuật viên đã sửa xong vòi nước bị rò rỉ tại phòng 201. Nếu vẫn còn vấn đề, vui lòng liên hệ chủ nhà qua số hotline.
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-thanh-cong">✅ Đã xử lý</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-        <div class="cham-chua-doc"></div>
-      </div>
-
-      <!-- ----- NHÓM: HÔM QUA ----- -->
-      <div class="nhan-nhom-ngay">Hôm qua</div>
-
-      <!-- Thông báo 5: Đã đọc – Hợp đồng sắp hết hạn -->
-      <div class="item-thong-bao"
-           data-loai="thong-tin" data-da-doc="true"
-           onclick="moChiTietThongBao(this, 'tb-05')">
-        <div class="bieu-tuong-thong-bao bt-thong-tin">
-          <i class="fas fa-file-contract"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Hợp đồng thuê phòng sắp hết hạn</span>
-            <span class="thoi-gian-thong-bao">Hôm qua, 14:30</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Hợp đồng thuê phòng 201 của bạn sẽ hết hạn vào ngày 30/06/2025. Vui lòng liên hệ chủ nhà để gia hạn hoặc thông báo trước 30 ngày nếu muốn dọn ra.
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-thong-tin">📄 Hợp đồng</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Thông báo 6: Đã đọc – Chào mừng -->
-      <div class="item-thong-bao"
-           data-loai="he-thong" data-da-doc="true"
-           onclick="moChiTietThongBao(this, 'tb-06')">
-        <div class="bieu-tuong-thong-bao bt-he-thong">
-          <i class="fas fa-star"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Chào mừng bạn sử dụng cổng khách thuê!</span>
-            <span class="thoi-gian-thong-bao">Hôm qua, 08:00</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Từ nay bạn có thể xem hóa đơn, báo sự cố và theo dõi tiện ích ngay trên ứng dụng này. Chúc bạn sử dụng vui vẻ!
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-he-thong">🔔 Hệ thống</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ----- NHÓM: TUẦN TRƯỚC ----- -->
-      <div class="nhan-nhom-ngay">Tuần trước</div>
-
-      <!-- Thông báo 7: Đã đọc – Sửa thang máy -->
-      <div class="item-thong-bao"
-           data-loai="canh-bao" data-da-doc="true"
-           onclick="moChiTietThongBao(this, 'tb-07')">
-        <div class="bieu-tuong-thong-bao bt-canh-bao">
-          <i class="fas fa-hard-hat"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Bảo trì thang máy tòa nhà ngày 04/05/2025</span>
-            <span class="thoi-gian-thong-bao">04/05/2025</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Thang máy tòa nhà sẽ ngừng hoạt động từ 09:00 – 17:00 ngày 04/05/2025 để bảo trì định kỳ. Bạn vui lòng sử dụng cầu thang bộ trong thời gian này.
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-canh-bao">🔧 Bảo trì</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Thông báo 8: Đã đọc – Thanh toán thành công -->
-      <div class="item-thong-bao"
-           data-loai="thanh-toan" data-da-doc="true"
-           onclick="moChiTietThongBao(this, 'tb-08')">
-        <div class="bieu-tuong-thong-bao bt-thanh-cong">
-          <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="noi-dung-thong-bao">
-          <div class="dong-tren-thong-bao">
-            <span class="tieu-de-thong-bao">Thanh toán tháng 4/2025 thành công</span>
-            <span class="thoi-gian-thong-bao">02/05/2025</span>
-          </div>
-          <p class="noi-dung-tom-tat">
-            Hệ thống đã ghi nhận khoản thanh toán 4.100.000 đ cho hóa đơn tháng 4/2025. Cảm ơn bạn đã thanh toán đúng hạn!
-          </p>
-          <div class="dong-duoi-thong-bao">
-            <span class="the-loai-thong-bao the-loai-thanh-cong">✅ Thành công</span>
-            <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
-          </div>
-        </div>
-      </div>
+        @* Nhóm: Cũ hơn *@
+        var cuHon = Model.DanhSachThongBao
+          .Where(tb => tb.NgayTao.Date < DateTime.Today.AddDays(-7))
+          .ToList();
+        if (cuHon.Any())
+        {
+          <div class="nhan-nhom-ngay">Cũ hơn</div>
+          foreach (var tb in cuHon)
+          {
+            <div class="item-thong-bao @Model.GetItemChuaDocClass(tb)"
+                 data-loai="@tb.LoaiTB"
+                 data-da-doc="@(tb.DaDoc ? "true" : "false")"
+                 onclick="moChiTietThongBao(this, '@tb.IDThongBao')">
+              <div class="bieu-tuong-thong-bao @Model.GetBieuTuongClass(tb.LoaiTB)">
+                <i class="@Model.GetIconClass(tb.LoaiTB)"></i>
+              </div>
+              <div class="noi-dung-thong-bao">
+                <div class="dong-tren-thong-bao">
+                  <span class="tieu-de-thong-bao">@tb.TieuDe</span>
+                  <span class="thoi-gian-thong-bao">@Model.FormatThoiGian(tb.NgayTao)</span>
+                </div>
+                <p class="noi-dung-tom-tat">@tb.NoiDung</p>
+                <div class="dong-duoi-thong-bao">
+                  <span class="the-loai-thong-bao @Model.GetLoaiClass(tb.LoaiTB)">@Model.GetLoaiNhan(tb.LoaiTB)</span>
+                  <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
+                </div>
+              </div>
+              @if (!tb.DaDoc) { <div class="cham-chua-doc"></div> }
+            </div>
+          }
+        }
+      }
 
     </div><!-- /khu-vuc-danh-sach-thong-bao -->
 
@@ -767,10 +689,7 @@
 </div>
 
 
-<!-- =============================================
-     MODAL: CHI TIẾT THÔNG BÁO
-     Hiển thị nội dung đầy đủ khi bấm vào item
-============================================= -->
+<!-- MODAL CHI TIẾT THÔNG BÁO -->
 <div class="lop-che-modal" id="modal-chi-tiet-thong-bao"
      onclick="dongModalNeuNhanNgoai(event, 'modal-chi-tiet-thong-bao')">
   <div class="hop-modal">
@@ -785,7 +704,6 @@
       <span id="modal-the-loai" class="the-loai-thong-bao the-loai-thong-tin">Thông tin</span>
       <span style="font-size:11px;color:var(--mau-chu-phu);" id="modal-thoi-gian">Thời gian</span>
     </div>
-    <!-- Nội dung đầy đủ thông báo -->
     <div class="noi-dung-modal" id="modal-noi-dung"></div>
     <div class="nhom-nut-modal">
       <button class="nut-huy" onclick="dongModal('modal-chi-tiet-thong-bao')">Đóng</button>
@@ -794,10 +712,23 @@
 </div>
 
 
-<!-- =============================================
-     JAVASCRIPT – LOGIC TRANG THÔNG BÁO
-============================================= -->
 <script>
+  // Dữ liệu thông báo từ Model – dùng cho modal chi tiết
+  const duLieuThongBao = {
+    @foreach (var tb in Model.DanhSachThongBao)
+    {
+      <text>
+      '@tb.IDThongBao': {
+        ten: '@Html.Raw(tb.TieuDe.Replace("'", "\\'"))',
+        loaiClass: '@Model.GetLoaiClass(tb.LoaiTB)',
+        loaiNhan: '@Model.GetLoaiNhan(tb.LoaiTB)',
+        thoiGian: '@tb.NgayTao.ToString("dd/MM/yyyy, HH:mm")',
+        noiDung: '@Html.Raw((tb.NoiDung ?? "").Replace("'", "\\'").Replace("\n", "\\n"))'
+      },
+      </text>
+    }
+  };
+
   // -------- Ngày giờ header --------
   function capNhatNgayGio() {
     const days = ['CN','T2','T3','T4','T5','T6','T7'];
@@ -815,7 +746,7 @@
     document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
   }
 
-  // -------- Chuyển trang (giữ nguyên logic từ KhachThue) --------
+  // -------- Chuyển trang --------
   function chuyenTrang(tenTrang, phanTu) {
     document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
     if (phanTu) phanTu.classList.add('dang-chon');
@@ -832,102 +763,13 @@
   }
 
   // -------- Mở modal chi tiết thông báo --------
-  // Dữ liệu mẫu – sau này lấy từ API/Model theo id
-  const duLieuThongBao = {
-    'tb-01': {
-      ten: 'Nhắc nhở thanh toán tiền phòng tháng 5/2025',
-      loaiClass: 'the-loai-canh-bao', loaiNhan: '💰 Thanh toán',
-      thoiGian: '10/05/2025, 08:00',
-      noiDung: `<p>Kính gửi khách thuê <strong>Trần Duy Hơn</strong> – Phòng 201,</p><br>
-        <p>Hóa đơn tháng 5/2025 của bạn đã được lập với tổng số tiền <strong>4.100.000 đ</strong>. Hạn thanh toán là <strong style="color:#dc2626;">15/05/2025</strong>.</p><br>
-        <p>Vui lòng thanh toán đúng hạn để tránh phát sinh phí phạt trễ hạn (5%/ngày).</p><br>
-        <p style="color:#64748b;">Chủ nhà trọ – Bà Năm | Hotline: 0901.234.567</p>`
-    },
-    'tb-02': {
-      ten: 'Lịch cúp điện bảo trì – 11/05/2025',
-      loaiClass: 'the-loai-canh-bao', loaiNhan: '⚡ Cảnh báo',
-      thoiGian: '10/05/2025, 05:00',
-      noiDung: `<p>Thông báo đến toàn bộ cư dân nhà trọ Bà Năm,</p><br>
-        <p>Do yêu cầu bảo trì định kỳ hệ thống điện, toàn bộ tòa nhà sẽ <strong>cúp điện từ 08:00 đến 12:00 ngày Chủ nhật 11/05/2025</strong>.</p><br>
-        <p>Bạn vui lòng sạc đầy các thiết bị điện tử và chủ động sắp xếp công việc trong khoảng thời gian này. Điện sẽ được khôi phục sớm nhất có thể.</p><br>
-        <p style="color:#64748b;">Chủ nhà trọ – Bà Năm</p>`
-    },
-    'tb-03': {
-      ten: 'Cập nhật nội quy nhà trọ tháng 5/2025',
-      loaiClass: 'the-loai-thong-tin', loaiNhan: '📋 Thông tin',
-      thoiGian: '10/05/2025, 02:00',
-      noiDung: `<p>Kính gửi toàn thể khách thuê,</p><br>
-        <p>Nhà trọ Bà Năm đã cập nhật nội quy với một số điểm mới:</p><br>
-        <ul style="padding-left:18px;line-height:2">
-          <li>Giờ giấc ra vào: <strong>cổng tự động khóa lúc 23:30</strong>, vui lòng liên hệ bảo vệ nếu về muộn.</li>
-          <li>Quy định để xe: xe máy <strong>phải để đúng ô quy định</strong>, không để trước cửa phòng.</li>
-          <li>Không tổ chức tiệc tùng ồn ào sau 22:00.</li>
-        </ul><br>
-        <p>Bạn vui lòng đọc và <strong>ký xác nhận</strong> tại văn phòng quản lý trước ngày 20/05/2025.</p><br>
-        <p style="color:#64748b;">Chủ nhà trọ – Bà Năm</p>`
-    },
-    'tb-04': {
-      ten: 'Sự cố vòi nước phòng 201 đã được khắc phục',
-      loaiClass: 'the-loai-thanh-cong', loaiNhan: '✅ Đã xử lý',
-      thoiGian: '09/05/2025, 16:00',
-      noiDung: `<p>Kính gửi bạn <strong>Trần Duy Hơn</strong>,</p><br>
-        <p>Kỹ thuật viên của nhà trọ đã <strong>hoàn tất sửa chữa vòi nước bị rò rỉ</strong> tại phòng 201 lúc 15:45 ngày 09/05/2025.</p><br>
-        <p>Nếu sau khi sử dụng bạn vẫn còn phát hiện vấn đề, hãy báo lại qua mục <em>Báo sự cố</em> hoặc gọi hotline: <strong>0901.234.567</strong>.</p><br>
-        <p style="color:#64748b;">Cảm ơn bạn đã kiên nhẫn chờ đợi!</p>`
-    },
-    'tb-05': {
-      ten: 'Hợp đồng thuê phòng sắp hết hạn',
-      loaiClass: 'the-loai-thong-tin', loaiNhan: '📄 Hợp đồng',
-      thoiGian: 'Hôm qua, 14:30',
-      noiDung: `<p>Kính gửi bạn <strong>Trần Duy Hơn</strong>,</p><br>
-        <p>Hợp đồng thuê phòng 201 của bạn sẽ <strong style="color:#dc2626;">hết hạn vào ngày 30/06/2025</strong>.</p><br>
-        <p>Nếu bạn muốn gia hạn, vui lòng liên hệ chủ nhà <strong>trước ngày 01/06/2025</strong> để ký hợp đồng mới. Nếu bạn có kế hoạch dọn ra, hãy thông báo trước ít nhất 30 ngày theo điều khoản hợp đồng.</p><br>
-        <p style="color:#64748b;">Chủ nhà trọ – Bà Năm | Hotline: 0901.234.567</p>`
-    },
-    'tb-06': {
-      ten: 'Chào mừng bạn sử dụng cổng khách thuê!',
-      loaiClass: 'the-loai-he-thong', loaiNhan: '🔔 Hệ thống',
-      thoiGian: 'Hôm qua, 08:00',
-      noiDung: `<p>Xin chào <strong>Trần Duy Hơn</strong>! 🎉</p><br>
-        <p>Tài khoản cổng khách thuê của bạn đã được kích hoạt thành công. Từ nay bạn có thể:</p><br>
-        <ul style="padding-left:18px;line-height:2">
-          <li>📊 Xem tổng quan phòng và hợp đồng</li>
-          <li>💳 Theo dõi và thanh toán hóa đơn online</li>
-          <li>🔧 Báo sự cố và theo dõi tiến độ xử lý</li>
-          <li>🔔 Nhận thông báo từ chủ nhà trực tiếp</li>
-        </ul><br>
-        <p style="color:#64748b;">Nhà trọ Bà Năm – Luôn ở bên bạn!</p>`
-    },
-    'tb-07': {
-      ten: 'Bảo trì thang máy tòa nhà ngày 04/05/2025',
-      loaiClass: 'the-loai-canh-bao', loaiNhan: '🔧 Bảo trì',
-      thoiGian: '03/05/2025, 20:00',
-      noiDung: `<p>Thông báo đến toàn bộ cư dân,</p><br>
-        <p>Thang máy tòa nhà sẽ <strong>ngừng hoạt động từ 09:00 – 17:00 ngày 04/05/2025</strong> để kiểm tra và bảo trì định kỳ.</p><br>
-        <p>Trong thời gian này, bạn vui lòng sử dụng cầu thang bộ. Xin lỗi vì sự bất tiện này.</p><br>
-        <p style="color:#64748b;">Ban quản lý nhà trọ Bà Năm</p>`
-    },
-    'tb-08': {
-      ten: 'Thanh toán tháng 4/2025 thành công',
-      loaiClass: 'the-loai-thanh-cong', loaiNhan: '✅ Thành công',
-      thoiGian: '02/05/2025, 10:15',
-      noiDung: `<p>Kính gửi bạn <strong>Trần Duy Hơn</strong>,</p><br>
-        <p>Hệ thống đã ghi nhận khoản thanh toán <strong>4.100.000 đ</strong> cho hóa đơn tháng 4/2025 của phòng 201.</p><br>
-        <p>Mã giao dịch: <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">TXN-2025050210-201</code></p><br>
-        <p>Cảm ơn bạn đã thanh toán đúng hạn! 🙏</p><br>
-        <p style="color:#64748b;">Nhà trọ Bà Năm</p>`
-    },
-  };
-
   function moChiTietThongBao(phanTuItem, idThongBao) {
-    // Đánh dấu đã đọc
     phanTuItem.classList.remove('chua-doc','loai-canh-bao','loai-nguy-hiem','loai-thanh-cong');
     const cham = phanTuItem.querySelector('.cham-chua-doc');
     if (cham) cham.remove();
     phanTuItem.dataset.daDoc = 'true';
     capNhatSoChuaDoc();
 
-    // Nạp nội dung vào modal
     const data = duLieuThongBao[idThongBao];
     if (!data) return;
     document.getElementById('modal-ten-thong-bao').textContent = data.ten;
