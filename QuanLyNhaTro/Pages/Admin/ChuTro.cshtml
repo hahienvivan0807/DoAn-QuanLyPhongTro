@@ -1080,7 +1080,347 @@
 .ring-svg{animation:spin 0.7s ease forwards;}
 .check-path{stroke-dasharray:40;stroke-dashoffset:40;animation:drawCheck 0.4s 0.5s ease forwards;}
 .x-path{stroke-dasharray:30;stroke-dashoffset:30;animation:drawX 0.3s 0.5s ease forwards;}
+/*Cửa sổ mới*/
+#modal-cau-hinh-gia-v2 .chg-box {
+  width: 680px;
+  max-width: 96vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.22),
+    0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255,255,255,0.8);
+  animation: chgPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@@keyframes chgPop {
+  from { opacity: 0; transform: scale(0.91) translateY(-18px); }
+  to   { opacity: 1; transform: none; }
+}
 
+/* ---------- header gradient ---------- */
+#modal-cau-hinh-gia-v2 .chg-hd {
+  flex-shrink: 0;
+  padding: 20px 26px 18px;
+  background: linear-gradient(135deg, #0f52ba 0%, #0891b2 55%, #06b6d4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+#modal-cau-hinh-gia-v2 .chg-hd::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+#modal-cau-hinh-gia-v2 .chg-hd::after {
+  content: '';
+  position: absolute; bottom: -30px; right: 80px;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+#modal-cau-hinh-gia-v2 .chg-hd-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: rgba(255,255,255,0.22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff; flex-shrink: 0;
+}
+#modal-cau-hinh-gia-v2 .chg-hd-title {
+  font-size: 15px; font-weight: 800;
+  color: #fff; font-family: 'Lexend', sans-serif;
+}
+#modal-cau-hinh-gia-v2 .chg-hd-sub {
+  font-size: 11px; color: rgba(255,255,255,0.62); margin-top: 2px;
+}
+#modal-cau-hinh-gia-v2 .chg-close {
+  position: relative; z-index: 1;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); border: none; color: #fff;
+  cursor: pointer; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+#modal-cau-hinh-gia-v2 .chg-close:hover { background: rgba(255,255,255,0.32); }
+
+/* ---------- tab switcher ---------- */
+#modal-cau-hinh-gia-v2 .chg-tabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+  padding: 14px 26px 0;
+  background: #fff;
+  border-bottom: 1.5px solid #e5e9f5;
+}
+#modal-cau-hinh-gia-v2 .chg-tab {
+  padding: 9px 18px 11px;
+  font-size: 13px; font-weight: 700;
+  color: #6b7a99;
+  border: none; background: none; cursor: pointer;
+  border-radius: 10px 10px 0 0;
+  display: flex; align-items: center; gap: 8px;
+  position: relative; bottom: -1.5px;
+  transition: color 0.18s, background 0.18s;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+#modal-cau-hinh-gia-v2 .chg-tab i {
+  font-size: 13px; opacity: 0.7;
+}
+#modal-cau-hinh-gia-v2 .chg-tab:hover {
+  background: #f0f2f8; color: #111827;
+}
+#modal-cau-hinh-gia-v2 .chg-tab.active {
+  color: #0891b2;
+  background: #fff;
+  border: 1.5px solid #e5e9f5;
+  border-bottom-color: #fff;
+}
+#modal-cau-hinh-gia-v2 .chg-tab.active i { opacity: 1; }
+#modal-cau-hinh-gia-v2 .chg-tab.active::after {
+  content: '';
+  position: absolute; bottom: -1.5px; left: 0; right: 0; height: 2px;
+  background: #0891b2;
+}
+
+/* ---------- scrollable body ---------- */
+#modal-cau-hinh-gia-v2 .chg-body {
+  flex: 1; overflow-y: auto;
+  padding: 22px 26px 8px;
+}
+#modal-cau-hinh-gia-v2 .chg-body::-webkit-scrollbar { width: 4px; }
+#modal-cau-hinh-gia-v2 .chg-body::-webkit-scrollbar-thumb {
+  background: #d4d9e6; border-radius: 3px;
+}
+
+/* ---------- panels ---------- */
+#modal-cau-hinh-gia-v2 .chg-panel { display: none; }
+#modal-cau-hinh-gia-v2 .chg-panel.show { display: block; }
+
+/* ---------- section label ---------- */
+#modal-cau-hinh-gia-v2 .chg-sec {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 9.5px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.8px; color: #6b7a99;
+  margin: 0 0 14px;
+  padding-bottom: 9px;
+  border-bottom: 1.5px solid #e5e9f5;
+}
+#modal-cau-hinh-gia-v2 .chg-sec i { font-size: 11px; color: #0891b2; }
+
+/* ---------- info banner ---------- */
+#modal-cau-hinh-gia-v2 .chg-info {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 14px;
+  background: #f0f9ff;
+  border-left: 3px solid #0891b2;
+  border-radius: 0 10px 10px 0;
+  font-size: 12.5px; color: #6b7a99;
+  margin-bottom: 18px; line-height: 1.6;
+}
+#modal-cau-hinh-gia-v2 .chg-info i { color: #0891b2; margin-top: 2px; flex-shrink: 0; }
+
+/* ---------- form grid ---------- */
+#modal-cau-hinh-gia-v2 .fg2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 13px;
+  margin-bottom: 14px;
+}
+#modal-cau-hinh-gia-v2 .field {
+  display: flex; flex-direction: column; gap: 5px;
+}
+#modal-cau-hinh-gia-v2 .f-lbl {
+  font-size: 11.5px; font-weight: 700; color: #111827;
+  display: flex; align-items: center; gap: 4px;
+}
+#modal-cau-hinh-gia-v2 .req { color: #dc2626; font-size: 13px; line-height: 1; }
+#modal-cau-hinh-gia-v2 .f-note {
+  font-size: 10px; color: #6b7a99; margin-top: 2px; line-height: 1.5;
+}
+
+/* ---------- input styles ---------- */
+#modal-cau-hinh-gia-v2 .inp {
+  width: 100%; padding: 9px 13px;
+  border: 1.5px solid #e5e9f5; border-radius: 8px;
+  font-size: 13px; outline: none;
+  color: #111827; font-family: 'Be Vietnam Pro', sans-serif;
+  background: #fff; transition: all 0.18s;
+}
+#modal-cau-hinh-gia-v2 .inp:focus {
+  border-color: #0891b2;
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.12);
+}
+#modal-cau-hinh-gia-v2 .inp:disabled {
+  background: #f8f9fd; color: #b0b9ce;
+  cursor: not-allowed;
+}
+#modal-cau-hinh-gia-v2 select.inp {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  padding-right: 32px;
+}
+#modal-cau-hinh-gia-v2 textarea.inp {
+  resize: vertical; min-height: 72px;
+}
+
+/* input with unit suffix */
+#modal-cau-hinh-gia-v2 .inp-u { position: relative; }
+#modal-cau-hinh-gia-v2 .inp-u .inp { padding-right: 46px; }
+#modal-cau-hinh-gia-v2 .inp-u .unit {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 10.5px; color: #6b7a99; font-weight: 600; pointer-events: none;
+}
+
+/* ---------- disabled block overlay ---------- */
+#modal-cau-hinh-gia-v2 .fields-group {
+  transition: opacity 0.25s ease;
+}
+#modal-cau-hinh-gia-v2 .fields-group.locked {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ---------- room picker (reuse existing styles, scoped) ---------- */
+#modal-cau-hinh-gia-v2 .room-wrap-chg { position: relative; z-index: 50; }
+#modal-cau-hinh-gia-v2 .room-btn-chg {
+  width: 100%; padding: 9px 42px 9px 13px;
+  border: 1.5px solid #e5e9f5; border-radius: 8px;
+  font-size: 13px; outline: none; color: #6b7a99;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  background: #fff; cursor: pointer; text-align: left; transition: all 0.18s;
+}
+#modal-cau-hinh-gia-v2 .room-btn-chg:hover,
+#modal-cau-hinh-gia-v2 .room-btn-chg.open-state {
+  border-color: #0891b2;
+}
+#modal-cau-hinh-gia-v2 .room-btn-chg.picked {
+  color: #111827; font-weight: 600;
+}
+#modal-cau-hinh-gia-v2 .room-btn-icon-chg {
+  position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+  color: #0891b2; font-size: 15px; pointer-events: none;
+}
+/* panel */
+#modal-cau-hinh-gia-v2 .room-panel-chg {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: #fff; border: 1.5px solid #0891b2; border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(8,145,178,0.18);
+  overflow: hidden; display: none; z-index: 200;
+}
+#modal-cau-hinh-gia-v2 .room-panel-chg.open { display: block; }
+/* search row */
+#modal-cau-hinh-gia-v2 .rpc-search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: #f0f9ff;
+  border-bottom: 1px solid #e5e9f5;
+}
+#modal-cau-hinh-gia-v2 .rpc-search i { color: #6b7a99; font-size: 12px; flex-shrink: 0; }
+#modal-cau-hinh-gia-v2 .rpc-search input {
+  border: none; background: none; outline: none;
+  font-size: 12px; width: 100%;
+  font-family: 'Be Vietnam Pro', sans-serif; color: #111827;
+}
+/* filter chips */
+#modal-cau-hinh-gia-v2 .rpc-filters {
+  display: flex; gap: 6px; padding: 7px 10px;
+  border-bottom: 1px solid #e5e9f5; flex-wrap: wrap;
+}
+#modal-cau-hinh-gia-v2 .rfc {
+  padding: 3px 10px; border-radius: 9999px;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  border: 1.5px solid #e5e9f5; background: #f0f2f8;
+  color: #6b7a99; font-family: 'Be Vietnam Pro', sans-serif;
+  transition: all 0.12s;
+}
+#modal-cau-hinh-gia-v2 .rfc.ra { background: #0891b2; color: #fff; border-color: #0891b2; }
+#modal-cau-hinh-gia-v2 .rfc.rt { background: #ecfdf5; color: #065f46; border-color: #6ee7b7; }
+#modal-cau-hinh-gia-v2 .rfc.rr { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+#modal-cau-hinh-gia-v2 .rfc.rs { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+/* list */
+#modal-cau-hinh-gia-v2 .rpc-list {
+  max-height: 160px; overflow-y: auto; padding: 5px;
+}
+#modal-cau-hinh-gia-v2 .rpc-list::-webkit-scrollbar { width: 3px; }
+#modal-cau-hinh-gia-v2 .rpc-list::-webkit-scrollbar-thumb { background: #d4d9e6; border-radius: 3px; }
+#modal-cau-hinh-gia-v2 .rpc-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.12s;
+}
+#modal-cau-hinh-gia-v2 .rpc-row:hover { background: #f0f9ff; }
+#modal-cau-hinh-gia-v2 .rpc-row.sel { background: #e0f7fa; }
+#modal-cau-hinh-gia-v2 .rpc-num { font-size: 13px; font-weight: 700; }
+#modal-cau-hinh-gia-v2 .rpc-sub { font-size: 10.5px; color: #6b7a99; margin-top: 1px; }
+#modal-cau-hinh-gia-v2 .bdg {
+  font-size: 10px; font-weight: 700; padding: 2px 9px;
+  border-radius: 9999px; white-space: nowrap;
+}
+#modal-cau-hinh-gia-v2 .b-empty  { background: #d1fae5; color: #065f46; }
+#modal-cau-hinh-gia-v2 .b-rented { background: #fef3c7; color: #92400e; }
+#modal-cau-hinh-gia-v2 .b-repair { background: #fee2e2; color: #991b1b; }
+
+/* ---------- divider ---------- */
+#modal-cau-hinh-gia-v2 .mdiv {
+  height: 1px; background: #e5e9f5; margin: 18px 0;
+}
+
+/* ---------- footer ---------- */
+#modal-cau-hinh-gia-v2 .chg-ft {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 26px 17px;
+  border-top: 1px solid #e5e9f5;
+  background: #f8f9fd;
+}
+#modal-cau-hinh-gia-v2 .ft-note {
+  font-size: 10.5px; color: #6b7a99;
+}
+#modal-cau-hinh-gia-v2 .ft-note span { color: #dc2626; }
+#modal-cau-hinh-gia-v2 .ft-btns { display: flex; gap: 9px; }
+#modal-cau-hinh-gia-v2 .btn-cancel-chg {
+  padding: 9px 18px; border-radius: 8px;
+  border: 1.5px solid #e5e9f5; background: transparent;
+  font-size: 12.5px; color: #6b7a99; cursor: pointer;
+  font-family: 'Be Vietnam Pro', sans-serif; transition: all 0.15s;
+}
+#modal-cau-hinh-gia-v2 .btn-cancel-chg:hover { background: #f0f2f8; }
+#modal-cau-hinh-gia-v2 .btn-confirm-chg {
+  padding: 9px 22px; border-radius: 8px; border: none;
+  background: linear-gradient(135deg, #0f52ba, #0891b2);
+  color: #fff; font-size: 12.5px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 14px rgba(8,145,178,0.35);
+  font-family: 'Be Vietnam Pro', sans-serif; transition: all 0.2s;
+}
+#modal-cau-hinh-gia-v2 .btn-confirm-chg:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(8,145,178,0.5);
+}
+
+/* ---------- loading spinner ---------- */
+#modal-cau-hinh-gia-v2 .chg-loading {
+  text-align: center; padding: 28px 0; color: #6b7a99; font-size: 12.5px;
+}
+#modal-cau-hinh-gia-v2 .chg-loading i {
+  font-size: 22px; display: block; margin-bottom: 8px; color: #0891b2;
+}
+#chg-phong-fields .inp:not(:disabled) {
+    background: #fff;
+    border-color: #e5e9f5;
+    transition: all 0.3s ease;
+}
+
+#chg-phong-fields.unlocked .inp:not(:disabled) {
+    animation: fieldLight 0.5s ease forwards;
+}
+
+@@keyframes fieldLight {
+    0%   { background: #e0f7fa; border-color: #0891b2; box-shadow: 0 0 0 4px rgba(8,145,178,0.15); }
+    60%  { background: #f0f9ff; border-color: #0891b2; box-shadow: 0 0 0 2px rgba(8,145,178,0.08); }
+    100% { background: #fff;    border-color: #e5e9f5; box-shadow: none; }
+}
 </style>
 </head>
 <body>
@@ -1141,7 +1481,7 @@
     <i class="fas fa-users"></i>
     <span>Quản lý người thuê</span>
   </div>
-  <div class="muc-menu" onclick="moModal('modal-cau-hinh-gia')">
+  <div class="muc-menu" onclick="moModal('modal-cau-hinh-gia-v2')">
     <i class="fas fa-sliders-h"></i>
     <span>Cấu hình giá thuê</span>
   </div>
@@ -1249,19 +1589,19 @@
     <div class="hang-thong-ke-tong-quan">
 
       <!-- Card 1: Doanh thu -->
-      <div class="card-thong-ke mau-vang">
-        <div class="noi-dung-card-thong-ke">
-          <div class="bieu-tuong-card"><i class="fas fa-coins"></i></div>
-          <div class="so-lieu-card">
-            <div class="con-so" style="font-size:22px;">58.5M</div>
-            <div class="nhan-card">Doanh thu tháng 5</div>
-            <span class="the-ty-le tang">↑ +12% tháng trước</span>
-          </div>
+    <div class="card-thong-ke mau-vang">
+      <div class="noi-dung-card-thong-ke">
+        <div class="bieu-tuong-card"><i class="fas fa-coins"></i></div>
+        <div class="so-lieu-card">
+          <div class="con-so" id="hien-thi-doanh-thu" style="font-size:22px;">0M</div> 
+          <div class="nhan-card" id="hien-thi-thang">Doanh thu tháng...</div>   
+          <span class="the-ty-le tang" id="hien-thi-ty-le">Đang tải...</span> 
         </div>
       </div>
+    </div>
 
       <!-- Card 2: Tổng phòng -->
-      <div class="card-thong-ke mau-xanh-bien">
+      <div class="card-thong-ke mau-xanh-bien card-phong">
         <div class="noi-dung-card-thong-ke">
           <div class="bieu-tuong-card"><i class="fas fa-building"></i></div>
           <div class="so-lieu-card">
@@ -1322,7 +1662,7 @@
         <span class="the-tinh-nang">Xem danh sách người thuê</span>
       </div>
 
-      <div class="card-tinh-nang" onclick="moModal('modal-cau-hinh-gia')">
+      <div class="card-tinh-nang" onclick="moModal('modal-cau-hinh-gia-v2')">
         <div class="dau-tinh-nang mau-cyan-nhat"><i class="fas fa-tags"></i></div>
         <div>
           <div class="ten-tinh-nang">Cấu hình giá thuê</div>
@@ -2482,6 +2822,239 @@ function taoTruong(nhan, giatri) {
 
 </div>
 </div>
+<!--MODAL Config giá-->
+<!-- ============================================================
+     MODAL MARKUP
+============================================================ -->
+<div class="lop-phu-modal" id="modal-cau-hinh-gia-v2"
+     onclick="chgDongNgoai(event)">
+  <div class="chg-box" onclick="event.stopPropagation()">
+
+    <!-- ── HEADER ── -->
+    <div class="chg-hd">
+      <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+        <div class="chg-hd-icon"><i class="fas fa-sliders-h"></i></div>
+        <div>
+          <div class="chg-hd-title">Cấu hình giá thuê</div>
+          <div class="chg-hd-sub">Dịch vụ &amp; Phòng trọ</div>
+        </div>
+      </div>
+      <button class="chg-close" onclick="chgDong()">✕</button>
+    </div>
+
+    <!-- ── TABS ── -->
+    <div class="chg-tabs">
+      <button class="chg-tab active" id="chg-tab-dv"
+              onclick="chgSwitch('dv')">
+        <i class="fas fa-bolt"></i> Cấu hình Giá Dịch Vụ
+      </button>
+      <button class="chg-tab" id="chg-tab-phong"
+              onclick="chgSwitch('phong')">
+        <i class="fas fa-door-open"></i> Cấu hình Phòng
+      </button>
+    </div>
+
+    <!-- ── BODY ── -->
+    <div class="chg-body">
+
+      <!-- ════ PANEL 1: GIÁ DỊCH VỤ ════ -->
+      <div class="chg-panel show" id="chg-panel-dv">
+
+        <div class="chg-info">
+          <i class="fas fa-info-circle"></i>
+          <span>Thiết lập đơn giá cho từng loại dịch vụ. Đơn giá này sẽ được áp dụng khi tính hóa đơn hàng tháng cho tất cả các phòng.</span>
+        </div>
+
+        <div class="chg-sec"><i class="fas fa-cog"></i> Thiết lập đơn giá dịch vụ</div>
+
+        <!-- Form 2 cột -->
+        <div class="fg2" id="chg-dv-form">
+          <!-- JS sẽ render các dòng dịch vụ từ API vào đây -->
+          <!-- Fallback tĩnh để preview giao diện -->
+          <div class="field">
+            <label class="f-lbl">Mã dịch vụ <span class="req">*</span></label>
+            <input class="inp" type="text" id="dv-ma" placeholder="VD: DIEN, NUOC, INET..." />
+            <div class="f-note">Mã định danh, không dấu cách</div>
+          </div>
+          <div class="field">
+            <label class="f-lbl">Tên dịch vụ <span class="req">*</span></label>
+            <input class="inp" type="text" id="dv-ten" placeholder="VD: Tiền điện, Tiền nước..." />
+          </div>
+          <div class="field">
+            <label class="f-lbl">Đơn giá <span class="req">*</span></label>
+            <div class="inp-u">
+              <input class="inp" type="number" id="dv-gia" placeholder="VD: 3500" min="0" />
+              <span class="unit">đ</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="f-lbl">Đơn vị tính <span class="req">*</span></label>
+            <select class="inp" id="dv-donvi">
+              <option value="">-- Chọn đơn vị --</option>
+              <option value="kWh">kWh (điện)</option>
+              <option value="m3">m³ (nước)</option>
+              <option value="phong/thang">phòng / tháng</option>
+              <option value="nguoi/thang">người / tháng</option>
+              <option value="xe/thang">xe / tháng</option>
+              <option value="thang">tháng (khoán)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bảng danh sách dịch vụ hiện có -->
+        <div class="mdiv"></div>
+        <div class="chg-sec"><i class="fas fa-list"></i> Danh sách dịch vụ hiện có</div>
+
+        <div id="chg-dv-list">
+          <!-- Chỗ này để render dữ liệu từ Database (bảng ConfigGia) -->
+          <div class="chg-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            Đang tải danh sách dịch vụ...
+          </div>
+        </div>
+
+      </div><!-- /panel-dv -->
+
+
+      <!-- ════ PANEL 2: CẤU HÌNH PHÒNG ════ -->
+      <div class="chg-panel" id="chg-panel-phong">
+
+        <div class="chg-info">
+          <i class="fas fa-info-circle"></i>
+          <span>Chọn phòng để chỉnh sửa thông tin. Khi chưa chọn phòng, các trường nhập liệu sẽ bị khoá.</span>
+        </div>
+
+        <!-- Room Picker -->
+        <div class="chg-sec"><i class="fas fa-search"></i> Chọn phòng</div>
+        <div class="field" style="margin-bottom:16px;">
+          <label class="f-lbl">Số phòng <span class="req">*</span></label>
+          <div class="room-wrap-chg" id="chgRoomWrap">
+            <button type="button" class="room-btn-chg" id="chgRoomBtn"
+                    onclick="toggleRoomChg()">
+              Nhấn để chọn phòng cần chỉnh sửa...
+            </button>
+            <span class="room-btn-icon-chg"><i class="fas fa-door-open"></i></span>
+
+            <div class="room-panel-chg" id="chgRoomPanel">
+              <!-- Search -->
+              <div class="rpc-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="chg-rp-q"
+                       placeholder="Tìm số phòng, tầng..."
+                       oninput="chgRenderRooms()" />
+              </div>
+              <!-- Filters -->
+              <div class="rpc-filters">
+                <button class="rfc ra" id="chg-rf-all"
+                        onclick="chgSetFilter('all',this)">Tất cả</button>
+                <button class="rfc rt" id="chg-rf-trong"
+                        onclick="chgSetFilter('Trống',this)">Trống</button>
+                <button class="rfc rr" id="chg-rf-datthue"
+                        onclick="chgSetFilter('Đã thuê',this)">Đã thuê</button>
+                <button class="rfc rs" id="chg-rf-dangsua"
+                        onclick="chgSetFilter('Đang sửa',this)">Đang sửa</button>
+              </div>
+              <!-- Room list -->
+              <div class="rpc-list" id="chgRpList">
+                <!-- Gọi API lấy danh sách phòng tại đây -->
+              </div>
+            </div>
+          </div>
+          <div class="f-note">Có thể chỉnh sửa phòng ở bất kỳ trạng thái nào.</div>
+        </div>
+
+        <div class="mdiv" style="margin-top:0;"></div>
+        <div class="chg-sec"><i class="fas fa-edit"></i> Thông tin phòng</div>
+
+        <!-- Fields group – bị lock khi chưa chọn phòng -->
+        <div class="fields-group locked" id="chg-phong-fields">
+
+          <div class="fg2">
+            <!-- SoPhong -->
+            <div class="field">
+              <label class="f-lbl">Số phòng <span class="req">*</span></label>
+              <input class="inp" type="text" id="phong-so"
+                     placeholder="VD: 101" disabled />
+            </div>
+            <!-- Tang -->
+            <div class="field">
+              <label class="f-lbl">Tầng <span class="req">*</span></label>
+              <input class="inp" type="number" id="phong-tang"
+                     placeholder="VD: 1" min="1" disabled />
+            </div>
+            <!-- TrangThai -->
+            <div class="field">
+              <label class="f-lbl">Trạng thái <span class="req">*</span></label>
+              <select class="inp" id="phong-trang-thai" disabled>
+                <option value="Trống">Trống</option>
+                <option value="Đã thuê">Đã thuê</option>
+                <option value="Đang sửa">Đang sửa</option>
+              </select>
+            </div>
+            <!-- DienTich -->
+            <div class="field">
+              <label class="f-lbl">Diện tích (m²) <span class="req">*</span></label>
+              <div class="inp-u">
+                <input class="inp" type="number" id="phong-dien-tich"
+                       placeholder="VD: 22" min="1" disabled />
+                <span class="unit">m²</span>
+              </div>
+            </div>
+            <!-- GiaPhongFix -->
+            <div class="field" style="grid-column:1/-1;">
+              <label class="f-lbl">Giá phòng cố định (GiaPhongFix)</label>
+              <div class="inp-u">
+                <input class="inp" type="number" id="phong-gia-fix"
+                       placeholder="Để trống = dùng giá mặc định hệ thống"
+                       min="0" disabled />
+                <span class="unit">đ/tháng</span>
+              </div>
+              <div class="f-note">
+                Nếu đặt giá riêng, giá này sẽ ưu tiên cao hơn cấu hình mặc định.
+                Để trống để dùng giá chung.
+              </div>
+            </div>
+          </div>
+
+          <!-- MoTa – textarea -->
+          <div class="field" style="margin-bottom:6px;">
+            <label class="f-lbl">Mô tả phòng</label>
+            <textarea class="inp" id="phong-mo-ta" rows="3"
+                      placeholder="VD: Phòng gần cầu thang, có ban công, máy lạnh 2 chiều..."
+                      disabled></textarea>
+            <div class="f-note">Thông tin thêm về tiện ích, vị trí, đặc điểm phòng.</div>
+          </div>
+
+        </div><!-- /fields-group -->
+
+        <!-- hint khi chưa chọn phòng -->
+        <div id="chg-phong-hint"
+             style="text-align:center;padding:24px 0 8px;color:#6b7a99;font-size:12.5px;">
+          <i class="fas fa-hand-pointer"
+             style="font-size:22px;display:block;margin-bottom:8px;color:#0891b2;opacity:0.6;"></i>
+          Hãy chọn một phòng ở trên để bắt đầu chỉnh sửa.
+        </div>
+
+      </div><!-- /panel-phong -->
+
+    </div><!-- /chg-body -->
+
+    <!-- ── FOOTER ── -->
+    <div class="chg-ft">
+      <div class="ft-note"><span>*</span> Trường bắt buộc</div>
+      <div class="ft-btns">
+        <button class="btn-cancel-chg" onclick="chgDong()">Hủy</button>
+        <button class="btn-confirm-chg" id="chg-btn-submit"
+                onclick="chgSubmit()">
+          <i class="fas fa-check"></i>
+          <span id="chg-btn-label">Xác nhận thay đổi</span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /chg-box -->
+</div><!-- /modal -->
+
 <!-- Thông báo-->
 <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;"></div>
 <script>

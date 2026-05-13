@@ -45,7 +45,7 @@ namespace QuanLyNhaTro.Controllers
 
             if (request.NgayKetThuc.HasValue)
             {
-                if (request.NgayKetThuc.Value.Date <= request.NgayBatDau.Value.Date)
+                if (request.NgayKetThuc.Value.Date <= request.NgayBatDau.Date)
                     return BadRequest(new { message = "Ngày kết thúc phải lớn hơn ngày bắt đầu!" });
             }
             // Validate SĐT trùng

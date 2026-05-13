@@ -66,3 +66,64 @@ function moChinhSuaNguoiThue() {
     // TODO: Mở form chỉnh sửa / kết nối API
     alert('Chức năng chỉnh sửa người thuê "' + nguoiThueHienTai.hoTen + '" sẽ được tích hợp với backend.');
 }
+async function HienThiTyLeLapDay() {
+    try {
+        const response = await fetch('/api/ChuTro/TyLeLap');
+
+        if (!response.ok) {
+            throw new Error('Lỗi khi gọi API');
+        }
+        const data = await response.json();
+        console.log("Dữ Liệu nhận được: ",data)
+        const theTongSoPhong = document.querySelector('.card-phong .con-so');
+        const theTyLe = document.querySelector('.card-phong .the-ty-le');
+
+        if (theTongSoPhong && theTyLe) {
+
+            theTongSoPhong.textContent = data.tongSoPhong;
+            theTyLe.textContent = `↑ ${data.tyLeLapDay}% lấp đầy`;
+        }
+
+    } catch (error) {
+        console.error("Đã xảy ra lỗi:", error);
+    }
+}
+async function TyLeDoanhThu() {
+    try {
+        const response = await fetch('/api/ChuTro/TyLeDoanhThu');
+        const data = await response.json();
+
+        const thang = data.thang;
+        const doanhThu = data.doanhThuT;
+        const tyLe = data.tyleDT;
+
+        const doanhThuFormat = (doanhThu / 1000000).toFixed(1) + 'M';
+
+        const tyLeElement = document.getElementById('hien-thi-ty-le');
+
+        if (tyLe > 0) {
+            tyLeElement.innerText = `↑ +${tyLe.toFixed(1)}% tháng trước`;
+            tyLeElement.className = "the-ty-le tang"; 
+        } else if (tyLe < 0) {
+            tyLeElement.innerText = `↓ ${tyLe.toFixed(1)}% tháng trước`;
+            tyLeElement.className = "the-ty-le giam"; // Tự thêm class .giam màu đỏ trong CSS nhé
+        } else {
+            tyLeElement.innerText = `- 0% tháng trước`;
+            tyLeElement.className = "the-ty-le"; // Màu xám bình thường
+        }
+
+        document.getElementById('hien-thi-doanh-thu').innerText = doanhThuFormat;
+        document.getElementById('hien-thi-thang').innerText = `Doanh thu tháng ${thang}`;
+
+    } catch (error) {
+        console.error("Lỗi khi load dữ liệu doanh thu:", error);
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    HienThiTyLeLapDay();
+});
+document.addEventListener('DOMContentLoaded', () => {
+    TyLeDoanhThu();
+});

@@ -161,7 +161,6 @@ function handleSelectRoom(el) {
     // Re-render để highlight
     renderRooms();
 }
-
 async function toggleRoom() {
     const panel = document.getElementById('roomPanel');
     const btn = document.getElementById('roomBtn');

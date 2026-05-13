@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
@@ -198,6 +199,48 @@ namespace QuanLyNhaTro.Controllers
             }).ToListAsync();
             return Ok(DSPhong);
         }
-    }
+        [HttpGet("TyLeLap")]
+        public async Task<IActionResult> TyLePhong()
+        {
+
+            int tongPhong = await _context.PHONG.CountAsync();
+            int soPhongDaThue = await _context.PHONG
+            .CountAsync(p => p.TrangThai == "Đã Thuê");
+            if (tongPhong > 0)
+            {
+                double tyLe = ((double) soPhongDaThue / tongPhong) *100;
+                return Ok(new
+                {
+                    tongSoPhong = tongPhong,
+                    tyLeLapDay = Math.Round(tyLe)
+                });
+            }
+            return BadRequest(new { message = "Có lỗi xảy ra" });
+        }
+        [HttpGet("TyLeDoanhThu")]
+        public async Task<IActionResult> TyLeDoanhThu()
+        {
+            var SoLieu = await _context.THONGKE_DOANHTHU_THANG
+                .OrderByDescending(t => t.Nam)
+                .ThenByDescending(t => t.Thang)
+                .FirstOrDefaultAsync();
+            var SoLieuCu = await _context.THONGKE_DOANHTHU_THANG
+                .OrderByDescending(t => t.Nam)
+                .ThenByDescending(t => t.Thang)
+                .Skip(1)
+                .FirstOrDefaultAsync();
+
+            decimal DoanhThuCu = SoLieuCu.TongCong;
+            decimal DoanhThuMoi = SoLieu.TongCong;
+
+            decimal tong = ((DoanhThuMoi - DoanhThuCu) / DoanhThuCu * 100);
+            return Ok(new
+            {
+                thang = SoLieu.Thang,
+                DoanhThuT = SoLieu.TongCong,
+                TyleDT = tong
+            });
+        }
+    }   
 
 }
