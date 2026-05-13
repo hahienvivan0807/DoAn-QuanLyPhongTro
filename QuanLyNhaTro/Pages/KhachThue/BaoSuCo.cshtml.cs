@@ -54,7 +54,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
         {
             var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(idUserStr, out int idUser))
-                return RedirectToPage("/Login");
+                return RedirectToPage("/Index");
 
             KhachThue = await _db.ACCOUNT.FindAsync(idUser)
                         ?? throw new Exception("Không tìm thấy tài khoản");

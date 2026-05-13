@@ -3,7 +3,26 @@
 @{
     ViewData["title"] = "Hồ Sơ Cá Nhân";
     Layout = null;
-}<!DOCTYPE html>
+
+    var kt     = Model.KhachThue;
+    var hd     = Model.HopDong;
+    var phong  = Model.Phong;
+    var tenViet = Model.HoTen ?? "";
+    var chuCai  = tenViet.Length > 0 ? tenViet[0].ToString() : "?";
+    var soPhongHienThi = phong != null ? $"Phòng {phong.SoPhong} · Tầng {phong.Tang}" : "";
+
+    string NhanTrangThaiHD(string trangThai) => trangThai switch {
+        "Đang hiệu lực" => "nhan-xanh-la",
+        "Đã kết thúc"   => "nhan-do",
+        _               => "nhan-cam"
+    };
+    string NhanTrangThaiPhong(string trangThai) => trangThai switch {
+        "Đã thuê"  => "nhan-xanh",
+        "Đang sửa" => "nhan-cam",
+        _          => "nhan-do"
+    };
+}
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
@@ -46,7 +65,7 @@
     }
 
     /* =============================================
-       SIDEBAR – GIỮ NGUYÊN TỪ KHACHTHUE
+       SIDEBAR
     ============================================= */
     #thanh-sidebar {
       width: 220px; min-width: 220px;
@@ -187,18 +206,6 @@
     }
     .hang-tieu-de-trang h2 { font-size: 20px; font-weight: 800; }
     .hang-tieu-de-trang p { font-size: 13px; color: var(--mau-chu-phu); margin-top: 3px; }
-    .nut-chinh {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 10px; cursor: pointer;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 13px; font-weight: 700;
-      transition: all 0.2s; border: none;
-    }
-    .nut-luu-ho-so {
-      background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      color: #fff; box-shadow: 0 4px 12px rgba(26,86,219,0.3);
-    }
-    .nut-luu-ho-so:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,86,219,0.4); }
 
     /* ===== LƯỚI 2 CỘT: ẢNH ĐẠI DIỆN | THÔNG TIN NHANH ===== */
     .luoi-ho-so { display: grid; grid-template-columns: 280px 1fr; gap: 20px; margin-bottom: 20px; }
@@ -214,14 +221,12 @@
     }
     .card-ho-so:hover { box-shadow: var(--bong-card-hover); }
 
-    /* Thanh màu trên cùng mỗi card */
     .duong-mau-card { height: 4px; }
     .mau-xanh { background: linear-gradient(90deg, #1a56db, #60a5fa); }
     .mau-xanh-la { background: linear-gradient(90deg, #059669, #34d399); }
     .mau-tim { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
     .mau-cam { background: linear-gradient(90deg, #d97706, #fbbf24); }
 
-    /* Tiêu đề của từng card */
     .tieu-de-card-ho-so {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 20px 12px;
@@ -240,7 +245,6 @@
     .nhan-do { background: var(--mau-do-nhat); color: var(--mau-do); }
     .nhan-xanh { background: var(--mau-xanh-trung); color: var(--mau-chu-de); }
 
-    /* Thân card */
     .than-card { padding: 18px 20px; }
 
     /* ===== CARD TRÁI: ẢNH ĐẠI DIỆN & TRẠNG THÁI ===== */
@@ -285,7 +289,6 @@
       50%      { box-shadow: 0 0 0 6px rgba(5,150,105,0.06); }
     }
 
-    /* Mini stats trong card trái */
     .luoi-mini-stat { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 20px 20px; }
     .o-mini-stat {
       background: var(--mau-nen); border: 1px solid var(--mau-vien);
@@ -294,21 +297,15 @@
     .ms-so { font-size: 17px; font-weight: 800; color: var(--mau-chu-de); }
     .ms-nhan { font-size: 10px; color: var(--mau-chu-phu); margin-top: 2px; font-weight: 600; }
 
-    /* ===== CARD PHẢI: CÁC TRƯỜNG THÔNG TIN ===== */
-
-    /* Lưới 2 cột cho các trường nhập liệu */
+    /* ===== CARD PHẢI: CÁC TRƯỜNG THÔNG TIN (CHỈ ĐỌC) ===== */
     .luoi-truong { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .luoi-truong.mot-cot { grid-template-columns: 1fr; }
 
-    /* Nhóm trường nhập liệu */
-    .nhom-truong {
-      display: flex; flex-direction: column; gap: 5px;
-    }
+    .nhom-truong { display: flex; flex-direction: column; gap: 5px; }
     .nhan-truong {
       font-size: 11.5px; font-weight: 700; color: var(--mau-chu-phu);
       text-transform: uppercase; letter-spacing: 0.5px;
     }
-    /* Trường chỉ đọc (hiển thị từ DB) */
     .truong-chi-doc {
       background: var(--mau-nen); border: 1.5px solid var(--mau-vien);
       border-radius: 10px; padding: 10px 14px;
@@ -316,27 +313,26 @@
       display: flex; align-items: center; gap: 8px;
     }
     .truong-chi-doc i { color: var(--mau-chu-de); font-size: 12px; flex-shrink: 0; }
-    /* Trường có thể chỉnh sửa */
-    .truong-nhap {
-      width: 100%; padding: 10px 14px;
-      border: 1.5px solid var(--mau-vien); border-radius: 10px;
-      font-size: 13.5px; font-weight: 600; outline: none;
-      color: var(--mau-chu); font-family: 'Be Vietnam Pro', sans-serif;
-      transition: border-color 0.2s; background: var(--mau-trang);
+
+    .nhan-khoa {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700;
+      color: var(--mau-chu-phu); background: var(--mau-vien);
+      padding: 2px 7px; border-radius: 20px; margin-left: 6px;
     }
-    .truong-nhap:focus { border-color: var(--mau-chu-de-sang); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-    .truong-nhap:disabled { background: var(--mau-nen); color: var(--mau-chu-phu); cursor: not-allowed; }
+    .nhan-khoa i { font-size: 9px; }
 
-    /* Nhãn bắt buộc */
-    .dau-bat-buoc { color: var(--mau-do); margin-left: 2px; }
+    .ghi-chu-chi-doc {
+      font-size: 11px; color: var(--mau-chu-phu);
+      display: flex; align-items: center; gap: 5px; margin-top: 4px;
+    }
+    .ghi-chu-chi-doc i { color: var(--mau-cam); font-size: 10px; }
 
-    /* Đường phân cách trong card */
     .duong-phan-cach { height: 1px; background: var(--mau-vien); margin: 16px 0; }
 
-    /* ===== HÀNG DƯỚI: HỢP ĐỒNG + PHÒNG (FULL WIDTH) ===== */
+    /* ===== HÀNG DƯỚI: HỢP ĐỒNG + PHÒNG ===== */
     .luoi-duoi { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-    /* ===== BẢNG THÔNG TIN HỢP ĐỒNG / PHÒNG ===== */
     .hang-thong-tin {
       display: flex; align-items: center; justify-content: space-between;
       padding: 11px 0; border-bottom: 1px solid var(--mau-vien);
@@ -346,55 +342,9 @@
     .nhan-truong-bang { color: var(--mau-chu-phu); font-weight: 600; display: flex; align-items: center; gap: 7px; }
     .nhan-truong-bang i { font-size: 12px; color: var(--mau-chu-de); width: 14px; text-align: center; }
     .gia-tri-truong-bang { font-weight: 700; color: var(--mau-chu); text-align: right; }
-    /* Giá trị nổi bật */
     .gia-tri-lon { font-size: 15px; font-weight: 800; color: var(--mau-chu-de); }
 
-    /* ===== MODAL XÁC NHẬN LƯU ===== */
-    .lop-che-modal {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 999;
-      align-items: center; justify-content: center;
-      backdrop-filter: blur(4px);
-    }
-    .lop-che-modal.hien { display: flex; }
-    .hop-modal {
-      background: var(--mau-trang); border-radius: 20px;
-      padding: 28px; width: 420px; max-width: 95vw;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-      animation: hienModal 0.3s ease;
-    }
-    @@keyframes hienModal {
-      from { opacity:0; transform:scale(0.9) translateY(-20px); }
-      to   { opacity:1; transform:none; }
-    }
-    .tieu-de-modal {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
-    }
-    .tieu-de-modal h3 { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 9px; }
-    .nut-dong-modal {
-      background: none; border: none; font-size: 20px; cursor: pointer;
-      color: var(--mau-chu-phu); border-radius: 50%; width: 34px; height: 34px;
-      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-    }
-    .nut-dong-modal:hover { background: var(--mau-nen); color: var(--mau-chu); }
-    .nhom-nut-modal { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-    .nut-huy-modal {
-      background: var(--mau-nen); color: var(--mau-chu-phu);
-      border: none; padding: 10px 20px; border-radius: 10px;
-      cursor: pointer; font-size: 13px; font-weight: 600;
-      transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-huy-modal:hover { background: var(--mau-vien); }
-    .nut-xac-nhan {
-      background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      color: #fff; border: none; padding: 10px 24px; border-radius: 10px;
-      cursor: pointer; font-size: 13px; font-weight: 700;
-      box-shadow: 0 4px 12px rgba(26,86,219,0.3);
-      transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-xac-nhan:hover { transform: translateY(-2px); }
-
-    /* ===== THÔNG BÁO TOAST ===== */
+    /* ===== TOAST ===== */
     .toast-thong-bao {
       position: fixed; bottom: 24px; right: 24px;
       background: #1e293b; color: #fff;
@@ -430,12 +380,10 @@
 <body>
 
 <!-- =============================================
-     SIDEBAR – THANH ĐIỀU HƯỚNG BÊN TRÁI
-     (Dùng chung với KhachThue, mục "ho-so" được đánh dấu dang-chon)
+     SIDEBAR
 ============================================= -->
 <nav id="thanh-sidebar">
 
-  <!-- Logo nhà trọ -->
   <div class="logo-sidebar">
     <img src="~/images/logo.png" alt="Logo Nhà Trọ Bà Năm" class="logo-img" />
     <div class="ten-logo">
@@ -444,30 +392,33 @@
     </div>
   </div>
 
-  <!-- Nhóm Tổng quan -->
   <div class="nhan-nhom">Tổng quan</div>
   <a href="/KhachThue/KhachThue" class="menu-item" onclick="chuyenTrang('trang-chu', this); return false;">
     <i class="fas fa-home"></i><span>Trang chủ</span>
   </a>
 
-  <!-- Nhóm Dịch vụ -->
   <div class="nhan-nhom">Dịch vụ</div>
   <a href="/KhachThue/ThanhToan" class="menu-item" onclick="chuyenTrang('thanh-toan', this); return false;">
     <i class="fas fa-credit-card"></i><span>Thanh toán</span>
-    <span class="huy-hieu-menu">1</span>
+    @if (Model.SoHoaDonChuaDong > 0)
+    {
+      <span class="huy-hieu-menu">@Model.SoHoaDonChuaDong</span>
+    }
   </a>
   <a href="/KhachThue/TienIch" class="menu-item" onclick="chuyenTrang('tien-ich', this); return false;">
-    <i class="fas fa-bolt"></i><span>Dịch vụ & Tiện ích</span>
+    <i class="fas fa-bolt"></i><span>Dịch vụ &amp; Tiện ích</span>
   </a>
   <a href="/KhachThue/BaoSuCo" class="menu-item" onclick="chuyenTrang('bao-su-co', this); return false;">
     <i class="fas fa-tools"></i><span>Báo sự cố</span>
   </a>
 
-  <!-- Nhóm Cá nhân – mục Hồ sơ đang được chọn -->
   <div class="nhan-nhom">Cá nhân</div>
   <a href="/KhachThue/ThongBao" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
     <i class="fas fa-bell"></i><span>Thông báo</span>
-    <span class="huy-hieu-menu">4</span>
+    @if (Model.SoThongBaoChuaDoc > 0)
+    {
+      <span class="huy-hieu-menu">@Model.SoThongBaoChuaDoc</span>
+    }
   </a>
   <a href="/KhachThue/HoSo" class="menu-item dang-chon" onclick="chuyenTrang('ho-so', this); return false;">
     <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
@@ -476,23 +427,21 @@
     <i class="fas fa-cog"></i><span>Cài đặt</span>
   </a>
 
-  <!-- Footer sidebar: thông tin người dùng -->
   <div class="khach-thue-footer">
-    <div class="anh-khach online-badge">T</div>
+    <div class="anh-khach online-badge">@chuCai</div>
     <div class="ten-khach">
-      <strong>Trần Duy Hơn</strong>
-      <span>Phòng 201 · Tầng 2</span>
+      <strong>@tenViet</strong>
+      <span>@soPhongHienThi</span>
     </div>
   </div>
 </nav>
 
 
 <!-- =============================================
-     KHU VỰC CHÍNH – NỘI DUNG TRANG HỒ SƠ
+     KHU VỰC CHÍNH
 ============================================= -->
 <div id="khu-vuc-chinh">
 
-  <!-- HEADER TRÊN CÙNG -->
   <header id="thanh-header">
     <div class="header-trai">
       <button class="nut-ham-menu" onclick="dongMoSidebar()" title="Ẩn/hiện menu">
@@ -506,92 +455,78 @@
 
     <div class="header-phai">
       <div class="hdr-date" id="headerDate"></div>
-      <!-- Chuông thông báo -->
       <button class="nut-thong-bao" onclick="chuyenTrang('thong-bao', null)" title="Thông báo">
         <i class="fas fa-bell"></i>
-        <span class="so-thong-bao">4</span>
+        @if (Model.SoThongBaoChuaDoc > 0)
+        {
+          <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
+        }
       </button>
-      <!-- Thông tin khách thuê -->
       <div class="thong-tin-khach">
-        <div class="anh-dai-dien">T</div>
+        <div class="anh-dai-dien">@chuCai</div>
         <div>
-          <div class="ten">Trần Duy Hơn</div>
-          <div class="phong-so">Phòng 201</div>
+          <div class="ten">@tenViet</div>
+          <div class="phong-so">Phòng @(phong?.SoPhong ?? "-")</div>
         </div>
         <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
       </div>
     </div>
   </header>
 
-  <!-- NỘI DUNG CHÍNH TRANG HỒ SƠ -->
   <main id="noi-dung-chinh">
 
-    <!-- ==========================================
-         TIÊU ĐỀ TRANG + NÚT LƯU
-    ========================================== -->
     <div class="hang-tieu-de-trang">
       <div>
         <h2><i class="fas fa-user-circle" style="color:var(--mau-chu-de);margin-right:8px;"></i>Hồ Sơ Cá Nhân</h2>
-        <p>Xem và cập nhật thông tin cá nhân của bạn</p>
+        <p>Xem thông tin cá nhân của bạn</p>
       </div>
-      <button class="nut-chinh nut-luu-ho-so" onclick="moXacNhanLuu()">
-        <i class="fas fa-save"></i> Lưu thay đổi
-      </button>
     </div>
 
-    <!-- ==========================================
-         HÀNG TRÊN: ẢNH ĐẠI DIỆN (trái) + THÔNG TIN CÁ NHÂN (phải)
-    ========================================== -->
+    <!-- HÀNG TRÊN: ẢNH ĐẠI DIỆN + THÔNG TIN CÁ NHÂN -->
     <div class="luoi-ho-so">
 
-      <!-- ===== CỘT TRÁI: ẢNH ĐẠI DIỆN & TRẠNG THÁI ===== -->
+      <!-- CỘT TRÁI: ẢNH ĐẠI DIỆN & TRẠNG THÁI -->
       <div class="card-ho-so">
         <div class="duong-mau-card mau-xanh"></div>
 
-        <!-- Khối ảnh đại diện – hiển thị chữ cái đầu tên -->
         <div class="khung-anh-dai-dien">
-          <!-- Bind từ Model: Model.KhachThue.HoTen[0] -->
           <div class="anh-dai-dien-lon">
-            T
+            @chuCai
             <div class="dot-online"></div>
           </div>
-          <!-- Bind: Model.KhachThue.HoTen -->
-          <div class="ten-chinh">Trần Duy Hơn</div>
-          <!-- Bind: Model.Phong.SoPhong -->
-          <div class="dong-phong"><i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:4px;"></i>Phòng 201 · Tầng 2</div>
-          <!-- Bind: Model.HopDong.TrangThaiHD -->
+          <div class="ten-chinh">@tenViet</div>
+          <div class="dong-phong">
+            <i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:4px;"></i>
+            @soPhongHienThi
+          </div>
           <div class="hang-trang-thai-khach">
             <div class="dot-nhip"></div>
             Đang hoạt động
           </div>
         </div>
 
-        <!-- Mini stats tóm tắt -->
+        <!-- Mini stats -->
         <div class="luoi-mini-stat">
-          <!-- Bind: số tháng đã thuê tính từ NgayBatDau -->
           <div class="o-mini-stat">
-            <div class="ms-so">13</div>
+            <div class="ms-so">@Model.SoThangThue</div>
             <div class="ms-nhan">Tháng thuê</div>
           </div>
-          <!-- Bind: số hóa đơn đã thanh toán -->
           <div class="o-mini-stat">
-            <div class="ms-so">13</div>
+            <div class="ms-so">@Model.SoHoaDonDaDong</div>
             <div class="ms-nhan">HĐ đã đóng</div>
           </div>
-          <!-- Bind: số sự cố đã báo -->
           <div class="o-mini-stat">
-            <div class="ms-so">2</div>
+            <div class="ms-so">@Model.SoSuCoDaBao</div>
             <div class="ms-nhan">Sự cố báo</div>
           </div>
-          <!-- Bind: số ngày còn lại hợp đồng -->
           <div class="o-mini-stat">
-            <div class="ms-so" style="color:var(--mau-cam);">51</div>
+            <div class="ms-so" style="color:var(--mau-cam);">@Model.SoNgayHDConLai</div>
             <div class="ms-nhan">Ngày HĐ còn</div>
           </div>
         </div>
       </div><!-- /card trái -->
 
-      <!-- ===== CỘT PHẢI: THÔNG TIN CÁ NHÂN ===== -->
+      <!-- CỘT PHẢI: THÔNG TIN CÁ NHÂN (CHỈ ĐỌC) -->
       <div class="card-ho-so">
         <div class="duong-mau-card mau-xanh"></div>
         <div class="tieu-de-card-ho-so">
@@ -600,63 +535,131 @@
         </div>
 
         <div class="than-card">
-          <!-- Lưới 2 cột: các trường chỉnh sửa được -->
           <div class="luoi-truong">
 
-            <!-- HoTen: lấy từ bảng User / KhachThue (có thể chỉnh sửa) -->
+            <!-- Họ và tên -->
             <div class="nhom-truong">
-              <label class="nhan-truong">Họ và tên <span class="dau-bat-buoc">*</span></label>
-              <!-- Bind: asp-for="Model.KhachThue.HoTen" -->
-              <input class="truong-nhap" type="text" id="truong-ho-ten" value="Trần Duy Hơn" placeholder="Nhập họ và tên" />
-            </div>
-
-            <!-- SoDienThoai (có thể chỉnh sửa) -->
-            <div class="nhom-truong">
-              <label class="nhan-truong">Số điện thoại <span class="dau-bat-buoc">*</span></label>
-              <!-- Bind: asp-for="Model.KhachThue.SoDienThoai" -->
-              <input class="truong-nhap" type="tel" id="truong-sdt" value="0312 345 678" placeholder="Nhập số điện thoại" />
-            </div>
-
-            <!-- Email (có thể chỉnh sửa) -->
-            <div class="nhom-truong">
-              <label class="nhan-truong">Email</label>
-              <!-- Bind: asp-for="Model.KhachThue.Email" -->
-              <input class="truong-nhap" type="email" id="truong-email" value="tranduyhon@example.com" placeholder="Nhập địa chỉ email" />
-            </div>
-
-            <!-- NgaySinh (có thể chỉnh sửa) -->
-            <div class="nhom-truong">
-              <label class="nhan-truong">Ngày sinh</label>
-              <!-- Bind: asp-for="Model.KhachThue.NgaySinh" -->
-              <input class="truong-nhap" type="date" id="truong-ngay-sinh" value="1999-08-15" />
-            </div>
-
-            <!-- CCCD/CMND (chỉ đọc – dữ liệu định danh) -->
-            <div class="nhom-truong">
-              <label class="nhan-truong">Số CCCD / CMND</label>
-              <!-- Bind: Model.KhachThue.SoCCCD – chỉ đọc -->
+              <label class="nhan-truong">
+                Họ và tên
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
               <div class="truong-chi-doc">
-                <i class="fas fa-id-badge"></i>
-                <span>079199012345</span>
+                <i class="fas fa-user"></i>
+                @(string.IsNullOrWhiteSpace(Model.HoTen) ? "Chưa cập nhật" : Model.HoTen)
               </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
             </div>
 
-            <!-- Quê quán (có thể chỉnh sửa) -->
+            <!-- Số điện thoại -->
             <div class="nhom-truong">
-              <label class="nhan-truong">Quê quán</label>
-              <!-- Bind: asp-for="Model.KhachThue.QueQuan" -->
-              <input class="truong-nhap" type="text" id="truong-que-quan" value="Ủ Minh, Cà Mau" placeholder="Nhập quê quán" />
+              <label class="nhan-truong">
+                Số điện thoại
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
+              <div class="truong-chi-doc">
+                <i class="fas fa-phone"></i>
+                @(string.IsNullOrWhiteSpace(Model.Phone) ? "Chưa cập nhật" : Model.Phone)
+              </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
             </div>
+
+            <!-- Email -->
+            <div class="nhom-truong">
+              <label class="nhan-truong">
+                Email
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
+              <div class="truong-chi-doc">
+                <i class="fas fa-envelope"></i>
+                @(string.IsNullOrWhiteSpace(Model.Email) ? "Chưa cập nhật" : Model.Email)
+              </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
+            </div>
+
+            <!-- Ngày sinh -->
+            <div class="nhom-truong">
+              <label class="nhan-truong">
+                Ngày sinh
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
+              <div class="truong-chi-doc">
+                <i class="fas fa-birthday-cake"></i>
+                @(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")
+              </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
+            </div>
+
+            <!-- Giới tính -->
+            <div class="nhom-truong">
+              <label class="nhan-truong">
+                Giới tính
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
+              <div class="truong-chi-doc">
+                <i class="fas fa-venus-mars"></i>
+                @(string.IsNullOrWhiteSpace(Model.GioiTinh) ? "Chưa cập nhật" : Model.GioiTinh)
+              </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
+            </div>
+
+            <!-- Số CCCD / CMND – CHỈ ĐỌC, lấy từ bảng KHACH_THUE -->
+            <div class="nhom-truong">
+              <label class="nhan-truong">
+                Số CCCD / CMND
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
+              <div class="truong-chi-doc">
+                <i class="fas fa-id-card"></i>
+                @(string.IsNullOrWhiteSpace(Model.SoCCCD) ? "Chưa cập nhật" : Model.SoCCCD)
+              </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
+            </div>
+
+            <!-- Quê quán – CHỈ ĐỌC, lấy từ bảng KHACH_THUE -->
+            <div class="nhom-truong">
+              <label class="nhan-truong">
+                Quê quán
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
+              <div class="truong-chi-doc">
+                <i class="fas fa-map-marker-alt"></i>
+                @(string.IsNullOrWhiteSpace(Model.QueQuan) ? "Chưa cập nhật" : Model.QueQuan)
+              </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
+            </div>
+
           </div><!-- /luoi-truong -->
 
           <div class="duong-phan-cach"></div>
 
-          <!-- Địa chỉ thường trú (1 cột – dài hơn) -->
+          <!-- Địa chỉ thường trú – CHỈ ĐỌC, lấy từ bảng KHACH_THUE -->
           <div class="luoi-truong mot-cot">
             <div class="nhom-truong">
-              <label class="nhan-truong">Địa chỉ thường trú</label>
-              <!-- Bind: asp-for="Model.KhachThue.DiaChiThuongTru" -->
-              <input class="truong-nhap" type="text" id="truong-dia-chi" value="123 Đường Nguyễn Văn Cừ, P. An Khánh, Quận Ninh Kiều, TP. Cần Thơ" placeholder="Nhập địa chỉ thường trú" />
+              <label class="nhan-truong">
+                Địa chỉ thường trú
+                <span class="nhan-khoa"><i class="fas fa-lock"></i> Chỉ đọc</span>
+              </label>
+              <div class="truong-chi-doc">
+                <i class="fas fa-home"></i>
+                @(string.IsNullOrWhiteSpace(Model.DiaChiThuongTru) ? "Chưa cập nhật" : Model.DiaChiThuongTru)
+              </div>
+              <span class="ghi-chu-chi-doc">
+                <i class="fas fa-info-circle"></i> Liên hệ chủ nhà để thay đổi.
+              </span>
             </div>
           </div>
 
@@ -665,140 +668,139 @@
     </div><!-- /luoi-ho-so -->
 
 
-    <!-- ==========================================
-         HÀNG DƯỚI: THÔNG TIN HỢP ĐỒNG (trái) + THÔNG TIN PHÒNG (phải)
-         Tất cả là CHỈ ĐỌC – lấy từ bảng HOPDONG và PHONG trong SQL
-    ========================================== -->
+    <!-- HÀNG DƯỚI: HỢP ĐỒNG + PHÒNG -->
     <div class="luoi-duoi">
 
-      <!-- ===== CARD: THÔNG TIN HỢP ĐỒNG – từ bảng dbo.HOPDONG ===== -->
+      <!-- CARD: THÔNG TIN HỢP ĐỒNG -->
       <div class="card-ho-so">
         <div class="duong-mau-card mau-xanh-la"></div>
         <div class="tieu-de-card-ho-so">
           <h3><i class="fas fa-file-contract"></i> Thông tin hợp đồng</h3>
-          <!-- Bind: Model.HopDong.TrangThaiHD -->
-          <span class="nhan-trang-thai-nho nhan-xanh-la">● Còn hiệu lực</span>
+          @if (hd != null)
+          {
+            <span class="nhan-trang-thai-nho @NhanTrangThaiHD(hd.TrangThaiHD)">● @hd.TrangThaiHD</span>
+          }
         </div>
 
         <div class="than-card">
 
-          <!-- IDHopDong – Khóa chính, chỉ đọc -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-hashtag"></i> Mã hợp đồng</span>
-            <!-- Bind: Model.HopDong.IDHopDong -->
-            <span class="gia-tri-truong-bang" style="font-family:monospace;color:var(--mau-chu-de);">HD-2024-0042</span>
+            <span class="gia-tri-truong-bang" style="font-family:monospace;color:var(--mau-chu-de);">
+              HD-@(hd?.IDHopDong.ToString("D4") ?? "-")
+            </span>
           </div>
 
-          <!-- IDUser – Khóa ngoại, hiển thị tên thay vì số ID -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-user"></i> Khách thuê</span>
-            <!-- Bind: Model.KhachThue.HoTen -->
-            <span class="gia-tri-truong-bang">Trần Duy Hơn</span>
+            <span class="gia-tri-truong-bang">@tenViet</span>
           </div>
 
-          <!-- IDPhong – Khóa ngoại, hiển thị số phòng -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-door-open"></i> Phòng thuê</span>
-            <!-- Bind: Model.Phong.SoPhong -->
-            <span class="gia-tri-truong-bang">Phòng 201</span>
+            <span class="gia-tri-truong-bang">Phòng @(phong?.SoPhong ?? "-")</span>
           </div>
 
-          <!-- NgayBatDau – date -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-calendar-plus"></i> Ngày bắt đầu</span>
-            <!-- Bind: Model.HopDong.NgayBatDau.ToString("dd/MM/yyyy") -->
-            <span class="gia-tri-truong-bang">01/04/2024</span>
+            <span class="gia-tri-truong-bang">
+              @(hd?.NgayBatDau.ToString("dd/MM/yyyy") ?? "-")
+            </span>
           </div>
 
-          <!-- NgayKetThuc – date -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-calendar-times"></i> Ngày kết thúc</span>
-            <!-- Bind: Model.HopDong.NgayKetThuc.ToString("dd/MM/yyyy") -->
-            <span class="gia-tri-truong-bang" style="color:var(--mau-cam);">30/06/2025</span>
+            <span class="gia-tri-truong-bang" style="color:var(--mau-cam);">
+              @(hd?.NgayKetThuc?.ToString("dd/MM/yyyy") ?? "Không xác định")
+            </span>
           </div>
 
-          <!-- DienDauKy – int (số điện đầu kỳ) -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-bolt"></i> Điện đầu kỳ</span>
-            <!-- Bind: Model.HopDong.DienDauKy -->
-            <span class="gia-tri-truong-bang">12.450 kWh</span>
+            <span class="gia-tri-truong-bang">@(hd?.DienDauKy.ToString("N0") ?? "0") kWh</span>
           </div>
 
-          <!-- NuocDauKy – int (số nước đầu kỳ) -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-tint"></i> Nước đầu kỳ</span>
-            <!-- Bind: Model.HopDong.NuocDauKy -->
-            <span class="gia-tri-truong-bang">320 m³</span>
+            <span class="gia-tri-truong-bang">@(hd?.NuocDauKy.ToString("N0") ?? "0") m³</span>
           </div>
 
-          <!-- TrangThaiHD – nvarchar(30) -->
+          <div class="hang-thong-tin">
+            <span class="nhan-truong-bang"><i class="fas fa-hand-holding-usd"></i> Tiền cọc</span>
+            <span class="gia-tri-truong-bang gia-tri-lon">
+              @(hd?.TienCocBanDau.ToString("N0") ?? "0") đ
+            </span>
+          </div>
+
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-info-circle"></i> Trạng thái HĐ</span>
-            <!-- Bind: Model.HopDong.TrangThaiHD -->
-            <span class="nhan-trang-thai-nho nhan-xanh-la">● Còn hiệu lực</span>
+            @if (hd != null)
+            {
+              <span class="nhan-trang-thai-nho @NhanTrangThaiHD(hd.TrangThaiHD)">● @hd.TrangThaiHD</span>
+            }
           </div>
 
         </div><!-- /than-card -->
       </div><!-- /card hợp đồng -->
 
 
-      <!-- ===== CARD: THÔNG TIN PHÒNG – từ bảng dbo.PHONG ===== -->
+      <!-- CARD: THÔNG TIN PHÒNG -->
       <div class="card-ho-so">
         <div class="duong-mau-card mau-tim"></div>
         <div class="tieu-de-card-ho-so">
           <h3><i class="fas fa-building"></i> Thông tin phòng</h3>
-          <!-- Bind: Model.Phong.TrangThai -->
-          <span class="nhan-trang-thai-nho nhan-xanh">Đang thuê</span>
+          @if (phong != null)
+          {
+            <span class="nhan-trang-thai-nho @NhanTrangThaiPhong(phong.TrangThai)">@phong.TrangThai</span>
+          }
         </div>
 
         <div class="than-card">
 
-          <!-- IDPhong – Khóa chính -->
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-hashtag"></i> Mã phòng</span>
-            <!-- Bind: Model.Phong.IDPhong -->
-            <span class="gia-tri-truong-bang" style="font-family:monospace;color:var(--mau-tim);">P-201</span>
-          </div>
-
-          <!-- SoPhong – varchar(10) -->
-          <div class="hang-thong-tin">
-            <span class="nhan-truong-bang"><i class="fas fa-door-open"></i> Số phòng</span>
-            <!-- Bind: Model.Phong.SoPhong -->
-            <span class="gia-tri-truong-bang">201</span>
-          </div>
-
-          <!-- Tầng / Vị trí (tính từ SoPhong) -->
-          <div class="hang-thong-tin">
-            <span class="nhan-truong-bang"><i class="fas fa-layer-group"></i> Tầng</span>
-            <span class="gia-tri-truong-bang">Tầng 2</span>
-          </div>
-
-          <!-- GiaPhongFix – decimal(15,2) -->
-          <div class="hang-thong-tin">
-            <span class="nhan-truong-bang"><i class="fas fa-money-bill-wave"></i> Giá phòng cố định</span>
-            <!-- Bind: Model.Phong.GiaPhongFix.ToString("N0") + " đ/tháng" -->
-            <span class="gia-tri-truong-bang gia-tri-lon">3.500.000 đ/tháng</span>
-          </div>
-
-          <!-- Diện tích (nếu có trường diện tích, hoặc để mẫu) -->
-          <div class="hang-thong-tin">
-            <span class="nhan-truong-bang"><i class="fas fa-ruler-combined"></i> Diện tích</span>
-            <span class="gia-tri-truong-bang">18 m²</span>
-          </div>
-
-          <!-- Tiện nghi phòng (ghi chú thêm, có thể mở rộng) -->
-          <div class="hang-thong-tin">
-            <span class="nhan-truong-bang"><i class="fas fa-couch"></i> Tiện nghi</span>
-            <span class="gia-tri-truong-bang" style="text-align:right;font-size:12px;">
-              Điều hoà, WC riêng, Bếp
+            <span class="gia-tri-truong-bang" style="font-family:monospace;color:var(--mau-tim);">
+              P-@(phong?.IDPhong.ToString("D3") ?? "-")
             </span>
           </div>
 
-          <!-- TrangThai – nvarchar(30) -->
+          <div class="hang-thong-tin">
+            <span class="nhan-truong-bang"><i class="fas fa-door-open"></i> Số phòng</span>
+            <span class="gia-tri-truong-bang">@(phong?.SoPhong ?? "-")</span>
+          </div>
+
+          <div class="hang-thong-tin">
+            <span class="nhan-truong-bang"><i class="fas fa-layer-group"></i> Tầng</span>
+            <span class="gia-tri-truong-bang">Tầng @(phong?.Tang.ToString() ?? "-")</span>
+          </div>
+
+          <div class="hang-thong-tin">
+            <span class="nhan-truong-bang"><i class="fas fa-money-bill-wave"></i> Giá phòng cố định</span>
+            <span class="gia-tri-truong-bang gia-tri-lon">
+              @(phong?.GiaPhongFix.ToString("N0") ?? "0") đ/tháng
+            </span>
+          </div>
+
+          <div class="hang-thong-tin">
+            <span class="nhan-truong-bang"><i class="fas fa-ruler-combined"></i> Diện tích</span>
+            <span class="gia-tri-truong-bang">
+              @(phong?.DienTich.HasValue == true ? phong.DienTich.Value.ToString("N0") + " m²" : "N/A")
+            </span>
+          </div>
+
+          <div class="hang-thong-tin">
+            <span class="nhan-truong-bang"><i class="fas fa-couch"></i> Tiện nghi</span>
+            <span class="gia-tri-truong-bang" style="text-align:right;font-size:12px;">
+              @(phong?.MoTa ?? "-")
+            </span>
+          </div>
+
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-circle"></i> Trạng thái phòng</span>
-            <!-- Bind: Model.Phong.TrangThai -->
-            <span class="nhan-trang-thai-nho nhan-xanh">● Đang thuê</span>
+            @if (phong != null)
+            {
+              <span class="nhan-trang-thai-nho @NhanTrangThaiPhong(phong.TrangThai)">● @phong.TrangThai</span>
+            }
           </div>
 
         </div><!-- /than-card -->
@@ -810,45 +812,8 @@
 </div><!-- /khu-vuc-chinh -->
 
 
-<!-- =============================================
-     MODAL: XÁC NHẬN LƯU THAY ĐỔI
-============================================= -->
-<div class="lop-che-modal" id="modal-xac-nhan-luu"
-     onclick="dongModalNeuNhanNgoai(event, 'modal-xac-nhan-luu')">
-  <div class="hop-modal">
-    <div class="tieu-de-modal">
-      <h3>
-        <i class="fas fa-save" style="color:var(--mau-chu-de);"></i>
-        Xác nhận lưu thay đổi
-      </h3>
-      <button class="nut-dong-modal" onclick="dongModal('modal-xac-nhan-luu')">✕</button>
-    </div>
-    <p style="font-size:13.5px;color:var(--mau-chu-phu);line-height:1.6;">
-      Bạn có chắc muốn lưu các thay đổi trong hồ sơ? Thông tin sau khi lưu sẽ được gửi đến chủ nhà trọ để xác nhận.
-    </p>
-    <div class="nhom-nut-modal">
-      <button class="nut-huy-modal" onclick="dongModal('modal-xac-nhan-luu')">Huỷ</button>
-      <button class="nut-xac-nhan" onclick="luuHoSo()">
-        <i class="fas fa-save"></i> Xác nhận lưu
-      </button>
-    </div>
-  </div>
-</div>
-
-
-<!-- =============================================
-     TOAST THÔNG BÁO LƯU THÀNH CÔNG
-============================================= -->
-<div class="toast-thong-bao thanh-cong" id="toast-luu">
-  <i class="fas fa-check-circle"></i> Hồ sơ đã được lưu thành công!
-</div>
-
-
-<!-- =============================================
-     JAVASCRIPT – LOGIC TRANG HỒ SƠ
-============================================= -->
+<!-- JAVASCRIPT -->
 <script>
-  // -------- Ngày giờ header --------
   function capNhatNgayGio() {
     const days = ['CN','T2','T3','T4','T5','T6','T7'];
     const now = new Date();
@@ -860,12 +825,10 @@
   }
   capNhatNgayGio();
 
-  // -------- Toggle sidebar --------
   function dongMoSidebar() {
     document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
   }
 
-  // -------- Chuyển trang --------
   function chuyenTrang(tenTrang, phanTu) {
     document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
     if (phanTu) phanTu.classList.add('dang-chon');
@@ -880,38 +843,6 @@
     };
     if (bang[tenTrang]) window.location.href = bang[tenTrang];
   }
-
-  // -------- Mở modal xác nhận lưu --------
-  function moXacNhanLuu() {
-    // Kiểm tra trường bắt buộc trước khi mở modal
-    const hoTen = document.getElementById('truong-ho-ten').value.trim();
-    const sdt   = document.getElementById('truong-sdt').value.trim();
-    if (!hoTen || !sdt) {
-      hienToast('⚠️ Vui lòng điền đầy đủ họ tên và số điện thoại!', false);
-      return;
-    }
-    document.getElementById('modal-xac-nhan-luu').classList.add('hien');
-  }
-
-  // -------- Xử lý lưu hồ sơ (gọi API/Form post sau này) --------
-  function luuHoSo() {
-    dongModal('modal-xac-nhan-luu');
-    // TODO: gọi Model.OnPostAsync() hoặc fetch('/KhachThue/HoSo', { method:'POST', body:... })
-    hienToast('✅ Hồ sơ đã được lưu thành công!', true);
-  }
-
-  // -------- Toast thông báo --------
-  function hienToast(noiDung, thanhCong) {
-    const toast = document.getElementById('toast-luu');
-    toast.textContent = noiDung;
-    toast.className = 'toast-thong-bao' + (thanhCong ? ' thanh-cong' : '');
-    setTimeout(() => toast.classList.add('hien'), 10);
-    setTimeout(() => toast.classList.remove('hien'), 3500);
-  }
-
-  // -------- Modal helpers --------
-  function dongModal(id)  { document.getElementById(id).classList.remove('hien'); }
-  function dongModalNeuNhanNgoai(e, id) { if (e.target.id === id) dongModal(id); }
 </script>
 
 </body>
