@@ -548,7 +548,7 @@ namespace QuanLyNhaTro.Models
         public int SoHoaDonDaDong { get; set; } = 0;
 
         [Column(TypeName = "decimal(15, 2)")]
-        public decimal ChiPhi_Thang { get; set; } = 0;
+        public decimal ChiPhiThang { get; set; } = 0;
 
         public DateTime NgayCapNhat { get; set; } = DateTime.UtcNow;
     }
