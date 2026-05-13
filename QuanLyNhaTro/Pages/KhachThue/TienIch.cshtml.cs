@@ -63,7 +63,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (!int.TryParse(userIdClaim, out int idUser))
-                return RedirectToPage("/Account/Login");
+                return RedirectToPage("/Index");
 
             var hopDong = await _db.HOPDONG
                 .Include(h => h.Tenant)

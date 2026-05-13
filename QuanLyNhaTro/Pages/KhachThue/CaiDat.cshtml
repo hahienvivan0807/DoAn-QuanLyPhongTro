@@ -506,7 +506,7 @@
   <div class="nhan-nhom">Cá nhân</div>
   <a href="/KhachThue/ThongBao" class="menu-item" onclick="chuyenTrang('thong-bao', this); return false;">
     <i class="fas fa-bell"></i><span>Thông báo</span>
-    <span class="huy-hieu-menu">4</span>
+    <span class="huy-hieu-menu">@Model.SoThongBaoChuaDoc</span>
   </a>
   <a href="/KhachThue/HoSo" class="menu-item" onclick="chuyenTrang('ho-so', this); return false;">
     <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
@@ -516,10 +516,10 @@
   </a>
 
   <div class="khach-thue-footer">
-    <div class="anh-khach online-badge">T</div>
+    <div class="anh-khach online-badge">@Model.ChuCaiDaiDien</div>
     <div class="ten-khach">
-      <strong>Trần Duy Hơn</strong>
-      <span>Phòng 201 · Tầng 2</span>
+      <strong>@Model.HoTen</strong>
+      <span>Phòng @Model.SoPhong · @Model.TangPhong</span>
     </div>
   </div>
 </nav>
@@ -545,13 +545,13 @@
       <div class="hdr-date" id="headerDate"></div>
       <button class="nut-thong-bao" onclick="alert('Danh sách thông báo')">
         <i class="fas fa-bell"></i>
-        <span class="so-thong-bao">4</span>
+        <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
       </button>
       <div class="thong-tin-khach" onclick="alert('Xem hồ sơ')">
-        <div class="anh-dai-dien">T</div>
+        <div class="anh-dai-dien">@Model.ChuCaiDaiDien</div>
         <div>
-          <div class="ten">Trần Duy Hơn</div>
-          <div class="phong-so">Phòng 201</div>
+          <div class="ten">@Model.HoTen</div>
+          <div class="phong-so">Phòng @Model.SoPhong</div>
         </div>
         <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
       </div>
@@ -586,6 +586,9 @@
           </div>
         </div>
         <div class="card-cd-body">
+
+          @* CSRF token — bắt buộc để POST handler hoạt động *@
+          @Html.AntiForgeryToken()
 
           <!-- Mật khẩu hiện tại -->
           <div class="nhom-truong">
@@ -668,7 +671,7 @@
               <p>Yêu cầu mã OTP khi đăng nhập</p>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="toggle-2fa" />
+              <input type="checkbox" id="toggle-2fa" @(Model.Bat2FA ? "checked" : "") />
               <span class="toggle-rail"></span>
             </label>
           </div>
@@ -679,7 +682,7 @@
               <p>Gửi email khi có đăng nhập mới</p>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="toggle-login-notif" checked />
+              <input type="checkbox" id="toggle-login-notif" @(Model.BatThongBaoDangNhap ? "checked" : "") />
               <span class="toggle-rail"></span>
             </label>
           </div>
@@ -690,7 +693,7 @@
               <p>Thông báo trước hạn thanh toán 3 ngày</p>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="toggle-hoadon" checked />
+              <input type="checkbox" id="toggle-hoadon" @(Model.BatNhacHoaDon ? "checked" : "") />
               <span class="toggle-rail"></span>
             </label>
           </div>
@@ -701,7 +704,7 @@
               <p>Nhận cập nhật khi sự cố được xử lý</p>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="toggle-suco" checked />
+              <input type="checkbox" id="toggle-suco" @(Model.BatThongBaoSuCo ? "checked" : "") />
               <span class="toggle-rail"></span>
             </label>
           </div>
@@ -750,7 +753,7 @@
             </div>
             <div style="flex:1; min-width:180px; background:var(--mau-nen); border:1px solid var(--mau-vien); border-radius:10px; padding:12px 16px;">
               <div style="font-size:11px;color:var(--mau-chu-phu);font-weight:700;margin-bottom:4px;">TÀI KHOẢN</div>
-              <div style="font-size:13px;font-weight:700;"><i class="fas fa-user" style="color:var(--mau-xanh-la);margin-right:6px;"></i>Trần Duy Hơn</div>
+              <div style="font-size:13px;font-weight:700;"><i class="fas fa-user" style="color:var(--mau-xanh-la);margin-right:6px;"></i>@Model.HoTen</div>
             </div>
           </div>
 
@@ -783,7 +786,7 @@
       </div>
       <h3 style="font-size:19px;font-weight:800;margin-bottom:8px;">Xác nhận đăng xuất</h3>
       <p style="font-size:13.5px;color:var(--mau-chu-phu);line-height:1.6;">
-        Bạn có chắc chắn muốn đăng xuất khỏi tài khoản <strong>Trần Duy Hơn</strong> không?
+        Bạn có chắc chắn muốn đăng xuất khỏi tài khoản <strong>@Model.HoTen</strong> không?
       </p>
     </div>
     <div style="display:flex;gap:12px;">
@@ -900,20 +903,57 @@
     nhan.style.color = mauTen[diem];
   }
 
-  /* ---- Lưu mật khẩu ---- */
-  function luuMatKhau() {
-    const hienTai  = document.getElementById('mk-hien-tai').value;
-    const moi      = document.getElementById('mk-moi').value;
-    const xacNhan  = document.getElementById('mk-xac-nhan').value;
+  /* ---- Lưu mật khẩu (gọi POST handler thật) ---- */
+  async function luuMatKhau() {
+    const hienTai = document.getElementById('mk-hien-tai').value;
+    const moi     = document.getElementById('mk-moi').value;
+    const xacNhan = document.getElementById('mk-xac-nhan').value;
 
-    if (!hienTai) { alert('Vui lòng nhập mật khẩu hiện tại!'); return; }
-    if (moi.length < 8) { alert('Mật khẩu mới phải có ít nhất 8 ký tự!'); return; }
-    if (moi !== xacNhan) { alert('Mật khẩu xác nhận không khớp!'); return; }
+    // Validate phía client trước
+    if (!hienTai) { hienThongBaoLoi('Vui lòng nhập mật khẩu hiện tại!'); return; }
+    if (moi.length < 8) { hienThongBaoLoi('Mật khẩu mới phải có ít nhất 8 ký tự!'); return; }
+    if (moi !== xacNhan) { hienThongBaoLoi('Mật khẩu xác nhận không khớp!'); return; }
 
-    // Giả lập lưu thành công
+    // Lấy CSRF token từ Razor (bắt buộc với Razor Pages POST)
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+    const formData = new FormData();
+    formData.append('MatKhauHienTai', hienTai);
+    formData.append('MatKhauMoi', moi);
+    formData.append('MatKhauXacNhan', xacNhan);
+    if (token) formData.append('__RequestVerificationToken', token);
+
+    try {
+      const res  = await fetch('/KhachThue/CaiDat?handler=DoiMatKhau', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        const tb = document.getElementById('tb-mat-khau');
+        tb.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
+        tb.style.background = 'var(--mau-xanh-la-nhat)';
+        tb.style.borderColor = '#6ee7b7';
+        tb.style.color = '#065f46';
+        tb.classList.add('hien');
+        xoaFormMatKhau();
+        setTimeout(() => tb.classList.remove('hien'), 4000);
+      } else {
+        hienThongBaoLoi(data.message);
+      }
+    } catch (err) {
+      hienThongBaoLoi('Có lỗi xảy ra, vui lòng thử lại!');
+    }
+  }
+
+  function hienThongBaoLoi(msg) {
     const tb = document.getElementById('tb-mat-khau');
+    tb.innerHTML = '<i class="fas fa-times-circle"></i> ' + msg;
+    tb.style.background = 'var(--mau-do-nhat)';
+    tb.style.borderColor = '#fca5a5';
+    tb.style.color = '#991b1b';
     tb.classList.add('hien');
-    xoaFormMatKhau();
     setTimeout(() => tb.classList.remove('hien'), 4000);
   }
 
@@ -952,6 +992,7 @@
   function thucHienDangXuat() {
     // Thực tế: window.location.href = '/Account/Logout';
     alert('Đã đăng xuất thành công! Chuyển về trang đăng nhập...');
+    window.location.href='/Index';
     dongModalDangXuat();
   }
 </script>
