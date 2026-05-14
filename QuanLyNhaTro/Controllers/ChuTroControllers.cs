@@ -206,15 +206,26 @@ namespace QuanLyNhaTro.Controllers
             int tongPhong = await _context.PHONG.CountAsync();
             int soPhongDaThue = await _context.PHONG
             .CountAsync(p => p.TrangThai == "Đã Thuê");
+
+            int Phongtrong = await _context.PHONG
+            .CountAsync(i => i.TrangThai == "Trống");
+
+            int PhongBaotri = await _context.PHONG
+                .CountAsync(k => k.TrangThai == "Bảo Trì");
+
             if (tongPhong > 0)
             {
                 double tyLe = ((double) soPhongDaThue / tongPhong) *100;
                 return Ok(new
                 {
+                    PhongBaoTri = PhongBaotri,
+                    PhongTrong = Phongtrong,
+                    PhongThue = soPhongDaThue,
                     tongSoPhong = tongPhong,
                     tyLeLapDay = Math.Round(tyLe)
                 });
             }
+
             return BadRequest(new { message = "Có lỗi xảy ra" });
         }
         [HttpGet("TyLeDoanhThu")]

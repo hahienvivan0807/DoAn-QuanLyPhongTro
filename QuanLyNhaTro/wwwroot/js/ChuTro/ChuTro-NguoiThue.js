@@ -24,11 +24,28 @@ function showToast(type, title, msg) {
     const drawSvg = type === 'success' ? `
   <svg width="18" height="18" viewBox="0 0 18 18" style="position:relative;z-index:1;">
     <polyline class="check-path" points="3,9 7,13 15,5" fill="none" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`: type === 'fail' ? `
+  </svg>`
+        : type === 'fail' ? `
   <svg width="18" height="18" viewBox="0 0 18 18" style="position:relative;z-index:1;">
     <line class="x-path" x1="4" y1="4" x2="14" y2="14" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round"/>
     <line class="x-path" x1="14" y1="4" x2="4" y2="14" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round"/>
-  </svg>`: `<i class="ti ${c.icon} ${type === 'warn' ? 'warn-icon' : 'info-icon'}" style="font-size:17px;color:${c.ic};"></i>`;
+  </svg>`
+            : type === 'warn' ? `
+  <svg class="ring-svg" width="36" height="36" viewBox="0 0 36 36" style="position:absolute;top:0;left:0;">
+    <circle cx="18" cy="18" r="14" fill="none" stroke="${c.ring}" stroke-width="2" stroke-dasharray="6 4" opacity="0.5"/>
+  </svg>
+  <svg width="18" height="18" viewBox="0 0 18 18" style="position:relative;z-index:1;">
+    <line class="check-path" x1="9" y1="2" x2="9" y2="11" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round"/>
+    <line class="check-path" x1="9" y1="14" x2="9" y2="15.5" stroke="${c.ic}" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>`
+                : `
+  <svg class="ring-svg" width="36" height="36" viewBox="0 0 36 36" style="position:absolute;top:0;left:0;">
+    <circle cx="18" cy="18" r="14" fill="none" stroke="${c.ring}" stroke-width="2" stroke-dasharray="6 4" opacity="0.5"/>
+  </svg>
+  <svg width="18" height="18" viewBox="0 0 18 18" style="position:relative;z-index:1;">
+    <line class="x-path" x1="9" y1="3" x2="9" y2="10" stroke="${c.ic}" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="9" cy="14" r="1.2" fill="${c.ic}"/>
+  </svg>`;
 
     el.innerHTML = `
     <div class="toast-icon-wrap" style="background:${c.bg};">
@@ -459,6 +476,36 @@ async function loadDanhSachNguoiThue() {
         renderDanhSachNguoiThue(danhSachNguoiThue);
     } catch (err) {
         console.error('Lỗi load danh sách người thuê:', err);
+    }
+}
+async function CapLaiMatKhau() {
+    const phone = document.getElementById('phone-reset').value.trim();
+    const newPw = document.getElementById('password-reset').value.trim();
+    if (!phone || !newPw) {
+        showToast('warn', 'Thiếu thông tin', 'Vui lòng nhập đủ số điện thoại và mật khẩu mới.');
+        return;
+    }
+    dulieu = {
+        SDTKhach: phone,
+        NewPassword: newPw
+    }
+    try {
+        let respone = await fetch('/api/ChuTroThemNguoiThue/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dulieu)
+        });
+        const data = await respone.json();
+        if (respone.ok) {
+            showToast('success', data.message);
+            console.log(data.messgage);
+            document.getElementById('phone-reset').value = '';
+            document.getElementById('password-reset').value = '';
+        }else {
+            showToast('warn', data.message, "Vui lòng kiểm tra lại");
+        }
+    } catch (error) {
+        showToast('fail', "Lỗi kết nối server","Kiểm tra lại kết nối");
     }
 }
 // Khởi tạo khi tải trang
