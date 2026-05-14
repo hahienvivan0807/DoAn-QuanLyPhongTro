@@ -19,10 +19,10 @@ function chuyenMenu(tenTrang, phanTu) {
     if (phanTu) phanTu.classList.add('dang-chon');
     // ⚙️ BACKEND: Map tên trang → Razor Page route
     const bangDuongDan = {
-        'trang-chu': '/ChuTro',
+        'trang-chu': '/Admin/ChuTro',
         'quan-ly-phong': '/ChiTietPhong',
         'nguoi-thue': '/QuanLyNguoiThue',
-        'hop-dong': '/HopDong',
+        'hop-dong': '/Admin/QuanLyHopDong',
         'hoa-don': '/HoaDon',
         'sua-chua': '/SuCoBaoTri',
         'bao-cao': '/BaoCao',

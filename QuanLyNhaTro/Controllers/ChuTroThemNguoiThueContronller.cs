@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using BCrypt.Net;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
 using System.Security.Claims;
-using BCrypt.Net;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace QuanLyNhaTro.Controllers
 {
     [ApiController]
@@ -128,6 +129,24 @@ namespace QuanLyNhaTro.Controllers
                 await transaction.RollbackAsync();
                 return StatusCode(500, new { message = "Lỗi hệ thống!", detail = ex.Message });
             }
+        }
+        public class ResetPasswordRequest
+        {
+            public string SDTKhach { get; set; }
+            public string NewPassword { get; set; }
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> UpdateUser([FromBody] ResetPasswordRequest request)
+        {
+            var user = await _context.ACCOUNT.FirstOrDefaultAsync(u => u.Phone == request.SDTKhach);
+            if(user == null)
+            {
+                return BadRequest(new { message = "Không tồn tại số điện thoại" });
+            }
+            string hashPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            user.Passwords = hashPassword;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Cập nhật mật khẩu thành công" });
         }
     }
 }

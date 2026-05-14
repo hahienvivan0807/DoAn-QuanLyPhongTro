@@ -1421,6 +1421,10 @@
     60%  { background: #f0f9ff; border-color: #0891b2; box-shadow: 0 0 0 2px rgba(8,145,178,0.08); }
     100% { background: #fff;    border-color: #e5e9f5; box-shadow: none; }
 }
+@@keyframes dotPop {
+  from { r: 0; opacity: 0; }
+  to   { r: 1.2; opacity: 1; }
+}
 </style>
 </head>
 <body>
@@ -1647,10 +1651,10 @@
       <div class="card-tinh-nang" onclick="moModal('modal-tai-khoan-quan-ly')">
         <div class="dau-tinh-nang mau-cam-nhat"><i class="fas fa-user-shield"></i></div>
         <div>
-          <div class="ten-tinh-nang">Tài khoản quản lý</div>
-          <div class="mo-ta-tinh-nang">Thêm, sửa, xóa tài khoản quản lý. Kiểm soát quyền truy cập hệ thống.</div>
+          <div class="ten-tinh-nang">Cấp lại mật khẩu mới</div>
+          <div class="mo-ta-tinh-nang">Cấp lại mật khẩu cho người thuê khi quên mật khẩu.</div>
         </div>
-        <span class="the-tinh-nang">3 quản lý đang hoạt động</span>
+        <span class="the-tinh-nang">Không cấp lại mật khẩu cũ</span>
       </div>
 
       <div class="card-tinh-nang" onclick="moModalQuanLyNguoiThue()">
@@ -1882,45 +1886,30 @@
     <div class="tieu-de-modal">
       <h3>
         <span style="width:32px;height:32px;background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;"><i class="fas fa-user-plus"></i></span>
-        Thêm người dùng mới
+        Cấp lại mật khẩu mới
       </h3>
       <button class="nut-dong-modal" onclick="dongModal('modal-tai-khoan-quan-ly')">✕</button>
     </div>
 
     <div class="luoi-form-2">
       <div class="nhom-nhap">
-        <label class="nhan-nhap">Username *</label>
-        <input class="o-nhap" type="text" id="username-moi" placeholder="VD: nguyenthilan" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Mật khẩu *</label>
-        <input class="o-nhap" type="password" id="password-moi" placeholder="VD:123" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Họ và tên *</label>
-        <input class="o-nhap" type="text" id="fullname-moi" placeholder="VD: Nguyễn Thị Lan" />
-      </div>
-      <div class="nhom-nhap">
         <label class="nhan-nhap">Số điện thoại *</label>
-        <input class="o-nhap" type="tel" id="phone-moi" placeholder="VD: 0901234567" />
+        <input class="o-nhap" type="tel" id="phone-reset" placeholder="VD: 0901234567" />
       </div>
       <div class="nhom-nhap">
-        <label class="nhan-nhap">Vai trò (Role) *</label>
-        <select class="o-nhap o-chon" id="role-moi">
-          <option value="Tenant">Người thuê</option>
-          <option value="Manager">Quản lý</option>
-        </select>
+        <label class="nhan-nhap">Mật khẩu mới *</label>
+        <input class="o-nhap" type="password" id="password-reset" placeholder="Nhập mật khẩu mới tại đây" />
       </div>
     </div>
 
-    <div class="nhom-nut-duoi-modal">
-      <button class="nut-huy-modal" onclick="dongModal('modal-tai-khoan-quan-ly')">Hủy</button>
-      <button class="nut-luu-modal" onclick="ThemUser()">
-        <i class="fas fa-user-plus"></i> Tạo tài khoản
-      </button>
+        <div class="nhom-nut-duoi-modal">
+          <button class="nut-huy-modal" onclick="dongModal('modal-tai-khoan-quan-ly')">Hủy</button>
+            <button class="nut-luu-modal" onclick="CapLaiMatKhau()">
+              <i class="fas fa-redo"></i> Cập nhật mật khẩu
+            </button>
+        </div>
     </div>
-</div>
-</div>
+    </div>
 
 
 <!-- MODAL: QUẢN LÝ NGƯỜI THUÊ -->
