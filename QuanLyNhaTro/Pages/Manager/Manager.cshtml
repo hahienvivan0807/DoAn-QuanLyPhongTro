@@ -478,7 +478,13 @@
             .nut-hanh-dong:hover { background: var(--mau-xanh-nhat); }
 
             /* Danh sách phòng trống */
-            .danh-sach-phong { display: flex; flex-direction: column; gap: 8px; }
+            .danh-sach-phong { 
+                display: flex; 
+                flex-direction: column; gap: 8px;
+                max-height: 320px;  
+                overflow-y: auto;    
+                padding-right: 4px;
+            }
             .muc-phong {
               display: flex; align-items: center; justify-content: space-between;
               padding: 10px 14px; border-radius: 10px;
@@ -933,52 +939,7 @@
                                 <span class="trang-thai-phong trong">Còn trống</span>
                             </div>
                         </div>
-                        <div class="muc-phong" onclick="xemChiTietPhongCuThe('P.204')">
-                            <div>
-                                <div class="ten-phong">Phòng 204</div>
-                                <div class="loai-phong">Phòng đôi • 20m²</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="gia-phong">3.5M/th</div>
-                                <span class="trang-thai-phong trong">Còn trống</span>
-                            </div>
-                        </div>
-                        <div class="muc-phong" onclick="xemChiTietPhongCuThe('P.301')">
-                            <div>
-                                <div class="ten-phong">Phòng 301</div>
-                                <div class="loai-phong">Phòng cao cấp • 25m²</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="gia-phong">4.5M/th</div>
-                                <span class="trang-thai-phong dang-thue">Đang thuê</span>
-                            </div>
-                        </div>
-                        <div class="muc-phong" onclick="xemChiTietPhongCuThe('P.403')">
-                            <div>
-                                <div class="ten-phong">Phòng 403</div>
-                                <div class="loai-phong">Phòng đơn • 15m²</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="gia-phong">2.5M/th</div>
-                                <span class="trang-thai-phong bao-tri">Bảo trì</span>
-                            </div>
-                        </div>
-                        <div class="muc-phong" onclick="xemChiTietPhongCuThe('P.106')">
-                            <div>
-                                <div class="ten-phong">Phòng 106</div>
-                                <div class="loai-phong">Phòng đôi • 18m²</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="gia-phong">3.0M/th</div>
-                                <span class="trang-thai-phong trong">Còn trống</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Nút thêm phòng mới -->
-                    <button style="width:100%;margin-top:14px;background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(26,86,219,0.25);" onclick="moModalThemPhong()">
-                        <i class="fas fa-plus"></i> Thêm phòng mới
-                    </button>
                 </div>
 
             </div><!-- Kết thúc HÀNG 3 -->
