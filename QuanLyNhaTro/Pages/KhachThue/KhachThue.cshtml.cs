@@ -82,7 +82,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
 
                 string kyHienTai = $"{now.Month:D2}/{now.Year}";
                 HoaDonThangNay = await _db.HDTHANG
-                    .FirstOrDefaultAsync(h => h.IDPhong == PhongHienTai.IDPhong && h.KyThanhToan == kyHienTai);
+    .           FirstOrDefaultAsync(h => h.IDPhong == PhongHienTai.IDPhong
+                           && h.KyThanhToan == kyHienTai);
             }
             else
             {

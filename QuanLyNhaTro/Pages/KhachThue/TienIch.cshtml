@@ -6,22 +6,34 @@
 
     // Badge giặt sấy
     string gsBadgeClass = "dv-status-badge dsb-none";
-    string gsBadgeHtml  = "<span class=\"dsb-dot\"></span>Chưa đặt";
-    if (Model.DonGiatSay != null)
+    string gsBadgeHtml = "<span class=\"dsb-dot\"></span>Chưa đặt";
+    if (Model.DonGiatSayCongVaoTro != null)
     {
-        gsBadgeClass = Model.DonGiatSay.TrangThai_DV == "Chờ xử lý"  ? "dv-status-badge dsb-pending"
+        gsBadgeClass = "dv-status-badge dsb-no-dv";
+        gsBadgeHtml = "<i class=\"fas fa-exclamation-triangle\" style=\"font-size:10px;\"></i>Nợ – Cộng vào hóa đơn";
+    }
+    else if (Model.DonGiatSay != null)
+    {
+        gsBadgeClass = Model.DonGiatSay.TrangThai_DV == "Chờ xử lý" ? "dv-status-badge dsb-pending"
                      : Model.DonGiatSay.TrangThai_DV == "Đang xử lý" ? "dv-status-badge dsb-active"
+                     : Model.DonGiatSay.TrangThai_DV == "Chờ thanh toán" ? "dv-status-badge dsb-pay"
                      : "dv-status-badge dsb-none";
         gsBadgeHtml = $"<span class=\"dsb-dot\"></span>{Model.DonGiatSay.TrangThai_DV}";
     }
 
     // Badge nước bình
     string nuocBadgeClass = "dv-status-badge dsb-none";
-    string nuocBadgeHtml  = "<span class=\"dsb-dot\"></span>Chưa đặt";
-    if (Model.DonNuocBinh != null)
+    string nuocBadgeHtml = "<span class=\"dsb-dot\"></span>Chưa đặt";
+    if (Model.DonNuocBinhCongVaoTro != null)
     {
-        nuocBadgeClass = Model.DonNuocBinh.TrangThai_DV == "Chờ xử lý"  ? "dv-status-badge dsb-pending"
+        nuocBadgeClass = "dv-status-badge dsb-no-dv";
+        nuocBadgeHtml = "<i class=\"fas fa-exclamation-triangle\" style=\"font-size:10px;\"></i>Nợ – Cộng vào hóa đơn";
+    }
+    else if (Model.DonNuocBinh != null)
+    {
+        nuocBadgeClass = Model.DonNuocBinh.TrangThai_DV == "Chờ xử lý" ? "dv-status-badge dsb-pending"
                        : Model.DonNuocBinh.TrangThai_DV == "Đang xử lý" ? "dv-status-badge dsb-active"
+                       : Model.DonNuocBinh.TrangThai_DV == "Chờ thanh toán" ? "dv-status-badge dsb-pay"
                        : "dv-status-badge dsb-none";
         nuocBadgeHtml = $"<span class=\"dsb-dot\"></span>{Model.DonNuocBinh.TrangThai_DV}";
     }
@@ -29,1711 +41,1903 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tiện Ích – Nhà Trọ Bà Năm</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tiện Ích – Nhà Trọ Bà Năm</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
 
-    /* =============================================
-       BIẾN MÀU — đồng bộ KhachThue / ThanhToan
-    ============================================= */
-    :root {
-      --mau-sidebar:        #0d1b3e;
-      --mau-sidebar-dam:    #091429;
-      --mau-chu-de:         #1a56db;
-      --mau-chu-de-sang:    #3b82f6;
-      --mau-nen:            #f0f4f8;
-      --mau-trang:          #ffffff;
-      --mau-chu:            #1e293b;
-      --mau-chu-phu:        #64748b;
-      --mau-vien:           #e2e8f0;
-      --mau-xanh-nhat:      #eff6ff;
-      --mau-xanh-trung:     #dbeafe;
-      --mau-xanh-la:        #059669;
-      --mau-xanh-la-nhat:   #d1fae5;
-      --mau-cam:            #d97706;
-      --mau-cam-nhat:       #fef3c7;
-      --mau-do:             #dc2626;
-      --mau-do-nhat:        #fee2e2;
-      --mau-tim:            #7c3aed;
-      --mau-tim-nhat:       #ede9fe;
-      --mau-cyan:           #0891b2;
-      --mau-cyan-nhat:      #cffafe;
-      --mau-vang:           #d97706;
-      --mau-vang-nhat:      #fef9c3;
-      --mau-hong:           #db2777;
-      --mau-hong-nhat:      #fce7f3;
-      --bong-card:          0 4px 24px rgba(26,86,219,0.10);
-      --bong-card-hover:    0 8px 32px rgba(26,86,219,0.18);
-    }
+            /* =============================================
+               BIẾN MÀU — đồng bộ KhachThue / ThanhToan
+            ============================================= */
+            :root {
+              --mau-sidebar:        #0d1b3e;
+              --mau-sidebar-dam:    #091429;
+              --mau-chu-de:         #1a56db;
+              --mau-chu-de-sang:    #3b82f6;
+              --mau-nen:            #f0f4f8;
+              --mau-trang:          #ffffff;
+              --mau-chu:            #1e293b;
+              --mau-chu-phu:        #64748b;
+              --mau-vien:           #e2e8f0;
+              --mau-xanh-nhat:      #eff6ff;
+              --mau-xanh-trung:     #dbeafe;
+              --mau-xanh-la:        #059669;
+              --mau-xanh-la-nhat:   #d1fae5;
+              --mau-cam:            #d97706;
+              --mau-cam-nhat:       #fef3c7;
+              --mau-do:             #dc2626;
+              --mau-do-nhat:        #fee2e2;
+              --mau-tim:            #7c3aed;
+              --mau-tim-nhat:       #ede9fe;
+              --mau-cyan:           #0891b2;
+              --mau-cyan-nhat:      #cffafe;
+              --mau-vang:           #d97706;
+              --mau-vang-nhat:      #fef9c3;
+              --mau-hong:           #db2777;
+              --mau-hong-nhat:      #fce7f3;
+              --bong-card:          0 4px 24px rgba(26,86,219,0.10);
+              --bong-card-hover:    0 8px 32px rgba(26,86,219,0.18);
+            }
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
-      background: var(--mau-nen);
-      color: var(--mau-chu);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+            *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+              font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+              background: var(--mau-nen);
+              color: var(--mau-chu);
+              display: flex;
+              height: 100vh;
+              overflow: hidden;
+            }
 
-    /* =============================================
-       SIDEBAR
-    ============================================= */
-    #thanh-sidebar {
-      width: 220px; min-width: 220px;
-      background: linear-gradient(180deg, #0d1b3e 0%, #091429 100%);
-      display: flex; flex-direction: column;
-      height: 100vh; z-index: 100;
-      box-shadow: 4px 0 24px rgba(0,0,0,0.18);
-      overflow-y: auto; overflow-x: hidden;
-      transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s;
-      flex-shrink: 0;
-    }
-    #thanh-sidebar.an-sidebar { width: 0; min-width: 0; overflow: hidden; }
+            /* =============================================
+               SIDEBAR
+            ============================================= */
+            #thanh-sidebar {
+              width: 220px; min-width: 220px;
+              background: linear-gradient(180deg, #0d1b3e 0%, #091429 100%);
+              display: flex; flex-direction: column;
+              height: 100vh; z-index: 100;
+              box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+              overflow-y: auto; overflow-x: hidden;
+              transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s;
+              flex-shrink: 0;
+            }
+            #thanh-sidebar.an-sidebar { width: 0; min-width: 0; overflow: hidden; }
 
-    .logo-sidebar {
-      display: flex; align-items: center; gap: 12px;
-      padding: 28px 20px 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      white-space: nowrap;
-    }
-    .logo-sidebar .bieu-tuong {
-      width: 42px; height: 42px;
-      border-radius: 10px;
-      overflow: hidden;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .logo-sidebar .bieu-tuong img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
-    .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; }
-    .logo-sidebar .ten-logo span  { font-size: 11px; color: rgba(255,255,255,0.45); }
+            .logo-sidebar {
+              display: flex; align-items: center; gap: 12px;
+              padding: 28px 20px 24px;
+              border-bottom: 1px solid rgba(255,255,255,0.07);
+              white-space: nowrap;
+            }
+            .logo-sidebar .bieu-tuong {
+              width: 42px; height: 42px;
+              border-radius: 10px;
+              overflow: hidden;
+              flex-shrink: 0;
+              display: flex; align-items: center; justify-content: center;
+            }
+            .logo-sidebar .bieu-tuong img {
+              width: 100%; height: 100%;
+              object-fit: cover;
+            }
+            .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; }
+            .logo-sidebar .ten-logo span  { font-size: 11px; color: rgba(255,255,255,0.45); }
 
-    .nhan-nhom {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 1.5px; color: rgba(255,255,255,0.3);
-      text-transform: uppercase;
-      padding: 18px 20px 6px; white-space: nowrap;
-    }
-    .menu-item {
-      display: flex; align-items: center; gap: 13px;
-      padding: 11px 20px; color: rgba(255,255,255,0.65);
-      cursor: pointer; border-radius: 0 30px 30px 0;
-      margin: 2px 10px 2px 0; transition: all 0.2s;
-      font-size: 13.5px; font-weight: 600;
-      text-decoration: none; position: relative; white-space: nowrap;
-    }
-    .menu-item i { width: 20px; text-align: center; font-size: 15px; flex-shrink: 0; }
-    .menu-item:hover { background: rgba(59,130,246,0.15); color: #fff; }
-    .menu-item.dang-chon {
-      background: linear-gradient(90deg, rgba(26,86,219,0.85), rgba(59,130,246,0.6));
-      color: #fff; font-weight: 700;
-      box-shadow: 0 4px 16px rgba(26,86,219,0.3);
-    }
-    .menu-item.dang-chon::before {
-      content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-      height: 70%; width: 4px; background: #60a5fa; border-radius: 0 4px 4px 0;
-    }
-    .huy-hieu-menu {
-      margin-left: auto; background: #ef4444; color: #fff;
-      font-size: 10px; font-weight: 700; border-radius: 20px; padding: 1px 7px;
-    }
-    .sidebar-footer {
-      margin-top: auto; padding: 18px 16px;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      display: flex; align-items: center; gap: 10px; white-space: nowrap;
-    }
-    .sidebar-footer .anh-khach {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: linear-gradient(135deg, #1a56db, #60a5fa);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 15px; font-weight: 800;
-      border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0;
-      position: relative;
-    }
-    .sidebar-footer .anh-khach::after {
-      content: ''; position: absolute; bottom: 1px; right: 1px;
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #10b981; border: 2px solid #091429;
-    }
-    .sidebar-footer .ten-khach strong { display: block; color: #fff; font-size: 13px; }
-    .sidebar-footer .ten-khach span  { color: rgba(255,255,255,0.45); font-size: 11px; }
+            .nhan-nhom {
+              font-size: 10px; font-weight: 700;
+              letter-spacing: 1.5px; color: rgba(255,255,255,0.3);
+              text-transform: uppercase;
+              padding: 18px 20px 6px; white-space: nowrap;
+            }
+            .menu-item {
+              display: flex; align-items: center; gap: 13px;
+              padding: 11px 20px; color: rgba(255,255,255,0.65);
+              cursor: pointer; border-radius: 0 30px 30px 0;
+              margin: 2px 10px 2px 0; transition: all 0.2s;
+              font-size: 13.5px; font-weight: 600;
+              text-decoration: none; position: relative; white-space: nowrap;
+            }
+            .menu-item i { width: 20px; text-align: center; font-size: 15px; flex-shrink: 0; }
+            .menu-item:hover { background: rgba(59,130,246,0.15); color: #fff; }
+            .menu-item.dang-chon {
+              background: linear-gradient(90deg, rgba(26,86,219,0.85), rgba(59,130,246,0.6));
+              color: #fff; font-weight: 700;
+              box-shadow: 0 4px 16px rgba(26,86,219,0.3);
+            }
+            .menu-item.dang-chon::before {
+              content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+              height: 70%; width: 4px; background: #60a5fa; border-radius: 0 4px 4px 0;
+            }
+            .huy-hieu-menu {
+              margin-left: auto; background: #ef4444; color: #fff;
+              font-size: 10px; font-weight: 700; border-radius: 20px; padding: 1px 7px;
+            }
+            .sidebar-footer {
+              margin-top: auto; padding: 18px 16px;
+              border-top: 1px solid rgba(255,255,255,0.07);
+              display: flex; align-items: center; gap: 10px; white-space: nowrap;
+            }
+            .sidebar-footer .anh-khach {
+              width: 38px; height: 38px; border-radius: 50%;
+              background: linear-gradient(135deg, #1a56db, #60a5fa);
+              display: flex; align-items: center; justify-content: center;
+              color: #fff; font-size: 15px; font-weight: 800;
+              border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0;
+              position: relative;
+            }
+            .sidebar-footer .anh-khach::after {
+              content: ''; position: absolute; bottom: 1px; right: 1px;
+              width: 10px; height: 10px; border-radius: 50%;
+              background: #10b981; border: 2px solid #091429;
+            }
+            .sidebar-footer .ten-khach strong { display: block; color: #fff; font-size: 13px; }
+            .sidebar-footer .ten-khach span  { color: rgba(255,255,255,0.45); font-size: 11px; }
 
-    /* =============================================
-       KHU VỰC CHÍNH
-    ============================================= */
-    #khu-vuc-chinh { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+            /* =============================================
+               KHU VỰC CHÍNH
+            ============================================= */
+            #khu-vuc-chinh { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-    #thanh-header {
-      background: var(--mau-trang); padding: 0 28px; height: 64px;
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--mau-vien);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex-shrink: 0;
-    }
-    .header-trai { display: flex; align-items: center; gap: 16px; }
-    .nut-ham-menu {
-      background: none; border: none; cursor: pointer;
-      font-size: 20px; color: var(--mau-chu-phu);
-      padding: 6px; border-radius: 8px; transition: background 0.2s;
-    }
-    .nut-ham-menu:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
-    .tieu-de-trang { font-size: 16px; font-weight: 800; }
-    .duong-dan { font-size: 12px; color: var(--mau-chu-phu); }
-    .duong-dan a { color: var(--mau-chu-de); text-decoration: none; font-weight: 600; }
-    .header-phai { display: flex; align-items: center; gap: 14px; }
-    .hdr-date {
-      font-size: 12px; font-weight: 600; color: var(--mau-chu-phu);
-      background: var(--mau-nen); padding: 6px 12px;
-      border-radius: 20px; border: 1px solid var(--mau-vien);
-    }
-    .nut-thong-bao {
-      position: relative; background: none; border: none;
-      cursor: pointer; font-size: 18px; color: var(--mau-chu-phu);
-      padding: 8px; border-radius: 50%; transition: all 0.2s;
-    }
-    .nut-thong-bao:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
-    .so-thong-bao {
-      position: absolute; top: 2px; right: 2px;
-      background: #ef4444; color: #fff; font-size: 9px; font-weight: 700;
-      border-radius: 50%; width: 16px; height: 16px;
-      display: flex; align-items: center; justify-content: center; border: 2px solid #fff;
-    }
-    .thong-tin-khach {
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer; padding: 6px 12px; border-radius: 24px; transition: background 0.2s;
-    }
-    .thong-tin-khach:hover { background: var(--mau-xanh-nhat); }
-    .thong-tin-khach .anh-dai-dien {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, #1a56db, #60a5fa);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 14px; font-weight: 800; position: relative;
-    }
-    .thong-tin-khach .anh-dai-dien::after {
-      content: ''; position: absolute; bottom: 0; right: 0;
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #10b981; border: 2px solid #fff;
-    }
-    .thong-tin-khach .ten     { font-size: 13px; font-weight: 700; }
-    .thong-tin-khach .phong-so{ font-size: 11px; color: var(--mau-chu-phu); }
+            #thanh-header {
+              background: var(--mau-trang); padding: 0 28px; height: 64px;
+              display: flex; align-items: center; justify-content: space-between;
+              border-bottom: 1px solid var(--mau-vien);
+              box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex-shrink: 0;
+            }
+            .header-trai { display: flex; align-items: center; gap: 16px; }
+            .nut-ham-menu {
+              background: none; border: none; cursor: pointer;
+              font-size: 20px; color: var(--mau-chu-phu);
+              padding: 6px; border-radius: 8px; transition: background 0.2s;
+            }
+            .nut-ham-menu:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+            .tieu-de-trang { font-size: 16px; font-weight: 800; }
+            .duong-dan { font-size: 12px; color: var(--mau-chu-phu); }
+            .duong-dan a { color: var(--mau-chu-de); text-decoration: none; font-weight: 600; }
+            .header-phai { display: flex; align-items: center; gap: 14px; }
+            .hdr-date {
+              font-size: 12px; font-weight: 600; color: var(--mau-chu-phu);
+              background: var(--mau-nen); padding: 6px 12px;
+              border-radius: 20px; border: 1px solid var(--mau-vien);
+            }
+            .nut-thong-bao {
+              position: relative; background: none; border: none;
+              cursor: pointer; font-size: 18px; color: var(--mau-chu-phu);
+              padding: 8px; border-radius: 50%; transition: all 0.2s;
+            }
+            .nut-thong-bao:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+            .so-thong-bao {
+              position: absolute; top: 2px; right: 2px;
+              background: #ef4444; color: #fff; font-size: 9px; font-weight: 700;
+              border-radius: 50%; width: 16px; height: 16px;
+              display: flex; align-items: center; justify-content: center; border: 2px solid #fff;
+            }
+            .thong-tin-khach {
+              display: flex; align-items: center; gap: 10px;
+              cursor: pointer; padding: 6px 12px; border-radius: 24px; transition: background 0.2s;
+            }
+            .thong-tin-khach:hover { background: var(--mau-xanh-nhat); }
+            .thong-tin-khach .anh-dai-dien {
+              width: 36px; height: 36px; border-radius: 50%;
+              background: linear-gradient(135deg, #1a56db, #60a5fa);
+              display: flex; align-items: center; justify-content: center;
+              color: #fff; font-size: 14px; font-weight: 800; position: relative;
+            }
+            .thong-tin-khach .anh-dai-dien::after {
+              content: ''; position: absolute; bottom: 0; right: 0;
+              width: 10px; height: 10px; border-radius: 50%;
+              background: #10b981; border: 2px solid #fff;
+            }
+            .thong-tin-khach .ten     { font-size: 13px; font-weight: 700; }
+            .thong-tin-khach .phong-so{ font-size: 11px; color: var(--mau-chu-phu); }
 
-    /* =============================================
-       NỘI DUNG CUỘN
-    ============================================= */
-    #noi-dung-chinh { flex: 1; overflow-y: auto; padding: 28px 32px; }
+            /* =============================================
+               NỘI DUNG CUỘN
+            ============================================= */
+            #noi-dung-chinh { flex: 1; overflow-y: auto; padding: 28px 32px; }
 
-    .page-heading {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    .page-heading h2 {
-      font-size: 22px; font-weight: 800; color: var(--mau-chu);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .page-heading h2 i { color: var(--mau-tim); font-size: 20px; }
-    .page-heading p { font-size: 13px; color: var(--mau-chu-phu); margin-top: 4px; }
+            .page-heading {
+              display: flex; align-items: flex-start; justify-content: space-between;
+              margin-bottom: 24px;
+            }
+            .page-heading h2 {
+              font-size: 22px; font-weight: 800; color: var(--mau-chu);
+              display: flex; align-items: center; gap: 10px;
+            }
+            .page-heading h2 i { color: var(--mau-tim); font-size: 20px; }
+            .page-heading p { font-size: 13px; color: var(--mau-chu-phu); margin-top: 4px; }
 
-    /* =============================================
-       LƯỚI DỊCH VỤ — 3 CỘT HÀNG ĐẦU, 1 CỘT RỘNG SAU
-    ============================================= */
-    .dv-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 24px; animation: fadeUp 0.4s ease both;
-    }
-    /* Card điện nước chiếm full row */
-    .dv-card.full-width {
-      grid-column: 1 / -1;
-    }
-    @@keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+            /* =============================================
+               LƯỚI DỊCH VỤ — 3 CỘT HÀNG ĐẦU, 1 CỘT RỘNG SAU
+            ============================================= */
+            .dv-grid {
+              display: grid; grid-template-columns: 1fr 1fr;
+              gap: 24px; animation: fadeUp 0.4s ease both;
+            }
+            /* Card điện nước chiếm full row */
+            .dv-card.full-width {
+              grid-column: 1 / -1;
+            }
+            @@keyframes fadeUp {
+              from { opacity: 0; transform: translateY(16px); }
+              to   { opacity: 1; transform: translateY(0); }
+            }
 
-    /* =============================================
-       CARD DỊCH VỤ
-    ============================================= */
-    .dv-card {
-      background: var(--mau-trang); border-radius: 20px;
-      border: 1px solid var(--mau-vien); box-shadow: var(--bong-card);
-      overflow: hidden; display: flex; flex-direction: column;
-      transition: box-shadow 0.25s;
-    }
-    .dv-card:hover { box-shadow: var(--bong-card-hover); }
+            /* =============================================
+               CARD DỊCH VỤ
+            ============================================= */
+            .dv-card {
+              background: var(--mau-trang); border-radius: 20px;
+              border: 1px solid var(--mau-vien); box-shadow: var(--bong-card);
+              overflow: hidden; display: flex; flex-direction: column;
+              transition: box-shadow 0.25s;
+            }
+            .dv-card:hover { box-shadow: var(--bong-card-hover); }
 
-    .dv-accent { height: 5px; border-radius: 20px 20px 0 0; }
-    .dv-accent.tim   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
-    .dv-accent.cyan  { background: linear-gradient(90deg, #0891b2, #22d3ee); }
-    .dv-accent.dien-nuoc { background: linear-gradient(90deg, #d97706, #f59e0b, #0891b2, #22d3ee); }
+            .dv-accent { height: 5px; border-radius: 20px 20px 0 0; }
+            .dv-accent.tim   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+            .dv-accent.cyan  { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+            .dv-accent.dien-nuoc { background: linear-gradient(90deg, #d97706, #f59e0b, #0891b2, #22d3ee); }
 
-    .dv-card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 22px 16px;
-      border-bottom: 1px solid var(--mau-vien);
-    }
-    .dv-header-left { display: flex; align-items: center; gap: 12px; }
-    .dv-icon-wrap {
-      width: 46px; height: 46px; border-radius: 13px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
-    }
-    .dv-icon-wrap.tim  { background: var(--mau-tim-nhat); color: var(--mau-tim); }
-    .dv-icon-wrap.cyan { background: var(--mau-cyan-nhat); color: var(--mau-cyan); }
-    .dv-icon-wrap.vang { background: var(--mau-vang-nhat); color: var(--mau-vang); }
-    .dv-card-header h3 { font-size: 15px; font-weight: 800; color: var(--mau-chu); }
-    .dv-card-header .sub { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 2px; }
+            .dv-card-header {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 20px 22px 16px;
+              border-bottom: 1px solid var(--mau-vien);
+            }
+            .dv-header-left { display: flex; align-items: center; gap: 12px; }
+            .dv-icon-wrap {
+              width: 46px; height: 46px; border-radius: 13px;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 20px; flex-shrink: 0;
+            }
+            .dv-icon-wrap.tim  { background: var(--mau-tim-nhat); color: var(--mau-tim); }
+            .dv-icon-wrap.cyan { background: var(--mau-cyan-nhat); color: var(--mau-cyan); }
+            .dv-icon-wrap.vang { background: var(--mau-vang-nhat); color: var(--mau-vang); }
+            .dv-card-header h3 { font-size: 15px; font-weight: 800; color: var(--mau-chu); }
+            .dv-card-header .sub { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 2px; }
 
-    /* Badge trạng thái đơn */
-    .dv-status-badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 700; padding: 5px 12px;
-      border-radius: 20px;
-    }
-    .dsb-none    { background: #f1f5f9; color: #64748b; }
-    .dsb-pending { background: var(--mau-cam-nhat); color: var(--mau-cam); }
-    .dsb-active  { background: var(--mau-xanh-la-nhat); color: var(--mau-xanh-la); }
-    .dsb-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor;
-               box-shadow: 0 0 0 2px rgba(0,0,0,0.06); }
+            /* Badge trạng thái đơn */
+            .dv-status-badge {
+              display: inline-flex; align-items: center; gap: 5px;
+              font-size: 11px; font-weight: 700; padding: 5px 12px;
+              border-radius: 20px;
+            }
+            .dsb-none    { background: #f1f5f9; color: #64748b; }
+            .dsb-pending { background: var(--mau-cam-nhat); color: var(--mau-cam); }
+            .dsb-active  { background: var(--mau-xanh-la-nhat); color: var(--mau-xanh-la); }
+            .dsb-pay     { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+            /* Badge nợ dịch vụ — đã cộng vào hóa đơn tháng */
+            .dsb-no-dv {
+              background: #fff1f2; color: #be123c;
+              border: 1px solid #fecdd3; gap: 5px;
+              animation: pulse-red 2s infinite;
+            }
+            @@keyframes pulse-red {
+              0%,100% { box-shadow: 0 0 0 0 rgba(190,18,60,0); }
+              50%      { box-shadow: 0 0 0 4px rgba(190,18,60,0.12); }
+            }
+            .dsb-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+                       box-shadow: 0 0 0 2px rgba(0,0,0,0.06); }
 
-    .dv-card-body { padding: 20px 22px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+            /* Banner cảnh báo — tiền dịch vụ đã cộng vào hóa đơn tháng */
+            .no-dv-banner {
+              display: flex; flex-direction: column; gap: 12px;
+              background: linear-gradient(135deg, #fff1f2, #fff7ed);
+              border: 1.5px solid #fca5a5; border-radius: 14px;
+              padding: 16px 18px; animation: fadeUp 0.35s ease;
+            }
+            .no-dv-banner-header {
+              display: flex; align-items: center; gap: 10px;
+            }
+            .no-dv-banner-icon {
+              width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+              background: #fee2e2; color: #dc2626;
+              display: flex; align-items: center; justify-content: center; font-size: 17px;
+            }
+            .no-dv-banner-title  { font-size: 13px; font-weight: 800; color: #be123c; }
+            .no-dv-banner-sub    { font-size: 11.5px; color: #9f1239; margin-top: 2px; line-height: 1.5; }
+            .no-dv-amount-row {
+              display: flex; align-items: center; justify-content: space-between;
+              background: #fff; border: 1px solid #fecdd3; border-radius: 10px; padding: 10px 14px;
+            }
+            .no-dv-amount-label  { font-size: 11.5px; font-weight: 600; color: #9f1239; }
+            .no-dv-amount-val    { font-size: 18px; font-weight: 800; color: #dc2626; }
+            .btn-huy-no-dv {
+              width: 100%; padding: 12px;
+              background: linear-gradient(135deg, #1a56db, #3b82f6);
+              color: #fff; border: none; border-radius: 12px;
+              font-family: 'Be Vietnam Pro', sans-serif; font-size: 13.5px; font-weight: 700;
+              cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+              box-shadow: 0 4px 14px rgba(26,86,219,0.25); transition: all 0.2s;
+            }
+            .btn-huy-no-dv:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(26,86,219,0.35); }
+            .btn-huy-no-dv:disabled { opacity: 0.6; pointer-events: none; }
 
-    /* =============================================
-       MÔ TẢ DỊCH VỤ
-    ============================================= */
-    .dv-desc-box {
-      background: #f8faff; border: 1.5px dashed #c7d2fe;
-      border-radius: 14px; padding: 18px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .dv-desc-box.cyan-bg { background: #f0fdff; border-color: #a5f3fc; }
-    .dv-desc-box.dn-bg   { background: linear-gradient(135deg, #fffbeb, #f0fdff); border-color: #fde68a; border-style: solid; }
+            .dv-card-body { padding: 20px 22px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
 
-    .dv-feature-row {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 12.5px; color: var(--mau-chu);
-    }
-    .dv-feature-row i { width: 22px; text-align: center; font-size: 14px; flex-shrink: 0; }
+            /* =============================================
+               MÔ TẢ DỊCH VỤ
+            ============================================= */
+            .dv-desc-box {
+              background: #f8faff; border: 1.5px dashed #c7d2fe;
+              border-radius: 14px; padding: 18px;
+              display: flex; flex-direction: column; gap: 10px;
+            }
+            .dv-desc-box.cyan-bg { background: #f0fdff; border-color: #a5f3fc; }
+            .dv-desc-box.dn-bg   { background: linear-gradient(135deg, #fffbeb, #f0fdff); border-color: #fde68a; border-style: solid; }
 
-    /* Nút mở form */
-    .dv-btn-open {
-      width: 100%; padding: 13px;
-      border: none; border-radius: 13px; cursor: pointer;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 14px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; gap: 9px;
-      transition: all 0.22s; position: relative; overflow: hidden;
-    }
-    .dv-btn-open.tim {
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      color: #fff; box-shadow: 0 5px 18px rgba(124,58,237,0.35);
-    }
-    .dv-btn-open.tim:hover {
-      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.45);
-    }
-    .dv-btn-open.cyan {
-      background: linear-gradient(135deg, #0891b2, #22d3ee);
-      color: #fff; box-shadow: 0 5px 18px rgba(8,145,178,0.35);
-    }
-    .dv-btn-open.cyan:hover {
-      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(8,145,178,0.45);
-    }
-    .dv-btn-open.dien-nuoc {
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      color: #fff; box-shadow: 0 5px 18px rgba(217,119,6,0.35);
-    }
-    .dv-btn-open.dien-nuoc:hover {
-      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(217,119,6,0.45);
-    }
+            .dv-feature-row {
+              display: flex; align-items: center; gap: 10px;
+              font-size: 12.5px; color: var(--mau-chu);
+            }
+            .dv-feature-row i { width: 22px; text-align: center; font-size: 14px; flex-shrink: 0; }
 
-    /* =============================================
-       FORM DỊCH VỤ
-    ============================================= */
-    .dv-form-wrap { display: none; flex-direction: column; gap: 14px; animation: slideDown 0.3s ease; }
-    .dv-form-wrap.hien { display: flex; }
-    @@keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+            /* Nút mở form */
+            .dv-btn-open {
+              width: 100%; padding: 13px;
+              border: none; border-radius: 13px; cursor: pointer;
+              font-family: 'Be Vietnam Pro', sans-serif;
+              font-size: 14px; font-weight: 700;
+              display: flex; align-items: center; justify-content: center; gap: 9px;
+              transition: all 0.22s; position: relative; overflow: hidden;
+            }
+            .dv-btn-open.tim {
+              background: linear-gradient(135deg, #7c3aed, #a78bfa);
+              color: #fff; box-shadow: 0 5px 18px rgba(124,58,237,0.35);
+            }
+            .dv-btn-open.tim:hover {
+              transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.45);
+            }
+            .dv-btn-open.cyan {
+              background: linear-gradient(135deg, #0891b2, #22d3ee);
+              color: #fff; box-shadow: 0 5px 18px rgba(8,145,178,0.35);
+            }
+            .dv-btn-open.cyan:hover {
+              transform: translateY(-2px); box-shadow: 0 8px 24px rgba(8,145,178,0.45);
+            }
+            .dv-btn-open.dien-nuoc {
+              background: linear-gradient(135deg, #d97706, #f59e0b);
+              color: #fff; box-shadow: 0 5px 18px rgba(217,119,6,0.35);
+            }
+            .dv-btn-open.dien-nuoc:hover {
+              transform: translateY(-2px); box-shadow: 0 8px 24px rgba(217,119,6,0.45);
+            }
 
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-label {
-      font-size: 12px; font-weight: 700; color: var(--mau-chu);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .form-label i { color: var(--mau-chu-phu); font-size: 11px; }
-    .form-input {
-      padding: 10px 14px; border: 1.5px solid var(--mau-vien);
-      border-radius: 10px; font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 13px; color: var(--mau-chu);
-      background: #fff; transition: border-color 0.18s, box-shadow 0.18s;
-      width: 100%;
-    }
-    .form-input:focus {
-      outline: none; border-color: var(--mau-chu-de);
-      box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
-    }
-    .form-input.disabled { background: #f8faff; color: var(--mau-chu-phu); cursor: not-allowed; }
+            /* =============================================
+               FORM DỊCH VỤ
+            ============================================= */
+            .dv-form-wrap { display: none; flex-direction: column; gap: 14px; animation: slideDown 0.3s ease; }
+            .dv-form-wrap.hien { display: flex; }
+            @@keyframes slideDown {
+              from { opacity: 0; transform: translateY(-10px); }
+              to   { opacity: 1; transform: translateY(0); }
+            }
 
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+            .form-group { display: flex; flex-direction: column; gap: 6px; }
+            .form-label {
+              font-size: 12px; font-weight: 700; color: var(--mau-chu);
+              display: flex; align-items: center; gap: 6px;
+            }
+            .form-label i { color: var(--mau-chu-phu); font-size: 11px; }
+            .form-input {
+              padding: 10px 14px; border: 1.5px solid var(--mau-vien);
+              border-radius: 10px; font-family: 'Be Vietnam Pro', sans-serif;
+              font-size: 13px; color: var(--mau-chu);
+              background: #fff; transition: border-color 0.18s, box-shadow 0.18s;
+              width: 100%;
+            }
+            .form-input:focus {
+              outline: none; border-color: var(--mau-chu-de);
+              box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+            }
+            .form-input.disabled { background: #f8faff; color: var(--mau-chu-phu); cursor: not-allowed; }
 
-    .gs-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .gs-info-item {
-      background: var(--mau-tim-nhat); border-radius: 10px; padding: 10px 12px;
-    }
-    .gs-info-item.cyan-theme { background: var(--mau-cyan-nhat); }
-    .gs-info-item.vang-theme { background: var(--mau-vang-nhat); }
-    .gs-info-label { font-size: 10.5px; font-weight: 600; color: var(--mau-chu-phu); margin-bottom: 3px; }
-    .gs-info-val   { font-size: 13px; font-weight: 800; color: var(--mau-chu); }
+            .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
-    /* Thanh trạng thái giao hàng */
-    .delivery-track {
-      background: #f8faff; border: 1.5px solid #e0f2fe;
-      border-radius: 14px; padding: 16px;
-    }
-    .dt-title { font-size: 12px; font-weight: 700; color: var(--mau-chu); margin-bottom: 14px;
-                display: flex; align-items: center; gap: 7px; }
-    .dt-title i { color: var(--mau-cyan); }
+            .gs-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+            .gs-info-item {
+              background: var(--mau-tim-nhat); border-radius: 10px; padding: 10px 12px;
+            }
+            .gs-info-item.cyan-theme { background: var(--mau-cyan-nhat); }
+            .gs-info-item.vang-theme { background: var(--mau-vang-nhat); }
+            .gs-info-label { font-size: 10.5px; font-weight: 600; color: var(--mau-chu-phu); margin-bottom: 3px; }
+            .gs-info-val   { font-size: 13px; font-weight: 800; color: var(--mau-chu); }
 
-    .dt-steps { display: flex; align-items: flex-start; position: relative; }
-    .dt-steps::before {
-      content: ''; position: absolute; top: 18px; left: 18px;
-      right: 18px; height: 3px;
-      background: #e2e8f0; border-radius: 2px; z-index: 0;
-    }
-    .dt-progress-line {
-      position: absolute; top: 18px; left: 18px;
-      height: 3px; background: linear-gradient(90deg, #0891b2, #22d3ee);
-      border-radius: 2px; z-index: 1;
-      transition: width 0.6s ease;
-    }
-    .dt-step {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      gap: 7px; position: relative; z-index: 2;
-    }
-    .dt-dot {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; border: 3px solid #e2e8f0;
-      background: #fff; color: #94a3b8;
-      transition: all 0.3s;
-    }
-    .dt-step.done .dt-dot   { border-color: var(--mau-cyan); background: var(--mau-cyan); color: #fff; }
-    .dt-step.active .dt-dot { border-color: var(--mau-cyan); background: #fff; color: var(--mau-cyan);
-                               box-shadow: 0 0 0 4px rgba(8,145,178,0.18); animation: pulse-cyan 1.8s infinite; }
-    @@keyframes pulse-cyan {
-      0%,100% { box-shadow: 0 0 0 4px rgba(8,145,178,0.18); }
-      50%      { box-shadow: 0 0 0 8px rgba(8,145,178,0.06); }
-    }
-    .dt-lbl { font-size: 10.5px; font-weight: 700; color: var(--mau-chu-phu); text-align: center; line-height: 1.3; }
-    .dt-step.done .dt-lbl, .dt-step.active .dt-lbl { color: var(--mau-cyan); }
+            /* Thanh trạng thái giao hàng */
+            .delivery-track {
+              background: #f8faff; border: 1.5px solid #e0f2fe;
+              border-radius: 14px; padding: 16px;
+            }
+            .dt-title { font-size: 12px; font-weight: 700; color: var(--mau-chu); margin-bottom: 14px;
+                        display: flex; align-items: center; gap: 7px; }
+            .dt-title i { color: var(--mau-cyan); }
 
-    /* Khu vực xác nhận nhận hàng + thanh toán */
-    .nuoc-confirm-box {
-      background: var(--mau-xanh-la-nhat); border: 1.5px solid #6ee7b7;
-      border-radius: 13px; padding: 14px 16px;
-      display: none; flex-direction: column; gap: 12px;
-      animation: fadeUp 0.3s ease;
-    }
-    .nuoc-confirm-box.hien { display: flex; }
+            .dt-steps { display: flex; align-items: flex-start; position: relative; }
+            .dt-steps::before {
+              content: ''; position: absolute; top: 18px; left: 18px;
+              right: 18px; height: 3px;
+              background: #e2e8f0; border-radius: 2px; z-index: 0;
+            }
+            .dt-progress-line {
+              position: absolute; top: 18px; left: 18px;
+              height: 3px; background: linear-gradient(90deg, #0891b2, #22d3ee);
+              border-radius: 2px; z-index: 1;
+              transition: width 0.6s ease;
+            }
+            .dt-step {
+              flex: 1; display: flex; flex-direction: column; align-items: center;
+              gap: 7px; position: relative; z-index: 2;
+            }
+            .dt-dot {
+              width: 36px; height: 36px; border-radius: 50%;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 15px; border: 3px solid #e2e8f0;
+              background: #fff; color: #94a3b8;
+              transition: all 0.3s;
+            }
+            .dt-step.done .dt-dot   { border-color: var(--mau-cyan); background: var(--mau-cyan); color: #fff; }
+            .dt-step.active .dt-dot { border-color: var(--mau-cyan); background: #fff; color: var(--mau-cyan);
+                                       box-shadow: 0 0 0 4px rgba(8,145,178,0.18); animation: pulse-cyan 1.8s infinite; }
+            @@keyframes pulse-cyan {
+              0%,100% { box-shadow: 0 0 0 4px rgba(8,145,178,0.18); }
+              50%      { box-shadow: 0 0 0 8px rgba(8,145,178,0.06); }
+            }
+            .dt-lbl { font-size: 10.5px; font-weight: 700; color: var(--mau-chu-phu); text-align: center; line-height: 1.3; }
+            .dt-step.done .dt-lbl, .dt-step.active .dt-lbl { color: var(--mau-cyan); }
 
-    .ncb-title { font-size: 13px; font-weight: 800; color: #065f46;
-                 display: flex; align-items: center; gap: 7px; }
-    .ncb-amount { font-size: 20px; font-weight: 800; color: var(--mau-xanh-la); }
+            /* Khu vực xác nhận nhận hàng + thanh toán */
+            .nuoc-confirm-box {
+              background: var(--mau-xanh-la-nhat); border: 1.5px solid #6ee7b7;
+              border-radius: 13px; padding: 14px 16px;
+              display: none; flex-direction: column; gap: 12px;
+              animation: fadeUp 0.3s ease;
+            }
+            .nuoc-confirm-box.hien { display: flex; }
 
-    .btn-xac-nhan-hang {
-      padding: 11px 18px; background: linear-gradient(135deg, #059669, #10b981);
-      color: #fff; border: none; border-radius: 10px;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; gap: 7px; transition: all 0.2s;
-      box-shadow: 0 4px 14px rgba(5,150,105,0.3);
-    }
-    .btn-xac-nhan-hang:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(5,150,105,0.4); }
+            .ncb-title { font-size: 13px; font-weight: 800; color: #065f46;
+                         display: flex; align-items: center; gap: 7px; }
+            .ncb-amount { font-size: 20px; font-weight: 800; color: var(--mau-xanh-la); }
 
-    .waiting-box {
-      display: none; align-items: center; gap: 12px;
-      background: var(--mau-cam-nhat); border: 1.5px solid #fcd34d;
-      border-radius: 13px; padding: 14px 16px;
-    }
-    .waiting-box.hien { display: flex; }
-    .waiting-box i { font-size: 22px; color: var(--mau-cam); flex-shrink: 0; }
-    .wb-text { font-size: 12.5px; color: #92400e; font-weight: 600; line-height: 1.5; }
-    .wb-text strong { color: var(--mau-cam); }
+            .btn-xac-nhan-hang {
+              padding: 11px 18px; background: linear-gradient(135deg, #059669, #10b981);
+              color: #fff; border: none; border-radius: 10px;
+              font-family: 'Be Vietnam Pro', sans-serif;
+              font-size: 13px; font-weight: 700; cursor: pointer;
+              display: flex; align-items: center; gap: 7px; transition: all 0.2s;
+              box-shadow: 0 4px 14px rgba(5,150,105,0.3);
+            }
+            .btn-xac-nhan-hang:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(5,150,105,0.4); }
 
-    .gs-price-box {
-      display: none; flex-direction: column; gap: 12px;
-      background: #f0fdf4; border: 1.5px solid #6ee7b7;
-      border-radius: 13px; padding: 16px;
-    }
-    .gs-price-box.hien { display: flex; animation: fadeUp 0.3s ease; }
+            .waiting-box {
+              display: none; align-items: center; gap: 12px;
+              background: var(--mau-cam-nhat); border: 1.5px solid #fcd34d;
+              border-radius: 13px; padding: 14px 16px;
+            }
+            .waiting-box.hien { display: flex; }
+            .waiting-box i { font-size: 22px; color: var(--mau-cam); flex-shrink: 0; }
+            .wb-text { font-size: 12.5px; color: #92400e; font-weight: 600; line-height: 1.5; }
+            .wb-text strong { color: var(--mau-cam); }
 
-    .dv-btn-submit {
-      width: 100%; padding: 13px;
-      border: none; border-radius: 13px; cursor: pointer;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 14px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; gap: 9px;
-      transition: all 0.22s;
-    }
-    .dv-btn-submit.tim {
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      color: #fff; box-shadow: 0 5px 18px rgba(124,58,237,0.3);
-    }
-    .dv-btn-submit.tim:hover { transform: translateY(-2px); }
-    .dv-btn-submit.cyan {
-      background: linear-gradient(135deg, #0891b2, #22d3ee);
-      color: #fff; box-shadow: 0 5px 18px rgba(8,145,178,0.3);
-    }
-    .dv-btn-submit.cyan:hover { transform: translateY(-2px); }
-    .dv-btn-submit.vang {
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      color: #fff; box-shadow: 0 5px 18px rgba(217,119,6,0.3);
-    }
-    .dv-btn-submit.vang:hover { transform: translateY(-2px); }
+            .gs-price-box {
+              display: none; flex-direction: column; gap: 12px;
+              background: #f0fdf4; border: 1.5px solid #6ee7b7;
+              border-radius: 13px; padding: 16px;
+            }
+            .gs-price-box.hien { display: flex; animation: fadeUp 0.3s ease; }
 
-    .dv-btn-cancel {
-      width: 100%; padding: 11px;
-      background: #f1f5f9; color: #475569;
-      border: 1.5px solid var(--mau-vien); border-radius: 13px;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: background 0.18s;
-    }
-    .dv-btn-cancel:hover { background: var(--mau-vien); }
+            .dv-btn-submit {
+              width: 100%; padding: 13px;
+              border: none; border-radius: 13px; cursor: pointer;
+              font-family: 'Be Vietnam Pro', sans-serif;
+              font-size: 14px; font-weight: 700;
+              display: flex; align-items: center; justify-content: center; gap: 9px;
+              transition: all 0.22s;
+            }
+            .dv-btn-submit.tim {
+              background: linear-gradient(135deg, #7c3aed, #a78bfa);
+              color: #fff; box-shadow: 0 5px 18px rgba(124,58,237,0.3);
+            }
+            .dv-btn-submit.tim:hover { transform: translateY(-2px); }
+            .dv-btn-submit.cyan {
+              background: linear-gradient(135deg, #0891b2, #22d3ee);
+              color: #fff; box-shadow: 0 5px 18px rgba(8,145,178,0.3);
+            }
+            .dv-btn-submit.cyan:hover { transform: translateY(-2px); }
+            .dv-btn-submit.vang {
+              background: linear-gradient(135deg, #d97706, #f59e0b);
+              color: #fff; box-shadow: 0 5px 18px rgba(217,119,6,0.3);
+            }
+            .dv-btn-submit.vang:hover { transform: translateY(-2px); }
 
-    /* =============================================
-       CARD ĐIỆN NƯỚC — LAYOUT 2 CỘT BÊN TRONG
-    ============================================= */
-    .dn-two-col {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-    }
+            .dv-btn-cancel {
+              width: 100%; padding: 11px;
+              background: #f1f5f9; color: #475569;
+              border: 1.5px solid var(--mau-vien); border-radius: 13px;
+              font-family: 'Be Vietnam Pro', sans-serif;
+              font-size: 13px; font-weight: 700; cursor: pointer;
+              display: flex; align-items: center; justify-content: center; gap: 8px;
+              transition: background 0.18s;
+            }
+            .dv-btn-cancel:hover { background: var(--mau-vien); }
 
-    /* Panel điện / nước con */
-    .dn-panel {
-      border-radius: 14px; padding: 16px;
-      border: 1.5px solid;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    .dn-panel.dien {
-      background: linear-gradient(135deg, #fffbeb, #fef3c7);
-      border-color: #fde68a;
-    }
-    .dn-panel.nuoc-lanh {
-      background: linear-gradient(135deg, #eff6ff, #dbeafe);
-      border-color: #bfdbfe;
-    }
+            /* =============================================
+               CARD ĐIỆN NƯỚC — LAYOUT 2 CỘT BÊN TRONG
+            ============================================= */
+            .dn-two-col {
+              display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+            }
 
-    .dn-panel-header {
-      display: flex; align-items: center; gap: 9px;
-      font-size: 13px; font-weight: 800;
-    }
-    .dn-panel-header .icon-dien {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; color: #fff; flex-shrink: 0;
-      box-shadow: 0 3px 10px rgba(217,119,6,0.35);
-    }
-    .dn-panel-header .icon-nuoc {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: linear-gradient(135deg, #1a56db, #3b82f6);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; color: #fff; flex-shrink: 0;
-      box-shadow: 0 3px 10px rgba(26,86,219,0.35);
-    }
+            /* Panel điện / nước con */
+            .dn-panel {
+              border-radius: 14px; padding: 16px;
+              border: 1.5px solid;
+              display: flex; flex-direction: column; gap: 12px;
+            }
+            .dn-panel.dien {
+              background: linear-gradient(135deg, #fffbeb, #fef3c7);
+              border-color: #fde68a;
+            }
+            .dn-panel.nuoc-lanh {
+              background: linear-gradient(135deg, #eff6ff, #dbeafe);
+              border-color: #bfdbfe;
+            }
 
-    .dn-chip-mien-phi {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #dcfce7; color: #15803d;
-      font-size: 10px; font-weight: 700;
-      padding: 3px 9px; border-radius: 20px;
-      border: 1px solid #86efac;
-    }
+            .dn-panel-header {
+              display: flex; align-items: center; gap: 9px;
+              font-size: 13px; font-weight: 800;
+            }
+            .dn-panel-header .icon-dien {
+              width: 34px; height: 34px; border-radius: 9px;
+              background: linear-gradient(135deg, #d97706, #f59e0b);
+              display: flex; align-items: center; justify-content: center;
+              font-size: 16px; color: #fff; flex-shrink: 0;
+              box-shadow: 0 3px 10px rgba(217,119,6,0.35);
+            }
+            .dn-panel-header .icon-nuoc {
+              width: 34px; height: 34px; border-radius: 9px;
+              background: linear-gradient(135deg, #1a56db, #3b82f6);
+              display: flex; align-items: center; justify-content: center;
+              font-size: 16px; color: #fff; flex-shrink: 0;
+              box-shadow: 0 3px 10px rgba(26,86,219,0.35);
+            }
 
-    /* Trường chỉ số điện nước */
-    .dn-chi-so-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    }
-    .dn-chi-so-item { display: flex; flex-direction: column; gap: 4px; }
-    .dn-chi-so-label {
-      font-size: 10.5px; font-weight: 700; color: var(--mau-chu-phu);
-      display: flex; align-items: center; gap: 4px;
-    }
-    .dn-chi-so-input {
-      padding: 9px 12px; border: 1.5px solid var(--mau-vien);
-      border-radius: 9px; font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 14px; font-weight: 700; color: var(--mau-chu);
-      background: #fff; width: 100%;
-      transition: border-color 0.18s, box-shadow 0.18s;
-    }
-    .dn-chi-so-input:focus {
-      outline: none; border-color: #d97706;
-      box-shadow: 0 0 0 3px rgba(217,119,6,0.12);
-    }
-    .dn-chi-so-input.nuoc-focus:focus {
-      border-color: #1a56db;
-      box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
-    }
-    .dn-chi-so-input.disabled-field {
-      background: #f8faff; color: var(--mau-chu-phu); cursor: not-allowed;
-    }
+            .dn-chip-mien-phi {
+              display: inline-flex; align-items: center; gap: 5px;
+              background: #dcfce7; color: #15803d;
+              font-size: 10px; font-weight: 700;
+              padding: 3px 9px; border-radius: 20px;
+              border: 1px solid #86efac;
+            }
 
-    /* Tóm tắt tính tiền */
-    .dn-tong-box {
-      background: #fff; border-radius: 10px; padding: 10px 12px;
-      border: 1px solid var(--mau-vien);
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .dn-tong-label { font-size: 11px; font-weight: 600; color: var(--mau-chu-phu); }
-    .dn-tong-val   { font-size: 16px; font-weight: 800; }
-    .dn-tong-val.vang { color: var(--mau-vang); }
-    .dn-tong-val.xanh { color: var(--mau-chu-de); }
+            /* Trường chỉ số điện nước */
+            .dn-chi-so-row {
+              display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            }
+            .dn-chi-so-item { display: flex; flex-direction: column; gap: 4px; }
+            .dn-chi-so-label {
+              font-size: 10.5px; font-weight: 700; color: var(--mau-chu-phu);
+              display: flex; align-items: center; gap: 4px;
+            }
+            .dn-chi-so-input {
+              padding: 9px 12px; border: 1.5px solid var(--mau-vien);
+              border-radius: 9px; font-family: 'Be Vietnam Pro', sans-serif;
+              font-size: 14px; font-weight: 700; color: var(--mau-chu);
+              background: #fff; width: 100%;
+              transition: border-color 0.18s, box-shadow 0.18s;
+            }
+            .dn-chi-so-input:focus {
+              outline: none; border-color: #d97706;
+              box-shadow: 0 0 0 3px rgba(217,119,6,0.12);
+            }
+            .dn-chi-so-input.nuoc-focus:focus {
+              border-color: #1a56db;
+              box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+            }
+            .dn-chi-so-input.disabled-field {
+              background: #f8faff; color: var(--mau-chu-phu); cursor: not-allowed;
+            }
 
-    /* Upload ảnh minh chứng điện nước (trong card) */
-    .dn-upload-zone {
-      border: 2px dashed #d97706; border-radius: 12px;
-      background: #fffbeb; padding: 14px;
-      text-align: center; cursor: pointer;
-      transition: all 0.22s; position: relative;
-    }
-    .dn-upload-zone:hover { border-color: #b45309; background: #fef3c7; }
-    .dn-upload-zone.drag-over { background: #fef3c7; transform: scale(1.01); }
-    .dn-upload-zone input[type=file] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-    }
-    .dn-upload-zone .up-icon { font-size: 24px; color: #d97706; display: block; margin-bottom: 5px; }
-    .dn-upload-zone .up-title { font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 2px; }
-    .dn-upload-zone .up-hint  { font-size: 10.5px; color: #b45309; }
-    .dn-upload-zone .up-hint span { color: var(--mau-chu-de); font-weight: 700; }
-    .dn-upload-preview { display: none; position: relative; }
-    .dn-upload-preview img {
-      width: 100%; max-height: 130px; object-fit: cover;
-      border-radius: 8px; border: 1.5px solid var(--mau-vien); display: block;
-    }
-    .dn-btn-remove {
-      position: absolute; top: 4px; right: 4px;
-      background: rgba(220,38,38,0.9); color: #fff; border: none;
-      border-radius: 50%; width: 24px; height: 24px; font-size: 10px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
-    .dn-preview-fname { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 4px; font-style: italic; }
+            /* Tóm tắt tính tiền */
+            .dn-tong-box {
+              background: #fff; border-radius: 10px; padding: 10px 12px;
+              border: 1px solid var(--mau-vien);
+              display: flex; justify-content: space-between; align-items: center;
+            }
+            .dn-tong-label { font-size: 11px; font-weight: 600; color: var(--mau-chu-phu); }
+            .dn-tong-val   { font-size: 16px; font-weight: 800; }
+            .dn-tong-val.vang { color: var(--mau-vang); }
+            .dn-tong-val.xanh { color: var(--mau-chu-de); }
 
-    /* Section tiêu đề trong form điện nước */
-    .dn-section-title {
-      font-size: 12px; font-weight: 700; color: var(--mau-chu);
-      display: flex; align-items: center; gap: 6px;
-      padding-bottom: 8px; border-bottom: 1px solid var(--mau-vien);
-    }
+            /* Upload ảnh minh chứng điện nước (trong card) */
+            .dn-upload-zone {
+              border: 2px dashed #d97706; border-radius: 12px;
+              background: #fffbeb; padding: 14px;
+              text-align: center; cursor: pointer;
+              transition: all 0.22s; position: relative;
+            }
+            .dn-upload-zone:hover { border-color: #b45309; background: #fef3c7; }
+            .dn-upload-zone.drag-over { background: #fef3c7; transform: scale(1.01); }
+            .dn-upload-zone input[type=file] {
+              position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+            }
+            .dn-upload-zone .up-icon { font-size: 24px; color: #d97706; display: block; margin-bottom: 5px; }
+            .dn-upload-zone .up-title { font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 2px; }
+            .dn-upload-zone .up-hint  { font-size: 10.5px; color: #b45309; }
+            .dn-upload-zone .up-hint span { color: var(--mau-chu-de); font-weight: 700; }
+            .dn-upload-preview { display: none; position: relative; }
+            .dn-upload-preview img {
+              width: 100%; max-height: 130px; object-fit: cover;
+              border-radius: 8px; border: 1.5px solid var(--mau-vien); display: block;
+            }
+            .dn-btn-remove {
+              position: absolute; top: 4px; right: 4px;
+              background: rgba(220,38,38,0.9); color: #fff; border: none;
+              border-radius: 50%; width: 24px; height: 24px; font-size: 10px;
+              cursor: pointer; display: flex; align-items: center; justify-content: center;
+            }
+            .dn-preview-fname { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 4px; font-style: italic; }
 
-    /* Thông tin tóm tắt gộp (hiện phía dưới 2 panel) */
-    .dn-summary-bar {
-      background: linear-gradient(135deg, #fefce8, #eff6ff);
-      border: 1.5px solid #fde68a; border-radius: 13px; padding: 14px 18px;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      flex-wrap: wrap;
-    }
-    .dn-summary-item { display: flex; flex-direction: column; gap: 2px; }
-    .dn-sum-label { font-size: 10.5px; font-weight: 600; color: var(--mau-chu-phu); }
-    .dn-sum-val   { font-size: 15px; font-weight: 800; color: var(--mau-chu); }
-    .dn-sum-val.highlight { color: #d97706; }
+            /* Section tiêu đề trong form điện nước */
+            .dn-section-title {
+              font-size: 12px; font-weight: 700; color: var(--mau-chu);
+              display: flex; align-items: center; gap: 6px;
+              padding-bottom: 8px; border-bottom: 1px solid var(--mau-vien);
+            }
 
-    /* Thông tin phòng (readonly row) */
-    .dn-phong-row {
-      display: flex; align-items: center; gap: 10px;
-      background: #f8faff; border: 1px solid var(--mau-vien);
-      border-radius: 10px; padding: 10px 14px;
-    }
-    .dn-phong-row i { color: var(--mau-chu-de); font-size: 14px; }
-    .dn-phong-row span { font-size: 13px; color: var(--mau-chu-phu); }
-    .dn-phong-row strong { color: var(--mau-chu-de); font-size: 14px; font-weight: 800; }
+            /* Thông tin tóm tắt gộp (hiện phía dưới 2 panel) */
+            .dn-summary-bar {
+              background: linear-gradient(135deg, #fefce8, #eff6ff);
+              border: 1.5px solid #fde68a; border-radius: 13px; padding: 14px 18px;
+              display: flex; align-items: center; justify-content: space-between; gap: 12px;
+              flex-wrap: wrap;
+            }
+            .dn-summary-item { display: flex; flex-direction: column; gap: 2px; }
+            .dn-sum-label { font-size: 10.5px; font-weight: 600; color: var(--mau-chu-phu); }
+            .dn-sum-val   { font-size: 15px; font-weight: 800; color: var(--mau-chu); }
+            .dn-sum-val.highlight { color: #d97706; }
 
-    /* =============================================
-       MODAL THANH TOÁN
-    ============================================= */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 9999;
-      background: rgba(9,20,41,0.72);
-      backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.28s ease;
-    }
-    .modal-overlay.hien { opacity: 1; pointer-events: auto; }
+            /* Thông tin phòng (readonly row) */
+            .dn-phong-row {
+              display: flex; align-items: center; gap: 10px;
+              background: #f8faff; border: 1px solid var(--mau-vien);
+              border-radius: 10px; padding: 10px 14px;
+            }
+            .dn-phong-row i { color: var(--mau-chu-de); font-size: 14px; }
+            .dn-phong-row span { font-size: 13px; color: var(--mau-chu-phu); }
+            .dn-phong-row strong { color: var(--mau-chu-de); font-size: 14px; font-weight: 800; }
 
-    .modal-box {
-      background: #fff; border-radius: 24px;
-      width: 100%; max-width: 400px; margin: 16px; /* [CHỈNH] Thu nhỏ modal: giảm max-width 460→400px */
-      box-shadow: 0 24px 64px rgba(9,20,41,0.35);
-      overflow: hidden;
-      transform: translateY(20px) scale(0.97);
-      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
-    }
-    .modal-overlay.hien .modal-box { transform: translateY(0) scale(1); }
+            /* =============================================
+               MODAL THANH TOÁN
+            ============================================= */
+            .modal-overlay {
+              position: fixed; inset: 0; z-index: 9999;
+              background: rgba(9,20,41,0.72);
+              backdrop-filter: blur(6px);
+              display: flex; align-items: center; justify-content: center;
+              opacity: 0; pointer-events: none;
+              transition: opacity 0.28s ease;
+            }
+            .modal-overlay.hien { opacity: 1; pointer-events: auto; }
 
-    .modal-accent { height: 6px; }
-    /* (màu modal-accent & icon-badge được định nghĩa trong block CSS bên dưới) */
+            .modal-box {
+              background: #fff; border-radius: 24px;
+              width: 100%; max-width: 400px; margin: 16px; /* [CHỈNH] Thu nhỏ modal: giảm max-width 460→400px */
+              box-shadow: 0 24px 64px rgba(9,20,41,0.35);
+              overflow: hidden;
+              transform: translateY(20px) scale(0.97);
+              transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+            }
+            .modal-overlay.hien .modal-box { transform: translateY(0) scale(1); }
 
-    .modal-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px 12px; border-bottom: 1px solid #f1f5f9; /* [CHỈNH] Giảm padding header modal */
-    }
-    .modal-header-left { display: flex; align-items: center; gap: 12px; }
-    .modal-icon-badge {
-      width: 42px; height: 42px; border-radius: 11px;
-      display: flex; align-items: center; justify-content: center; font-size: 18px;
-    }
-    /* (màu icon-badge định nghĩa trong block CSS bên dưới) */
-    .modal-title { font-size: 15px; font-weight: 800; color: #1e293b; }
-    .modal-sub   { font-size: 11.5px; color: #64748b; margin-top: 2px; }
-    .modal-close {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: #f1f5f9; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; color: #64748b; transition: all 0.18s;
-    }
-    .modal-close:hover { background: #fee2e2; color: #dc2626; }
+            .modal-accent { height: 6px; }
+            /* (màu modal-accent & icon-badge được định nghĩa trong block CSS bên dưới) */
 
-    .modal-body { padding: 12px 18px; } /* [CHỈNH] Giảm padding trong modal-body */
+            .modal-header {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 14px 18px 12px; border-bottom: 1px solid #f1f5f9; /* [CHỈNH] Giảm padding header modal */
+            }
+            .modal-header-left { display: flex; align-items: center; gap: 12px; }
+            .modal-icon-badge {
+              width: 42px; height: 42px; border-radius: 11px;
+              display: flex; align-items: center; justify-content: center; font-size: 18px;
+            }
+            /* (màu icon-badge định nghĩa trong block CSS bên dưới) */
+            .modal-title { font-size: 15px; font-weight: 800; color: #1e293b; }
+            .modal-sub   { font-size: 11.5px; color: #64748b; margin-top: 2px; }
+            .modal-close {
+              width: 32px; height: 32px; border-radius: 50%;
+              background: #f1f5f9; border: none; cursor: pointer;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 13px; color: #64748b; transition: all 0.18s;
+            }
+            .modal-close:hover { background: #fee2e2; color: #dc2626; }
 
-    .modal-amount-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      background: linear-gradient(135deg, #eff6ff, #dbeafe);
-      border: 1.5px solid #bfdbfe; border-radius: 14px;
-      padding: 10px 14px; margin-bottom: 12px; /* [CHỈNH] Giảm padding & margin amount-bar */
-    }
-    .modal-amount-label { font-size: 12px; font-weight: 600; color: #64748b; }
-    .modal-amount-val   { font-size: 22px; font-weight: 800; color: #1a56db; letter-spacing: -0.5px; }
-    .modal-wallet-icon {
-      width: 42px; height: 42px; border-radius: 11px;
-      background: linear-gradient(135deg, #1a56db, #3b82f6);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff; box-shadow: 0 4px 12px rgba(26,86,219,0.3);
-    }
+            .modal-body { padding: 12px 18px; } /* [CHỈNH] Giảm padding trong modal-body */
 
-    .modal-dv-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-    .modal-dv-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 14px; border-radius: 10px; border: 1px solid var(--mau-vien);
-    }
-    .modal-dv-item.tim-bg  { background: #faf5ff; border-color: #ddd6fe; }
-    .modal-dv-item.cyan-bg { background: #f0fdff; border-color: #a5f3fc; }
-    .mdi-left { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; }
-    .mdi-left i { font-size: 14px; }
-    .mdi-price { font-size: 14px; font-weight: 800; color: var(--mau-chu); }
+            .modal-amount-bar {
+              display: flex; align-items: center; justify-content: space-between;
+              background: linear-gradient(135deg, #eff6ff, #dbeafe);
+              border: 1.5px solid #bfdbfe; border-radius: 14px;
+              padding: 10px 14px; margin-bottom: 12px; /* [CHỈNH] Giảm padding & margin amount-bar */
+            }
+            .modal-amount-label { font-size: 12px; font-weight: 600; color: #64748b; }
+            .modal-amount-val   { font-size: 22px; font-weight: 800; color: #1a56db; letter-spacing: -0.5px; }
+            .modal-wallet-icon {
+              width: 42px; height: 42px; border-radius: 11px;
+              background: linear-gradient(135deg, #1a56db, #3b82f6);
+              display: flex; align-items: center; justify-content: center;
+              font-size: 18px; color: #fff; box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+            }
 
-    .qr-section {
-      background: #f8faff; border: 2px solid #e2e8f0;
-      border-radius: 16px; padding: 10px; text-align: center; margin-bottom: 10px; /* [CHỈNH] Giảm padding qr-section */
-    }
-    #modal-qr-img {
-      width: 300px; height: 170px; object-fit: contain; /* [CHỈNH] Thu nhỏ ảnh QR 200x125→160x100 */
-      border-radius: 8px; display: block; margin: 0 auto 10px;
-    }
-    .qr-fallback {
-      width: 160px; height: 160px; border-radius: 8px;
-      border: 2px dashed #bfdbfe; background: #f8faff;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      margin: 0 auto 10px; gap: 6px;
-      font-size: 12px; font-weight: 600; color: #94a3b8;
-    }
-    .qr-bank-rows { display: flex; flex-direction: column; gap: 5px; }
-    .qr-br { display: flex; justify-content: space-between; font-size: 12px; }
-    .qr-br .lbl { color: #64748b; }
-    .qr-br .val { font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 5px; }
-    .copy-btn {
-      background: none; border: none; cursor: pointer;
-      font-size: 11px; color: #1a56db; padding: 1px 5px;
-      border-radius: 5px; transition: background 0.15s;
-    }
-    .copy-btn:hover { background: #eff6ff; }
+            .modal-dv-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+            .modal-dv-item {
+              display: flex; justify-content: space-between; align-items: center;
+              padding: 10px 14px; border-radius: 10px; border: 1px solid var(--mau-vien);
+            }
+            .modal-dv-item.tim-bg  { background: #faf5ff; border-color: #ddd6fe; }
+            .modal-dv-item.cyan-bg { background: #f0fdff; border-color: #a5f3fc; }
+            .mdi-left { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; }
+            .mdi-left i { font-size: 14px; }
+            .mdi-price { font-size: 14px; font-weight: 800; color: var(--mau-chu); }
 
-    .noi-dung-ck {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #fefce8; border: 1px solid #fde68a;
-      border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; /* [CHỈNH] Giảm padding & margin nội dung chuyển khoản */
-      font-size: 12.5px;
-    }
-    .noi-dung-ck .nd-label { color: #92400e; font-weight: 600; }
-    .noi-dung-ck .nd-val   { font-weight: 800; color: #b45309; }
+            .qr-section {
+              background: #f8faff; border: 2px solid #e2e8f0;
+              border-radius: 16px; padding: 10px; text-align: center; margin-bottom: 10px; /* [CHỈNH] Giảm padding qr-section */
+            }
+            #modal-qr-img {
+              width: 300px; height: 170px; object-fit: contain; /* [CHỈNH] Thu nhỏ ảnh QR 200x125→160x100 */
+              border-radius: 8px; display: block; margin: 0 auto 10px;
+            }
+            .qr-fallback {
+              width: 160px; height: 160px; border-radius: 8px;
+              border: 2px dashed #bfdbfe; background: #f8faff;
+              display: flex; flex-direction: column;
+              align-items: center; justify-content: center;
+              margin: 0 auto 10px; gap: 6px;
+              font-size: 12px; font-weight: 600; color: #94a3b8;
+            }
+            .qr-bank-rows { display: flex; flex-direction: column; gap: 5px; }
+            .qr-br { display: flex; justify-content: space-between; font-size: 12px; }
+            .qr-br .lbl { color: #64748b; }
+            .qr-br .val { font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 5px; }
+            .copy-btn {
+              background: none; border: none; cursor: pointer;
+              font-size: 11px; color: #1a56db; padding: 1px 5px;
+              border-radius: 5px; transition: background 0.15s;
+            }
+            .copy-btn:hover { background: #eff6ff; }
 
-    .upload-zone {
-      border: 2px dashed #bfdbfe; border-radius: 12px;
-      background: #f8faff; padding: 10px; text-align: center; /* [CHỈNH] Giảm padding upload-zone */
-      cursor: pointer; transition: all 0.22s; position: relative; margin-bottom: 10px; /* [CHỈNH] Giảm margin-bottom upload-zone */
-    }
-    .upload-zone:hover { border-color: #1a56db; }
-    .upload-zone.drag-over { border-color: #1a56db; background: #eff6ff; transform: scale(1.01); }
-    .upload-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .upload-icon  { font-size: 22px; color: #93c5fd; display: block; margin-bottom: 4px; } /* [CHỈNH] Thu nhỏ icon upload */
-    .upload-title { font-size: 12.5px; font-weight: 700; color: var(--mau-chu); margin-bottom: 3px; }
-    .upload-hint  { font-size: 11px; color: var(--mau-chu-phu); }
-    .upload-hint span { color: var(--mau-chu-de); font-weight: 700; }
-    .upload-preview { display: none; position: relative; }
-    .upload-preview img {
-      width: 100%; max-height: 140px; object-fit: cover;
-      border-radius: 8px; border: 1.5px solid var(--mau-vien); display: block;
-    }
-    .btn-remove-img {
-      position: absolute; top: 5px; right: 5px;
-      background: rgba(220,38,38,0.9); color: #fff; border: none;
-      border-radius: 50%; width: 26px; height: 26px; font-size: 11px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
-    .upload-fname { font-size: 11px; color: var(--mau-chu-phu); margin-top: 5px; font-style: italic; }
+            .noi-dung-ck {
+              display: flex; align-items: center; justify-content: space-between;
+              background: #fefce8; border: 1px solid #fde68a;
+              border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; /* [CHỈNH] Giảm padding & margin nội dung chuyển khoản */
+              font-size: 12.5px;
+            }
+            .noi-dung-ck .nd-label { color: #92400e; font-weight: 600; }
+            .noi-dung-ck .nd-val   { font-weight: 800; color: #b45309; }
 
-    .modal-footer { padding: 0 18px 16px; display: flex; gap: 10px; } /* [CHỈNH] Giảm padding footer modal */
-    .btn-modal-huy {
-      flex: 1; padding: 12px; background: #f1f5f9; color: #475569;
-      border: 1.5px solid #e2e8f0; border-radius: 12px;
-      font-family: 'Be Vietnam Pro', sans-serif; font-size: 13.5px; font-weight: 700;
-      cursor: pointer; transition: background 0.18s;
-    }
-    .btn-modal-huy:hover { background: #e2e8f0; }
-    .btn-modal-gui {
-      flex: 2; padding: 12px;
-      background: linear-gradient(135deg, #059669, #10b981);
-      color: #fff; border: none; border-radius: 12px;
-      font-family: 'Be Vietnam Pro', sans-serif; font-size: 13.5px; font-weight: 700;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 4px 14px rgba(5,150,105,0.3); transition: all 0.18s;
-      opacity: 0.45; pointer-events: none;
-    }
-    .btn-modal-gui.active { opacity: 1; pointer-events: auto; }
-    .btn-modal-gui.active:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(5,150,105,0.4); }
+            .upload-zone {
+              border: 2px dashed #bfdbfe; border-radius: 12px;
+              background: #f8faff; padding: 10px; text-align: center; /* [CHỈNH] Giảm padding upload-zone */
+              cursor: pointer; transition: all 0.22s; position: relative; margin-bottom: 10px; /* [CHỈNH] Giảm margin-bottom upload-zone */
+            }
+            .upload-zone:hover { border-color: #1a56db; }
+            .upload-zone.drag-over { border-color: #1a56db; background: #eff6ff; transform: scale(1.01); }
+            .upload-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+            .upload-icon  { font-size: 22px; color: #93c5fd; display: block; margin-bottom: 4px; } /* [CHỈNH] Thu nhỏ icon upload */
+            .upload-title { font-size: 12.5px; font-weight: 700; color: var(--mau-chu); margin-bottom: 3px; }
+            .upload-hint  { font-size: 11px; color: var(--mau-chu-phu); }
+            .upload-hint span { color: var(--mau-chu-de); font-weight: 700; }
+            .upload-preview { display: none; position: relative; }
+            .upload-preview img {
+              width: 100%; max-height: 140px; object-fit: cover;
+              border-radius: 8px; border: 1.5px solid var(--mau-vien); display: block;
+            }
+            .btn-remove-img {
+              position: absolute; top: 5px; right: 5px;
+              background: rgba(220,38,38,0.9); color: #fff; border: none;
+              border-radius: 50%; width: 26px; height: 26px; font-size: 11px;
+              cursor: pointer; display: flex; align-items: center; justify-content: center;
+            }
+            .upload-fname { font-size: 11px; color: var(--mau-chu-phu); margin-top: 5px; font-style: italic; }
 
-    .modal-success {
-      display: none; flex-direction: column; align-items: center;
-      text-align: center; gap: 10px; padding: 32px 24px;
-    }
-    .modal-success.hien { display: flex; animation: fadeUp 0.4s ease; }
-    .success-icon { font-size: 52px; color: #059669; animation: bounce-in 0.5s ease; }
-    @@keyframes bounce-in {
-      0%  { transform: scale(0); }
-      70% { transform: scale(1.15); }
-      100%{ transform: scale(1); }
-    }
-    .modal-success h4 { font-size: 17px; font-weight: 800; }
-    .modal-success p  { font-size: 12.5px; color: var(--mau-chu-phu); line-height: 1.7; }
-    .btn-ve-trang {
-      margin-top: 6px; padding: 10px 24px;
-      background: var(--mau-xanh-nhat); color: var(--mau-chu-de);
-      border: 1.5px solid var(--mau-xanh-trung); border-radius: 10px;
-      font-family: 'Be Vietnam Pro', sans-serif; font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .btn-ve-trang:hover { background: var(--mau-xanh-trung); }
+            .modal-footer { padding: 0 18px 16px; display: flex; gap: 10px; } /* [CHỈNH] Giảm padding footer modal */
+            .btn-modal-huy {
+              flex: 1; padding: 12px; background: #f1f5f9; color: #475569;
+              border: 1.5px solid #e2e8f0; border-radius: 12px;
+              font-family: 'Be Vietnam Pro', sans-serif; font-size: 13.5px; font-weight: 700;
+              cursor: pointer; transition: background 0.18s;
+            }
+            .btn-modal-huy:hover { background: #e2e8f0; }
+            .btn-modal-gui {
+              flex: 2; padding: 12px;
+              background: linear-gradient(135deg, #059669, #10b981);
+              color: #fff; border: none; border-radius: 12px;
+              font-family: 'Be Vietnam Pro', sans-serif; font-size: 13.5px; font-weight: 700;
+              cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+              box-shadow: 0 4px 14px rgba(5,150,105,0.3); transition: all 0.18s;
+              opacity: 0.45; pointer-events: none;
+            }
+            .btn-modal-gui.active { opacity: 1; pointer-events: auto; }
+            .btn-modal-gui.active:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(5,150,105,0.4); }
 
-    /* =============================================
-       THANH TOÁN THỐNG NHẤT (tt-bar)
-    ============================================= */
-    .tt-bar {
-      margin-top: 24px;
-      background: var(--mau-trang);
-      border: 1.5px solid var(--mau-vien);
-      border-radius: 18px;
-      padding: 16px 22px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      box-shadow: 0 6px 28px rgba(26,86,219,0.10);
-      animation: fadeUp 0.35s ease;
-    }
-    .tt-bar-left  { display: flex; align-items: center; gap: 14px; }
-    .tt-bar-icon  {
-      width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 20px;
-      background: linear-gradient(135deg, #1a56db, #3b82f6); color: #fff;
-      box-shadow: 0 4px 14px rgba(26,86,219,0.30);
-    }
-    .tt-bar-icon.gop { background: linear-gradient(135deg, #7c3aed, #0891b2); }
-    .tt-bar-label { font-size: 14px; font-weight: 800; color: var(--mau-chu); }
-    .tt-bar-breakdown { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 3px; }
-    .tt-bar-right { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
-    .tt-bar-total { font-size: 22px; font-weight: 800; color: var(--mau-chu-de); letter-spacing: -0.5px; }
-    .tt-bar-btn {
-      padding: 11px 22px;
-      background: linear-gradient(135deg, #1a56db, #3b82f6);
-      color: #fff; border: none; border-radius: 12px;
-      font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px; font-weight: 700;
-      cursor: pointer; display: flex; align-items: center; gap: 8px;
-      box-shadow: 0 5px 18px rgba(26,86,219,0.30); transition: all 0.22s;
-      white-space: nowrap;
-    }
-    .tt-bar-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,86,219,0.40); }
+            .modal-success {
+              display: none; flex-direction: column; align-items: center;
+              text-align: center; gap: 10px; padding: 32px 24px;
+            }
+            .modal-success.hien { display: flex; animation: fadeUp 0.4s ease; }
+            .success-icon { font-size: 52px; color: #059669; animation: bounce-in 0.5s ease; }
+            @@keyframes bounce-in {
+              0%  { transform: scale(0); }
+              70% { transform: scale(1.15); }
+              100%{ transform: scale(1); }
+            }
+            .modal-success h4 { font-size: 17px; font-weight: 800; }
+            .modal-success p  { font-size: 12.5px; color: var(--mau-chu-phu); line-height: 1.7; }
+            .btn-ve-trang {
+              margin-top: 6px; padding: 10px 24px;
+              background: var(--mau-xanh-nhat); color: var(--mau-chu-de);
+              border: 1.5px solid var(--mau-xanh-trung); border-radius: 10px;
+              font-family: 'Be Vietnam Pro', sans-serif; font-size: 13px; font-weight: 700;
+              cursor: pointer; transition: background 0.2s;
+            }
+            .btn-ve-trang:hover { background: var(--mau-xanh-trung); }
 
-    /* Nút Thanh toán riêng lẻ trong card — ẩn mặc định */
-    .dv-btn-thanh-toan {
-      display: none; width: 100%; padding: 13px;
-      border: none; border-radius: 13px; cursor: pointer;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 14px; font-weight: 700;
-      align-items: center; justify-content: center; gap: 9px;
-      transition: all 0.22s; animation: fadeUp 0.35s ease;
-    }
-    .dv-btn-thanh-toan.tim {
-      background: linear-gradient(135deg, #059669, #34d399);
-      color: #fff; box-shadow: 0 5px 18px rgba(5,150,105,0.35);
-    }
-    .dv-btn-thanh-toan.tim:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(5,150,105,0.45); }
-    .dv-btn-thanh-toan.cyan {
-      background: linear-gradient(135deg, #059669, #34d399);
-      color: #fff; box-shadow: 0 5px 18px rgba(5,150,105,0.35);
-    }
-    .dv-btn-thanh-toan.cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(5,150,105,0.45); }
+            /* =============================================
+               THANH TOÁN THỐNG NHẤT (tt-bar)
+            ============================================= */
+            .tt-bar {
+              margin-top: 24px;
+              background: var(--mau-trang);
+              border: 1.5px solid var(--mau-vien);
+              border-radius: 18px;
+              padding: 16px 22px;
+              display: flex; align-items: center; justify-content: space-between; gap: 16px;
+              box-shadow: 0 6px 28px rgba(26,86,219,0.10);
+              animation: fadeUp 0.35s ease;
+            }
+            .tt-bar-left  { display: flex; align-items: center; gap: 14px; }
+            .tt-bar-icon  {
+              width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+              display: flex; align-items: center; justify-content: center; font-size: 20px;
+              background: linear-gradient(135deg, #1a56db, #3b82f6); color: #fff;
+              box-shadow: 0 4px 14px rgba(26,86,219,0.30);
+            }
+            .tt-bar-icon.gop { background: linear-gradient(135deg, #7c3aed, #0891b2); }
+            .tt-bar-label { font-size: 14px; font-weight: 800; color: var(--mau-chu); }
+            .tt-bar-breakdown { font-size: 11.5px; color: var(--mau-chu-phu); margin-top: 3px; }
+            .tt-bar-right { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+            .tt-bar-total { font-size: 22px; font-weight: 800; color: var(--mau-chu-de); letter-spacing: -0.5px; }
+            .tt-bar-btn {
+              padding: 11px 22px;
+              background: linear-gradient(135deg, #1a56db, #3b82f6);
+              color: #fff; border: none; border-radius: 12px;
+              font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px; font-weight: 700;
+              cursor: pointer; display: flex; align-items: center; gap: 8px;
+              box-shadow: 0 5px 18px rgba(26,86,219,0.30); transition: all 0.22s;
+              white-space: nowrap;
+            }
+            .tt-bar-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,86,219,0.40); }
 
-    /* tt-bar icon màu nước */
-    .tt-bar-icon.nuoc { background: linear-gradient(135deg, #0891b2, #22d3ee); }
+            /* Nút Thanh toán riêng lẻ trong card — ẩn mặc định */
+            .dv-btn-thanh-toan {
+              display: none; width: 100%; padding: 13px;
+              border: none; border-radius: 13px; cursor: pointer;
+              font-family: 'Be Vietnam Pro', sans-serif;
+              font-size: 14px; font-weight: 700;
+              align-items: center; justify-content: center; gap: 9px;
+              transition: all 0.22s; animation: fadeUp 0.35s ease;
+            }
+            .dv-btn-thanh-toan.tim {
+              background: linear-gradient(135deg, #059669, #34d399);
+              color: #fff; box-shadow: 0 5px 18px rgba(5,150,105,0.35);
+            }
+            .dv-btn-thanh-toan.tim:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(5,150,105,0.45); }
+            .dv-btn-thanh-toan.cyan {
+              background: linear-gradient(135deg, #059669, #34d399);
+              color: #fff; box-shadow: 0 5px 18px rgba(5,150,105,0.35);
+            }
+            .dv-btn-thanh-toan.cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(5,150,105,0.45); }
 
-    /* Modal accent + icon badge — màu tím (GS), cyan (nước), gộp */
-    .modal-accent.tim   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
-    .modal-accent.cyan  { background: linear-gradient(90deg, #0891b2, #22d3ee); }
-    .modal-accent.gop   { background: linear-gradient(90deg, #7c3aed, #0891b2, #34d399); }
-    .modal-icon-badge.tim  { background: var(--mau-tim-nhat);  color: var(--mau-tim);  }
-    .modal-icon-badge.cyan { background: var(--mau-cyan-nhat); color: var(--mau-cyan); }
-    .modal-icon-badge.gop  { background: var(--mau-tim-nhat);  color: var(--mau-tim);  }
+            /* tt-bar icon màu nước */
+            .tt-bar-icon.nuoc { background: linear-gradient(135deg, #0891b2, #22d3ee); }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+            /* Modal accent + icon badge — màu tím (GS), cyan (nước), gộp */
+            .modal-accent.tim   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+            .modal-accent.cyan  { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+            .modal-accent.gop   { background: linear-gradient(90deg, #7c3aed, #0891b2, #34d399); }
+            .modal-icon-badge.tim  { background: var(--mau-tim-nhat);  color: var(--mau-tim);  }
+            .modal-icon-badge.cyan { background: var(--mau-cyan-nhat); color: var(--mau-cyan); }
+            .modal-icon-badge.gop  { background: var(--mau-tim-nhat);  color: var(--mau-tim);  }
 
-    /* =============================================
-       RESPONSIVE
-    ============================================= */
-    @@media (max-width: 1100px) {
-      .dv-grid { grid-template-columns: 1fr; }
-      .dv-card.full-width { grid-column: 1; }
-      .dn-two-col { grid-template-columns: 1fr; }
-    }
-    @@media (max-width: 768px) {
-      #thanh-sidebar { width: 0; min-width: 0; }
-      #noi-dung-chinh { padding: 16px; }
-      .form-row-3 { grid-template-columns: 1fr 1fr; }
-    }
+            /* Scrollbar */
+            ::-webkit-scrollbar { width: 6px; }
+            ::-webkit-scrollbar-track { background: transparent; }
+            ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-  </style>
+            /* =============================================
+               RESPONSIVE
+            ============================================= */
+            @@media (max-width: 1100px) {
+              .dv-grid { grid-template-columns: 1fr; }
+              .dv-card.full-width { grid-column: 1; }
+              .dn-two-col { grid-template-columns: 1fr; }
+            }
+            @@media (max-width: 768px) {
+              #thanh-sidebar { width: 0; min-width: 0; }
+              #noi-dung-chinh { padding: 16px; }
+              .form-row-3 { grid-template-columns: 1fr 1fr; }
+            }
+
+    </style>
 </head>
 <body>
 
-  @* =============================================
+    @* =============================================
      SIDEBAR
   ============================================= *@
-  <nav id="thanh-sidebar">
-    <div class="logo-sidebar">
-      <div class="bieu-tuong">
-        <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
-      </div>
-      <div class="ten-logo">
-        <strong>Nhà Trọ Bà Năm</strong>
-        <span>Cổng khách thuê</span>
-      </div>
-    </div>
+    <nav id="thanh-sidebar">
+        <div class="logo-sidebar">
+            <div class="bieu-tuong">
+                <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
+            </div>
+            <div class="ten-logo">
+                <strong>Nhà Trọ Bà Năm</strong>
+                <span>Cổng khách thuê</span>
+            </div>
+        </div>
 
-    <div class="nhan-nhom">Tổng quan</div>
-    <a href="/KhachThue/KhachThue" class="menu-item">
-      <i class="fas fa-home"></i><span>Trang chủ</span>
-    </a>
+        <div class="nhan-nhom">Tổng quan</div>
+        <a href="/KhachThue/KhachThue" class="menu-item">
+            <i class="fas fa-home"></i><span>Trang chủ</span>
+        </a>
 
-    <div class="nhan-nhom">Dịch vụ</div>
-    <a href="/KhachThue/ThanhToan" class="menu-item">
-      <i class="fas fa-credit-card"></i><span>Thanh toán</span>
-    </a>
-    <a href="/KhachThue/TienIch" class="menu-item dang-chon">
-      <i class="fas fa-bolt"></i><span>Dịch vụ &amp; Tiện ích</span>
-    </a>
-    <a href="/KhachThue/BaoSuCo" class="menu-item">
-      <i class="fas fa-tools"></i><span>Báo sự cố</span>
-    </a>
+        <div class="nhan-nhom">Dịch vụ</div>
+        <a href="/KhachThue/ThanhToan" class="menu-item">
+            <i class="fas fa-credit-card"></i><span>Thanh toán</span>
+        </a>
+        <a href="/KhachThue/TienIch" class="menu-item dang-chon">
+            <i class="fas fa-bolt"></i><span>Dịch vụ &amp; Tiện ích</span>
+        </a>
+        <a href="/KhachThue/BaoSuCo" class="menu-item">
+            <i class="fas fa-tools"></i><span>Báo sự cố</span>
+        </a>
 
-    <div class="nhan-nhom">Cá nhân</div>
-    <a href="/KhachThue/ThongBao" class="menu-item">
-      <i class="fas fa-bell"></i><span>Thông báo</span>
-      @if (Model.SoThongBaoChuaDoc > 0)
-      {
-          <span class="huy-hieu-menu">@Model.SoThongBaoChuaDoc</span>
-      }
-    </a>
-    <a href="/KhachThue/HoSo" class="menu-item">
-      <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
-    </a>
-    <a href="/KhachThue/CaiDat" class="menu-item">
-      <i class="fas fa-cog"></i><span>Cài đặt</span>
-    </a>
+        <div class="nhan-nhom">Cá nhân</div>
+        <a href="/KhachThue/ThongBao" class="menu-item">
+            <i class="fas fa-bell"></i><span>Thông báo</span>
+            @if (Model.SoThongBaoChuaDoc > 0)
+            {
+                <span class="huy-hieu-menu">@Model.SoThongBaoChuaDoc</span>
+            }
+        </a>
+        <a href="/KhachThue/HoSo" class="menu-item">
+            <i class="fas fa-user-circle"></i><span>Hồ sơ</span>
+        </a>
+        <a href="/KhachThue/CaiDat" class="menu-item">
+            <i class="fas fa-cog"></i><span>Cài đặt</span>
+        </a>
 
-    <div class="sidebar-footer">
-      <div class="anh-khach">@Model.ChuVietTat</div>
-      <div class="ten-khach">
-        <strong>@Model.TenKhach</strong>
-        <span>@Model.SoPhong · @Model.TangPhong</span>
-      </div>
-    </div>
-  </nav>
+        <div class="sidebar-footer">
+            <div class="anh-khach">@Model.ChuVietTat</div>
+            <div class="ten-khach">
+                <strong>@Model.TenKhach</strong>
+                <span>@Model.SoPhong · @Model.TangPhong</span>
+            </div>
+        </div>
+    </nav>
 
-  @* =============================================
+    @* =============================================
      KHU VỰC CHÍNH
   ============================================= *@
-  <div id="khu-vuc-chinh">
+    <div id="khu-vuc-chinh">
 
-    <header id="thanh-header">
-      <div class="header-trai">
-        <button class="nut-ham-menu" onclick="dongMoSidebar()" aria-label="Toggle menu">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div>
-          <div class="tieu-de-trang">Dịch Vụ &amp; Tiện Ích</div>
-          <div class="duong-dan">
-            <a href="/KhachThue/KhachThue">Trang chủ</a>
-            &nbsp;/&nbsp; Tiện ích
-          </div>
-        </div>
-      </div>
-      <div class="header-phai">
-        <div class="hdr-date" id="headerDate"></div>
-        <button class="nut-thong-bao" aria-label="Thông báo">
-          <i class="fas fa-bell"></i>
-          @if (Model.SoThongBaoChuaDoc > 0)
-          {
-              <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
-          }
-        </button>
-        <div class="thong-tin-khach">
-          <div class="anh-dai-dien">@Model.ChuVietTat</div>
-          <div>
-            <div class="ten">@Model.TenKhach</div>
-            <div class="phong-so">@Model.SoPhong</div>
-          </div>
-          <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
-        </div>
-      </div>
-    </header>
+        <header id="thanh-header">
+            <div class="header-trai">
+                <button class="nut-ham-menu" onclick="dongMoSidebar()" aria-label="Toggle menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div>
+                    <div class="tieu-de-trang">Dịch Vụ &amp; Tiện Ích</div>
+                    <div class="duong-dan">
+                        <a href="/KhachThue/KhachThue">Trang chủ</a>
+                        &nbsp;/&nbsp; Tiện ích
+                    </div>
+                </div>
+            </div>
+            <div class="header-phai">
+                <div class="hdr-date" id="headerDate"></div>
+                <button class="nut-thong-bao" aria-label="Thông báo">
+                    <i class="fas fa-bell"></i>
+                    @if (Model.SoThongBaoChuaDoc > 0)
+                    {
+                        <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
+                    }
+                </button>
+                <div class="thong-tin-khach">
+                    <div class="anh-dai-dien">@Model.ChuVietTat</div>
+                    <div>
+                        <div class="ten">@Model.TenKhach</div>
+                        <div class="phong-so">@Model.SoPhong</div>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
+                </div>
+            </div>
+        </header>
 
-    <main id="noi-dung-chinh">
+        <main id="noi-dung-chinh">
 
-      <div class="page-heading">
-        <div>
-          <h2><i class="fas fa-concierge-bell"></i> Dịch vụ &amp; Tiện ích</h2>
-          <p>Đặt dịch vụ tiện ích ngay tại trang — @Model.SoPhong &nbsp;·&nbsp; @Model.TenKhach</p>
-        </div>
-      </div>
+            <div class="page-heading">
+                <div>
+                    <h2><i class="fas fa-concierge-bell"></i> Dịch vụ &amp; Tiện ích</h2>
+                    <p>Đặt dịch vụ tiện ích ngay tại trang — @Model.SoPhong &nbsp;·&nbsp; @Model.TenKhach</p>
+                </div>
+            </div>
 
-      @* ==========================================
+            @* ==========================================
          LƯỚI DỊCH VỤ
       ========================================== *@
-      <div class="dv-grid">
+            <div class="dv-grid">
 
-        @* ==========================================
+                @* ==========================================
            DỊCH VỤ 1 — GIẶT SẤY
         ========================================== *@
-        <div class="dv-card">
-          <div class="dv-accent tim"></div>
-          <div class="dv-card-header">
-            <div class="dv-header-left">
-              <div class="dv-icon-wrap tim"><i class="fas fa-tshirt"></i></div>
-              <div>
-                <h3>Giặt Sấy</h3>
-                <div class="sub">Giao nhận tại phòng · Xử lý trong ngày</div>
-              </div>
-            </div>
-            <div class="@gsBadgeClass" id="gs-badge">
-              @Html.Raw(gsBadgeHtml)
-            </div>
-          </div>
+                <div class="dv-card">
+                    <div class="dv-accent tim"></div>
+                    <div class="dv-card-header">
+                        <div class="dv-header-left">
+                            <div class="dv-icon-wrap tim"><i class="fas fa-tshirt"></i></div>
+                            <div>
+                                <h3>Giặt Sấy</h3>
+                                <div class="sub">Giao nhận tại phòng · Xử lý trong ngày</div>
+                            </div>
+                        </div>
+                        <div class="@gsBadgeClass" id="gs-badge">
+                            @Html.Raw(gsBadgeHtml)
+                        </div>
+                    </div>
 
-          <div class="dv-card-body">
-            <div class="dv-desc-box" id="gs-desc">
-              <div class="dv-feature-row">
-                <i class="fas fa-clock" style="color:#7c3aed;"></i>
-                <span>Khung giờ giao nhận: <strong>7:00–8:30</strong> và <strong>18:00–20:00</strong></span>
-              </div>
-              <div class="dv-feature-row">
-                <i class="fas fa-soap" style="color:#7c3aed;"></i>
-                <span>Giặt thường, giặt sấy, ủi — giá theo kg</span>
-              </div>
-              <div class="dv-feature-row">
-                <i class="fas fa-money-bill-wave" style="color:#7c3aed;"></i>
-                <span>Quản lý báo giá sau khi nhận đồ</span>
-              </div>
-              <div class="dv-feature-row">
-                <i class="fas fa-calendar-check" style="color:#7c3aed;"></i>
-                <span>Nhận lại đồ sau 1–2 ngày làm việc</span>
-              </div>
-            </div>
+                    <div class="dv-card-body">
+                        <div class="dv-desc-box" id="gs-desc">
+                            <div class="dv-feature-row">
+                                <i class="fas fa-clock" style="color:#7c3aed;"></i>
+                                <span>Khung giờ giao nhận: <strong>7:00–8:30</strong> và <strong>18:00–20:00</strong></span>
+                            </div>
+                            <div class="dv-feature-row">
+                                <i class="fas fa-soap" style="color:#7c3aed;"></i>
+                                <span>Giặt thường, giặt sấy, ủi — giá theo kg</span>
+                            </div>
+                            <div class="dv-feature-row">
+                                <i class="fas fa-money-bill-wave" style="color:#7c3aed;"></i>
+                                <span>Quản lý báo giá sau khi nhận đồ</span>
+                            </div>
+                            <div class="dv-feature-row">
+                                <i class="fas fa-calendar-check" style="color:#7c3aed;"></i>
+                                <span>Nhận lại đồ sau 1–2 ngày làm việc</span>
+                            </div>
+                        </div>
 
-            <div class="dv-form-wrap" id="gs-form">
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
-                <input class="form-input disabled" type="text" id="gs-so-phong"
-                       value="@Model.SoPhong" readonly />
-              </div>
+                        <div class="dv-form-wrap" id="gs-form">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
+                                <input class="form-input disabled" type="text" id="gs-so-phong"
+                                       value="@Model.SoPhong" readonly />
+                            </div>
 
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-tshirt"></i>Loại dịch vụ</label>
-                <select class="form-input" id="gs-loai">
-                  <option value="">-- Chọn loại --</option>
-                  <option value="giat">Giặt thường</option>
-                  <option value="giat-say">Giặt + Sấy</option>
-                  <option value="giat-say-ui">Giặt + Sấy + Ủi</option>
-                </select>
-              </div>
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-tshirt"></i>Loại dịch vụ</label>
+                                <select class="form-input" id="gs-loai">
+                                    <option value="">-- Chọn loại --</option>
+                                    <option value="giat">Giặt thường</option>
+                                    <option value="giat-say">Giặt + Sấy</option>
+                                    <option value="giat-say-ui">Giặt + Sấy + Ủi</option>
+                                </select>
+                            </div>
 
-              <div>
-                <div class="form-label" style="margin-bottom:8px;">
-                  <i class="fas fa-info-circle" style="color:#7c3aed;"></i>
-                  Khung giờ giao nhận (cố định)
+                            <div>
+                                <div class="form-label" style="margin-bottom:8px;">
+                                    <i class="fas fa-info-circle" style="color:#7c3aed;"></i>
+                                    Khung giờ giao nhận (cố định)
+                                </div>
+                                <div class="gs-info-grid">
+                                    <div class="gs-info-item">
+                                        <div class="gs-info-label">Buổi sáng</div>
+                                        <div class="gs-info-val">7:00 – 8:30</div>
+                                    </div>
+                                    <div class="gs-info-item">
+                                        <div class="gs-info-label">Buổi tối</div>
+                                        <div class="gs-info-val">18:00 – 20:00</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-comment"></i>Ghi chú (tuỳ chọn)</label>
+                                <textarea class="form-input" id="gs-ghi-chu" rows="2"
+                                          placeholder="VD: 2 áo trắng cần giặt riêng..."></textarea>
+                            </div>
+
+                            <div class="waiting-box" id="gs-waiting">
+                                <i class="fas fa-hourglass-half"></i>
+                                <div class="wb-text">
+                                    Đơn đã được gửi! Quản lý sẽ <strong>báo tổng tiền</strong> sau khi
+                                    nhận và cân đồ của bạn. Vui lòng chờ thông báo.
+                                </div>
+                            </div>
+
+                            <div class="gs-price-box" id="gs-price-box">
+                                <div style="font-size:13px;font-weight:800;color:#065f46;display:flex;align-items:center;gap:7px;">
+                                    <i class="fas fa-tag" style="color:#059669;"></i>
+                                    Quản lý đã báo giá đơn giặt sấy
+                                </div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span style="font-size:12px;color:var(--mau-chu-phu);">Tổng tiền cần thanh toán</span>
+                                    <span style="font-size:20px;font-weight:800;color:var(--mau-xanh-la);" id="gs-gia-tien">
+                                        @(Model.DonGiatSay?.TongTien > 0
+                                            ? Model.DonGiatSay.TongTien.ToString("N0") + " đ"
+                                            : "— đ")
+                                    </span>
+                                </div>
+                            </div>
+
+                            @* Nút Thanh toán Giặt sấy — hiện sau khi quản lý báo giá *@
+                            <button class="dv-btn-thanh-toan tim" id="gs-btn-thanh-toan"
+                                    onclick="moThanhToanGS()"
+                                    style="@(Model.DonGiatSay?.TrangThai_DV == "Chờ thanh toán" ? "display:flex;" : "display:none;")">
+                                <i class="fas fa-qrcode"></i> Thanh toán Giặt Sấy
+                            </button>
+
+                            <div id="gs-btn-group" style="display:flex;flex-direction:column;gap:8px;">
+                                <button class="dv-btn-submit tim" onclick="guiDonGS()">
+                                    <i class="fas fa-paper-plane"></i> Đặt dịch vụ giặt sấy
+                                </button>
+                                <button class="dv-btn-cancel" onclick="dongFormGS()">
+                                    <i class="fas fa-times"></i> Huỷ
+                                </button>
+                            </div>
+                        </div>
+
+                        @* ── Banner: Tiền GS đã cộng vào hóa đơn tháng ── *@
+                        @if (Model.DonGiatSayCongVaoTro != null)
+                        {
+                            <div class="no-dv-banner" id="gs-no-dv-banner">
+                                <div class="no-dv-banner-header">
+                                    <div class="no-dv-banner-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                                    <div>
+                                        <div class="no-dv-banner-title">Tiền chưa thanh toán đã cộng vào hóa đơn tháng</div>
+                                        <div class="no-dv-banner-sub">
+                                            Đơn giặt sấy quá hạn @((DateTime.Now - Model.DonGiatSayCongVaoTro.NgayTao).Days) ngày
+                                            chưa thanh toán. Khoản này đã được gộp vào hóa đơn tháng của bạn.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="no-dv-amount-row">
+                                    <span class="no-dv-amount-label">Số tiền đã cộng vào hóa đơn</span>
+                                    <span class="no-dv-amount-val">@Model.DonGiatSayCongVaoTro.TongTien.ToString("N0") đ</span>
+                                </div>
+                                <button class="btn-huy-no-dv" id="gs-btn-huy-no-dv"
+                                        onclick="huyNoDV(@Model.DonGiatSayCongVaoTro.IDDonDV, 'gs')">
+                                    <i class="fas fa-credit-card"></i>
+                                    Thanh toán riêng — hủy khoản cộng vào hóa đơn
+                                </button>
+                            </div>
+                        }
+
+                        <button class="dv-btn-open tim" id="gs-btn-open" onclick="moFormGS()">
+                            <i class="fas fa-plus-circle"></i> Đặt dịch vụ giặt sấy
+                        </button>
+                    </div>
                 </div>
-                <div class="gs-info-grid">
-                  <div class="gs-info-item">
-                    <div class="gs-info-label">Buổi sáng</div>
-                    <div class="gs-info-val">7:00 – 8:30</div>
-                  </div>
-                  <div class="gs-info-item">
-                    <div class="gs-info-label">Buổi tối</div>
-                    <div class="gs-info-val">18:00 – 20:00</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-comment"></i>Ghi chú (tuỳ chọn)</label>
-                <textarea class="form-input" id="gs-ghi-chu" rows="2"
-                          placeholder="VD: 2 áo trắng cần giặt riêng..."></textarea>
-              </div>
-
-              <div class="waiting-box" id="gs-waiting">
-                <i class="fas fa-hourglass-half"></i>
-                <div class="wb-text">
-                  Đơn đã được gửi! Quản lý sẽ <strong>báo tổng tiền</strong> sau khi
-                  nhận và cân đồ của bạn. Vui lòng chờ thông báo.
-                </div>
-              </div>
-
-              <div class="gs-price-box" id="gs-price-box">
-                <div style="font-size:13px;font-weight:800;color:#065f46;display:flex;align-items:center;gap:7px;">
-                  <i class="fas fa-tag" style="color:#059669;"></i>
-                  Quản lý đã báo giá đơn giặt sấy
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                  <span style="font-size:12px;color:var(--mau-chu-phu);">Tổng tiền cần thanh toán</span>
-                  <span style="font-size:20px;font-weight:800;color:var(--mau-xanh-la);" id="gs-gia-tien">
-                    @(Model.DonGiatSay?.TongTien > 0
-                        ? Model.DonGiatSay.TongTien.ToString("N0") + " đ"
-                        : "— đ")
-                  </span>
-                </div>
-              </div>
-
-              @* Nút Thanh toán Giặt sấy — hiện sau khi quản lý báo giá *@
-              <button class="dv-btn-thanh-toan tim" id="gs-btn-thanh-toan"
-                      onclick="moThanhToanGS()"
-                      style="@(Model.DonGiatSay?.TrangThai_DV == "Chờ thanh toán" ? "display:flex;" : "display:none;")">
-                <i class="fas fa-qrcode"></i> Thanh toán Giặt Sấy
-              </button>
-
-              <div id="gs-btn-group" style="display:flex;flex-direction:column;gap:8px;">
-                <button class="dv-btn-submit tim" onclick="guiDonGS()">
-                  <i class="fas fa-paper-plane"></i> Đặt dịch vụ giặt sấy
-                </button>
-                <button class="dv-btn-cancel" onclick="dongFormGS()">
-                  <i class="fas fa-times"></i> Huỷ
-                </button>
-              </div>
-            </div>
-
-            <button class="dv-btn-open tim" id="gs-btn-open" onclick="moFormGS()">
-              <i class="fas fa-plus-circle"></i> Đặt dịch vụ giặt sấy
-            </button>
-          </div>
-        </div>
-        @* -- kết thúc dịch vụ giặt sấy -- *@
+                @* -- kết thúc dịch vụ giặt sấy -- *@
 
 
-        @* ==========================================
+                @* ==========================================
            DỊCH VỤ 2 — GIAO BÌNH NƯỚC
         ========================================== *@
-        <div class="dv-card">
-          <div class="dv-accent cyan"></div>
-          <div class="dv-card-header">
-            <div class="dv-header-left">
-              <div class="dv-icon-wrap cyan"><i class="fas fa-tint"></i></div>
-              <div>
-                <h3>Giao Bình Nước</h3>
-                <div class="sub">Bình 20L · Giao tận phòng</div>
-              </div>
-            </div>
-            <div class="@nuocBadgeClass" id="nuoc-badge">
-              @Html.Raw(nuocBadgeHtml)
-            </div>
-          </div>
+                <div class="dv-card">
+                    <div class="dv-accent cyan"></div>
+                    <div class="dv-card-header">
+                        <div class="dv-header-left">
+                            <div class="dv-icon-wrap cyan"><i class="fas fa-tint"></i></div>
+                            <div>
+                                <h3>Giao Bình Nước</h3>
+                                <div class="sub">Bình 20L · Giao tận phòng</div>
+                            </div>
+                        </div>
+                        <div class="@nuocBadgeClass" id="nuoc-badge">
+                            @Html.Raw(nuocBadgeHtml)
+                        </div>
+                    </div>
 
-          <div class="dv-card-body">
-            <div class="dv-desc-box cyan-bg" id="nuoc-desc">
-              <div class="dv-feature-row">
-                <i class="fas fa-water" style="color:#0891b2;"></i>
-                <span>Bình nước 20L tinh khiết — <strong>30,000 đ/bình</strong></span>
-              </div>
-              <div class="dv-feature-row">
-                <i class="fas fa-truck" style="color:#0891b2;"></i>
-                <span>Giao trong vòng 30–60 phút sau khi đặt</span>
-              </div>
-              <div class="dv-feature-row">
-                <i class="fas fa-check-circle" style="color:#0891b2;"></i>
-                <span>Xác nhận nhận hàng &amp; thanh toán trực tiếp</span>
-              </div>
-              <div class="dv-feature-row">
-                <i class="fas fa-redo" style="color:#0891b2;"></i>
-                <span>Trả vỏ bình cũ — giảm 5,000 đ/bình</span>
-              </div>
-            </div>
+                    <div class="dv-card-body">
+                        <div class="dv-desc-box cyan-bg" id="nuoc-desc">
+                            <div class="dv-feature-row">
+                                <i class="fas fa-water" style="color:#0891b2;"></i>
+                                <span>Bình nước 20L tinh khiết — <strong>30,000 đ/bình</strong></span>
+                            </div>
+                            <div class="dv-feature-row">
+                                <i class="fas fa-truck" style="color:#0891b2;"></i>
+                                <span>Giao trong vòng 30–60 phút sau khi đặt</span>
+                            </div>
+                            <div class="dv-feature-row">
+                                <i class="fas fa-check-circle" style="color:#0891b2;"></i>
+                                <span>Xác nhận nhận hàng &amp; thanh toán trực tiếp</span>
+                            </div>
+                            <div class="dv-feature-row">
+                                <i class="fas fa-redo" style="color:#0891b2;"></i>
+                                <span>Trả vỏ bình cũ — giảm 5,000 đ/bình</span>
+                            </div>
+                        </div>
 
-            <div class="dv-form-wrap" id="nuoc-form">
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
-                <input class="form-input disabled" type="text" id="nuoc-so-phong"
-                       value="@Model.SoPhong" readonly />
-              </div>
+                        <div class="dv-form-wrap" id="nuoc-form">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-door-open"></i>Số phòng</label>
+                                <input class="form-input disabled" type="text" id="nuoc-so-phong"
+                                       value="@Model.SoPhong" readonly />
+                            </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label"><i class="fas fa-sort-numeric-up"></i>Số lượng bình</label>
-                  <input class="form-input" type="number" id="nuoc-so-luong"
-                         min="1" max="10" value="1" oninput="tinhTienNuoc()" />
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-sort-numeric-up"></i>Số lượng bình</label>
+                                    <input class="form-input" type="number" id="nuoc-so-luong"
+                                           min="1" max="10" value="1" oninput="tinhTienNuoc()" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-redo"></i>Trả vỏ bình cũ</label>
+                                    <select class="form-input" id="nuoc-tra-vo" onchange="tinhTienNuoc()">
+                                        <option value="0">Không</option>
+                                        <option value="1">Có (–5,000đ/bình)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="background:#f0fdff;border:1.5px solid #a5f3fc;border-radius:12px;padding:12px 16px;
+                                display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:12px;font-weight:600;color:#164e63;">Dự tính tiền thanh toán</span>
+                                <span style="font-size:18px;font-weight:800;color:#0891b2;" id="nuoc-du-tinh">10,000 đ</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-comment"></i>Ghi chú (tuỳ chọn)</label>
+                                <textarea class="form-input" id="nuoc-ghi-chu" rows="2"
+                                          placeholder="VD: Để trước cửa phòng nếu không có nhà..."></textarea>
+                            </div>
+
+                            <div class="delivery-track" id="nuoc-track" style="display:none;">
+                                <div class="dt-title"><i class="fas fa-shipping-fast"></i> Trạng thái giao hàng</div>
+                                <div class="dt-steps" id="dt-steps-wrap">
+                                    <div class="dt-progress-line" id="dt-progress" style="width:0%;"></div>
+                                    <div class="dt-step done" id="dt-step-1">
+                                        <div class="dt-dot"><i class="fas fa-check"></i></div>
+                                        <div class="dt-lbl">Đã đặt</div>
+                                    </div>
+                                    <div class="dt-step" id="dt-step-2">
+                                        <div class="dt-dot"><i class="fas fa-box"></i></div>
+                                        <div class="dt-lbl">Đang chuẩn bị</div>
+                                    </div>
+                                    <div class="dt-step" id="dt-step-3">
+                                        <div class="dt-dot"><i class="fas fa-truck"></i></div>
+                                        <div class="dt-lbl">Đang giao</div>
+                                    </div>
+                                    <div class="dt-step" id="dt-step-4">
+                                        <div class="dt-dot"><i class="fas fa-home"></i></div>
+                                        <div class="dt-lbl">Đã giao</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="nuoc-confirm-box" id="nuoc-confirm">
+                                <div class="ncb-title">
+                                    <i class="fas fa-truck-loading" style="color:#059669;"></i>
+                                    Quản lý đã giao bình nước đến phòng bạn!
+                                </div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span style="font-size:12px;color:#065f46;font-weight:600;">Tổng tiền thanh toán</span>
+                                    <span class="ncb-amount" id="nuoc-tong-tien">
+                                        @(Model.DonNuocBinh?.TongTien > 0
+                                            ? Model.DonNuocBinh.TongTien.ToString("N0") + " đ"
+                                            : "30,000 đ")
+                                    </span>
+                                </div>
+                                <div style="display:flex;gap:8px;">
+                                    <button class="btn-xac-nhan-hang" onclick="xacNhanNhanNuoc()" style="flex:1;">
+                                        <i class="fas fa-check-double"></i> Xác nhận đã nhận
+                                    </button>
+                                </div>
+                            </div>
+
+                            @* Nút Thanh toán Bình Nước — hiện sau khi quản lý đã giao *@
+                            <button class="dv-btn-thanh-toan cyan" id="nuoc-btn-thanh-toan"
+                                    onclick="moThanhToanNuoc()"
+                                    style="@(Model.DonNuocBinh?.TrangThai_DV == "Chờ thanh toán" ? "display:flex;" : "display:none;")">
+                                <i class="fas fa-qrcode"></i> Thanh toán Bình Nước
+                            </button>
+
+                            <div id="nuoc-btn-group" style="display:flex;flex-direction:column;gap:8px;">
+                                <button class="dv-btn-submit cyan" onclick="guiDonNuoc()">
+                                    <i class="fas fa-paper-plane"></i> Đặt bình nước
+                                </button>
+                                <button class="dv-btn-cancel" onclick="dongFormNuoc()">
+                                    <i class="fas fa-times"></i> Huỷ
+                                </button>
+                            </div>
+                        </div>
+
+                        @* ── Banner: Tiền Bình Nước đã cộng vào hóa đơn tháng ── *@
+                        @if (Model.DonNuocBinhCongVaoTro != null)
+                        {
+                            <div class="no-dv-banner" id="nuoc-no-dv-banner">
+                                <div class="no-dv-banner-header">
+                                    <div class="no-dv-banner-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                                    <div>
+                                        <div class="no-dv-banner-title">Tiền chưa thanh toán đã cộng vào hóa đơn tháng</div>
+                                        <div class="no-dv-banner-sub">
+                                            Đơn bình nước quá hạn @((DateTime.Now - Model.DonNuocBinhCongVaoTro.NgayTao).Days) ngày
+                                            chưa thanh toán. Khoản này đã được gộp vào hóa đơn tháng của bạn.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="no-dv-amount-row">
+                                    <span class="no-dv-amount-label">Số tiền đã cộng vào hóa đơn</span>
+                                    <span class="no-dv-amount-val">@Model.DonNuocBinhCongVaoTro.TongTien.ToString("N0") đ</span>
+                                </div>
+                                <button class="btn-huy-no-dv" id="nuoc-btn-huy-no-dv"
+                                        onclick="huyNoDV(@Model.DonNuocBinhCongVaoTro.IDDonDV, 'nuoc')">
+                                    <i class="fas fa-credit-card"></i>
+                                    Thanh toán riêng — hủy khoản cộng vào hóa đơn
+                                </button>
+                            </div>
+                        }
+
+                        <button class="dv-btn-open cyan" id="nuoc-btn-open" onclick="moFormNuoc()">
+                            <i class="fas fa-plus-circle"></i> Đặt bình nước
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
-                  <label class="form-label"><i class="fas fa-redo"></i>Trả vỏ bình cũ</label>
-                  <select class="form-input" id="nuoc-tra-vo" onchange="tinhTienNuoc()">
-                    <option value="0">Không</option>
-                    <option value="1">Có (–5,000đ/bình)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style="background:#f0fdff;border:1.5px solid #a5f3fc;border-radius:12px;padding:12px 16px;
-                          display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:12px;font-weight:600;color:#164e63;">Dự tính tiền thanh toán</span>
-                <span style="font-size:18px;font-weight:800;color:#0891b2;" id="nuoc-du-tinh">10,000 đ</span>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-comment"></i>Ghi chú (tuỳ chọn)</label>
-                <textarea class="form-input" id="nuoc-ghi-chu" rows="2"
-                          placeholder="VD: Để trước cửa phòng nếu không có nhà..."></textarea>
-              </div>
-
-              <div class="delivery-track" id="nuoc-track" style="display:none;">
-                <div class="dt-title"><i class="fas fa-shipping-fast"></i> Trạng thái giao hàng</div>
-                <div class="dt-steps" id="dt-steps-wrap">
-                  <div class="dt-progress-line" id="dt-progress" style="width:0%;"></div>
-                  <div class="dt-step done" id="dt-step-1">
-                    <div class="dt-dot"><i class="fas fa-check"></i></div>
-                    <div class="dt-lbl">Đã đặt</div>
-                  </div>
-                  <div class="dt-step" id="dt-step-2">
-                    <div class="dt-dot"><i class="fas fa-box"></i></div>
-                    <div class="dt-lbl">Đang chuẩn bị</div>
-                  </div>
-                  <div class="dt-step" id="dt-step-3">
-                    <div class="dt-dot"><i class="fas fa-truck"></i></div>
-                    <div class="dt-lbl">Đang giao</div>
-                  </div>
-                  <div class="dt-step" id="dt-step-4">
-                    <div class="dt-dot"><i class="fas fa-home"></i></div>
-                    <div class="dt-lbl">Đã giao</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="nuoc-confirm-box" id="nuoc-confirm">
-                <div class="ncb-title">
-                  <i class="fas fa-truck-loading" style="color:#059669;"></i>
-                  Quản lý đã giao bình nước đến phòng bạn!
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                  <span style="font-size:12px;color:#065f46;font-weight:600;">Tổng tiền thanh toán</span>
-                  <span class="ncb-amount" id="nuoc-tong-tien">
-                    @(Model.DonNuocBinh?.TongTien > 0
-                        ? Model.DonNuocBinh.TongTien.ToString("N0") + " đ"
-                        : "30,000 đ")
-                  </span>
-                </div>
-                <div style="display:flex;gap:8px;">
-                  <button class="btn-xac-nhan-hang" onclick="xacNhanNhanNuoc()" style="flex:1;">
-                    <i class="fas fa-check-double"></i> Xác nhận đã nhận
-                  </button>
-                </div>
-              </div>
-
-              @* Nút Thanh toán Bình Nước — hiện sau khi quản lý đã giao *@
-              <button class="dv-btn-thanh-toan cyan" id="nuoc-btn-thanh-toan"
-                      onclick="moThanhToanNuoc()"
-                      style="@(Model.DonNuocBinh?.TrangThai_DV == "Chờ thanh toán" ? "display:flex;" : "display:none;")">
-                <i class="fas fa-qrcode"></i> Thanh toán Bình Nước
-              </button>
-
-              <div id="nuoc-btn-group" style="display:flex;flex-direction:column;gap:8px;">
-                <button class="dv-btn-submit cyan" onclick="guiDonNuoc()">
-                  <i class="fas fa-paper-plane"></i> Đặt bình nước
-                </button>
-                <button class="dv-btn-cancel" onclick="dongFormNuoc()">
-                  <i class="fas fa-times"></i> Huỷ
-                </button>
-              </div>
-            </div>
-
-            <button class="dv-btn-open cyan" id="nuoc-btn-open" onclick="moFormNuoc()">
-              <i class="fas fa-plus-circle"></i> Đặt bình nước
-            </button>
-          </div>
-        </div>
-        @* -- kết thúc dịch vụ nước -- *@
+                @* -- kết thúc dịch vụ nước -- *@
 
 
-        @* ==========================================
+                @* ==========================================
            DỊCH VỤ 3 — GỬI CHỈ SỐ ĐIỆN NƯỚC (FULL ROW)
         ========================================== *@
-        <div class="dv-card full-width">
-          <div class="dv-accent dien-nuoc"></div>
-          <div class="dv-card-header">
-            <div class="dv-header-left">
-              <div class="dv-icon-wrap vang"><i class="fas fa-bolt"></i></div>
-              <div>
-                <h3>Báo Chỉ Số Điện &amp; Nước</h3>
-                <div class="sub">Gửi ảnh đồng hồ minh chứng · Xử lý trong ngày</div>
-              </div>
-            </div>
-            <div class="dv-status-badge dsb-none" id="dn-badge">
-              <span class="dsb-dot"></span>Chưa gửi
-            </div>
-          </div>
-
-          <div class="dv-card-body">
-
-            @* Mô tả hiển thị trước khi mở form *@
-            <div class="dv-desc-box dn-bg" id="dn-desc">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div>
-                  <div style="font-size:11.5px;font-weight:700;color:#92400e;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
-                    <i class="fas fa-bolt" style="color:#d97706;"></i> Điện
-                  </div>
-                  <div class="dv-feature-row">
-                    <i class="fas fa-tachometer-alt" style="color:#d97706;"></i>
-                    <span>Nhập chỉ số đồng hồ điện cuối kỳ</span>
-                  </div>
-                  <div class="dv-feature-row">
-                    <i class="fas fa-calculator" style="color:#d97706;"></i>
-                    <span>Hệ thống tự tính số kWh tiêu thụ</span>
-                  </div>
-                </div>
-                <div>
-                  <div style="font-size:11.5px;font-weight:700;color:#1e40af;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
-                    <i class="fas fa-faucet" style="color:#1a56db;"></i> Nước sinh hoạt
-                  </div>
-                  <div class="dv-feature-row">
-                    <i class="fas fa-tachometer-alt" style="color:#1a56db;"></i>
-                    <span>Nhập chỉ số đồng hồ nước cuối kỳ</span>
-                  </div>
-                  <div class="dv-feature-row">
-                    <i class="fas fa-recycle" style="color:#059669;"></i>
-                    <span>Tiền rác: <strong style="color:#059669;">Miễn phí</strong></span>
-                  </div>
-                </div>
-              </div>
-              <div class="dv-feature-row" style="margin-top:4px;">
-                <i class="fas fa-camera" style="color:#d97706;"></i>
-                <span>Đính kèm ảnh chụp đồng hồ để xác minh — bắt buộc</span>
-              </div>
-            </div>
-
-            @* Form gửi chỉ số điện nước *@
-            <div class="dv-form-wrap" id="dn-form">
-
-              @* Số phòng — lấy từ DB, không cho nhập *@
-              <div class="dn-phong-row">
-                <i class="fas fa-door-open"></i>
-                <span>Số phòng:</span>
-                <strong id="dn-so-phong">@Model.SoPhong</strong>
-                <span style="margin-left:auto;font-size:11px;color:var(--mau-chu-phu);">
-                  <i class="fas fa-lock" style="font-size:10px;"></i> Tự động từ hệ thống
-                </span>
-              </div>
-
-              @* 2 panel điện / nước *@
-              <div class="dn-two-col">
-
-                @* Panel Điện *@
-                <div class="dn-panel dien">
-                  <div class="dn-panel-header">
-                    <div class="icon-dien"><i class="fas fa-bolt"></i></div>
-                    <div>
-                      <div style="font-size:13px;font-weight:800;color:#92400e;">Đồng hồ Điện</div>
-                      <div style="font-size:10.5px;color:#b45309;">Đơn vị: kWh</div>
+                <div class="dv-card full-width">
+                    <div class="dv-accent dien-nuoc"></div>
+                    <div class="dv-card-header">
+                        <div class="dv-header-left">
+                            <div class="dv-icon-wrap vang"><i class="fas fa-bolt"></i></div>
+                            <div>
+                                <h3>Báo Chỉ Số Điện &amp; Nước</h3>
+                                <div class="sub">Gửi ảnh đồng hồ minh chứng · Xử lý trong ngày</div>
+                            </div>
+                        </div>
+                        <div class="dv-status-badge dsb-none" id="dn-badge">
+                            <span class="dsb-dot"></span>Chưa gửi
+                        </div>
                     </div>
-                  </div>
 
-                  <div class="dn-chi-so-row">
-                    <div class="dn-chi-so-item">
-                      <div class="dn-chi-so-label">
-                        <i class="fas fa-history" style="color:#b45309;"></i> Chỉ số cũ
-                      </div>
-                      <input class="dn-chi-so-input disabled-field" type="number"
-                             id="dn-dien-cu" value="@Model.ChiSoDienCu" readonly
-                             title="Chỉ số kỳ trước — lấy từ hệ thống" />
-                    </div>
-                    <div class="dn-chi-so-item">
-                      <div class="dn-chi-so-label">
-                        <i class="fas fa-pencil-alt" style="color:#d97706;"></i> Chỉ số mới
-                      </div>
-                      <input class="dn-chi-so-input" type="number"
-                             id="dn-dien-moi" min="0" placeholder="Nhập..."
-                             oninput="tinhTienDienNuoc()" />
-                    </div>
-                  </div>
+                    <div class="dv-card-body">
 
-                  <div class="dn-tong-box">
-                    <div>
-                      <div class="dn-tong-label">Số kWh tiêu thụ</div>
-                      <div class="dn-tong-val vang" id="dn-dien-so-kwh">— kWh</div>
-                    </div>
-                    <div style="text-align:right;">
-                      <div class="dn-tong-label">Thành tiền (3,500đ/kWh)</div>
-                      <div class="dn-tong-val vang" id="dn-dien-tien">— đ</div>
-                    </div>
-                  </div>
+                        @* Mô tả hiển thị trước khi mở form *@
+                        <div class="dv-desc-box dn-bg" id="dn-desc">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div>
+                                    <div style="font-size:11.5px;font-weight:700;color:#92400e;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+                                        <i class="fas fa-bolt" style="color:#d97706;"></i> Điện
+                                    </div>
+                                    <div class="dv-feature-row">
+                                        <i class="fas fa-tachometer-alt" style="color:#d97706;"></i>
+                                        <span>Nhập chỉ số đồng hồ điện cuối kỳ</span>
+                                    </div>
+                                    <div class="dv-feature-row">
+                                        <i class="fas fa-calculator" style="color:#d97706;"></i>
+                                        <span>Hệ thống tự tính số kWh tiêu thụ</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:11.5px;font-weight:700;color:#1e40af;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+                                        <i class="fas fa-faucet" style="color:#1a56db;"></i> Nước sinh hoạt
+                                    </div>
+                                    <div class="dv-feature-row">
+                                        <i class="fas fa-tachometer-alt" style="color:#1a56db;"></i>
+                                        <span>Nhập chỉ số đồng hồ nước cuối kỳ</span>
+                                    </div>
+                                    <div class="dv-feature-row">
+                                        <i class="fas fa-recycle" style="color:#059669;"></i>
+                                        <span>Tiền rác: <strong style="color:#059669;">Miễn phí</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dv-feature-row" style="margin-top:4px;">
+                                <i class="fas fa-camera" style="color:#d97706;"></i>
+                                <span>Đính kèm ảnh chụp đồng hồ để xác minh — bắt buộc</span>
+                            </div>
+                        </div>
 
-                  @* Upload ảnh đồng hồ điện *@
-                  <div>
-                    <div class="dn-section-title">
-                      <i class="fas fa-camera" style="color:#d97706;"></i>
-                      Ảnh đồng hồ điện <span style="color:#dc2626;margin-left:4px;">*</span>
-                    </div>
-                    <div style="margin-top:8px;" class="dn-upload-zone" id="dn-dien-upload-zone"
-                         ondragover="dnDragOver(event,'dien')" ondragleave="dnDragLeave(event,'dien')"
-                         ondrop="dnDrop(event,'dien')"
-                         onclick="document.getElementById('dn-dien-file').click()">
-                      <input type="file" id="dn-dien-file" accept="image/*"
-                             onchange="dnFileChosen(this,'dien')" />
-                      <div id="dn-dien-upload-prompt">
-                        <i class="fas fa-bolt up-icon"></i>
-                        <div class="up-title">Tải ảnh đồng hồ điện</div>
-                        <div class="up-hint">Kéo thả hoặc <span>nhấn chọn</span> · JPG, PNG – tối đa 10MB</div>
-                      </div>
-                      <div class="dn-upload-preview" id="dn-dien-preview">
-                        <img src="" alt="Ảnh đồng hồ điện" id="dn-dien-preview-img" />
-                        <button class="dn-btn-remove" type="button"
-                                onclick="dnXoaAnh(event,'dien')">
-                          <i class="fas fa-times"></i>
+                        @* Form gửi chỉ số điện nước *@
+                        <div class="dv-form-wrap" id="dn-form">
+
+                            @* Số phòng — lấy từ DB, không cho nhập *@
+                            <div class="dn-phong-row">
+                                <i class="fas fa-door-open"></i>
+                                <span>Số phòng:</span>
+                                <strong id="dn-so-phong">@Model.SoPhong</strong>
+                                <span style="margin-left:auto;font-size:11px;color:var(--mau-chu-phu);">
+                                    <i class="fas fa-lock" style="font-size:10px;"></i> Tự động từ hệ thống
+                                </span>
+                            </div>
+
+                            @* 2 panel điện / nước *@
+                            <div class="dn-two-col">
+
+                                @* Panel Điện *@
+                                <div class="dn-panel dien">
+                                    <div class="dn-panel-header">
+                                        <div class="icon-dien"><i class="fas fa-bolt"></i></div>
+                                        <div>
+                                            <div style="font-size:13px;font-weight:800;color:#92400e;">Đồng hồ Điện</div>
+                                            <div style="font-size:10.5px;color:#b45309;">Đơn vị: kWh</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="dn-chi-so-row">
+                                        <div class="dn-chi-so-item">
+                                            <div class="dn-chi-so-label">
+                                                <i class="fas fa-history" style="color:#b45309;"></i> Chỉ số cũ
+                                            </div>
+                                            <input class="dn-chi-so-input disabled-field" type="number"
+                                                   id="dn-dien-cu" value="@Model.ChiSoDienCu" readonly
+                                                   title="Chỉ số kỳ trước — lấy từ hệ thống" />
+                                        </div>
+                                        <div class="dn-chi-so-item">
+                                            <div class="dn-chi-so-label">
+                                                <i class="fas fa-pencil-alt" style="color:#d97706;"></i> Chỉ số mới
+                                            </div>
+                                            <input class="dn-chi-so-input" type="number"
+                                                   id="dn-dien-moi" min="0" placeholder="Nhập..."
+                                                   oninput="tinhTienDienNuoc()" />
+                                        </div>
+                                    </div>
+
+                                    <div class="dn-tong-box">
+                                        <div>
+                                            <div class="dn-tong-label">Số kWh tiêu thụ</div>
+                                            <div class="dn-tong-val vang" id="dn-dien-so-kwh">— kWh</div>
+                                        </div>
+                                        <div style="text-align:right;">
+                                            <div class="dn-tong-label">Thành tiền (3,500đ/kWh)</div>
+                                            <div class="dn-tong-val vang" id="dn-dien-tien">— đ</div>
+                                        </div>
+                                    </div>
+
+                                    @* Upload ảnh đồng hồ điện *@
+                                    <div>
+                                        <div class="dn-section-title">
+                                            <i class="fas fa-camera" style="color:#d97706;"></i>
+                                            Ảnh đồng hồ điện <span style="color:#dc2626;margin-left:4px;">*</span>
+                                        </div>
+                                        <div style="margin-top:8px;" class="dn-upload-zone" id="dn-dien-upload-zone"
+                                             ondragover="dnDragOver(event,'dien')" ondragleave="dnDragLeave(event,'dien')"
+                                             ondrop="dnDrop(event,'dien')"
+                                             onclick="document.getElementById('dn-dien-file').click()">
+                                            <input type="file" id="dn-dien-file" accept="image/*"
+                                                   onchange="dnFileChosen(this,'dien')" />
+                                            <div id="dn-dien-upload-prompt">
+                                                <i class="fas fa-bolt up-icon"></i>
+                                                <div class="up-title">Tải ảnh đồng hồ điện</div>
+                                                <div class="up-hint">Kéo thả hoặc <span>nhấn chọn</span> · JPG, PNG – tối đa 10MB</div>
+                                            </div>
+                                            <div class="dn-upload-preview" id="dn-dien-preview">
+                                                <img src="" alt="Ảnh đồng hồ điện" id="dn-dien-preview-img" />
+                                                <button class="dn-btn-remove" type="button"
+                                                        onclick="dnXoaAnh(event,'dien')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <div class="dn-preview-fname" id="dn-dien-fname"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @* -- kết thúc panel điện -- *@
+
+                                @* Panel Nước sinh hoạt *@
+                                <div class="dn-panel nuoc-lanh">
+                                    <div class="dn-panel-header">
+                                        <div class="icon-nuoc"><i class="fas fa-faucet"></i></div>
+                                        <div>
+                                            <div style="font-size:13px;font-weight:800;color:#1e3a8a;">Đồng hồ Nước</div>
+                                            <div style="font-size:10.5px;color:#1e40af;">Đơn vị: m³</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="dn-chi-so-row">
+                                        <div class="dn-chi-so-item">
+                                            <div class="dn-chi-so-label">
+                                                <i class="fas fa-history" style="color:#1e40af;"></i> Chỉ số cũ
+                                            </div>
+                                            <input class="dn-chi-so-input nuoc-focus disabled-field" type="number"
+                                                   id="dn-nuoc-cu" value="@Model.ChiSoNuocCu" readonly
+                                                   title="Chỉ số kỳ trước — lấy từ hệ thống" />
+                                        </div>
+                                        <div class="dn-chi-so-item">
+                                            <div class="dn-chi-so-label">
+                                                <i class="fas fa-pencil-alt" style="color:#1a56db;"></i> Chỉ số mới
+                                            </div>
+                                            <input class="dn-chi-so-input nuoc-focus" type="number"
+                                                   id="dn-nuoc-moi" min="0" placeholder="Nhập..."
+                                                   oninput="tinhTienDienNuoc()" />
+                                        </div>
+                                    </div>
+
+                                    <div class="dn-tong-box">
+                                        <div>
+                                            <div class="dn-tong-label">Số m³ tiêu thụ</div>
+                                            <div class="dn-tong-val xanh" id="dn-nuoc-so-m3">— m³</div>
+                                        </div>
+                                        <div style="text-align:right;">
+                                            <div class="dn-tong-label">Thành tiền (15,000đ/m³)</div>
+                                            <div class="dn-tong-val xanh" id="dn-nuoc-tien">— đ</div>
+                                        </div>
+                                    </div>
+
+                                    @* Tiền rác miễn phí — không cần nhập *@
+                                    <div style="display:flex;align-items:center;justify-content:space-between;
+                                        background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 12px;">
+                                        <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#15803d;">
+                                            <i class="fas fa-recycle"></i> Tiền rác
+                                        </div>
+                                        <span class="dn-chip-mien-phi">
+                                            <i class="fas fa-check-circle"></i> Miễn phí
+                                        </span>
+                                    </div>
+
+                                    @* Upload ảnh đồng hồ nước *@
+                                    <div>
+                                        <div class="dn-section-title">
+                                            <i class="fas fa-camera" style="color:#1a56db;"></i>
+                                            Ảnh đồng hồ nước <span style="color:#dc2626;margin-left:4px;">*</span>
+                                        </div>
+                                        <div style="margin-top:8px;" class="dn-upload-zone"
+                                             style="border-color:#bfdbfe;background:#eff6ff;"
+                                             id="dn-nuoc-upload-zone"
+                                             ondragover="dnDragOver(event,'nuoc')" ondragleave="dnDragLeave(event,'nuoc')"
+                                             ondrop="dnDrop(event,'nuoc')"
+                                             onclick="document.getElementById('dn-nuoc-file').click()">
+                                            <input type="file" id="dn-nuoc-file" accept="image/*"
+                                                   onchange="dnFileChosen(this,'nuoc')" />
+                                            <div id="dn-nuoc-upload-prompt">
+                                                <i class="fas fa-faucet up-icon" style="color:#1a56db;"></i>
+                                                <div class="up-title">Tải ảnh đồng hồ nước</div>
+                                                <div class="up-hint">Kéo thả hoặc <span>nhấn chọn</span> · JPG, PNG – tối đa 10MB</div>
+                                            </div>
+                                            <div class="dn-upload-preview" id="dn-nuoc-preview">
+                                                <img src="" alt="Ảnh đồng hồ nước" id="dn-nuoc-preview-img" />
+                                                <button class="dn-btn-remove" type="button"
+                                                        onclick="dnXoaAnh(event,'nuoc')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <div class="dn-preview-fname" id="dn-nuoc-fname"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @* -- kết thúc panel nước -- *@
+
+                            </div>
+                            @* -- kết thúc dn-two-col -- *@
+
+                            @* Tóm tắt tổng cộng *@
+                            <div class="dn-summary-bar" id="dn-summary-bar">
+                                <div class="dn-summary-item">
+                                    <div class="dn-sum-label"><i class="fas fa-bolt" style="color:#d97706;"></i> Tiền điện</div>
+                                    <div class="dn-sum-val" id="dn-sum-dien">— đ</div>
+                                </div>
+                                <div class="dn-summary-item">
+                                    <div class="dn-sum-label"><i class="fas fa-faucet" style="color:#1a56db;"></i> Tiền nước</div>
+                                    <div class="dn-sum-val" id="dn-sum-nuoc">— đ</div>
+                                </div>
+                                <div class="dn-summary-item">
+                                    <div class="dn-sum-label"><i class="fas fa-recycle" style="color:#059669;"></i> Tiền rác</div>
+                                    <div class="dn-sum-val" style="color:#059669;">Miễn phí</div>
+                                </div>
+                                <div class="dn-summary-item" style="text-align:right;">
+                                    <div class="dn-sum-label">Tổng dự kiến</div>
+                                    <div class="dn-sum-val highlight" id="dn-sum-tong" style="font-size:20px;">— đ</div>
+                                </div>
+                            </div>
+
+                            @* Ghi chú *@
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-comment"></i>Ghi chú cho quản lý (tuỳ chọn)
+                                </label>
+                                <textarea class="form-input" id="dn-ghi-chu" rows="2"
+                                          placeholder="VD: Đồng hồ bị mờ, vui lòng kiểm tra trực tiếp..."></textarea>
+                            </div>
+
+                            @* Nút gửi + huỷ *@
+                            <div id="dn-btn-group" style="display:flex;flex-direction:column;gap:8px;">
+                                <button class="dv-btn-submit vang" id="dn-btn-gui" onclick="guiDonDienNuoc()">
+                                    <i class="fas fa-paper-plane"></i> Gửi chỉ số điện &amp; nước
+                                </button>
+                                <button class="dv-btn-cancel" onclick="dongFormDN()">
+                                    <i class="fas fa-times"></i> Huỷ
+                                </button>
+                            </div>
+
+                        </div>
+                        @* -- kết thúc dn-form -- *@
+
+                        @* Nút mở form *@
+                        <button class="dv-btn-open dien-nuoc" id="dn-btn-open" onclick="moFormDN()">
+                            <i class="fas fa-bolt"></i> Báo chỉ số điện &amp; nước
                         </button>
-                        <div class="dn-preview-fname" id="dn-dien-fname"></div>
-                      </div>
+
                     </div>
-                  </div>
                 </div>
-                @* -- kết thúc panel điện -- *@
-
-                @* Panel Nước sinh hoạt *@
-                <div class="dn-panel nuoc-lanh">
-                  <div class="dn-panel-header">
-                    <div class="icon-nuoc"><i class="fas fa-faucet"></i></div>
-                    <div>
-                      <div style="font-size:13px;font-weight:800;color:#1e3a8a;">Đồng hồ Nước</div>
-                      <div style="font-size:10.5px;color:#1e40af;">Đơn vị: m³</div>
-                    </div>
-                  </div>
-
-                  <div class="dn-chi-so-row">
-                    <div class="dn-chi-so-item">
-                      <div class="dn-chi-so-label">
-                        <i class="fas fa-history" style="color:#1e40af;"></i> Chỉ số cũ
-                      </div>
-                      <input class="dn-chi-so-input nuoc-focus disabled-field" type="number"
-                             id="dn-nuoc-cu" value="@Model.ChiSoNuocCu" readonly
-                             title="Chỉ số kỳ trước — lấy từ hệ thống" />
-                    </div>
-                    <div class="dn-chi-so-item">
-                      <div class="dn-chi-so-label">
-                        <i class="fas fa-pencil-alt" style="color:#1a56db;"></i> Chỉ số mới
-                      </div>
-                      <input class="dn-chi-so-input nuoc-focus" type="number"
-                             id="dn-nuoc-moi" min="0" placeholder="Nhập..."
-                             oninput="tinhTienDienNuoc()" />
-                    </div>
-                  </div>
-
-                  <div class="dn-tong-box">
-                    <div>
-                      <div class="dn-tong-label">Số m³ tiêu thụ</div>
-                      <div class="dn-tong-val xanh" id="dn-nuoc-so-m3">— m³</div>
-                    </div>
-                    <div style="text-align:right;">
-                      <div class="dn-tong-label">Thành tiền (15,000đ/m³)</div>
-                      <div class="dn-tong-val xanh" id="dn-nuoc-tien">— đ</div>
-                    </div>
-                  </div>
-
-                  @* Tiền rác miễn phí — không cần nhập *@
-                  <div style="display:flex;align-items:center;justify-content:space-between;
-                              background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 12px;">
-                    <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#15803d;">
-                      <i class="fas fa-recycle"></i> Tiền rác
-                    </div>
-                    <span class="dn-chip-mien-phi">
-                      <i class="fas fa-check-circle"></i> Miễn phí
-                    </span>
-                  </div>
-
-                  @* Upload ảnh đồng hồ nước *@
-                  <div>
-                    <div class="dn-section-title">
-                      <i class="fas fa-camera" style="color:#1a56db;"></i>
-                      Ảnh đồng hồ nước <span style="color:#dc2626;margin-left:4px;">*</span>
-                    </div>
-                    <div style="margin-top:8px;" class="dn-upload-zone"
-                         style="border-color:#bfdbfe;background:#eff6ff;"
-                         id="dn-nuoc-upload-zone"
-                         ondragover="dnDragOver(event,'nuoc')" ondragleave="dnDragLeave(event,'nuoc')"
-                         ondrop="dnDrop(event,'nuoc')"
-                         onclick="document.getElementById('dn-nuoc-file').click()">
-                      <input type="file" id="dn-nuoc-file" accept="image/*"
-                             onchange="dnFileChosen(this,'nuoc')" />
-                      <div id="dn-nuoc-upload-prompt">
-                        <i class="fas fa-faucet up-icon" style="color:#1a56db;"></i>
-                        <div class="up-title">Tải ảnh đồng hồ nước</div>
-                        <div class="up-hint">Kéo thả hoặc <span>nhấn chọn</span> · JPG, PNG – tối đa 10MB</div>
-                      </div>
-                      <div class="dn-upload-preview" id="dn-nuoc-preview">
-                        <img src="" alt="Ảnh đồng hồ nước" id="dn-nuoc-preview-img" />
-                        <button class="dn-btn-remove" type="button"
-                                onclick="dnXoaAnh(event,'nuoc')">
-                          <i class="fas fa-times"></i>
-                        </button>
-                        <div class="dn-preview-fname" id="dn-nuoc-fname"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                @* -- kết thúc panel nước -- *@
-
-              </div>
-              @* -- kết thúc dn-two-col -- *@
-
-              @* Tóm tắt tổng cộng *@
-              <div class="dn-summary-bar" id="dn-summary-bar">
-                <div class="dn-summary-item">
-                  <div class="dn-sum-label"><i class="fas fa-bolt" style="color:#d97706;"></i> Tiền điện</div>
-                  <div class="dn-sum-val" id="dn-sum-dien">— đ</div>
-                </div>
-                <div class="dn-summary-item">
-                  <div class="dn-sum-label"><i class="fas fa-faucet" style="color:#1a56db;"></i> Tiền nước</div>
-                  <div class="dn-sum-val" id="dn-sum-nuoc">— đ</div>
-                </div>
-                <div class="dn-summary-item">
-                  <div class="dn-sum-label"><i class="fas fa-recycle" style="color:#059669;"></i> Tiền rác</div>
-                  <div class="dn-sum-val" style="color:#059669;">Miễn phí</div>
-                </div>
-                <div class="dn-summary-item" style="text-align:right;">
-                  <div class="dn-sum-label">Tổng dự kiến</div>
-                  <div class="dn-sum-val highlight" id="dn-sum-tong" style="font-size:20px;">— đ</div>
-                </div>
-              </div>
-
-              @* Ghi chú *@
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-comment"></i>Ghi chú cho quản lý (tuỳ chọn)
-                </label>
-                <textarea class="form-input" id="dn-ghi-chu" rows="2"
-                          placeholder="VD: Đồng hồ bị mờ, vui lòng kiểm tra trực tiếp..."></textarea>
-              </div>
-
-              @* Nút gửi + huỷ *@
-              <div id="dn-btn-group" style="display:flex;flex-direction:column;gap:8px;">
-                <button class="dv-btn-submit vang" id="dn-btn-gui" onclick="guiDonDienNuoc()">
-                  <i class="fas fa-paper-plane"></i> Gửi chỉ số điện &amp; nước
-                </button>
-                <button class="dv-btn-cancel" onclick="dongFormDN()">
-                  <i class="fas fa-times"></i> Huỷ
-                </button>
-              </div>
+                @* -- kết thúc dịch vụ điện nước -- *@
 
             </div>
-            @* -- kết thúc dn-form -- *@
+            @* -- kết thúc dv-grid -- *@
 
-            @* Nút mở form *@
-            <button class="dv-btn-open dien-nuoc" id="dn-btn-open" onclick="moFormDN()">
-              <i class="fas fa-bolt"></i> Báo chỉ số điện &amp; nước
-            </button>
-
-          </div>
-        </div>
-        @* -- kết thúc dịch vụ điện nước -- *@
-
-      </div>
-      @* -- kết thúc dv-grid -- *@
-
-      @* ==========================================
+            @* ==========================================
          THANH TOÁN THỐNG NHẤT
       ========================================== *@
-      <div class="tt-bar" id="tt-bar" style="display:none;">
-        <div class="tt-bar-left">
-          <div class="tt-bar-icon" id="tt-bar-icon">
-            <i class="fas fa-credit-card"></i>
-          </div>
-          <div>
-            <div class="tt-bar-label" id="tt-bar-label">Thanh toán dịch vụ</div>
-            <div class="tt-bar-breakdown" id="tt-bar-breakdown"></div>
-          </div>
-        </div>
-        <div class="tt-bar-right">
-          <div class="tt-bar-total" id="tt-bar-total">0 đ</div>
-          <button class="tt-bar-btn" id="tt-bar-btn" onclick="moThanhToanTongHop()">
-            <i class="fas fa-arrow-right"></i> Thanh toán ngay
-          </button>
-        </div>
-      </div>
+            <div class="tt-bar" id="tt-bar" style="display:none;">
+                <div class="tt-bar-left">
+                    <div class="tt-bar-icon" id="tt-bar-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div>
+                        <div class="tt-bar-label" id="tt-bar-label">Thanh toán dịch vụ</div>
+                        <div class="tt-bar-breakdown" id="tt-bar-breakdown"></div>
+                    </div>
+                </div>
+                <div class="tt-bar-right">
+                    <div class="tt-bar-total" id="tt-bar-total">0 đ</div>
+                    <button class="tt-bar-btn" id="tt-bar-btn" onclick="moThanhToanTongHop()">
+                        <i class="fas fa-arrow-right"></i> Thanh toán ngay
+                    </button>
+                </div>
+            </div>
 
-    </main>
-  </div>
+        </main>
+    </div>
 
 
-  @* =============================================
+    @* =============================================
      MODAL THANH TOÁN
   ============================================= *@
-  <div class="modal-overlay" id="modal-overlay" onclick="dongModalNeuNgoai(event)">
-    <div class="modal-box" role="dialog" aria-modal="true">
+    <div class="modal-overlay" id="modal-overlay" onclick="dongModalNeuNgoai(event)">
+        <div class="modal-box" role="dialog" aria-modal="true">
 
-      <div class="modal-accent" id="modal-accent"></div>
+            <div class="modal-accent" id="modal-accent"></div>
 
-      <div class="modal-header">
-        <div class="modal-header-left">
-          <div class="modal-icon-badge" id="modal-icon-badge">
-            <i class="fas fa-credit-card"></i>
-          </div>
-          <div>
-            <div class="modal-title" id="modal-title">Thanh toán</div>
-            <div class="modal-sub"  id="modal-sub">Xác nhận &amp; chuyển khoản</div>
-          </div>
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-icon-badge" id="modal-icon-badge">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div>
+                        <div class="modal-title" id="modal-title">Thanh toán</div>
+                        <div class="modal-sub" id="modal-sub">Xác nhận &amp; chuyển khoản</div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="dongModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div id="modal-pay-body">
+                <div class="modal-body">
+
+                    <div class="modal-amount-bar">
+                        <div>
+                            <div class="modal-amount-label">Tổng tiền cần thanh toán</div>
+                            <div class="modal-amount-val" id="modal-tong-tien">—</div>
+                        </div>
+                        <div class="modal-wallet-icon"><i class="fas fa-wallet"></i></div>
+                    </div>
+
+                    <div class="modal-dv-list" id="modal-dv-list" style="display:none;">
+                        <div class="modal-dv-item tim-bg">
+                            <div class="mdi-left" style="color:#7c3aed;">
+                                <i class="fas fa-tshirt"></i> Giặt Sấy
+                            </div>
+                            <div class="mdi-price" id="modal-gs-price">—</div>
+                        </div>
+                        <div class="modal-dv-item cyan-bg">
+                            <div class="mdi-left" style="color:#0891b2;">
+                                <i class="fas fa-tint"></i> Bình Nước
+                            </div>
+                            <div class="mdi-price" id="modal-nuoc-price">—</div>
+                        </div>
+                    </div>
+
+                    <div class="qr-section">
+                        <img id="modal-qr-img"
+                             src="@(string.IsNullOrEmpty(Model.QrLink) ? "" : "/images/qr/" + Model.QrLink)"
+                             data-qr-base="/images/qr/"
+                             alt="Mã QR chuyển khoản"
+                             onerror="this.style.display='none';document.getElementById('qr-fallback-box').style.display='flex';"
+                             style="display: @(string.IsNullOrEmpty(Model.QrLink) ? "none" : "block");" />
+
+                        <div id="qr-fallback-box" class="qr-fallback"
+                             style="@(string.IsNullOrEmpty(Model.QrLink) ? "display:flex;" : "display:none;")">
+                            <i class="fas fa-image" style="font-size:32px;color:#bfdbfe;"></i>
+                            Chờ kết nối dữ liệu
+                        </div>
+
+                        <div class="qr-bank-rows">
+                            <div class="qr-br">
+                                <span class="lbl">Chủ tài khoản</span>
+                                <span class="val" id="qr-chu-tk">@Model.ChuTaiKhoan</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="noi-dung-ck">
+                        <div>
+                            <div class="nd-label">Nội dung chuyển khoản</div>
+                            @{
+                                var soPhongRaw = Model.SoPhong.Replace("Phòng ", "").Trim();
+                            }
+                            <div class="nd-val" id="modal-nd-ck" data-phong="P@(soPhongRaw)">P@(soPhongRaw) TIEN ICH</div>
+                        </div>
+                        <button class="copy-btn" onclick="saoChep('modal-nd-ck')"><i class="fas fa-copy"></i></button>
+                    </div>
+
+                    <div class="upload-zone" id="modal-upload-zone"
+                         ondragover="upDragOver(event)" ondragleave="upDragLeave(event)" ondrop="upDrop(event)"
+                         onclick="document.getElementById('modal-file-input').click()">
+                        <input type="file" class="upload-input" id="modal-file-input"
+                               accept="image/*" onchange="upFileChosen(this)" />
+                        <div id="modal-upload-prompt">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-title">Tải ảnh bill chuyển khoản lên</div>
+                            <div class="upload-hint">Kéo thả hoặc <span>nhấn để chọn</span> · JPG, PNG – tối đa 10MB</div>
+                        </div>
+                        <div class="upload-preview" id="modal-preview">
+                            <img src="" alt="Preview bill" id="modal-preview-img" />
+                            <button class="btn-remove-img" type="button" onclick="upXoaAnh(event)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="upload-fname" id="modal-fname"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-modal-huy" onclick="dongModal()">
+                        <i class="fas fa-arrow-left" style="margin-right:5px;"></i>Quay lại
+                    </button>
+                    <button class="btn-modal-gui" id="modal-btn-gui" onclick="guiXacNhan()">
+                        <i class="fas fa-paper-plane"></i> Gửi xác nhận thanh toán
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-success" id="modal-success">
+                <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                <h4>Thanh toán đã được xác nhận!</h4>
+                <p>
+                    Cảm ơn bạn đã sử dụng dịch vụ.<br />
+                    Đơn sẽ được xác nhận trong vòng <strong>15 phút</strong>.
+                </p>
+                <button class="btn-ve-trang" onclick="dongModal()">
+                    <i class="fas fa-arrow-left" style="margin-right:6px;"></i>Tiếp tục
+                </button>
+            </div>
+
         </div>
-        <button class="modal-close" onclick="dongModal()"><i class="fas fa-times"></i></button>
-      </div>
-
-      <div id="modal-pay-body">
-        <div class="modal-body">
-
-          <div class="modal-amount-bar">
-            <div>
-              <div class="modal-amount-label">Tổng tiền cần thanh toán</div>
-              <div class="modal-amount-val" id="modal-tong-tien">—</div>
-            </div>
-            <div class="modal-wallet-icon"><i class="fas fa-wallet"></i></div>
-          </div>
-
-          <div class="modal-dv-list" id="modal-dv-list" style="display:none;">
-            <div class="modal-dv-item tim-bg">
-              <div class="mdi-left" style="color:#7c3aed;">
-                <i class="fas fa-tshirt"></i> Giặt Sấy
-              </div>
-              <div class="mdi-price" id="modal-gs-price">—</div>
-            </div>
-            <div class="modal-dv-item cyan-bg">
-              <div class="mdi-left" style="color:#0891b2;">
-                <i class="fas fa-tint"></i> Bình Nước
-              </div>
-              <div class="mdi-price" id="modal-nuoc-price">—</div>
-            </div>
-          </div>
-
-<div class="qr-section">
-<img id="modal-qr-img" 
-     src="@(string.IsNullOrEmpty(Model.QrLink) ? "" : "/images/qr/" + Model.QrLink)" 
-     data-qr-base="/images/qr/"
-     alt="Mã QR chuyển khoản"
-     onerror="this.style.display='none';document.getElementById('qr-fallback-box').style.display='flex';" 
-     style="display: @(string.IsNullOrEmpty(Model.QrLink) ? "none" : "block");" />
-
-    <div id="qr-fallback-box" class="qr-fallback" 
-         style="@(string.IsNullOrEmpty(Model.QrLink) ? "display:flex;" : "display:none;")">
-        <i class="fas fa-image" style="font-size:32px;color:#bfdbfe;"></i>
-        Chờ kết nối dữ liệu
     </div>
 
-    <div class="qr-bank-rows">
-        <div class="qr-br">
-            <span class="lbl">Chủ tài khoản</span>
-            <span class="val" id="qr-chu-tk">@Model.ChuTaiKhoan</span>
-        </div>
-    </div>
-</div>
 
-          <div class="noi-dung-ck">
-            <div>
-              <div class="nd-label">Nội dung chuyển khoản</div>
-              @{
-                  var soPhongRaw = Model.SoPhong.Replace("Phòng ", "").Trim();
-              }
-              <div class="nd-val" id="modal-nd-ck" data-phong="P@(soPhongRaw)">P@(soPhongRaw) TIEN ICH</div>
-            </div>
-            <button class="copy-btn" onclick="saoChep('modal-nd-ck')"><i class="fas fa-copy"></i></button>
-          </div>
-
-          <div class="upload-zone" id="modal-upload-zone"
-               ondragover="upDragOver(event)" ondragleave="upDragLeave(event)" ondrop="upDrop(event)"
-               onclick="document.getElementById('modal-file-input').click()">
-            <input type="file" class="upload-input" id="modal-file-input"
-                   accept="image/*" onchange="upFileChosen(this)" />
-            <div id="modal-upload-prompt">
-              <i class="fas fa-cloud-upload-alt upload-icon"></i>
-              <div class="upload-title">Tải ảnh bill chuyển khoản lên</div>
-              <div class="upload-hint">Kéo thả hoặc <span>nhấn để chọn</span> · JPG, PNG – tối đa 10MB</div>
-            </div>
-            <div class="upload-preview" id="modal-preview">
-              <img src="" alt="Preview bill" id="modal-preview-img" />
-              <button class="btn-remove-img" type="button" onclick="upXoaAnh(event)">
-                <i class="fas fa-times"></i>
-              </button>
-              <div class="upload-fname" id="modal-fname"></div>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn-modal-huy" onclick="dongModal()">
-            <i class="fas fa-arrow-left" style="margin-right:5px;"></i>Quay lại
-          </button>
-          <button class="btn-modal-gui" id="modal-btn-gui" onclick="guiXacNhan()">
-            <i class="fas fa-paper-plane"></i> Gửi xác nhận thanh toán
-          </button>
-        </div>
-      </div>
-
-      <div class="modal-success" id="modal-success">
-        <div class="success-icon"><i class="fas fa-check-circle"></i></div>
-        <h4>Thanh toán đã được xác nhận!</h4>
-        <p>
-          Cảm ơn bạn đã sử dụng dịch vụ.<br />
-          Đơn sẽ được xác nhận trong vòng <strong>15 phút</strong>.
-        </p>
-        <button class="btn-ve-trang" onclick="dongModal()">
-          <i class="fas fa-arrow-left" style="margin-right:6px;"></i>Tiếp tục
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-
-  @* =============================================
+    @* =============================================
      JAVASCRIPT
   ============================================= *@
-  @* Token chống CSRF — dùng cho các POST fetch trong JS *@
-  @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
-  <input type="hidden" name="__RequestVerificationToken"
-         value="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
+    @* Token chống CSRF — dùng cho các POST fetch trong JS *@
+    @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+    <input type="hidden" name="__RequestVerificationToken"
+           value="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
 
-  <script src="~/js/Khach/DichVu.js"></script>
+    <script src="~/js/Khach/DichVu.js"></script>
+    <script>
+        // ── Hủy cộng nợ DV vào hóa đơn → chuyển sang thanh toán riêng ──
+        async function huyNoDV(donId, loai) {
+        const btnId = loai === 'gs' ? 'gs-btn-huy-no-dv' : 'nuoc-btn-huy-no-dv';
+        const btn   = document.getElementById(btnId);
+        if (!btn) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+        const token = document.querySelector('[name="__RequestVerificationToken"]')?.value ?? '';
+        try {
+        const res = await fetch('?handler=HuyNoDV', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify({ donId })
+        });
+        if (!res.ok) throw new Error(await res.text());
+
+        // Ẩn banner, mở modal thanh toán riêng
+        const banner = document.getElementById(loai === 'gs' ? 'gs-no-dv-banner' : 'nuoc-no-dv-banner');
+        if (banner) banner.style.display = 'none';
+
+        // Cập nhật badge về "Chờ thanh toán"
+        const badgeEl = document.getElementById(loai === 'gs' ? 'gs-badge' : 'nuoc-badge');
+        if (badgeEl) {
+        badgeEl.className = 'dv-status-badge dsb-pay';
+        badgeEl.innerHTML = '<span class="dsb-dot"></span>Chờ thanh toán';
+        }
+
+        // Hiện nút thanh toán riêng
+        const btnTT = document.getElementById(loai === 'gs' ? 'gs-btn-thanh-toan' : 'nuoc-btn-thanh-toan');
+        if (btnTT) btnTT.style.display = 'flex';
+
+        // Hiện form (nếu đang ẩn)
+        const formWrap = document.getElementById(loai === 'gs' ? 'gs-form' : 'nuoc-form');
+        if (formWrap) formWrap.classList.add('hien');
+
+        const btnOpen = document.getElementById(loai === 'gs' ? 'gs-btn-open' : 'nuoc-btn-open');
+        if (btnOpen) btnOpen.style.display = 'none';
+
+        } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh toán riêng — hủy khoản cộng vào hóa đơn';
+        alert('Có lỗi: ' + e.message);
+        }
+        }
+
+        // ── Cập nhật badge khi polling nhận duocCongVaoTro = true ──
+        // Override hàm capNhatBadge từ DichVu.js nếu cần
+        window.xuLyNoDVTuPolling = function(loai, don) {
+        if (!don || !don.duocCongVaoTro) return false;
+        const badgeEl  = document.getElementById(loai === 'gs' ? 'gs-badge' : 'nuoc-badge');
+        const bannerEl = document.getElementById(loai === 'gs' ? 'gs-no-dv-banner' : 'nuoc-no-dv-banner');
+        const btnTT    = document.getElementById(loai === 'gs' ? 'gs-btn-thanh-toan' : 'nuoc-btn-thanh-toan');
+
+        if (badgeEl) {
+        badgeEl.className = 'dv-status-badge dsb-no-dv';
+        badgeEl.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size:10px;"></i>Nợ – Cộng vào hóa đơn';
+        }
+        // Ẩn nút thanh toán riêng nếu đang hiện
+        if (btnTT) btnTT.style.display = 'none';
+
+        // Nếu banner chưa có (server render chưa kịp) thì tạo động
+        if (!bannerEl) {
+        const card = document.getElementById(loai === 'gs' ? 'gs-form' : 'nuoc-form')?.closest('.dv-card-body');
+        if (card) {
+        const openBtn = document.getElementById(loai === 'gs' ? 'gs-btn-open' : 'nuoc-btn-open');
+        const html = `
+        <div class="no-dv-banner" id="${loai}-no-dv-banner">
+        <div class="no-dv-banner-header">
+        <div class="no-dv-banner-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div>
+        <div class="no-dv-banner-title">Tiền chưa thanh toán đã cộng vào hóa đơn tháng</div>
+        <div class="no-dv-banner-sub">Đơn dịch vụ quá hạn 7 ngày chưa thanh toán. Khoản này đã được gộp vào hóa đơn tháng.</div>
+        </div>
+        </div>
+        <div class="no-dv-amount-row">
+        <span class="no-dv-amount-label">Số tiền đã cộng vào hóa đơn</span>
+        <span class="no-dv-amount-val">${Number(don.tongTien).toLocaleString('vi-VN')} đ</span>
+        </div>
+        <button class="btn-huy-no-dv" id="${loai}-btn-huy-no-dv"
+        onclick="huyNoDV(${don.id}, '${loai}')">
+        <i class="fas fa-credit-card"></i>
+        Thanh toán riêng — hủy khoản cộng vào hóa đơn
+        </button>
+        </div>`;
+        if (openBtn) openBtn.insertAdjacentHTML('beforebegin', html);
+        }
+        } else {
+        bannerEl.style.display = '';
+        }
+        return true;
+        };
+    </script>
 </body>
 </html>

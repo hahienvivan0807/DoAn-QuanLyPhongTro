@@ -45,9 +45,9 @@ namespace QuanLyNhaTro.Models
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public virtual ICollection<REFRESH_TOKEN> RefreshTokens { get; set; } = new List<REFRESH_TOKEN>();
@@ -84,7 +84,7 @@ namespace QuanLyNhaTro.Models
 
         public bool IsRevoked { get; set; } = false;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         [ForeignKey("IDUser")]
         public virtual ACCOUNT Account { get; set; } = null!;
@@ -120,7 +120,7 @@ namespace QuanLyNhaTro.Models
         [StringLength(20)]
         public string TrangThai { get; set; } = "Trống"; // 'Trống'|'Đã thuê'|'Đang sửa'
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
         public virtual ICollection<PHONG_MANAGER> PhongManagers { get; set; } = new List<PHONG_MANAGER>();
@@ -151,7 +151,7 @@ namespace QuanLyNhaTro.Models
         [StringLength(200)]
         public string? GhiChu { get; set; }
 
-        public DateTime NgayPhanCong { get; set; } = DateTime.UtcNow;
+        public DateTime NgayPhanCong { get; set; }
 
         [ForeignKey("IDPhong")]
         public virtual PHONG Phong { get; set; } = null!;
@@ -199,9 +199,9 @@ namespace QuanLyNhaTro.Models
         [StringLength(500)]
         public string? GhiChu { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         [ForeignKey("IDUser")]
         public virtual ACCOUNT Tenant { get; set; } = null!;
@@ -247,7 +247,8 @@ namespace QuanLyNhaTro.Models
 
         [Required]
         [StringLength(30)]
-        public string TrangThai_DV { get; set; } = "Chờ xử lý"; // 'Chờ xử lý'|'Đang xử lý'|'Chờ thanh toán'|'Thành công'|'Đã hủy'
+        // 'Chờ xử lý'|'Đang xử lý'|'Chờ thanh toán'|'Đang xử lý'|'Thành công'|'Đã hủy'
+        public string TrangThai_DV { get; set; } = "Chờ xử lý";
 
         [StringLength(200)]
         public string? LyDoHuy { get; set; }
@@ -268,10 +269,11 @@ namespace QuanLyNhaTro.Models
 
         public DateTime? NgayHoanThanh { get; set; }
 
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
+        // Navigation Properties
         [ForeignKey("IDUser")]
         public virtual ACCOUNT Tenant { get; set; } = null!;
 
@@ -325,8 +327,9 @@ namespace QuanLyNhaTro.Models
         [StringLength(200)]
         public string? GhiChuDuyet { get; set; }
 
-        public DateTime NgayGhi { get; set; } = DateTime.UtcNow;
+        public DateTime NgayGhi { get; set; }
 
+        // Navigation Properties
         [ForeignKey("IDPhong")]
         public virtual PHONG Phong { get; set; } = null!;
 
@@ -355,7 +358,7 @@ namespace QuanLyNhaTro.Models
 
         [Required]
         [StringLength(7)]
-        public string KyThanhToan { get; set; } = null!;
+        public string KyThanhToan { get; set; } = null!; // "MM/yyyy"
 
         [Required]
         [Column(TypeName = "decimal(15, 2)")]
@@ -369,11 +372,18 @@ namespace QuanLyNhaTro.Models
         [Column(TypeName = "decimal(15, 2)")]
         public decimal TienNuocSum { get; set; }
 
+        // TienDV: dịch vụ đã thanh toán đúng hạn trong tháng
         [Column(TypeName = "decimal(15, 2)")]
         public decimal TienDV { get; set; } = 0;
 
+        // TienNoDV: nợ dịch vụ quá hạn bị cộng thêm vào hóa đơn
+        // Cột này thêm mới — cần chạy migration
+        [Column(TypeName = "decimal(15, 2)")]
+        public decimal TienNoDV { get; set; } = 0;
+
         [Required]
         [Column(TypeName = "decimal(15, 2)")]
+        // TongCong = TienPhong + TienDienSum + TienNuocSum + TienDV + TienNoDV
         public decimal TongCong { get; set; }
 
         [Required]
@@ -382,20 +392,31 @@ namespace QuanLyNhaTro.Models
 
         [Required]
         [StringLength(20)]
-        public string TrangThai_TT { get; set; } = "Chưa đóng"; // 'Chưa đóng'|'Chờ duyệt'|'Đã hoàn thành'|'Quá hạn'
+        // 'Chưa đóng'|'Chờ duyệt'|'Đã hoàn thành'|'Quá hạn'
+        public string TrangThai_TT { get; set; } = "Chưa đóng";
 
         [StringLength(255)]
         public string? AnhChuyenKhoan { get; set; }
 
         public DateTime? NgayDuyet { get; set; }
 
+        // NgayHetHan: mốc chuyển sang trạng thái "Quá hạn" (thường = HanDong + 3~7 ngày)
+        // Cột này thêm mới — cần chạy migration
+
+        // DaCoNhacNo: 0=chưa nhắc | 1=đã gửi thông báo nhắc
+        // Cột này thêm mới — cần chạy migration
+
+        // DuocCongVaoTro: 0=chưa cộng nợ DV | 1=đã cộng vào hóa đơn tháng
+        // Cột này thêm mới — cần chạy migration
+
         [StringLength(200)]
         public string? GhiChuDuyet { get; set; }
 
-        public DateTime NgayXuatHD { get; set; } = DateTime.UtcNow;
+        public DateTime NgayXuatHD { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
+        // Navigation Properties
         [ForeignKey("IDPhong")]
         public virtual PHONG Phong { get; set; } = null!;
 
@@ -404,6 +425,9 @@ namespace QuanLyNhaTro.Models
 
         [ForeignKey("IDManagerDuyet")]
         public virtual ACCOUNT? ManagerDuyet { get; set; }
+        public DateTime? NgayHetHan { get; set; }
+        public bool DaCoNhacNo { get; set; }
+        public bool DuocCongVaoTro { get; set; }
     }
 
     // ================================================================
@@ -418,7 +442,7 @@ namespace QuanLyNhaTro.Models
 
         public int? IDNguoiGui { get; set; }
 
-        public int? IDUser { get; set; } // NULL = broadcast
+        public int? IDUser { get; set; } // NULL = broadcast tất cả
 
         public int? IDNguonTB { get; set; }
 
@@ -438,8 +462,9 @@ namespace QuanLyNhaTro.Models
 
         public bool DaDoc { get; set; } = false;
 
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; }
 
+        // Navigation Properties
         [ForeignKey("IDUser")]
         public virtual ACCOUNT? NguoiNhan { get; set; }
 
@@ -475,7 +500,7 @@ namespace QuanLyNhaTro.Models
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime NgayApDung { get; set; } = DateTime.UtcNow;
+        public DateTime NgayApDung { get; set; }
     }
 
     // ================================================================
@@ -510,7 +535,7 @@ namespace QuanLyNhaTro.Models
         public int DonDVChoXuLy { get; set; } = 0;
         public int DonDVKhanCap { get; set; } = 0;
 
-        public DateTime NgayCapNhat { get; set; } = DateTime.UtcNow;
+        public DateTime NgayCapNhat { get; set; }
     }
 
     // ================================================================
@@ -548,13 +573,13 @@ namespace QuanLyNhaTro.Models
         public int SoHoaDonDaDong { get; set; } = 0;
 
         [Column(TypeName = "decimal(15, 2)")]
-        public decimal ChiPhi_Thang { get; set; } = 0;
+        public decimal ChiPhiThang { get; set; } = 0;
 
-        public DateTime NgayCapNhat { get; set; } = DateTime.UtcNow;
+        public DateTime NgayCapNhat { get; set; }
     }
 
     // ================================================================
-    // 13. KHACH_THUE — Thông tin khách thuê
+    // 13. KHACH_THUE — Thông tin chi tiết khách thuê
     // ================================================================
     [Table("KHACH_THUE")]
     public class KHACH_THUE
@@ -564,9 +589,6 @@ namespace QuanLyNhaTro.Models
         public int IDKhachThue { get; set; }
 
         public int IDUser { get; set; }
-
-        [ForeignKey("IDUser")]
-        public virtual ACCOUNT? Account { get; set; }
 
         [Required(ErrorMessage = "Họ tên là bắt buộc")]
         [StringLength(100)]
@@ -589,13 +611,17 @@ namespace QuanLyNhaTro.Models
         [Column(TypeName = "nvarchar(max)")]
         public string? AnhChanDung { get; set; }
 
-        public DateTime NgayVaoO { get; set; } = DateTime.Now;
+        public DateTime NgayVaoO { get; set; }
 
         [Column(TypeName = "nvarchar(max)")]
         public string? GhiChu { get; set; }
 
         [StringLength(255)]
         public string? DiaChiThuongTru { get; set; }
+
+        // Navigation Properties
+        [ForeignKey("IDUser")]
+        public virtual ACCOUNT? Account { get; set; }
     }
 
     // ================================================================
@@ -604,6 +630,12 @@ namespace QuanLyNhaTro.Models
     public class QuanLyKhuNhaTro : DbContext
     {
         public QuanLyKhuNhaTro(DbContextOptions<QuanLyKhuNhaTro> options) : base(options) { }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.ConfigureWarnings(w =>
+                w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics
+                         .RelationalEventId.PendingModelChangesWarning));
+        }
 
         public DbSet<ACCOUNT> ACCOUNT { get; set; }
         public DbSet<REFRESH_TOKEN> REFRESH_TOKEN { get; set; }
@@ -629,9 +661,9 @@ namespace QuanLyNhaTro.Models
                 entity.HasIndex(e => e.Username).IsUnique();
                 entity.HasIndex(e => e.Roles);
                 entity.HasIndex(e => e.IsActive);
-
-                entity.Property(e => e.Roles)
-                      .HasConversion<string>();
+                entity.Property(e => e.Roles).HasConversion<string>();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
 
             // ── REFRESH_TOKEN ────────────────────────────────────────
@@ -639,6 +671,7 @@ namespace QuanLyNhaTro.Models
             {
                 entity.HasIndex(e => e.Token).IsUnique();
                 entity.HasIndex(e => e.IDUser);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
 
                 entity.HasOne(e => e.Account)
                       .WithMany(a => a.RefreshTokens)
@@ -651,12 +684,14 @@ namespace QuanLyNhaTro.Models
             {
                 entity.HasIndex(e => e.SoPhong).IsUnique();
                 entity.HasIndex(e => e.TrangThai);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
 
             // ── PHONG_MANAGER ────────────────────────────────────────
             modelBuilder.Entity<PHONG_MANAGER>(entity =>
             {
                 entity.HasIndex(e => new { e.IDPhong, e.IDManager, e.IsActive }).IsUnique();
+                entity.Property(e => e.NgayPhanCong).HasDefaultValueSql("GETUTCDATE()");
 
                 entity.HasOne(e => e.Phong)
                       .WithMany(p => p.PhongManagers)
@@ -676,6 +711,8 @@ namespace QuanLyNhaTro.Models
                 entity.HasIndex(e => e.IDPhong);
                 entity.HasIndex(e => e.IDManager);
                 entity.HasIndex(e => e.TrangThaiHD);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
 
                 entity.HasOne(e => e.Tenant)
                       .WithMany(a => a.HopDongTenants)
@@ -702,6 +739,8 @@ namespace QuanLyNhaTro.Models
                 entity.HasIndex(e => e.TrangThai_DV);
                 entity.HasIndex(e => e.LoaiDV);
                 entity.HasIndex(e => new { e.IDPhong, e.TrangThai_DV });
+                entity.Property(e => e.NgayTao).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
 
                 entity.HasOne(e => e.Tenant)
                       .WithMany(a => a.DonDVGuiDi)
@@ -724,6 +763,7 @@ namespace QuanLyNhaTro.Models
             {
                 entity.HasIndex(e => new { e.IDPhong, e.KyGhiNhan }).IsUnique();
                 entity.HasIndex(e => e.TrangThaiDuyet);
+                entity.Property(e => e.NgayGhi).HasDefaultValueSql("GETUTCDATE()");
 
                 entity.HasOne(e => e.Phong)
                       .WithMany(p => p.DanhSachDienNuoc)
@@ -743,6 +783,13 @@ namespace QuanLyNhaTro.Models
                 entity.HasIndex(e => e.TrangThai_TT);
                 entity.HasIndex(e => e.IDManagerDuyet);
                 entity.HasIndex(e => new { e.KyThanhToan, e.TrangThai_TT });
+
+                entity.Property(e => e.TienNoDV).HasDefaultValue(0m);
+                entity.Property(e => e.TienDV).HasDefaultValue(0m);
+                entity.Property(e => e.DaCoNhacNo).HasDefaultValue(false);
+                entity.Property(e => e.DuocCongVaoTro).HasDefaultValue(false);
+                entity.Property(e => e.NgayXuatHD).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
 
                 entity.HasOne(e => e.Phong)
                       .WithMany(p => p.HoaDonThangs)
@@ -765,6 +812,7 @@ namespace QuanLyNhaTro.Models
             {
                 entity.HasIndex(e => new { e.IDUser, e.DaDoc });
                 entity.HasIndex(e => e.NgayTao);
+                entity.Property(e => e.NgayTao).HasDefaultValueSql("GETUTCDATE()");
 
                 entity.HasOne(e => e.NguoiNhan)
                       .WithMany(a => a.ThongBaos)
@@ -781,12 +829,14 @@ namespace QuanLyNhaTro.Models
             modelBuilder.Entity<CONFIG_GIA>(entity =>
             {
                 entity.HasIndex(e => e.MaDichVu).IsUnique();
+                entity.Property(e => e.NgayApDung).HasDefaultValueSql("GETUTCDATE()");
             });
 
             // ── THONGKE_TONG ─────────────────────────────────────────
             modelBuilder.Entity<THONGKE_TONG>(entity =>
             {
                 entity.HasCheckConstraint("CHK_ID_1", "[ID] = 1");
+                entity.Property(e => e.NgayCapNhat).HasDefaultValueSql("GETUTCDATE()");
                 entity.HasData(new THONGKE_TONG { ID = 1 });
             });
 
@@ -794,12 +844,14 @@ namespace QuanLyNhaTro.Models
             modelBuilder.Entity<THONGKE_DOANHTHU_THANG>(entity =>
             {
                 entity.HasIndex(e => new { e.Nam, e.Thang }).IsUnique();
+                entity.Property(e => e.NgayCapNhat).HasDefaultValueSql("GETUTCDATE()");
             });
 
             // ── KHACH_THUE ───────────────────────────────────────────
             modelBuilder.Entity<KHACH_THUE>(entity =>
             {
                 entity.HasIndex(e => e.IDUser);
+                entity.Property(e => e.NgayVaoO).HasDefaultValueSql("GETDATE()");
 
                 entity.HasOne(e => e.Account)
                       .WithMany(a => a.KhachThues)
