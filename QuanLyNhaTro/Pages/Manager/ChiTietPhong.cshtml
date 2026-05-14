@@ -6,1786 +6,2490 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản Lý Phòng Trọ – Chi Tiết Phòng</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản Lý Phòng Trọ – Chi Tiết Phòng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <style>
-    /* ============================================================
-       BIẾN MÀU & THIẾT LẬP TOÀN CỤC
-    ============================================================ */
-    :root {
-      --mau-sidebar:        #0d1b3e;
-      --mau-sidebar-dam:    #091429;
-      --mau-chu-de:         #1a56db;
-      --mau-chu-de-sang:    #3b82f6;
-      --mau-nen:            #f0f4f8;
-      --mau-trang:          #ffffff;
-      --mau-chu:            #1e293b;
-      --mau-chu-phu:        #64748b;
-      --mau-vien:           #e2e8f0;
-      --mau-xanh-nhat:      #eff6ff;
-      --mau-xanh-trung:     #dbeafe;
-      --bong-card:          0 4px 24px rgba(26,86,219,0.10);
-      --bong-card-hover:    0 8px 32px rgba(26,86,219,0.18);
-      --mau-xanh-la:        #059669;
-      --mau-cam:            #d97706;
-      --mau-do:             #dc2626;
-    }
+    <style>
+            /* ============================================================
+                                                       BIẾN MÀU & THIẾT LẬP TOÀN CỤC
+                                       ============================================================ */
+            :root {
+                --mau-sidebar: #0d1b3e;
+                --mau-sidebar-dam: #091429;
+                --mau-chu-de: #1a56db;
+                --mau-chu-de-sang: #3b82f6;
+                --mau-nen: #f0f4f8;
+                --mau-trang: #ffffff;
+                --mau-chu: #1e293b;
+                --mau-chu-phu: #64748b;
+                --mau-vien: #e2e8f0;
+                --mau-xanh-nhat: #eff6ff;
+                --mau-xanh-trung: #dbeafe;
+                --bong-card: 0 4px 24px rgba(26,86,219,0.10);
+                --bong-card-hover: 0 8px 32px rgba(26,86,219,0.18);
+                --mau-xanh-la: #059669;
+                --mau-cam: #d97706;
+                --mau-do: #dc2626;
+            }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-    body {
-      font-family: 'Be Vietnam Pro', sans-serif;
-      background: var(--mau-nen);
-      color: var(--mau-chu);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+            body {
+                font-family: 'Be Vietnam Pro', sans-serif;
+                background: var(--mau-nen);
+                color: var(--mau-chu);
+                display: flex;
+                height: 100vh;
+                overflow: hidden;
+            }
 
-    /* ============================================================
-       SIDEBAR
-    ============================================================ */
-    #thanh-sidebar {
-      width: 220px;
-      min-width: 220px;
-      background: linear-gradient(180deg, #0d1b3e 0%, #091429 100%);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      position: relative;
-      z-index: 100;
-      box-shadow: 4px 0 24px rgba(0,0,0,0.18);
-      overflow-y: auto;
-      transition: width 0.3s;
-    }
+            /* ============================================================
+                                                       SIDEBAR
+                                       ============================================================ */
+            #thanh-sidebar {
+                width: 220px;
+                min-width: 220px;
+                background: linear-gradient(180deg, #0d1b3e 0%, #091429 100%);
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                position: relative;
+                z-index: 100;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+                overflow-y: auto;
+                transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
+            }
 
-    .logo-sidebar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 28px 20px 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .logo-sidebar .bieu-tuong {
-      width: 42px; height: 42px;
-      background: var(--mau-chu-de);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; color: #fff;
-    }
-    .logo-sidebar .ten-logo strong { display: block; font-size: 15px; color: #fff; letter-spacing: 0.5px; }
-    .logo-sidebar .ten-logo span  { font-size: 11px; color: rgba(255,255,255,0.45); }
+                #thanh-sidebar.an-sidebar {
+                    width: 0;
+                    min-width: 0;
+                    overflow: hidden;
+                }
 
-    .nhan-nhom {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 1.5px; color: rgba(255,255,255,0.3);
-      text-transform: uppercase;
-      padding: 18px 20px 6px;
-    }
+            /* Ẩn nhãn nhóm khi thu gọn */
+            .nhan-nhom {
+                transition: opacity 0.2s ease, max-height 0.3s ease;
+                max-height: 40px;
+                overflow: hidden;
+            }
 
-    .menu-item {
-      display: flex; align-items: center; gap: 13px;
-      padding: 11px 20px;
-      color: rgba(255,255,255,0.65);
-      cursor: pointer;
-      border-radius: 0 30px 30px 0;
-      margin: 2px 10px 2px 0;
-      transition: all 0.2s;
-      font-size: 14px;
-      text-decoration: none;
-      position: relative;
-    }
-    .menu-item i { width: 20px; text-align: center; font-size: 15px; }
-    .menu-item:hover { background: rgba(59,130,246,0.15); color: #fff; }
-    .menu-item.dang-chon {
-      background: linear-gradient(90deg, rgba(26,86,219,0.85), rgba(59,130,246,0.6));
-      color: #fff; font-weight: 600;
-      box-shadow: 0 4px 16px rgba(26,86,219,0.3);
-    }
-    .menu-item.dang-chon::before {
-      content: '';
-      position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-      height: 70%; width: 4px;
-      background: #60a5fa;
-      border-radius: 0 4px 4px 0;
-    }
-    .huy-hieu-menu {
-      margin-left: auto;
-      background: #ef4444; color: #fff;
-      font-size: 10px; font-weight: 700;
-      border-radius: 20px; padding: 1px 7px;
-      min-width: 20px; text-align: center;
-    }
+            #thanh-sidebar.thu-gon .nhan-nhom {
+                opacity: 0;
+                max-height: 0;
+                padding: 0;
+            }
 
-    .admin-sidebar {
-      margin-top: auto;
-      padding: 18px 16px;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer;
-    }
-    .admin-sidebar .anh-admin {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: linear-gradient(135deg, #1a56db, #60a5fa);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 16px;
-      border: 2px solid rgba(255,255,255,0.2);
-    }
-    .admin-sidebar .ten-admin strong { display: block; color: #fff; font-size: 13px; }
-    .admin-sidebar .ten-admin span   { color: rgba(255,255,255,0.45); font-size: 11px; }
+            /* Ẩn text trong menu item khi thu gọn */
+            .menu-item span:not(.huy-hieu-menu) {
+                transition: opacity 0.2s ease, max-width 0.35s ease;
+                max-width: 160px;
+                overflow: hidden;
+                display: inline-block;
+            }
 
-    /* ============================================================
-       KHU VỰC CHÍNH
-    ============================================================ */
-    #khu-vuc-chinh {
-      flex: 1; display: flex; flex-direction: column; overflow: hidden;
-    }
+            #thanh-sidebar.thu-gon .menu-item span:not(.huy-hieu-menu) {
+                opacity: 0;
+                max-width: 0;
+            }
 
-    /* ===== HEADER ===== */
-    #thanh-header {
-      background: var(--mau-trang);
-      padding: 0 28px; height: 64px;
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--mau-vien);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      flex-shrink: 0;
-    }
-    .header-trai { display: flex; align-items: center; gap: 16px; }
-    .nut-ham-menu {
-      background: none; border: none; cursor: pointer;
-      font-size: 20px; color: var(--mau-chu-phu);
-      padding: 6px; border-radius: 8px;
-      transition: background 0.2s;
-    }
-    .nut-ham-menu:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
-    .tieu-de-trang { font-size: 16px; font-weight: 700; color: var(--mau-chu); }
-    .duong-dan     { font-size: 12px; color: var(--mau-chu-phu); }
+            #thanh-sidebar.thu-gon .huy-hieu-menu {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+                padding: 0;
+            }
 
-    .header-phai { display: flex; align-items: center; gap: 16px; }
-    .o-tim-kiem-header {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--mau-nen); border: 1px solid var(--mau-vien);
-      border-radius: 24px; padding: 7px 16px;
-      transition: all 0.2s;
-    }
-    .o-tim-kiem-header:focus-within { border-color: var(--mau-chu-de-sang); background: #fff; }
-    .o-tim-kiem-header input { border: none; background: none; outline: none; font-size: 13px; width: 180px; }
-    .o-tim-kiem-header i { color: var(--mau-chu-phu); font-size: 13px; }
-    .nut-thong-bao {
-      position: relative; background: none; border: none;
-      cursor: pointer; font-size: 18px; color: var(--mau-chu-phu);
-      padding: 8px; border-radius: 50%; transition: all 0.2s;
-    }
-    .nut-thong-bao:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
-    .so-thong-bao {
-      position: absolute; top: 2px; right: 2px;
-      background: #ef4444; color: #fff;
-      font-size: 9px; font-weight: 700; border-radius: 50%;
-      width: 16px; height: 16px;
-      display: flex; align-items: center; justify-content: center;
-      border: 2px solid #fff;
-    }
-    .thong-tin-admin-header {
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer; padding: 6px 12px; border-radius: 24px;
-      transition: background 0.2s;
-    }
-    .thong-tin-admin-header:hover { background: var(--mau-xanh-nhat); }
-    .anh-dai-dien {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, #1a56db, #60a5fa);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 14px; font-weight: 700;
-    }
+            /* Căn giữa icon khi thu gọn */
+            #thanh-sidebar.thu-gon .menu-item {
+                padding: 10px 0;
+                justify-content: center;
+                border-radius: 10px;
+                margin: 2px 8px;
+            }
 
-    /* ============================================================
-       NỘI DUNG TRANG QUẢN LÝ PHÒNG
-    ============================================================ */
-    #noi-dung-trang {
-      flex: 1; overflow-y: auto; padding: 24px 28px;
-    }
+            #thanh-sidebar.thu-gon .admin-sidebar {
+                justify-content: center;
+            }
 
-    /* --- Dòng tiêu đề trang --- */
-    .hang-tieu-de-trang {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 22px;
-    }
-    .hang-tieu-de-trang h2 { font-size: 20px; font-weight: 800; }
-    .hang-tieu-de-trang p  { font-size: 13px; color: var(--mau-chu-phu); margin-top: 2px; }
+            .logo-sidebar {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 28px 20px 24px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
 
-    .nut-them-phong {
-      background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      color: #fff; border: none; border-radius: 10px;
-      padding: 10px 20px; font-size: 13px; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; gap: 8px;
-      box-shadow: 0 4px 12px rgba(26,86,219,0.3);
-      transition: all 0.2s;
-    }
-    .nut-them-phong:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,86,219,0.4); }
+                .logo-sidebar .bieu-tuong {
+                    width: 42px;
+                    height: 42px;
+                    background: var(--mau-chu-de);
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    color: #fff;
+                }
 
-    /* --- Hàng thống kê nhanh (3 thẻ nhỏ) --- */
-    .hang-thong-ke-nhanh {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 16px; margin-bottom: 22px;
-    }
-    .the-thong-ke-nhanh {
-      background: var(--mau-trang);
-      border-radius: 14px; padding: 18px 20px;
-      box-shadow: var(--bong-card);
-      display: flex; align-items: center; gap: 14px;
-      border: 1px solid transparent;
-      transition: all 0.25s; cursor: pointer;
-      position: relative; overflow: hidden;
-    }
-    .the-thong-ke-nhanh::before {
-      content: ''; position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
-      border-radius: 14px 14px 0 0;
-    }
-    .the-thong-ke-nhanh:hover { transform: translateY(-3px); box-shadow: var(--bong-card-hover); }
+                .logo-sidebar .ten-logo strong {
+                    display: block;
+                    font-size: 13px;
+                    color: #fff;
+                    letter-spacing: 0.5px;
+                }
 
-    .the-thong-ke-nhanh.tat-ca::before   { background: linear-gradient(90deg,#1a56db,#60a5fa); }
-    .the-thong-ke-nhanh.tat-ca           { border-color: #dbeafe; }
-    .the-thong-ke-nhanh.tat-ca .bieu-tuong-the { background: #eff6ff; color: #1a56db; }
+                .logo-sidebar .ten-logo span {
+                    font-size: 11px;
+                    color: rgba(255,255,255,0.45);
+                }
 
-    .the-thong-ke-nhanh.dang-thue::before { background: linear-gradient(90deg,#059669,#34d399); }
-    .the-thong-ke-nhanh.dang-thue         { border-color: #d1fae5; }
-    .the-thong-ke-nhanh.dang-thue .bieu-tuong-the { background: #ecfdf5; color: #059669; }
+            .nhan-nhom {
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                color: rgba(255,255,255,0.3);
+                text-transform: uppercase;
+                padding: 18px 20px 6px;
+                transition: opacity 0.2s ease, max-height 0.3s ease;
+                max-height: 40px;
+                overflow: hidden;
+            }
 
-    .the-thong-ke-nhanh.con-trong::before { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
-    .the-thong-ke-nhanh.con-trong         { border-color: #fef3c7; }
-    .the-thong-ke-nhanh.con-trong .bieu-tuong-the { background: #fffbeb; color: #d97706; }
+            #thanh-sidebar.thu-gon .nhan-nhom {
+                opacity: 0;
+                max-height: 0;
+                padding: 0;
+            }
 
-    .bieu-tuong-the {
-      width: 46px; height: 46px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
-    }
-    .so-lieu-the .con-so   { font-size: 26px; font-weight: 800; line-height: 1; }
-    .so-lieu-the .ten-the  { font-size: 12px; color: var(--mau-chu-phu); margin-top: 3px; }
+            .menu-item {
+                display: flex;
+                align-items: center;
+                gap: 13px;
+                padding: 11px 20px;
+                color: rgba(255,255,255,0.65);
+                cursor: pointer;
+                border-radius: 0 30px 30px 0;
+                margin: 2px 10px 2px 0;
+                transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+                font-size: 14px;
+                font-weight: 400;
+                text-decoration: none;
+                position: relative;
+            }
 
-    /* --- Thanh lọc + tìm kiếm --- */
-    .thanh-loc-tim-kiem {
-      background: var(--mau-trang);
-      border-radius: 14px; padding: 16px 20px;
-      box-shadow: var(--bong-card);
-      border: 1px solid var(--mau-vien);
-      display: flex; align-items: center; gap: 14px;
-      margin-bottom: 20px; flex-wrap: wrap;
-    }
+                .menu-item i {
+                    width: 20px;
+                    text-align: center;
+                    font-size: 15px;
+                }
 
-    /* Ô tìm kiếm trong thanh lọc */
-    .o-tim-kiem-phong {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--mau-nen); border: 1.5px solid var(--mau-vien);
-      border-radius: 10px; padding: 9px 14px;
-      flex: 1; min-width: 200px;
-      transition: all 0.2s;
-    }
-    .o-tim-kiem-phong:focus-within { border-color: var(--mau-chu-de-sang); background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-    .o-tim-kiem-phong input {
-      border: none; background: none; outline: none;
-      font-size: 13px; width: 100%;
-      font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .o-tim-kiem-phong i { color: var(--mau-chu-phu); font-size: 14px; flex-shrink: 0; }
+                .menu-item:hover {
+                    background: rgba(59,130,246,0.15);
+                    color: #fff;
+                }
 
-    /* Nhóm nút lọc (Tab: Tất cả / Đang thuê / Còn trống / Bảo trì) */
-    .nhom-nut-loc {
-      display: flex; gap: 6px; flex-wrap: wrap;
-    }
-    .nut-loc {
-      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
-      cursor: pointer; border: 1.5px solid var(--mau-vien);
-      background: var(--mau-nen); color: var(--mau-chu-phu);
-      transition: all 0.2s; white-space: nowrap;
-      font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-loc:hover { border-color: var(--mau-chu-de-sang); color: var(--mau-chu-de); background: var(--mau-xanh-nhat); }
-    .nut-loc.dang-chon-loc {
-      background: var(--mau-chu-de); color: #fff;
-      border-color: var(--mau-chu-de);
-      box-shadow: 0 3px 10px rgba(26,86,219,0.3);
-    }
+                .menu-item.dang-chon {
+                    background: linear-gradient(90deg, rgba(26,86,219,0.85), rgba(59,130,246,0.6));
+                    color: #fff;
+                    font-weight: 600;
+                    box-shadow: 0 4px 16px rgba(26,86,219,0.35);
+                }
 
-    /* Dropdown sắp xếp */
-    .chon-sap-xep {
-      padding: 9px 14px; border-radius: 10px; font-size: 12px; font-weight: 600;
-      border: 1.5px solid var(--mau-vien); background: var(--mau-nen);
-      color: var(--mau-chu); cursor: pointer; outline: none;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      transition: border-color 0.2s;
-    }
-    .chon-sap-xep:focus { border-color: var(--mau-chu-de-sang); }
+                    .menu-item.dang-chon::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 70%;
+                        width: 4px;
+                        background: #60a5fa;
+                        border-radius: 0 4px 4px 0;
+                    }
 
-    /* --- Kết quả tìm kiếm (thông báo số lượng) --- */
-    .ket-qua-loc {
-      font-size: 13px; color: var(--mau-chu-phu);
-      margin-bottom: 14px;
-    }
-    .ket-qua-loc strong { color: var(--mau-chu); }
+            .huy-hieu-menu {
+                margin-left: auto;
+                background: #ef4444;
+                color: #fff;
+                font-size: 10px;
+                font-weight: 700;
+                border-radius: 20px;
+                padding: 1px 7px;
+                min-width: 20px;
+                text-align: center;
+            }
 
-    /* ============================================================
-       LƯỚI DANH SÁCH PHÒNG
-    ============================================================ */
-    .luoi-danh-sach-phong {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 18px;
-    }
+            .admin-sidebar {
+                margin-top: auto;
+                padding: 18px 16px;
+                border-top: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+            }
 
-    /* --- Mỗi card phòng --- */
-    .phong-item {
-      background: var(--mau-trang);
-      border-radius: 16px;
-      border: 1px solid var(--mau-vien);
-      box-shadow: var(--bong-card);
-      overflow: hidden;
-      transition: all 0.25s;
-      cursor: pointer;
-      position: relative;
-    }
-    .phong-item:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--bong-card-hover);
-      border-color: var(--mau-chu-de-sang);
-    }
+                .admin-sidebar .anh-admin {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #1a56db, #60a5fa);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 16px;
+                    border: 2px solid rgba(255,255,255,0.2);
+                }
 
-    /* Vệt màu trên đầu mỗi card theo trạng thái */
-    .phong-item::before {
-      content: ''; position: absolute;
-      top: 0; left: 0; right: 0; height: 4px;
-      border-radius: 16px 16px 0 0;
-    }
-    .phong-item.trang-thai-dang-thue::before { background: linear-gradient(90deg,#059669,#34d399); }
-    .phong-item.trang-thai-con-trong::before  { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
-    .phong-item.trang-thai-bao-tri::before    { background: linear-gradient(90deg,#ef4444,#f97316); }
+                .admin-sidebar .ten-admin strong {
+                    display: block;
+                    color: #fff;
+                    font-size: 13px;
+                }
 
-    /* Phần ảnh / minh họa phòng */
-    .anh-phong {
-      height: 140px;
-      background: linear-gradient(135deg, #e0e7ff 0%, #bfdbfe 100%);
-      display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
-    }
-    .anh-phong .icon-phong { font-size: 48px; opacity: 0.35; color: #1a56db; }
+                .admin-sidebar .ten-admin span {
+                    color: rgba(255,255,255,0.45);
+                    font-size: 11px;
+                }
 
-    /* Badge trạng thái nổi trên ảnh */
-    .badge-trang-thai {
-      position: absolute; top: 10px; right: 10px;
-      padding: 4px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 700;
-      backdrop-filter: blur(4px);
-    }
-    .badge-trang-thai.dang-thue { background: rgba(5,150,105,0.9); color: #fff; }
-    .badge-trang-thai.con-trong  { background: rgba(217,119,6,0.9);  color: #fff; }
-    .badge-trang-thai.bao-tri    { background: rgba(220,38,38,0.9);  color: #fff; }
+            /* ============================================================
+                                                      KHU VỰC CHÍNH
+                                       ============================================================ */
+            #khu-vuc-chinh {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
 
-    /* Badge số phòng */
-    .badge-so-phong {
-      position: absolute; top: 10px; left: 10px;
-      background: rgba(15,23,42,0.75); color: #fff;
-      font-size: 12px; font-weight: 700;
-      padding: 4px 10px; border-radius: 8px;
-      backdrop-filter: blur(4px);
-    }
+            /* ===== HEADER ===== */
+            #thanh-header {
+                background: var(--mau-trang);
+                padding: 0 28px;
+                height: 64px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--mau-vien);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                flex-shrink: 0;
+            }
 
-    /* Phần nội dung thông tin phòng */
-    .noi-dung-phong {
-      padding: 16px;
-    }
+            .header-trai {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
 
-    .hang-ten-phong {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .ten-phong-item   { font-size: 16px; font-weight: 800; }
-    .gia-phong-item   { font-size: 15px; font-weight: 800; color: var(--mau-chu-de); }
+            .nut-ham-menu {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 20px;
+                color: var(--mau-chu-phu);
+                padding: 6px;
+                border-radius: 8px;
+                transition: background 0.2s;
+            }
 
-    /* Hàng thông tin chi tiết (diện tích, loại, tầng) */
-    .hang-thong-tin-phong {
-      display: flex; gap: 12px; flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .thong-tin-nhap {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 12px; color: var(--mau-chu-phu);
-      background: var(--mau-nen); padding: 4px 9px;
-      border-radius: 6px;
-    }
-    .thong-tin-nhap i { font-size: 11px; color: var(--mau-chu-de); }
+                .nut-ham-menu:hover {
+                    background: var(--mau-xanh-nhat);
+                    color: var(--mau-chu-de);
+                }
 
-    /* Người thuê hiện tại (nếu đang thuê) */
-    .nguoi-thue-hien-tai {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px 10px; border-radius: 8px;
-      background: #f0fdf4; border: 1px solid #bbf7d0;
-      margin-bottom: 12px;
-    }
-    .nguoi-thue-hien-tai .anh-nguoi-thue {
-      width: 30px; height: 30px; border-radius: 50%;
-      background: linear-gradient(135deg,#059669,#34d399);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0;
-    }
-    .nguoi-thue-hien-tai .ten-nguoi-thue   { font-size: 12px; font-weight: 700; color: #065f46; }
-    .nguoi-thue-hien-tai .han-hop-dong     { font-size: 11px; color: #6b7280; }
+            .tieu-de-trang {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--mau-chu);
+            }
 
-    /* Hàng nút thao tác dưới card */
-    .hang-nut-thao-tac {
-      display: flex; gap: 8px; margin-top: 4px;
-    }
-    .nut-xem-chi-tiet {
-      flex: 1; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 600;
-      background: var(--mau-xanh-nhat); color: var(--mau-chu-de);
-      border: 1.5px solid var(--mau-xanh-trung);
-      cursor: pointer; transition: all 0.2s;
-      font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-xem-chi-tiet:hover { background: var(--mau-xanh-trung); }
+            .duong-dan {
+                font-size: 12px;
+                color: var(--mau-chu-phu);
+            }
 
-    .nut-chinh-sua {
-      padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
-      background: var(--mau-nen); color: var(--mau-chu-phu);
-      border: 1.5px solid var(--mau-vien);
-      cursor: pointer; transition: all 0.2s;
-      font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-chinh-sua:hover { background: var(--mau-vien); color: var(--mau-chu); }
+            .header-phai {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
 
-    .nut-xoa {
-      padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
-      background: #fff5f5; color: #dc2626;
-      border: 1.5px solid #fecaca;
-      cursor: pointer; transition: all 0.2s;
-      font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-xoa:hover { background: #fee2e2; }
+            .o-tim-kiem {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: var(--mau-nen);
+                border: 1px solid var(--mau-vien);
+                border-radius: 24px;
+                padding: 7px 16px;
+                transition: all 0.2s;
+            }
 
-    /* Thông báo không có kết quả */
-    .khong-co-ket-qua {
-      display: none;
-      flex-direction: column; align-items: center; justify-content: center;
-      padding: 60px 20px; color: var(--mau-chu-phu); text-align: center;
-      grid-column: 1 / -1;
-    }
-    .khong-co-ket-qua i { font-size: 48px; margin-bottom: 14px; opacity: 0.3; }
-    .khong-co-ket-qua p { font-size: 15px; font-weight: 600; }
-    .khong-co-ket-qua span { font-size: 13px; }
+                .o-tim-kiem:focus-within {
+                    border-color: var(--mau-chu-de-sang);
+                    background: #fff;
+                }
 
-    /* ============================================================
-       MODAL POPUP
-    ============================================================ */
-    .lop-che-modal {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 999;
-      align-items: center; justify-content: center;
-      backdrop-filter: blur(4px);
-    }
-    .lop-che-modal.hien { display: flex; }
-    .hop-modal {
-      background: var(--mau-trang); border-radius: 20px;
-      padding: 28px; width: 560px; max-width: 95vw;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-      animation: hienModal 0.3s ease;
-      max-height: 90vh; overflow-y: auto;
-    }
-    @@keyframes hienModal {
-      from { opacity: 0; transform: scale(0.9) translateY(-20px); }
-      to   { opacity: 1; transform: none; }
-    }
-    .tieu-de-modal {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .tieu-de-modal h3 { font-size: 17px; font-weight: 800; }
-    .nut-dong-modal {
-      background: none; border: none; font-size: 20px; cursor: pointer;
-      color: var(--mau-chu-phu); border-radius: 50%;
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
-    }
-    .nut-dong-modal:hover { background: var(--mau-nen); color: var(--mau-chu); }
+                .o-tim-kiem input {
+                    border: none;
+                    background: none;
+                    outline: none;
+                    font-size: 13px;
+                    width: 180px;
+                    color: var(--mau-chu);
+                }
 
-    /* Form trong modal */
-    .hang-form-modal { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .nhom-truong-nhap { margin-bottom: 4px; }
-    .nhan-truong-nhap { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--mau-chu); }
-    .truong-nhap {
-      width: 100%; padding: 10px 14px;
-      border: 1.5px solid var(--mau-vien); border-radius: 10px;
-      font-size: 13px; outline: none; transition: border-color 0.2s;
-      color: var(--mau-chu); font-family: 'Be Vietnam Pro', sans-serif;
-      background: #fff;
-    }
-    .truong-nhap:focus { border-color: var(--mau-chu-de-sang); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+                .o-tim-kiem i {
+                    color: var(--mau-chu-phu);
+                    font-size: 13px;
+                }
 
-    .nhom-nut-modal { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-    .nut-huy {
-      background: var(--mau-nen); color: var(--mau-chu-phu);
-      border: none; padding: 10px 20px; border-radius: 10px;
-      cursor: pointer; font-size: 13px; font-weight: 600;
-      transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-huy:hover { background: var(--mau-vien); }
-    .nut-luu {
-      background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-      color: #fff; border: none; padding: 10px 24px; border-radius: 10px;
-      cursor: pointer; font-size: 13px; font-weight: 600;
-      box-shadow: 0 4px 12px rgba(26,86,219,0.3);
-      transition: all 0.2s; font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-luu:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,86,219,0.4); }
+            .nut-thong-bao {
+                position: relative;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 18px;
+                color: var(--mau-chu-phu);
+                padding: 8px;
+                border-radius: 50%;
+                transition: all 0.2s;
+            }
 
-    /* ============================================================
-       MODAL CHI TIẾT PHÒNG (hiển thị đầy đủ thông tin 1 phòng)
-    ============================================================ */
-    .hop-modal-chi-tiet {
-      background: var(--mau-trang); border-radius: 20px;
-      padding: 0; width: 640px; max-width: 95vw;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-      animation: hienModal 0.3s ease;
-      max-height: 90vh; overflow-y: auto;
-    }
-    .anh-phong-chi-tiet {
-      height: 180px;
-      background: linear-gradient(135deg, #e0e7ff, #bfdbfe);
-      display: flex; align-items: center; justify-content: center;
-      position: relative; border-radius: 20px 20px 0 0;
-    }
-    .anh-phong-chi-tiet .icon-lon { font-size: 64px; opacity: 0.3; color: #1a56db; }
-    .noi-dung-chi-tiet { padding: 24px; }
+                .nut-thong-bao:hover {
+                    background: var(--mau-xanh-nhat);
+                    color: var(--mau-chu-de);
+                }
 
-    /* Hàng tiêu đề chi tiết */
-    .hang-tieu-de-chi-tiet {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .ten-phong-chi-tiet  { font-size: 22px; font-weight: 800; }
-    .gia-phong-chi-tiet  { font-size: 20px; font-weight: 800; color: var(--mau-chu-de); }
+            .so-thong-bao {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                background: #ef4444;
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid #fff;
+            }
 
-    /* Lưới thông tin chi tiết */
-    .luoi-thong-tin-chi-tiet {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 12px; margin-bottom: 18px;
-    }
-    .o-thong-tin {
-      background: var(--mau-nen); border-radius: 10px;
-      padding: 12px 14px;
-    }
-    .o-thong-tin .nhan { font-size: 11px; color: var(--mau-chu-phu); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .o-thong-tin .gia-tri { font-size: 14px; font-weight: 700; margin-top: 3px; }
+            .thong-tin-admin {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                padding: 6px 12px;
+                border-radius: 24px;
+                transition: background 0.2s;
+            }
 
-    /* Phần lịch sử thuê */
-    .tieu-de-phan { font-size: 14px; font-weight: 700; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--mau-vien); }
-    .lich-su-thue-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 0; border-bottom: 1px dashed var(--mau-vien);
-    }
-    .lich-su-thue-item:last-child { border-bottom: none; }
-    .lich-su-thue-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mau-chu-de); flex-shrink: 0; }
-    .lich-su-thue-item .ten-nguoi { font-size: 13px; font-weight: 600; }
-    .lich-su-thue-item .thoi-gian-thue { font-size: 12px; color: var(--mau-chu-phu); }
+                .thong-tin-admin:hover {
+                    background: var(--mau-xanh-nhat);
+                }
 
-    /* Nút thao tác trong modal chi tiết */
-    .hang-nut-chi-tiet {
-      display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
-    }
-    .nut-hanh-dong-chinh {
-      flex: 1; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 600;
-      cursor: pointer; border: none; transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      font-family: 'Be Vietnam Pro', sans-serif;
-    }
-    .nut-hanh-dong-chinh.xanh { background: linear-gradient(135deg,#059669,#34d399); color: #fff; }
-    .nut-hanh-dong-chinh.xanh:hover { box-shadow: 0 4px 14px rgba(5,150,105,0.4); }
-    .nut-hanh-dong-chinh.xanh-duong { background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang)); color: #fff; }
-    .nut-hanh-dong-chinh.xanh-duong:hover { box-shadow: 0 4px 14px rgba(26,86,219,0.4); }
-    .nut-hanh-dong-chinh.do { background: linear-gradient(135deg,#ef4444,#f97316); color: #fff; }
-    .nut-hanh-dong-chinh.do:hover { box-shadow: 0 4px 14px rgba(239,68,68,0.4); }
+                .thong-tin-admin .anh-dai-dien {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #1a56db, #60a5fa);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 14px;
+                    font-weight: 700;
+                }
 
-    /* ============================================================
-       SCROLLBAR
-    ============================================================ */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+                .thong-tin-admin .ten {
+                    font-size: 13px;
+                    font-weight: 600;
+                }
 
-    /* ============================================================
-       RESPONSIVE
-    ============================================================ */
-    @@media (max-width: 1024px) {
-      .hang-thong-ke-nhanh { grid-template-columns: 1fr 1fr 1fr; }
-    }
-    @@media (max-width: 768px) {
-      #thanh-sidebar { width: 0; min-width: 0; overflow: hidden; }
-      #thanh-sidebar.mo { width: 220px; min-width: 220px; }
-      .hang-thong-ke-nhanh { grid-template-columns: 1fr; }
-      .luoi-danh-sach-phong { grid-template-columns: 1fr; }
-      .hang-form-modal { grid-template-columns: 1fr; }
-      .luoi-thong-tin-chi-tiet { grid-template-columns: 1fr; }
-    }
-  </style>
+                .thong-tin-admin .chuc-vu {
+                    font-size: 11px;
+                    color: var(--mau-chu-phu);
+                }
+
+            /* ============================================================
+                                                       NỘI DUNG TRANG QUẢN LÝ PHÒNG
+                                       ============================================================ */
+            #noi-dung-trang {
+                flex: 1;
+                overflow-y: auto;
+                padding: 24px 28px;
+            }
+
+            /* --- Dòng tiêu đề trang --- */
+            .hang-tieu-de-trang {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 22px;
+            }
+
+                .hang-tieu-de-trang h2 {
+                    font-size: 20px;
+                    font-weight: 800;
+                }
+
+                .hang-tieu-de-trang p {
+                    font-size: 13px;
+                    color: var(--mau-chu-phu);
+                    margin-top: 2px;
+                }
+
+            .nut-them-phong {
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                color: #fff;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 20px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+                transition: all 0.2s;
+            }
+
+                .nut-them-phong:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(26,86,219,0.4);
+                }
+
+            /* --- Hàng thống kê nhanh (3 thẻ nhỏ) --- */
+            .hang-thong-ke-nhanh {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin-bottom: 22px;
+            }
+
+            .the-thong-ke-nhanh {
+                background: var(--mau-trang);
+                border-radius: 14px;
+                padding: 18px 20px;
+                box-shadow: var(--bong-card);
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                border: 1px solid transparent;
+                transition: all 0.25s;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+                .the-thong-ke-nhanh::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    border-radius: 14px 14px 0 0;
+                }
+
+                .the-thong-ke-nhanh:hover {
+                    transform: translateY(-3px);
+                    box-shadow: var(--bong-card-hover);
+                }
+
+                .the-thong-ke-nhanh.tat-ca::before {
+                    background: linear-gradient(90deg,#1a56db,#60a5fa);
+                }
+
+                .the-thong-ke-nhanh.tat-ca {
+                    border-color: #dbeafe;
+                }
+
+                    .the-thong-ke-nhanh.tat-ca .bieu-tuong-the {
+                        background: #eff6ff;
+                        color: #1a56db;
+                    }
+
+                .the-thong-ke-nhanh.dang-thue::before {
+                    background: linear-gradient(90deg,#059669,#34d399);
+                }
+
+                .the-thong-ke-nhanh.dang-thue {
+                    border-color: #d1fae5;
+                }
+
+                    .the-thong-ke-nhanh.dang-thue .bieu-tuong-the {
+                        background: #ecfdf5;
+                        color: #059669;
+                    }
+
+                .the-thong-ke-nhanh.con-trong::before {
+                    background: linear-gradient(90deg,#f59e0b,#fbbf24);
+                }
+
+                .the-thong-ke-nhanh.con-trong {
+                    border-color: #fef3c7;
+                }
+
+                    .the-thong-ke-nhanh.con-trong .bieu-tuong-the {
+                        background: #fffbeb;
+                        color: #d97706;
+                    }
+
+            .bieu-tuong-the {
+                width: 46px;
+                height: 46px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+
+            .so-lieu-the .con-so {
+                font-size: 26px;
+                font-weight: 800;
+                line-height: 1;
+            }
+
+            .so-lieu-the .ten-the {
+                font-size: 12px;
+                color: var(--mau-chu-phu);
+                margin-top: 3px;
+            }
+
+            /* --- Thanh lọc + tìm kiếm --- */
+            .thanh-loc-tim-kiem {
+                background: var(--mau-trang);
+                border-radius: 14px;
+                padding: 16px 20px;
+                box-shadow: var(--bong-card);
+                border: 1px solid var(--mau-vien);
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
+            /* Ô tìm kiếm trong thanh lọc */
+            .o-tim-kiem-phong {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: var(--mau-nen);
+                border: 1.5px solid var(--mau-vien);
+                border-radius: 10px;
+                padding: 9px 14px;
+                flex: 1;
+                min-width: 200px;
+                transition: all 0.2s;
+            }
+
+                .o-tim-kiem-phong:focus-within {
+                    border-color: var(--mau-chu-de-sang);
+                    background: #fff;
+                    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+                }
+
+                .o-tim-kiem-phong input {
+                    border: none;
+                    background: none;
+                    outline: none;
+                    font-size: 13px;
+                    width: 100%;
+                    font-family: 'Be Vietnam Pro', sans-serif;
+                }
+
+                .o-tim-kiem-phong i {
+                    color: var(--mau-chu-phu);
+                    font-size: 14px;
+                    flex-shrink: 0;
+                }
+
+            /* Nhóm nút lọc (Tab: Tất cả / Đang thuê / Còn trống / Bảo trì) */
+            .nhom-nut-loc {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            .nut-loc {
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                border: 1.5px solid var(--mau-vien);
+                background: var(--mau-nen);
+                color: var(--mau-chu-phu);
+                transition: all 0.2s;
+                white-space: nowrap;
+                font-family: 'Be Vietnam Pro', sans-serif;
+            }
+
+                .nut-loc:hover {
+                    border-color: var(--mau-chu-de-sang);
+                    color: var(--mau-chu-de);
+                    background: var(--mau-xanh-nhat);
+                }
+
+                .nut-loc.dang-chon-loc {
+                    background: var(--mau-chu-de);
+                    color: #fff;
+                    border-color: var(--mau-chu-de);
+                    box-shadow: 0 3px 10px rgba(26,86,219,0.3);
+                }
+
+            /* Dropdown sắp xếp */
+            .chon-sap-xep {
+                padding: 9px 14px;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 600;
+                border: 1.5px solid var(--mau-vien);
+                background: var(--mau-nen);
+                color: var(--mau-chu);
+                cursor: pointer;
+                outline: none;
+                font-family: 'Be Vietnam Pro', sans-serif;
+                transition: border-color 0.2s;
+            }
+
+                .chon-sap-xep:focus {
+                    border-color: var(--mau-chu-de-sang);
+                }
+
+            /* --- Kết quả tìm kiếm (thông báo số lượng) --- */
+            .ket-qua-loc {
+                font-size: 13px;
+                color: var(--mau-chu-phu);
+                margin-bottom: 14px;
+            }
+
+                .ket-qua-loc strong {
+                    color: var(--mau-chu);
+                }
+
+            /* ============================================================
+                                                       LƯỚI DANH SÁCH PHÒNG
+                                                    ============================================================ */
+            .luoi-danh-sach-phong {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 18px;
+            }
+
+            /* --- Mỗi card phòng --- */
+            .phong-item {
+                background: var(--mau-trang);
+                border-radius: 16px;
+                border: 1px solid var(--mau-vien);
+                box-shadow: var(--bong-card);
+                overflow: hidden;
+                transition: all 0.25s;
+                cursor: pointer;
+                position: relative;
+            }
+
+                .phong-item:hover {
+                    transform: translateY(-4px);
+                    box-shadow: var(--bong-card-hover);
+                    border-color: var(--mau-chu-de-sang);
+                }
+
+                /* Vệt màu trên đầu mỗi card theo trạng thái */
+                .phong-item::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    border-radius: 16px 16px 0 0;
+                }
+
+                .phong-item.trang-thai-dang-thue::before {
+                    background: linear-gradient(90deg,#059669,#34d399);
+                }
+
+                .phong-item.trang-thai-con-trong::before {
+                    background: linear-gradient(90deg,#f59e0b,#fbbf24);
+                }
+
+                .phong-item.trang-thai-bao-tri::before {
+                    background: linear-gradient(90deg,#ef4444,#f97316);
+                }
+
+            /* Phần ảnh / minh họa phòng */
+            .anh-phong {
+                height: 140px;
+                background: linear-gradient(135deg, #e0e7ff 0%, #bfdbfe 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+                .anh-phong .icon-phong {
+                    font-size: 48px;
+                    opacity: 0.35;
+                    color: #1a56db;
+                }
+
+            /* Badge trạng thái nổi trên ảnh */
+            .badge-trang-thai {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 4px 10px;
+                border-radius: 20px;
+                font-size: 11px;
+                font-weight: 700;
+                backdrop-filter: blur(4px);
+            }
+
+                .badge-trang-thai.dang-thue {
+                    background: rgba(5,150,105,0.9);
+                    color: #fff;
+                }
+
+                .badge-trang-thai.con-trong {
+                    background: rgba(217,119,6,0.9);
+                    color: #fff;
+                }
+
+                .badge-trang-thai.bao-tri {
+                    background: rgba(220,38,38,0.9);
+                    color: #fff;
+                }
+
+            /* Badge số phòng */
+            .badge-so-phong {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(15,23,42,0.75);
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                padding: 4px 10px;
+                border-radius: 8px;
+                backdrop-filter: blur(4px);
+            }
+
+            /* Phần nội dung thông tin phòng */
+            .noi-dung-phong {
+                padding: 16px;
+            }
+
+            .hang-ten-phong {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+
+            .ten-phong-item {
+                font-size: 16px;
+                font-weight: 800;
+            }
+
+            .gia-phong-item {
+                font-size: 15px;
+                font-weight: 800;
+                color: var(--mau-chu-de);
+            }
+
+            /* Hàng thông tin chi tiết (diện tích, loại, tầng) */
+            .hang-thong-tin-phong {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 12px;
+            }
+
+            .thong-tin-nhap {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 12px;
+                color: var(--mau-chu-phu);
+                background: var(--mau-nen);
+                padding: 4px 9px;
+                border-radius: 6px;
+            }
+
+                .thong-tin-nhap i {
+                    font-size: 11px;
+                    color: var(--mau-chu-de);
+                }
+
+            /* Người thuê hiện tại (nếu đang thuê) */
+            .nguoi-thue-hien-tai {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 10px;
+                border-radius: 8px;
+                background: #f0fdf4;
+                border: 1px solid #bbf7d0;
+                margin-bottom: 12px;
+            }
+
+                .nguoi-thue-hien-tai .anh-nguoi-thue {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg,#059669,#34d399);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 12px;
+                    font-weight: 700;
+                    flex-shrink: 0;
+                }
+
+                .nguoi-thue-hien-tai .ten-nguoi-thue {
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #065f46;
+                }
+
+                .nguoi-thue-hien-tai .han-hop-dong {
+                    font-size: 11px;
+                    color: #6b7280;
+                }
+
+            /* Hàng nút thao tác dưới card */
+            .hang-nut-thao-tac {
+                display: flex;
+                gap: 8px;
+                margin-top: 4px;
+            }
+
+            .nut-xem-chi-tiet {
+                flex: 1;
+                padding: 8px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                background: var(--mau-xanh-nhat);
+                color: var(--mau-chu-de);
+                border: 1.5px solid var(--mau-xanh-trung);
+                cursor: pointer;
+                transition: all 0.2s;
+                font-family: 'Be Vietnam Pro', sans-serif;
+            }
+
+                .nut-xem-chi-tiet:hover {
+                    background: var(--mau-xanh-trung);
+                }
+
+            .nut-chinh-sua {
+                padding: 8px 12px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                background: var(--mau-nen);
+                color: var(--mau-chu-phu);
+                border: 1.5px solid var(--mau-vien);
+                cursor: pointer;
+                transition: all 0.2s;
+                font-family: 'Be Vietnam Pro', sans-serif;
+            }
+
+                .nut-chinh-sua:hover {
+                    background: var(--mau-vien);
+                    color: var(--mau-chu);
+                }
+
+            .nut-xoa {
+                padding: 8px 12px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                background: #fff5f5;
+                color: #dc2626;
+                border: 1.5px solid #fecaca;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-family: 'Be Vietnam Pro', sans-serif;
+            }
+
+                .nut-xoa:hover {
+                    background: #fee2e2;
+                }
+
+            /* Thông báo không có kết quả */
+            .khong-co-ket-qua {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 60px 20px;
+                color: var(--mau-chu-phu);
+                text-align: center;
+                grid-column: 1 / -1;
+            }
+
+                .khong-co-ket-qua i {
+                    font-size: 48px;
+                    margin-bottom: 14px;
+                    opacity: 0.3;
+                }
+
+                .khong-co-ket-qua p {
+                    font-size: 15px;
+                    font-weight: 600;
+                }
+
+                .khong-co-ket-qua span {
+                    font-size: 13px;
+                }
+
+            /* ============================================================
+                                                       MODAL POPUP
+                                                    ============================================================ */
+            .lop-che-modal {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(4px);
+            }
+
+                .lop-che-modal.hien {
+                    display: flex;
+                }
+
+            .hop-modal {
+                background: var(--mau-trang);
+                border-radius: 20px;
+                padding: 28px;
+                width: 560px;
+                max-width: 95vw;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                animation: hienModal 0.3s ease;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            @@keyframes hienModal {
+                from {
+                    opacity: 0;
+                    transform: scale(0.9) translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
+
+            .tieu-de-modal {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            }
+
+                .tieu-de-modal h3 {
+                    font-size: 17px;
+                    font-weight: 800;
+                }
+
+            .nut-dong-modal {
+                background: none;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+                color: var(--mau-chu-phu);
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+
+                .nut-dong-modal:hover {
+                    background: var(--mau-nen);
+                    color: var(--mau-chu);
+                }
+
+            /* Form trong modal */
+            .hang-form-modal {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+
+            .nhom-truong-nhap {
+                margin-bottom: 4px;
+            }
+
+            .nhan-truong-nhap {
+                display: block;
+                font-size: 12px;
+                font-weight: 600;
+                margin-bottom: 6px;
+                color: var(--mau-chu);
+            }
+
+            .truong-nhap {
+                width: 100%;
+                padding: 10px 14px;
+                border: 1.5px solid var(--mau-vien);
+                border-radius: 10px;
+                font-size: 13px;
+                outline: none;
+                transition: border-color 0.2s;
+                color: var(--mau-chu);
+                font-family: 'Be Vietnam Pro', sans-serif;
+                background: #fff;
+            }
+
+                .truong-nhap:focus {
+                    border-color: var(--mau-chu-de-sang);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+                }
+
+            .nhom-nut-modal {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                margin-top: 20px;
+            }
+
+            .nut-huy {
+                background: var(--mau-nen);
+                color: var(--mau-chu-phu);
+                border: none;
+                padding: 10px 20px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 600;
+                transition: all 0.2s;
+                font-family: 'Be Vietnam Pro', sans-serif;
+            }
+
+                .nut-huy:hover {
+                    background: var(--mau-vien);
+                }
+
+            .nut-luu {
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                color: #fff;
+                border: none;
+                padding: 10px 24px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+                transition: all 0.2s;
+                font-family: 'Be Vietnam Pro', sans-serif;
+            }
+
+                .nut-luu:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(26,86,219,0.4);
+                }
+
+            /* ============================================================
+                                                       MODAL CHI TIẾT PHÒNG (hiển thị đầy đủ thông tin 1 phòng)
+                                                    ============================================================ */
+            .hop-modal-chi-tiet {
+                background: var(--mau-trang);
+                border-radius: 20px;
+                padding: 0;
+                width: 640px;
+                max-width: 95vw;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                animation: hienModal 0.3s ease;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .anh-phong-chi-tiet {
+                height: 180px;
+                background: linear-gradient(135deg, #e0e7ff, #bfdbfe);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                border-radius: 20px 20px 0 0;
+            }
+
+                .anh-phong-chi-tiet .icon-lon {
+                    font-size: 64px;
+                    opacity: 0.3;
+                    color: #1a56db;
+                }
+
+            .noi-dung-chi-tiet {
+                padding: 24px;
+            }
+
+            /* Hàng tiêu đề chi tiết */
+            .hang-tieu-de-chi-tiet {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                margin-bottom: 16px;
+            }
+
+            .ten-phong-chi-tiet {
+                font-size: 22px;
+                font-weight: 800;
+            }
+
+            .gia-phong-chi-tiet {
+                font-size: 20px;
+                font-weight: 800;
+                color: var(--mau-chu-de);
+            }
+
+            /* Lưới thông tin chi tiết */
+            .luoi-thong-tin-chi-tiet {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+
+            .o-thong-tin {
+                background: var(--mau-nen);
+                border-radius: 10px;
+                padding: 12px 14px;
+            }
+
+                .o-thong-tin .nhan {
+                    font-size: 11px;
+                    color: var(--mau-chu-phu);
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .o-thong-tin .gia-tri {
+                    font-size: 14px;
+                    font-weight: 700;
+                    margin-top: 3px;
+                }
+
+            /* Phần lịch sử thuê */
+            .tieu-de-phan {
+                font-size: 14px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid var(--mau-vien);
+            }
+
+            .lich-su-thue-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 0;
+                border-bottom: 1px dashed var(--mau-vien);
+            }
+
+                .lich-su-thue-item:last-child {
+                    border-bottom: none;
+                }
+
+                .lich-su-thue-item .dot {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: var(--mau-chu-de);
+                    flex-shrink: 0;
+                }
+
+                .lich-su-thue-item .ten-nguoi {
+                    font-size: 13px;
+                    font-weight: 600;
+                }
+
+                .lich-su-thue-item .thoi-gian-thue {
+                    font-size: 12px;
+                    color: var(--mau-chu-phu);
+                }
+
+            /* Nút thao tác trong modal chi tiết */
+            .hang-nut-chi-tiet {
+                display: flex;
+                gap: 10px;
+                margin-top: 20px;
+                flex-wrap: wrap;
+            }
+
+            .nut-hanh-dong-chinh {
+                flex: 1;
+                padding: 11px;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border: none;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                font-family: 'Be Vietnam Pro', sans-serif;
+            }
+
+                .nut-hanh-dong-chinh.xanh {
+                    background: linear-gradient(135deg,#059669,#34d399);
+                    color: #fff;
+                }
+
+                    .nut-hanh-dong-chinh.xanh:hover {
+                        box-shadow: 0 4px 14px rgba(5,150,105,0.4);
+                    }
+
+                .nut-hanh-dong-chinh.xanh-duong {
+                    background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+                    color: #fff;
+                }
+
+                    .nut-hanh-dong-chinh.xanh-duong:hover {
+                        box-shadow: 0 4px 14px rgba(26,86,219,0.4);
+                    }
+
+                .nut-hanh-dong-chinh.do {
+                    background: linear-gradient(135deg,#ef4444,#f97316);
+                    color: #fff;
+                }
+
+                    .nut-hanh-dong-chinh.do:hover {
+                        box-shadow: 0 4px 14px rgba(239,68,68,0.4);
+                    }
+
+            /* ============================================================
+                                                       SCROLLBAR
+                                                    ============================================================ */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 3px;
+            }
+
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #94a3b8;
+                }
+
+            /* ============================================================
+                                                       RESPONSIVE
+                                                    ============================================================ */
+            @@media (max-width: 1024px) {
+                .hang-thong-ke-nhanh {
+                    grid-template-columns: 1fr 1fr 1fr;
+                }
+            }
+
+            @@media (max-width: 768px) {
+                #thanh-sidebar {
+                    width: 0;
+                    min-width: 0;
+                    overflow: hidden;
+                }
+
+                    #thanh-sidebar.mo {
+                        width: 220px;
+                        min-width: 220px;
+                    }
+
+                .hang-thong-ke-nhanh {
+                    grid-template-columns: 1fr;
+                }
+
+                .luoi-danh-sach-phong {
+                    grid-template-columns: 1fr;
+                }
+
+                .hang-form-modal {
+                    grid-template-columns: 1fr;
+                }
+
+                .luoi-thong-tin-chi-tiet {
+                    grid-template-columns: 1fr;
+                }
+            }
+    </style>
 </head>
 <body>
 
-<!-- ============================================================
+    <!-- ============================================================
      SIDEBAR – THANH ĐIỀU HƯỚNG
 ============================================================ -->
-<nav id="thanh-sidebar">
+    <nav id="thanh-sidebar">
 
-  <!-- Logo -->
-  <div class="logo-sidebar">
-    <div class="bieu-tuong"><i class="fas fa-building"></i></div>
-    <div class="ten-logo">
-      <strong>NHÀ TRỌ ABC</strong>
-      <span>Quản lý hệ thống</span>
-    </div>
-  </div>
+        <!-- Logo -->
+        <div class="logo-sidebar">
+            <div class="bieu-tuong"><i class="fas fa-building"></i></div>
+            <div class="ten-logo">
+                <strong>Nhà Trọ Bà Năm</strong>
+                <span>Quản lý hệ thống</span>
+            </div>
+        </div>
 
-  <div class="nhan-nhom">Tổng quan</div>
-  <a class="menu-item" onclick="chuyenTrang('trang-chu', this)">
-    <i class="fas fa-home"></i><span>Trang chủ</span>
-  </a>
+        <div class="nhan-nhom">Tổng quan</div>
+        <a class="menu-item" onclick="chuyenTrang('trang-chu', this)">
+            <i class="fas fa-home"></i><span>Trang chủ</span>
+        </a>
 
-  <div class="nhan-nhom">Quản lý</div>
-  <!-- Đang ở trang quản lý phòng nên thêm class dang-chon -->
-  <a class="menu-item dang-chon" onclick="chuyenTrang('quan-ly-phong', this)">
-    <i class="fas fa-door-open"></i><span>Quản lý phòng trọ</span>
-  </a>
-  <a class="menu-item" onclick="chuyenTrang('quan-ly-nguoi-thue', this)">
-    <i class="fas fa-users"></i><span>Quản lý người thuê</span>
-    <span class="huy-hieu-menu">2</span>
-  </a>
-  <a class="menu-item" onclick="chuyenTrang('hoa-don', this)">
-    <i class="fas fa-file-invoice-dollar"></i><span>Hóa đơn & Thu tiền</span>
-  </a>
+        <div class="nhan-nhom">Quản lý</div>
+        <!-- Đang ở trang quản lý phòng nên thêm class dang-chon -->
+        <a class="menu-item dang-chon" onclick="chuyenTrang('quan-ly-phong', this)">
+            <i class="fas fa-door-open"></i><span>Quản lý phòng trọ</span>
+        </a>
+        <a class="menu-item" onclick="chuyenTrang('quan-ly-nguoi-thue', this)">
+            <i class="fas fa-users"></i><span>Quản lý dịch vụ và tiện ích</span>
+            <span class="huy-hieu-menu">2</span>
+        </a>
+        <a class="menu-item" onclick="chuyenTrang('hoa-don', this)">
+            <i class="fas fa-file-invoice-dollar"></i><span>Hóa đơn & Thu tiền</span>
+        </a>
 
-  <div class="nhan-nhom">Hỗ trợ</div>
-  <a class="menu-item" onclick="chuyenTrang('su-co-bao-tri', this)">
-    <i class="fas fa-tools"></i><span>Sự cố / Bảo trì</span>
-    <span class="huy-hieu-menu">3</span>
-  </a>
-  <a class="menu-item" onclick="chuyenTrang('bao-cao', this)">
-    <i class="fas fa-chart-bar"></i><span>Thống kê & Báo cáo</span>
-  </a>
-  <a class="menu-item" onclick="chuyenTrang('cai-dat', this)">
-    <i class="fas fa-cog"></i><span>Cài đặt hệ thống</span>
-  </a>
+        <div class="nhan-nhom">Hỗ trợ</div>
+        <a class="menu-item" onclick="chuyenTrang('su-co-bao-tri', this)">
+            <i class="fas fa-tools"></i><span>Sự cố / Bảo trì</span>
+            <span class="huy-hieu-menu">3</span>
+        </a>
+        <a class="menu-item" onclick="chuyenTrang('bao-cao', this)">
+            <i class="fas fa-chart-bar"></i><span>Thống kê & Báo cáo</span>
+        </a>
+        <a class="menu-item" onclick="chuyenTrang('cai-dat', this)">
+            <i class="fas fa-cog"></i><span>Cài đặt hệ thống</span>
+        </a>
 
-  <!-- Admin dưới đáy sidebar -->
-  <div class="admin-sidebar" onclick="moThongTinAdmin()">
-    <div class="anh-admin">A</div>
-    <div class="ten-admin">
-      <strong>Admin</strong>
-      <span>Quản trị viên</span>
-    </div>
-  </div>
+        <!-- Admin dưới đáy sidebar -->
+        <div class="admin-sidebar" onclick="moThongTinAdmin()">
+            <div class="anh-admin">A</div>
+            <div class="ten-admin">
+                <strong>Admin</strong>
+                <span>Quản trị viên</span>
+            </div>
+        </div>
 
-</nav><!-- / SIDEBAR -->
-
-
-<!-- ============================================================
+    </nav><!-- / SIDEBAR -->
+    <!-- ============================================================
      KHU VỰC CHÍNH
 ============================================================ -->
-<div id="khu-vuc-chinh">
+    <div id="khu-vuc-chinh">
 
-  <!-- HEADER -->
-  <header id="thanh-header">
-    <div class="header-trai">
-      <button class="nut-ham-menu" onclick="dongMoSidebar()">
-        <i class="fas fa-bars"></i>
-      </button>
-      <div>
-        <div class="tieu-de-trang">Quản Lý Phòng Trọ</div>
-        <div class="duong-dan">Trang chủ / Quản lý phòng trọ</div>
-      </div>
-    </div>
-    <div class="header-phai">
-      <div class="o-tim-kiem-header">
-        <i class="fas fa-search"></i>
-        <input type="text" placeholder="Tìm phòng, người thuê..." oninput="timKiemToanCuc(this.value)" />
-      </div>
-      <button class="nut-thong-bao" onclick="moThongBao()">
-        <i class="fas fa-bell"></i>
-        <!-- ⚙️ BACKEND: Lấy số thông báo chưa đọc -->
-        <span class="so-thong-bao">5</span>
-      </button>
-      <div class="thong-tin-admin-header" onclick="moMenuAdmin()">
-        <div class="anh-dai-dien">A</div>
-        <div>
-          <div style="font-size:13px;font-weight:600;">Nguyễn Văn Admin</div>
-          <div style="font-size:11px;color:var(--mau-chu-phu);">Quản trị viên</div>
-        </div>
-        <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
-      </div>
-    </div>
-  </header><!-- / HEADER -->
+        <!-- HEADER -->
+        <header id="thanh-header">
+            <div class="header-trai">
+                <button class="nut-ham-menu" onclick="dongMoSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div>
+                    <div class="tieu-de-trang">Quản Lý Phòng Trọ</div>
+                    <div class="duong-dan">Trang chủ / Quản lý phòng trọ</div>
+                </div>
+            </div>
+            <div class="header-phai">
+                <div class="o-tim-kiem">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Tìm phòng, người thuê..." oninput="timKiemToanCuc(this.value)" />
+                </div>
+                <button class="nut-thong-bao" onclick="moThongBao()">
+                    <i class="fas fa-bell"></i>
+                    <!-- ⚙️ BACKEND: Lấy số thông báo chưa đọc -->
+                    <span class="so-thong-bao">5</span>
+                </button>
+                <div class="thong-tin-admin" onclick="moMenuAdmin()">
+                    <div class="anh-dai-dien">A</div>
+                    <div>
+                        <div class="ten">Nguyễn Văn Admin</div>
+                        <div class="chuc-vu">Quản trị viên</div>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
+                </div>
+            </div>
+        </header><!-- / HEADER -->
+        <!-- NỘI DUNG TRANG -->
+        <div id="noi-dung-trang">
 
+            <!-- Tiêu đề trang + nút thêm phòng -->
+            <div class="hang-tieu-de-trang">
+                <div>
+                    <h2>Danh Sách Phòng Trọ 🏠</h2>
+                    <p>Quản lý toàn bộ phòng trọ – xem, lọc và tìm kiếm nhanh chóng</p>
+                </div>
+                <button class="nut-them-phong" onclick="moModalThemPhong()">
+                    <i class="fas fa-plus"></i> Thêm phòng mới
+                </button>
+            </div>
 
-  <!-- NỘI DUNG TRANG -->
-  <main id="noi-dung-trang">
-
-    <!-- Tiêu đề trang + nút thêm phòng -->
-    <div class="hang-tieu-de-trang">
-      <div>
-        <h2>Danh Sách Phòng Trọ 🏠</h2>
-        <p>Quản lý toàn bộ phòng trọ – xem, lọc và tìm kiếm nhanh chóng</p>
-      </div>
-      <button class="nut-them-phong" onclick="moModalThemPhong()">
-        <i class="fas fa-plus"></i> Thêm phòng mới
-      </button>
-    </div>
-
-    <!-- ========================================
+            <!-- ========================================
          HÀNG THỐNG KÊ NHANH (3 thẻ)
     ======================================== -->
-    <div class="hang-thong-ke-nhanh">
+            <div class="hang-thong-ke-nhanh">
 
-      <!-- Thẻ 1: Tổng số phòng -->
-      <div class="the-thong-ke-nhanh tat-ca" onclick="locTheoTrangThai('tat-ca')">
-        <div class="bieu-tuong-the"><i class="fas fa-building"></i></div>
-        <div class="so-lieu-the">
-          <!-- ⚙️ BACKEND: Tổng số phòng từ DB -->
-          <div class="con-so" id="so-tong-phong">12</div>
-          <div class="ten-the">Tổng số phòng</div>
-        </div>
-      </div>
+                <!-- Thẻ 1: Tổng số phòng -->
+                <div class="the-thong-ke-nhanh tat-ca" onclick="locTheoTrangThai('tat-ca')">
+                    <div class="bieu-tuong-the"><i class="fas fa-building"></i></div>
+                    <div class="so-lieu-the">
+                        <!-- ⚙️ BACKEND: Tổng số phòng từ DB -->
+                        <div class="con-so" id="so-tong-phong">12</div>
+                        <div class="ten-the">Tổng số phòng</div>
+                    </div>
+                </div>
 
-      <!-- Thẻ 2: Phòng đang thuê -->
-      <div class="the-thong-ke-nhanh dang-thue" onclick="locTheoTrangThai('dang-thue')">
-        <div class="bieu-tuong-the"><i class="fas fa-user-check"></i></div>
-        <div class="so-lieu-the">
-          <!-- ⚙️ BACKEND: Đếm phòng trạng thái = đang thuê -->
-          <div class="con-so" id="so-phong-dang-thue">7</div>
-          <div class="ten-the">Đang được thuê</div>
-        </div>
-      </div>
+                <!-- Thẻ 2: Phòng đang thuê -->
+                <div class="the-thong-ke-nhanh dang-thue" onclick="locTheoTrangThai('dang-thue')">
+                    <div class="bieu-tuong-the"><i class="fas fa-user-check"></i></div>
+                    <div class="so-lieu-the">
+                        <!-- ⚙️ BACKEND: Đếm phòng trạng thái = đang thuê -->
+                        <div class="con-so" id="so-phong-dang-thue">7</div>
+                        <div class="ten-the">Đang được thuê</div>
+                    </div>
+                </div>
 
-      <!-- Thẻ 3: Phòng còn trống -->
-      <div class="the-thong-ke-nhanh con-trong" onclick="locTheoTrangThai('con-trong')">
-        <div class="bieu-tuong-the"><i class="fas fa-door-closed"></i></div>
-        <div class="so-lieu-the">
-          <!-- ⚙️ BACKEND: Đếm phòng trạng thái = còn trống -->
-          <div class="con-so" id="so-phong-con-trong">5</div>
-          <div class="ten-the">Còn trống</div>
-        </div>
-      </div>
+                <!-- Thẻ 3: Phòng còn trống -->
+                <div class="the-thong-ke-nhanh con-trong" onclick="locTheoTrangThai('con-trong')">
+                    <div class="bieu-tuong-the"><i class="fas fa-door-closed"></i></div>
+                    <div class="so-lieu-the">
+                        <!-- ⚙️ BACKEND: Đếm phòng trạng thái = còn trống -->
+                        <div class="con-so" id="so-phong-con-trong">5</div>
+                        <div class="ten-the">Còn trống</div>
+                    </div>
+                </div>
 
-    </div><!-- / HÀNG THỐNG KÊ NHANH -->
-
-
-    <!-- ========================================
+            </div><!-- / HÀNG THỐNG KÊ NHANH -->
+            <!-- ========================================
          THANH LỌC + TÌM KIẾM
     ======================================== -->
-    <div class="thanh-loc-tim-kiem">
+            <div class="thanh-loc-tim-kiem">
 
-      <!-- Ô tìm kiếm phòng -->
-      <div class="o-tim-kiem-phong">
-        <i class="fas fa-search"></i>
-        <input
-          type="text"
-          id="o-nhap-tim-kiem"
-          placeholder="Tìm theo số phòng, tên người thuê..."
-          oninput="timKiemPhong(this.value)"
-        />
-      </div>
+                <!-- Ô tìm kiếm phòng -->
+                <div class="o-tim-kiem-phong">
+                    <i class="fas fa-search"></i>
+                    <input type="text"
+                           id="o-nhap-tim-kiem"
+                           placeholder="Tìm theo số phòng, tên người thuê..."
+                           oninput="timKiemPhong(this.value)" />
+                </div>
 
-      <!-- Nhóm nút lọc theo trạng thái -->
-      <div class="nhom-nut-loc">
-        <button class="nut-loc dang-chon-loc" id="nut-loc-tat-ca"    onclick="locTheoTrangThai('tat-ca')">
-          <i class="fas fa-th-large"></i> Tất cả
-        </button>
-        <button class="nut-loc" id="nut-loc-dang-thue"  onclick="locTheoTrangThai('dang-thue')">
-          <i class="fas fa-user-check"></i> Đang thuê
-        </button>
-        <button class="nut-loc" id="nut-loc-con-trong"  onclick="locTheoTrangThai('con-trong')">
-          <i class="fas fa-door-closed"></i> Còn trống
-        </button>
-        <button class="nut-loc" id="nut-loc-bao-tri"    onclick="locTheoTrangThai('bao-tri')">
-          <i class="fas fa-tools"></i> Bảo trì
-        </button>
-      </div>
+                <!-- Nhóm nút lọc theo trạng thái -->
+                <div class="nhom-nut-loc">
+                    <button class="nut-loc dang-chon-loc" id="nut-loc-tat-ca" onclick="locTheoTrangThai('tat-ca')">
+                        <i class="fas fa-th-large"></i> Tất cả
+                    </button>
+                    <button class="nut-loc" id="nut-loc-dang-thue" onclick="locTheoTrangThai('dang-thue')">
+                        <i class="fas fa-user-check"></i> Đang thuê
+                    </button>
+                    <button class="nut-loc" id="nut-loc-con-trong" onclick="locTheoTrangThai('con-trong')">
+                        <i class="fas fa-door-closed"></i> Còn trống
+                    </button>
+                    <button class="nut-loc" id="nut-loc-bao-tri" onclick="locTheoTrangThai('bao-tri')">
+                        <i class="fas fa-tools"></i> Bảo trì
+                    </button>
+                </div>
 
-      <!-- Dropdown sắp xếp -->
-      <select class="chon-sap-xep" id="chon-sap-xep" onchange="sapXepPhong(this.value)">
-        <option value="so-phong-tang">Số phòng ↑</option>
-        <option value="so-phong-giam">Số phòng ↓</option>
-        <option value="gia-tang">Giá tăng dần</option>
-        <option value="gia-giam">Giá giảm dần</option>
-      </select>
+                <!-- Dropdown sắp xếp -->
+                <select class="chon-sap-xep" id="chon-sap-xep" onchange="sapXepPhong(this.value)">
+                    <option value="so-phong-tang">Số phòng ↑</option>
+                    <option value="so-phong-giam">Số phòng ↓</option>
+                    <option value="gia-tang">Giá tăng dần</option>
+                    <option value="gia-giam">Giá giảm dần</option>
+                </select>
 
-    </div><!-- / THANH LỌC TÌM KIẾM -->
-
-
-    <!-- Thông báo số kết quả -->
-    <div class="ket-qua-loc" id="ket-qua-loc">
-      Hiển thị <strong id="so-ket-qua">12</strong> phòng
-    </div>
+            </div><!-- / THANH LỌC TÌM KIẾM -->
+            <!-- Thông báo số kết quả -->
+            <div class="ket-qua-loc" id="ket-qua-loc">
+                Hiển thị <strong id="so-ket-qua">12</strong> phòng
+            </div>
 
 
-    <!-- ========================================
+            <!-- ========================================
          LƯỚI DANH SÁCH PHÒNG
          ⚙️ BACKEND: Render danh sách từ vòng lặp DB
     ======================================== -->
-    <div class="luoi-danh-sach-phong" id="luoi-danh-sach-phong">
+            <div class="luoi-danh-sach-phong" id="luoi-danh-sach-phong">
 
-      <!-- ====== PHÒNG ITEM 1 ====== -->
-      <div class="phong-item trang-thai-dang-thue"
-           data-so-phong="101"
-           data-trang-thai="dang-thue"
-           data-gia="3500000"
-           data-nguoi-thue="Nguyễn Văn Bình"
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong">
-          <i class="fas fa-bed icon-phong"></i>
-          <span class="badge-so-phong">P.101</span>
-          <span class="badge-trang-thai dang-thue">● Đang thuê</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 101</span>
-            <span class="gia-phong-item">3.5M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 18m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 1</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
-          </div>
-          <div class="nguoi-thue-hien-tai">
-            <div class="anh-nguoi-thue">B</div>
-            <div>
-              <div class="ten-nguoi-thue">Nguyễn Văn Bình</div>
-              <div class="han-hop-dong">Hợp đồng đến: 31/12/2025</div>
-            </div>
-          </div>
-          <div class="hang-nut-thao-tac">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'101')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'101')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 1 ====== -->
+                <div class="phong-item trang-thai-dang-thue"
+                     data-so-phong="101"
+                     data-trang-thai="dang-thue"
+                     data-gia="3500000"
+                     data-nguoi-thue="Nguyễn Văn Bình"
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong">
+                        <i class="fas fa-bed icon-phong"></i>
+                        <span class="badge-so-phong">P.101</span>
+                        <span class="badge-trang-thai dang-thue">● Đang thuê</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 101</span>
+                            <span class="gia-phong-item">3.5M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 18m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 1</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
+                        </div>
+                        <div class="nguoi-thue-hien-tai">
+                            <div class="anh-nguoi-thue">B</div>
+                            <div>
+                                <div class="ten-nguoi-thue">Nguyễn Văn Bình</div>
+                                <div class="han-hop-dong">Hợp đồng đến: 31/12/2025</div>
+                            </div>
+                        </div>
+                        <div class="hang-nut-thao-tac">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'101')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'101')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 2 ====== -->
-      <div class="phong-item trang-thai-con-trong"
-           data-so-phong="102"
-           data-trang-thai="con-trong"
-           data-gia="2500000"
-           data-nguoi-thue=""
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
-          <i class="fas fa-bed icon-phong" style="color:#d97706;"></i>
-          <span class="badge-so-phong">P.102</span>
-          <span class="badge-trang-thai con-trong">● Còn trống</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 102</span>
-            <span class="gia-phong-item">2.5M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 15m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 1</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
-          </div>
-          <div class="hang-nut-thao-tac" style="margin-top:46px;">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'102')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'102')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 2 ====== -->
+                <div class="phong-item trang-thai-con-trong"
+                     data-so-phong="102"
+                     data-trang-thai="con-trong"
+                     data-gia="2500000"
+                     data-nguoi-thue=""
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
+                        <i class="fas fa-bed icon-phong" style="color:#d97706;"></i>
+                        <span class="badge-so-phong">P.102</span>
+                        <span class="badge-trang-thai con-trong">● Còn trống</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 102</span>
+                            <span class="gia-phong-item">2.5M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 15m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 1</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
+                        </div>
+                        <div class="hang-nut-thao-tac" style="margin-top:46px;">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'102')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'102')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 3 ====== -->
-      <div class="phong-item trang-thai-dang-thue"
-           data-so-phong="201"
-           data-trang-thai="dang-thue"
-           data-gia="3000000"
-           data-nguoi-thue="Trần Thị Cẩm"
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong">
-          <i class="fas fa-bed icon-phong"></i>
-          <span class="badge-so-phong">P.201</span>
-          <span class="badge-trang-thai dang-thue">● Đang thuê</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 201</span>
-            <span class="gia-phong-item">3.0M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 18m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 2</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
-          </div>
-          <div class="nguoi-thue-hien-tai">
-            <div class="anh-nguoi-thue">C</div>
-            <div>
-              <div class="ten-nguoi-thue">Trần Thị Cẩm</div>
-              <div class="han-hop-dong">Hợp đồng đến: 30/06/2025</div>
-            </div>
-          </div>
-          <div class="hang-nut-thao-tac">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'201')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'201')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 3 ====== -->
+                <div class="phong-item trang-thai-dang-thue"
+                     data-so-phong="201"
+                     data-trang-thai="dang-thue"
+                     data-gia="3000000"
+                     data-nguoi-thue="Trần Thị Cẩm"
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong">
+                        <i class="fas fa-bed icon-phong"></i>
+                        <span class="badge-so-phong">P.201</span>
+                        <span class="badge-trang-thai dang-thue">● Đang thuê</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 201</span>
+                            <span class="gia-phong-item">3.0M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 18m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 2</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
+                        </div>
+                        <div class="nguoi-thue-hien-tai">
+                            <div class="anh-nguoi-thue">C</div>
+                            <div>
+                                <div class="ten-nguoi-thue">Trần Thị Cẩm</div>
+                                <div class="han-hop-dong">Hợp đồng đến: 30/06/2025</div>
+                            </div>
+                        </div>
+                        <div class="hang-nut-thao-tac">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'201')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'201')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 4 ====== -->
-      <div class="phong-item trang-thai-bao-tri"
-           data-so-phong="202"
-           data-trang-thai="bao-tri"
-           data-gia="2800000"
-           data-nguoi-thue=""
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong" style="background:linear-gradient(135deg,#fee2e2,#fca5a5);">
-          <i class="fas fa-tools icon-phong" style="color:#dc2626;"></i>
-          <span class="badge-so-phong">P.202</span>
-          <span class="badge-trang-thai bao-tri">● Bảo trì</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 202</span>
-            <span class="gia-phong-item">2.8M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 16m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 2</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
-          </div>
-          <div class="hang-nut-thao-tac" style="margin-top:46px;">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'202')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'202')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 4 ====== -->
+                <div class="phong-item trang-thai-bao-tri"
+                     data-so-phong="202"
+                     data-trang-thai="bao-tri"
+                     data-gia="2800000"
+                     data-nguoi-thue=""
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong" style="background:linear-gradient(135deg,#fee2e2,#fca5a5);">
+                        <i class="fas fa-tools icon-phong" style="color:#dc2626;"></i>
+                        <span class="badge-so-phong">P.202</span>
+                        <span class="badge-trang-thai bao-tri">● Bảo trì</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 202</span>
+                            <span class="gia-phong-item">2.8M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 16m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 2</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
+                        </div>
+                        <div class="hang-nut-thao-tac" style="margin-top:46px;">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'202')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'202')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 5 ====== -->
-      <div class="phong-item trang-thai-dang-thue"
-           data-so-phong="301"
-           data-trang-thai="dang-thue"
-           data-gia="4500000"
-           data-nguoi-thue="Lê Minh Đức"
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd);">
-          <i class="fas fa-crown icon-phong" style="color:#0284c7;"></i>
-          <span class="badge-so-phong">P.301</span>
-          <span class="badge-trang-thai dang-thue">● Đang thuê</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 301</span>
-            <span class="gia-phong-item">4.5M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 25m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 3</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng cao cấp</span>
-          </div>
-          <div class="nguoi-thue-hien-tai">
-            <div class="anh-nguoi-thue">D</div>
-            <div>
-              <div class="ten-nguoi-thue">Lê Minh Đức</div>
-              <div class="han-hop-dong">Hợp đồng đến: 31/03/2026</div>
-            </div>
-          </div>
-          <div class="hang-nut-thao-tac">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'301')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'301')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 5 ====== -->
+                <div class="phong-item trang-thai-dang-thue"
+                     data-so-phong="301"
+                     data-trang-thai="dang-thue"
+                     data-gia="4500000"
+                     data-nguoi-thue="Lê Minh Đức"
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd);">
+                        <i class="fas fa-crown icon-phong" style="color:#0284c7;"></i>
+                        <span class="badge-so-phong">P.301</span>
+                        <span class="badge-trang-thai dang-thue">● Đang thuê</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 301</span>
+                            <span class="gia-phong-item">4.5M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 25m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 3</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng cao cấp</span>
+                        </div>
+                        <div class="nguoi-thue-hien-tai">
+                            <div class="anh-nguoi-thue">D</div>
+                            <div>
+                                <div class="ten-nguoi-thue">Lê Minh Đức</div>
+                                <div class="han-hop-dong">Hợp đồng đến: 31/03/2026</div>
+                            </div>
+                        </div>
+                        <div class="hang-nut-thao-tac">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'301')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'301')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 6 ====== -->
-      <div class="phong-item trang-thai-con-trong"
-           data-so-phong="302"
-           data-trang-thai="con-trong"
-           data-gia="4200000"
-           data-nguoi-thue=""
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
-          <i class="fas fa-crown icon-phong" style="color:#d97706;"></i>
-          <span class="badge-so-phong">P.302</span>
-          <span class="badge-trang-thai con-trong">● Còn trống</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 302</span>
-            <span class="gia-phong-item">4.2M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 24m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 3</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng cao cấp</span>
-          </div>
-          <div class="hang-nut-thao-tac" style="margin-top:46px;">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'302')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'302')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 6 ====== -->
+                <div class="phong-item trang-thai-con-trong"
+                     data-so-phong="302"
+                     data-trang-thai="con-trong"
+                     data-gia="4200000"
+                     data-nguoi-thue=""
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
+                        <i class="fas fa-crown icon-phong" style="color:#d97706;"></i>
+                        <span class="badge-so-phong">P.302</span>
+                        <span class="badge-trang-thai con-trong">● Còn trống</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 302</span>
+                            <span class="gia-phong-item">4.2M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 24m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 3</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng cao cấp</span>
+                        </div>
+                        <div class="hang-nut-thao-tac" style="margin-top:46px;">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'302')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'302')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 7 ====== -->
-      <div class="phong-item trang-thai-dang-thue"
-           data-so-phong="401"
-           data-trang-thai="dang-thue"
-           data-gia="3200000"
-           data-nguoi-thue="Phạm Thị Hoa"
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong">
-          <i class="fas fa-bed icon-phong"></i>
-          <span class="badge-so-phong">P.401</span>
-          <span class="badge-trang-thai dang-thue">● Đang thuê</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 401</span>
-            <span class="gia-phong-item">3.2M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 20m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
-          </div>
-          <div class="nguoi-thue-hien-tai">
-            <div class="anh-nguoi-thue">H</div>
-            <div>
-              <div class="ten-nguoi-thue">Phạm Thị Hoa</div>
-              <div class="han-hop-dong">Hợp đồng đến: 30/09/2025</div>
-            </div>
-          </div>
-          <div class="hang-nut-thao-tac">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'401')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'401')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 7 ====== -->
+                <div class="phong-item trang-thai-dang-thue"
+                     data-so-phong="401"
+                     data-trang-thai="dang-thue"
+                     data-gia="3200000"
+                     data-nguoi-thue="Phạm Thị Hoa"
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong">
+                        <i class="fas fa-bed icon-phong"></i>
+                        <span class="badge-so-phong">P.401</span>
+                        <span class="badge-trang-thai dang-thue">● Đang thuê</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 401</span>
+                            <span class="gia-phong-item">3.2M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 20m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
+                        </div>
+                        <div class="nguoi-thue-hien-tai">
+                            <div class="anh-nguoi-thue">H</div>
+                            <div>
+                                <div class="ten-nguoi-thue">Phạm Thị Hoa</div>
+                                <div class="han-hop-dong">Hợp đồng đến: 30/09/2025</div>
+                            </div>
+                        </div>
+                        <div class="hang-nut-thao-tac">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'401')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'401')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 8 ====== -->
-      <div class="phong-item trang-thai-con-trong"
-           data-so-phong="402"
-           data-trang-thai="con-trong"
-           data-gia="3000000"
-           data-nguoi-thue=""
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
-          <i class="fas fa-bed icon-phong" style="color:#d97706;"></i>
-          <span class="badge-so-phong">P.402</span>
-          <span class="badge-trang-thai con-trong">● Còn trống</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 402</span>
-            <span class="gia-phong-item">3.0M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 20m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
-          </div>
-          <div class="hang-nut-thao-tac" style="margin-top:46px;">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'402')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'402')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 8 ====== -->
+                <div class="phong-item trang-thai-con-trong"
+                     data-so-phong="402"
+                     data-trang-thai="con-trong"
+                     data-gia="3000000"
+                     data-nguoi-thue=""
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
+                        <i class="fas fa-bed icon-phong" style="color:#d97706;"></i>
+                        <span class="badge-so-phong">P.402</span>
+                        <span class="badge-trang-thai con-trong">● Còn trống</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 402</span>
+                            <span class="gia-phong-item">3.0M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 20m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
+                        </div>
+                        <div class="hang-nut-thao-tac" style="margin-top:46px;">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'402')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'402')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 9 ====== -->
-      <div class="phong-item trang-thai-dang-thue"
-           data-so-phong="403"
-           data-trang-thai="dang-thue"
-           data-gia="2700000"
-           data-nguoi-thue="Hoàng Văn Nam"
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong">
-          <i class="fas fa-bed icon-phong"></i>
-          <span class="badge-so-phong">P.403</span>
-          <span class="badge-trang-thai dang-thue">● Đang thuê</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 403</span>
-            <span class="gia-phong-item">2.7M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 15m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
-          </div>
-          <div class="nguoi-thue-hien-tai">
-            <div class="anh-nguoi-thue">N</div>
-            <div>
-              <div class="ten-nguoi-thue">Hoàng Văn Nam</div>
-              <div class="han-hop-dong">Hợp đồng đến: 31/08/2025</div>
-            </div>
-          </div>
-          <div class="hang-nut-thao-tac">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'403')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'403')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 9 ====== -->
+                <div class="phong-item trang-thai-dang-thue"
+                     data-so-phong="403"
+                     data-trang-thai="dang-thue"
+                     data-gia="2700000"
+                     data-nguoi-thue="Hoàng Văn Nam"
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong">
+                        <i class="fas fa-bed icon-phong"></i>
+                        <span class="badge-so-phong">P.403</span>
+                        <span class="badge-trang-thai dang-thue">● Đang thuê</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 403</span>
+                            <span class="gia-phong-item">2.7M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 15m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
+                        </div>
+                        <div class="nguoi-thue-hien-tai">
+                            <div class="anh-nguoi-thue">N</div>
+                            <div>
+                                <div class="ten-nguoi-thue">Hoàng Văn Nam</div>
+                                <div class="han-hop-dong">Hợp đồng đến: 31/08/2025</div>
+                            </div>
+                        </div>
+                        <div class="hang-nut-thao-tac">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'403')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'403')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 10 ====== -->
-      <div class="phong-item trang-thai-bao-tri"
-           data-so-phong="404"
-           data-trang-thai="bao-tri"
-           data-gia="2700000"
-           data-nguoi-thue=""
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong" style="background:linear-gradient(135deg,#fee2e2,#fca5a5);">
-          <i class="fas fa-wrench icon-phong" style="color:#dc2626;"></i>
-          <span class="badge-so-phong">P.404</span>
-          <span class="badge-trang-thai bao-tri">● Bảo trì</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 404</span>
-            <span class="gia-phong-item">2.7M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 15m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
-          </div>
-          <div class="hang-nut-thao-tac" style="margin-top:46px;">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'404')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'404')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 10 ====== -->
+                <div class="phong-item trang-thai-bao-tri"
+                     data-so-phong="404"
+                     data-trang-thai="bao-tri"
+                     data-gia="2700000"
+                     data-nguoi-thue=""
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong" style="background:linear-gradient(135deg,#fee2e2,#fca5a5);">
+                        <i class="fas fa-wrench icon-phong" style="color:#dc2626;"></i>
+                        <span class="badge-so-phong">P.404</span>
+                        <span class="badge-trang-thai bao-tri">● Bảo trì</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 404</span>
+                            <span class="gia-phong-item">2.7M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 15m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 4</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
+                        </div>
+                        <div class="hang-nut-thao-tac" style="margin-top:46px;">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'404')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'404')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 11 ====== -->
-      <div class="phong-item trang-thai-dang-thue"
-           data-so-phong="203"
-           data-trang-thai="dang-thue"
-           data-gia="3100000"
-           data-nguoi-thue="Vũ Thị Lan"
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong">
-          <i class="fas fa-bed icon-phong"></i>
-          <span class="badge-so-phong">P.203</span>
-          <span class="badge-trang-thai dang-thue">● Đang thuê</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 203</span>
-            <span class="gia-phong-item">3.1M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 19m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 2</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
-          </div>
-          <div class="nguoi-thue-hien-tai">
-            <div class="anh-nguoi-thue">L</div>
-            <div>
-              <div class="ten-nguoi-thue">Vũ Thị Lan</div>
-              <div class="han-hop-dong">Hợp đồng đến: 28/02/2026</div>
-            </div>
-          </div>
-          <div class="hang-nut-thao-tac">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'203')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'203')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 11 ====== -->
+                <div class="phong-item trang-thai-dang-thue"
+                     data-so-phong="203"
+                     data-trang-thai="dang-thue"
+                     data-gia="3100000"
+                     data-nguoi-thue="Vũ Thị Lan"
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong">
+                        <i class="fas fa-bed icon-phong"></i>
+                        <span class="badge-so-phong">P.203</span>
+                        <span class="badge-trang-thai dang-thue">● Đang thuê</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 203</span>
+                            <span class="gia-phong-item">3.1M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 19m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 2</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đôi</span>
+                        </div>
+                        <div class="nguoi-thue-hien-tai">
+                            <div class="anh-nguoi-thue">L</div>
+                            <div>
+                                <div class="ten-nguoi-thue">Vũ Thị Lan</div>
+                                <div class="han-hop-dong">Hợp đồng đến: 28/02/2026</div>
+                            </div>
+                        </div>
+                        <div class="hang-nut-thao-tac">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'203')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'203')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- ====== PHÒNG ITEM 12 ====== -->
-      <div class="phong-item trang-thai-con-trong"
-           data-so-phong="103"
-           data-trang-thai="con-trong"
-           data-gia="2600000"
-           data-nguoi-thue=""
-           onclick="xemChiTietPhong(this)">
-        <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
-          <i class="fas fa-bed icon-phong" style="color:#d97706;"></i>
-          <span class="badge-so-phong">P.103</span>
-          <span class="badge-trang-thai con-trong">● Còn trống</span>
-        </div>
-        <div class="noi-dung-phong">
-          <div class="hang-ten-phong">
-            <span class="ten-phong-item">Phòng 103</span>
-            <span class="gia-phong-item">2.6M/th</span>
-          </div>
-          <div class="hang-thong-tin-phong">
-            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 16m²</span>
-            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 1</span>
-            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
-          </div>
-          <div class="hang-nut-thao-tac" style="margin-top:46px;">
-            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
-              <i class="fas fa-eye"></i> Xem chi tiết
-            </button>
-            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'103')">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="nut-xoa" onclick="xoaPhong(event,'103')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+                <!-- ====== PHÒNG ITEM 12 ====== -->
+                <div class="phong-item trang-thai-con-trong"
+                     data-so-phong="103"
+                     data-trang-thai="con-trong"
+                     data-gia="2600000"
+                     data-nguoi-thue=""
+                     onclick="xemChiTietPhong(this)">
+                    <div class="anh-phong" style="background:linear-gradient(135deg,#fef9c3,#fde68a);">
+                        <i class="fas fa-bed icon-phong" style="color:#d97706;"></i>
+                        <span class="badge-so-phong">P.103</span>
+                        <span class="badge-trang-thai con-trong">● Còn trống</span>
+                    </div>
+                    <div class="noi-dung-phong">
+                        <div class="hang-ten-phong">
+                            <span class="ten-phong-item">Phòng 103</span>
+                            <span class="gia-phong-item">2.6M/th</span>
+                        </div>
+                        <div class="hang-thong-tin-phong">
+                            <span class="thong-tin-nhap"><i class="fas fa-expand-arrows-alt"></i> 16m²</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-layer-group"></i> Tầng 1</span>
+                            <span class="thong-tin-nhap"><i class="fas fa-tag"></i> Phòng đơn</span>
+                        </div>
+                        <div class="hang-nut-thao-tac" style="margin-top:46px;">
+                            <button class="nut-xem-chi-tiet" onclick="xemChiTietPhong(this.closest('.phong-item'))">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                            <button class="nut-chinh-sua" onclick="chinhSuaPhong(event,'103')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="nut-xoa" onclick="xoaPhong(event,'103')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- Thông báo không có kết quả -->
-      <div class="khong-co-ket-qua" id="thong-bao-khong-co-ket-qua">
-        <i class="fas fa-search"></i>
-        <p>Không tìm thấy phòng nào</p>
-        <span>Thử thay đổi từ khóa hoặc bộ lọc</span>
-      </div>
+                <!-- Thông báo không có kết quả -->
+                <div class="khong-co-ket-qua" id="thong-bao-khong-co-ket-qua">
+                    <i class="fas fa-search"></i>
+                    <p>Không tìm thấy phòng nào</p>
+                    <span>Thử thay đổi từ khóa hoặc bộ lọc</span>
+                </div>
 
-    </div><!-- / LƯỚI DANH SÁCH PHÒNG -->
+            </div><!-- / LƯỚI DANH SÁCH PHÒNG -->
 
-  </main><!-- / NỘI DUNG TRANG -->
+        </div><!-- / NỘI DUNG TRANG -->
 
-</div><!-- / KHU VỰC CHÍNH -->
-
-
-<!-- ============================================================
+    </div><!-- / KHU VỰC CHÍNH -->
+    <!-- ============================================================
      MODAL: XEM CHI TIẾT PHÒNG
 ============================================================ -->
-<div class="lop-che-modal" id="modal-chi-tiet-phong" onclick="dongModalNeuNhanNgoai(event,'modal-chi-tiet-phong')">
-  <div class="hop-modal-chi-tiet">
-    <!-- Ảnh minh họa phòng -->
-    <div class="anh-phong-chi-tiet" id="anh-phong-chi-tiet">
-      <i class="fas fa-bed icon-lon"></i>
-      <span class="badge-trang-thai dang-thue" id="badge-ct-trang-thai">● Đang thuê</span>
+    <div class="lop-che-modal" id="modal-chi-tiet-phong" onclick="dongModalNeuNhanNgoai(event,'modal-chi-tiet-phong')">
+        <div class="hop-modal-chi-tiet">
+            <!-- Ảnh minh họa phòng -->
+            <div class="anh-phong-chi-tiet" id="anh-phong-chi-tiet">
+                <i class="fas fa-bed icon-lon"></i>
+                <span class="badge-trang-thai dang-thue" id="badge-ct-trang-thai">● Đang thuê</span>
+            </div>
+
+            <div class="noi-dung-chi-tiet">
+                <!-- Tiêu đề + giá -->
+                <div class="hang-tieu-de-chi-tiet">
+                    <div>
+                        <div class="ten-phong-chi-tiet" id="ct-ten-phong">Phòng 101</div>
+                        <div style="font-size:13px;color:var(--mau-chu-phu);margin-top:2px;">Mã phòng: P.101</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="gia-phong-chi-tiet" id="ct-gia-phong">3.5M/tháng</div>
+                        <button class="nut-dong-modal" onclick="dongModal('modal-chi-tiet-phong')" style="margin-top:4px;">✕</button>
+                    </div>
+                </div>
+
+                <!-- Lưới thông tin chi tiết -->
+                <div class="luoi-thong-tin-chi-tiet">
+                    <div class="o-thong-tin">
+                        <div class="nhan"><i class="fas fa-expand-arrows-alt"></i> Diện tích</div>
+                        <div class="gia-tri" id="ct-dien-tich">18 m²</div>
+                    </div>
+                    <div class="o-thong-tin">
+                        <div class="nhan"><i class="fas fa-layer-group"></i> Tầng</div>
+                        <div class="gia-tri" id="ct-tang">Tầng 1</div>
+                    </div>
+                    <div class="o-thong-tin">
+                        <div class="nhan"><i class="fas fa-tag"></i> Loại phòng</div>
+                        <div class="gia-tri" id="ct-loai-phong">Phòng đôi</div>
+                    </div>
+                    <div class="o-thong-tin">
+                        <div class="nhan"><i class="fas fa-circle"></i> Trạng thái</div>
+                        <div class="gia-tri" id="ct-trang-thai">Đang thuê</div>
+                    </div>
+                    <div class="o-thong-tin">
+                        <div class="nhan"><i class="fas fa-user"></i> Người thuê</div>
+                        <div class="gia-tri" id="ct-nguoi-thue">Nguyễn Văn Bình</div>
+                    </div>
+                    <div class="o-thong-tin">
+                        <div class="nhan"><i class="fas fa-calendar"></i> Hạn hợp đồng</div>
+                        <div class="gia-tri" id="ct-han-hop-dong">31/12/2025</div>
+                    </div>
+                </div>
+
+                <!-- Lịch sử thuê -->
+                <div class="tieu-de-phan"><i class="fas fa-history" style="color:var(--mau-chu-de);"></i> Lịch sử thuê phòng</div>
+                <div id="ct-lich-su-thue">
+                    <!-- ⚙️ BACKEND: Load lịch sử thuê theo soPhong từ DB -->
+                    <div class="lich-su-thue-item">
+                        <div class="dot"></div>
+                        <div>
+                            <div class="ten-nguoi">Nguyễn Văn Bình</div>
+                            <div class="thoi-gian-thue">01/01/2025 → Hiện tại</div>
+                        </div>
+                    </div>
+                    <div class="lich-su-thue-item">
+                        <div class="dot" style="background:#94a3b8;"></div>
+                        <div>
+                            <div class="ten-nguoi" style="color:var(--mau-chu-phu);">Trần Văn An</div>
+                            <div class="thoi-gian-thue">05/2024 → 12/2024</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút hành động trong chi tiết -->
+                <div class="hang-nut-chi-tiet">
+                    <button class="nut-hanh-dong-chinh xanh-duong" onclick="chinhSuaPhongTuChiTiet()">
+                        <i class="fas fa-pen"></i> Chỉnh sửa phòng
+                    </button>
+                    <button class="nut-hanh-dong-chinh xanh" onclick="taoHoaDon()">
+                        <i class="fas fa-file-invoice-dollar"></i> Tạo hóa đơn
+                    </button>
+                    <button class="nut-hanh-dong-chinh do" onclick="xoaPhongTuChiTiet()">
+                        <i class="fas fa-trash"></i> Xóa phòng
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="noi-dung-chi-tiet">
-      <!-- Tiêu đề + giá -->
-      <div class="hang-tieu-de-chi-tiet">
-        <div>
-          <div class="ten-phong-chi-tiet" id="ct-ten-phong">Phòng 101</div>
-          <div style="font-size:13px;color:var(--mau-chu-phu);margin-top:2px;">Mã phòng: P.101</div>
-        </div>
-        <div style="text-align:right;">
-          <div class="gia-phong-chi-tiet" id="ct-gia-phong">3.5M/tháng</div>
-          <button class="nut-dong-modal" onclick="dongModal('modal-chi-tiet-phong')" style="margin-top:4px;">✕</button>
-        </div>
-      </div>
 
-      <!-- Lưới thông tin chi tiết -->
-      <div class="luoi-thong-tin-chi-tiet">
-        <div class="o-thong-tin">
-          <div class="nhan"><i class="fas fa-expand-arrows-alt"></i> Diện tích</div>
-          <div class="gia-tri" id="ct-dien-tich">18 m²</div>
-        </div>
-        <div class="o-thong-tin">
-          <div class="nhan"><i class="fas fa-layer-group"></i> Tầng</div>
-          <div class="gia-tri" id="ct-tang">Tầng 1</div>
-        </div>
-        <div class="o-thong-tin">
-          <div class="nhan"><i class="fas fa-tag"></i> Loại phòng</div>
-          <div class="gia-tri" id="ct-loai-phong">Phòng đôi</div>
-        </div>
-        <div class="o-thong-tin">
-          <div class="nhan"><i class="fas fa-circle"></i> Trạng thái</div>
-          <div class="gia-tri" id="ct-trang-thai">Đang thuê</div>
-        </div>
-        <div class="o-thong-tin">
-          <div class="nhan"><i class="fas fa-user"></i> Người thuê</div>
-          <div class="gia-tri" id="ct-nguoi-thue">Nguyễn Văn Bình</div>
-        </div>
-        <div class="o-thong-tin">
-          <div class="nhan"><i class="fas fa-calendar"></i> Hạn hợp đồng</div>
-          <div class="gia-tri" id="ct-han-hop-dong">31/12/2025</div>
-        </div>
-      </div>
-
-      <!-- Lịch sử thuê -->
-      <div class="tieu-de-phan"><i class="fas fa-history" style="color:var(--mau-chu-de);"></i> Lịch sử thuê phòng</div>
-      <div id="ct-lich-su-thue">
-        <!-- ⚙️ BACKEND: Load lịch sử thuê theo soPhong từ DB -->
-        <div class="lich-su-thue-item">
-          <div class="dot"></div>
-          <div>
-            <div class="ten-nguoi">Nguyễn Văn Bình</div>
-            <div class="thoi-gian-thue">01/01/2025 → Hiện tại</div>
-          </div>
-        </div>
-        <div class="lich-su-thue-item">
-          <div class="dot" style="background:#94a3b8;"></div>
-          <div>
-            <div class="ten-nguoi" style="color:var(--mau-chu-phu);">Trần Văn An</div>
-            <div class="thoi-gian-thue">05/2024 → 12/2024</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Nút hành động trong chi tiết -->
-      <div class="hang-nut-chi-tiet">
-        <button class="nut-hanh-dong-chinh xanh-duong" onclick="chinhSuaPhongTuChiTiet()">
-          <i class="fas fa-pen"></i> Chỉnh sửa phòng
-        </button>
-        <button class="nut-hanh-dong-chinh xanh" onclick="taoHoaDon()">
-          <i class="fas fa-file-invoice-dollar"></i> Tạo hóa đơn
-        </button>
-        <button class="nut-hanh-dong-chinh do" onclick="xoaPhongTuChiTiet()">
-          <i class="fas fa-trash"></i> Xóa phòng
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- ============================================================
+    <!-- ============================================================
      MODAL: THÊM / CHỈNH SỬA PHÒNG
      ⚙️ BACKEND: POST /api/phong (thêm mới) hoặc PUT /api/phong/{id} (chỉnh sửa)
 ============================================================ -->
-<div class="lop-che-modal" id="modal-them-chinh-sua-phong" onclick="dongModalNeuNhanNgoai(event,'modal-them-chinh-sua-phong')">
-  <div class="hop-modal">
-    <div class="tieu-de-modal">
-      <h3 id="tieu-de-modal-phong">
-        <i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:8px;"></i>Thêm phòng mới
-      </h3>
-      <button class="nut-dong-modal" onclick="dongModal('modal-them-chinh-sua-phong')">✕</button>
+    <div class="lop-che-modal" id="modal-them-chinh-sua-phong" onclick="dongModalNeuNhanNgoai(event,'modal-them-chinh-sua-phong')">
+        <div class="hop-modal">
+            <div class="tieu-de-modal">
+                <h3 id="tieu-de-modal-phong">
+                    <i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:8px;"></i>Thêm phòng mới
+                </h3>
+                <button class="nut-dong-modal" onclick="dongModal('modal-them-chinh-sua-phong')">✕</button>
+            </div>
+
+            <div class="hang-form-modal">
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Số phòng *</label>
+                    <!-- ⚙️ BACKEND: Validate số phòng không trùng -->
+                    <input class="truong-nhap" type="text" id="nhap-so-phong" placeholder="VD: 101, 202..." />
+                </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">SĐT Người thuê *</label>
+                    <select class="truong-nhap" id="nhap-loai-phong">
+                        <option value="">-- Chọn loại --</option>
+                        <option value="phong-don">Phòng đơn</option>
+                        <option value="phong-doi">Phòng đôi</option>
+                        <option value="phong-cao-cap">Phòng cao cấp</option>
+                    </select>
+                </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Diện tích (m²)</label>
+                    <input class="truong-nhap" type="number" id="nhap-dien-tich" placeholder="VD: 15" />
+                </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Giá thuê (đồng/tháng) *</label>
+                    <!-- ⚙️ BACKEND: Lưu vào bảng phong -->
+                    <input class="truong-nhap" type="number" id="nhap-gia-thue" placeholder="VD: 3500000" />
+                </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Tầng</label>
+                    <select class="truong-nhap" id="nhap-tang">
+                        <option value="1">Tầng 1</option>
+                        <option value="2">Tầng 2</option>
+                        <option value="3">Tầng 3</option>
+                        <option value="4">Tầng 4</option>
+                    </select>
+                </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Trạng thái</label>
+                    <select class="truong-nhap" id="nhap-trang-thai">
+                        <option value="con-trong">Còn trống</option>
+                        <option value="dang-thue">Đang thuê</option>
+                        <option value="bao-tri">Bảo trì</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="nhom-truong-nhap" style="margin-top:14px;">
+                <label class="nhan-truong-nhap">Ghi chú / Tiện nghi</label>
+                <textarea class="truong-nhap" rows="2" id="nhap-ghi-chu" placeholder="Máy lạnh, WC riêng, ban công..."></textarea>
+            </div>
+
+            <div class="nhom-nut-modal">
+                <button class="nut-huy" onclick="dongModal('modal-them-chinh-sua-phong')">Hủy</button>
+                <!-- ⚙️ BACKEND: Gọi API lưu phòng -->
+                <button class="nut-luu" onclick="luuPhong()">
+                    <i class="fas fa-save"></i> Lưu phòng
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="hang-form-modal">
-      <div class="nhom-truong-nhap">
-        <label class="nhan-truong-nhap">Số phòng *</label>
-        <!-- ⚙️ BACKEND: Validate số phòng không trùng -->
-        <input class="truong-nhap" type="text" id="nhap-so-phong" placeholder="VD: 101, 202..." />
-      </div>
-      <div class="nhom-truong-nhap">
-        <label class="nhan-truong-nhap">SĐT Người thuê *</label>
-        <select class="truong-nhap" id="nhap-loai-phong">
-          <option value="">-- Chọn loại --</option>
-          <option value="phong-don">Phòng đơn</option>
-          <option value="phong-doi">Phòng đôi</option>
-          <option value="phong-cao-cap">Phòng cao cấp</option>
-        </select>
-      </div>
-      <div class="nhom-truong-nhap">
-        <label class="nhan-truong-nhap">Diện tích (m²)</label>
-        <input class="truong-nhap" type="number" id="nhap-dien-tich" placeholder="VD: 15" />
-      </div>
-      <div class="nhom-truong-nhap">
-        <label class="nhan-truong-nhap">Giá thuê (đồng/tháng) *</label>
-        <!-- ⚙️ BACKEND: Lưu vào bảng phong -->
-        <input class="truong-nhap" type="number" id="nhap-gia-thue" placeholder="VD: 3500000" />
-      </div>
-      <div class="nhom-truong-nhap">
-        <label class="nhan-truong-nhap">Tầng</label>
-        <select class="truong-nhap" id="nhap-tang">
-          <option value="1">Tầng 1</option>
-          <option value="2">Tầng 2</option>
-          <option value="3">Tầng 3</option>
-          <option value="4">Tầng 4</option>
-        </select>
-      </div>
-      <div class="nhom-truong-nhap">
-        <label class="nhan-truong-nhap">Trạng thái</label>
-        <select class="truong-nhap" id="nhap-trang-thai">
-          <option value="con-trong">Còn trống</option>
-          <option value="dang-thue">Đang thuê</option>
-          <option value="bao-tri">Bảo trì</option>
-        </select>
-      </div>
-    </div>
 
-    <div class="nhom-truong-nhap" style="margin-top:14px;">
-      <label class="nhan-truong-nhap">Ghi chú / Tiện nghi</label>
-      <textarea class="truong-nhap" rows="2" id="nhap-ghi-chu" placeholder="Máy lạnh, WC riêng, ban công..."></textarea>
-    </div>
-
-    <div class="nhom-nut-modal">
-      <button class="nut-huy" onclick="dongModal('modal-them-chinh-sua-phong')">Hủy</button>
-      <!-- ⚙️ BACKEND: Gọi API lưu phòng -->
-      <button class="nut-luu" onclick="luuPhong()">
-        <i class="fas fa-save"></i> Lưu phòng
-      </button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ============================================================
+    <!-- ============================================================
      JAVASCRIPT – XỬ LÝ TƯƠNG TÁC
 ============================================================ -->
-<script>
-  // ========================================================
-  // BIẾN TRẠNG THÁI TOÀN CỤC
-  // ========================================================
-  let trangThaiLocHienTai = 'tat-ca';   // Bộ lọc đang được chọn
-  let tuKhoaTimKiemHienTai = '';         // Từ khóa tìm kiếm hiện tại
-  let phongDangChon = null;              // Phòng đang xem chi tiết
+    <script>
+            // ========================================================
+            // BIẾN TRẠNG THÁI TOÀN CỤC
+            // ========================================================
+            let trangThaiLocHienTai = 'tat-ca';   // Bộ lọc đang được chọn
+            let tuKhoaTimKiemHienTai = '';         // Từ khóa tìm kiếm hiện tại
+            let phongDangChon = null;              // Phòng đang xem chi tiết
 
-  // ========================================================
-  // HÀM: ĐÓNG / MỞ SIDEBAR (mobile)
-  // ========================================================
-  function dongMoSidebar() {
-    document.getElementById('thanh-sidebar').classList.toggle('mo');
-  }
+            // ========================================================
+            // HÀM: ĐÓNG / MỞ SIDEBAR (mobile)
+            // ========================================================
+            function dongMoSidebar() {
+              document.getElementById('thanh-sidebar').classList.toggle('mo');
+            }
 
-  // ========================================================
-  // HÀM: CHUYỂN TRANG (điều hướng Razor Pages)
-  // ========================================================
-  function chuyenTrang(tenTrang, phanTu) {
-    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
-    phanTu.classList.add('dang-chon');
-    const bangDieuHuong = {
-      'trang-chu':           '/Manager/Manager',
-      'quan-ly-phong':       '/ChiTietPhong',
-      'quan-ly-nguoi-thue':  '/QuanLyNguoiThue',
-      'hoa-don':             '/HoaDon',
-      'su-co-bao-tri':       '/SuCoBaoTri',
-      'bao-cao':             '/BaoCao',
-      'cai-dat':             '/CaiDat',
-    };
-    const duongDan = bangDieuHuong[tenTrang];
-    if (duongDan) window.location.href = duongDan;
-  }
+            // ========================================================
+            // HÀM: CHUYỂN TRANG (điều hướng Razor Pages)
+            // ========================================================
+            function chuyenTrang(tenTrang, phanTu) {
+              document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
+              phanTu.classList.add('dang-chon');
+              const bangDieuHuong = {
+                'trang-chu':           '/Manager/Manager',
+                'quan-ly-phong':       '/ChiTietPhong',
+                'quan-ly-nguoi-thue':  '/Manager/QuanLyDichVu',
+                'hoa-don':             '/HoaDon',
+                'su-co-bao-tri':       '/SuCoBaoTri',
+                'bao-cao':             '/BaoCao',
+                'cai-dat':             '/CaiDat',
+              };
+              const duongDan = bangDieuHuong[tenTrang];
+              if (duongDan) window.location.href = duongDan;
+            }
 
-  // ========================================================
-  // HÀM: LỌC PHÒNG THEO TRẠNG THÁI
-  // (Gọi khi bấm nút lọc hoặc bấm thẻ thống kê)
-  // ========================================================
-  function locTheoTrangThai(trangThai) {
-    trangThaiLocHienTai = trangThai;
+            // ========================================================
+            // HÀM: LỌC PHÒNG THEO TRẠNG THÁI
+            // (Gọi khi bấm nút lọc hoặc bấm thẻ thống kê)
+            // ========================================================
+            function locTheoTrangThai(trangThai) {
+              trangThaiLocHienTai = trangThai;
 
-    // Cập nhật nút lọc đang được chọn
-    document.querySelectorAll('.nut-loc').forEach(nut => nut.classList.remove('dang-chon-loc'));
-    const nutTuongUng = document.getElementById('nut-loc-' + trangThai);
-    if (nutTuongUng) nutTuongUng.classList.add('dang-chon-loc');
+              // Cập nhật nút lọc đang được chọn
+              document.querySelectorAll('.nut-loc').forEach(nut => nut.classList.remove('dang-chon-loc'));
+              const nutTuongUng = document.getElementById('nut-loc-' + trangThai);
+              if (nutTuongUng) nutTuongUng.classList.add('dang-chon-loc');
 
-    // Áp dụng lọc kết hợp với tìm kiếm
-    apDungLocVaTimKiem();
-  }
+              // Áp dụng lọc kết hợp với tìm kiếm
+              apDungLocVaTimKiem();
+            }
 
-  // ========================================================
-  // HÀM: TÌM KIẾM PHÒNG
-  // (Gọi khi người dùng gõ vào ô tìm kiếm)
-  // ========================================================
-  function timKiemPhong(tuKhoa) {
-    tuKhoaTimKiemHienTai = tuKhoa.toLowerCase().trim();
-    apDungLocVaTimKiem();
-  }
+            // ========================================================
+            // HÀM: TÌM KIẾM PHÒNG
+            // (Gọi khi người dùng gõ vào ô tìm kiếm)
+            // ========================================================
+            function timKiemPhong(tuKhoa) {
+              tuKhoaTimKiemHienTai = tuKhoa.toLowerCase().trim();
+              apDungLocVaTimKiem();
+            }
 
-  // ========================================================
-  // HÀM: ÁP DỤNG LỌC + TÌM KIẾM (xử lý chính)
-  // Kết hợp cả bộ lọc trạng thái và từ khóa tìm kiếm
-  // ========================================================
-  function apDungLocVaTimKiem() {
-    const tatCaPhong = document.querySelectorAll('.phong-item');
-    let soHienThi = 0;
+            // ========================================================
+            // HÀM: ÁP DỤNG LỌC + TÌM KIẾM (xử lý chính)
+            // Kết hợp cả bộ lọc trạng thái và từ khóa tìm kiếm
+            // ========================================================
+            function apDungLocVaTimKiem() {
+              const tatCaPhong = document.querySelectorAll('.phong-item');
+              let soHienThi = 0;
 
-    tatCaPhong.forEach(phong => {
-      const trangThaiPhong = phong.dataset.trangThai;        // vd: "dang-thue"
-      const soPhong       = phong.dataset.soPhong.toLowerCase(); // vd: "101"
-      const nguoiThue     = (phong.dataset.nguoiThue || '').toLowerCase();
+              tatCaPhong.forEach(phong => {
+                const trangThaiPhong = phong.dataset.trangThai;        // vd: "dang-thue"
+                const soPhong       = phong.dataset.soPhong.toLowerCase(); // vd: "101"
+                const nguoiThue     = (phong.dataset.nguoiThue || '').toLowerCase();
 
-      // Kiểm tra điều kiện lọc trạng thái
-      const hopLoc = (trangThaiLocHienTai === 'tat-ca') || (trangThaiPhong === trangThaiLocHienTai);
+                // Kiểm tra điều kiện lọc trạng thái
+                const hopLoc = (trangThaiLocHienTai === 'tat-ca') || (trangThaiPhong === trangThaiLocHienTai);
 
-      // Kiểm tra điều kiện tìm kiếm (theo số phòng hoặc tên người thuê)
-      const hopTimKiem = (tuKhoaTimKiemHienTai === '')
-        || soPhong.includes(tuKhoaTimKiemHienTai)
-        || nguoiThue.includes(tuKhoaTimKiemHienTai);
+                // Kiểm tra điều kiện tìm kiếm (theo số phòng hoặc tên người thuê)
+                const hopTimKiem = (tuKhoaTimKiemHienTai === '')
+                  || soPhong.includes(tuKhoaTimKiemHienTai)
+                  || nguoiThue.includes(tuKhoaTimKiemHienTai);
 
-      // Hiển thị hoặc ẩn card phòng
-      if (hopLoc && hopTimKiem) {
-        phong.style.display = '';
-        soHienThi++;
-      } else {
-        phong.style.display = 'none';
-      }
-    });
+                // Hiển thị hoặc ẩn card phòng
+                if (hopLoc && hopTimKiem) {
+                  phong.style.display = '';
+                  soHienThi++;
+                } else {
+                  phong.style.display = 'none';
+                }
+              });
 
-    // Cập nhật dòng kết quả tìm kiếm
-    document.getElementById('so-ket-qua').textContent = soHienThi;
+              // Cập nhật dòng kết quả tìm kiếm
+              document.getElementById('so-ket-qua').textContent = soHienThi;
 
-    // Hiện thông báo "không có kết quả" nếu cần
-    const thongBao = document.getElementById('thong-bao-khong-co-ket-qua');
-    thongBao.style.display = (soHienThi === 0) ? 'flex' : 'none';
-  }
+              // Hiện thông báo "không có kết quả" nếu cần
+              const thongBao = document.getElementById('thong-bao-khong-co-ket-qua');
+              thongBao.style.display = (soHienThi === 0) ? 'flex' : 'none';
+            }
 
-  // ========================================================
-  // HÀM: SẮP XẾP PHÒNG
-  // (Gọi khi thay đổi dropdown sắp xếp)
-  // ========================================================
-  function sapXepPhong(kieuSapXep) {
-    const luoi = document.getElementById('luoi-danh-sach-phong');
-    const danhSachPhong = Array.from(luoi.querySelectorAll('.phong-item'));
+            // ========================================================
+            // HÀM: SẮP XẾP PHÒNG
+            // (Gọi khi thay đổi dropdown sắp xếp)
+            // ========================================================
+            function sapXepPhong(kieuSapXep) {
+              const luoi = document.getElementById('luoi-danh-sach-phong');
+              const danhSachPhong = Array.from(luoi.querySelectorAll('.phong-item'));
 
-    danhSachPhong.sort((a, b) => {
-      const soA  = parseInt(a.dataset.soPhong);
-      const soB  = parseInt(b.dataset.soPhong);
-      const giaA = parseInt(a.dataset.gia);
-      const giaB = parseInt(b.dataset.gia);
+              danhSachPhong.sort((a, b) => {
+                const soA  = parseInt(a.dataset.soPhong);
+                const soB  = parseInt(b.dataset.soPhong);
+                const giaA = parseInt(a.dataset.gia);
+                const giaB = parseInt(b.dataset.gia);
 
-      if (kieuSapXep === 'so-phong-tang') return soA - soB;
-      if (kieuSapXep === 'so-phong-giam') return soB - soA;
-      if (kieuSapXep === 'gia-tang')      return giaA - giaB;
-      if (kieuSapXep === 'gia-giam')      return giaB - giaA;
-      return 0;
-    });
+                if (kieuSapXep === 'so-phong-tang') return soA - soB;
+                if (kieuSapXep === 'so-phong-giam') return soB - soA;
+                if (kieuSapXep === 'gia-tang')      return giaA - giaB;
+                if (kieuSapXep === 'gia-giam')      return giaB - giaA;
+                return 0;
+              });
 
-    // Chèn lại các card vào lưới theo thứ tự mới
-    danhSachPhong.forEach(phong => luoi.appendChild(phong));
-  }
+              // Chèn lại các card vào lưới theo thứ tự mới
+              danhSachPhong.forEach(phong => luoi.appendChild(phong));
+            }
 
-  // ========================================================
-  // HÀM: XEM CHI TIẾT PHÒNG
-  // (Gọi khi click vào card phòng hoặc nút "Xem chi tiết")
-  // ========================================================
-  function xemChiTietPhong(phanTuPhong) {
-    phongDangChon = phanTuPhong;
+            // ========================================================
+            // HÀM: XEM CHI TIẾT PHÒNG
+            // (Gọi khi click vào card phòng hoặc nút "Xem chi tiết")
+            // ========================================================
+            function xemChiTietPhong(phanTuPhong) {
+              phongDangChon = phanTuPhong;
 
-    // Lấy dữ liệu từ data attributes của card
-    const soPhong   = phanTuPhong.dataset.soPhong;
-    const trangThai = phanTuPhong.dataset.trangThai;
-    const gia       = parseInt(phanTuPhong.dataset.gia);
-    const nguoiThue = phanTuPhong.dataset.nguoiThue || 'Chưa có người thuê';
+              // Lấy dữ liệu từ data attributes của card
+              const soPhong   = phanTuPhong.dataset.soPhong;
+              const trangThai = phanTuPhong.dataset.trangThai;
+              const gia       = parseInt(phanTuPhong.dataset.gia);
+              const nguoiThue = phanTuPhong.dataset.nguoiThue || 'Chưa có người thuê';
 
-    // ⚙️ BACKEND: Gọi GET /api/phong/{soPhong} để lấy dữ liệu đầy đủ
+              // ⚙️ BACKEND: Gọi GET /api/phong/{soPhong} để lấy dữ liệu đầy đủ
 
-    // Điền thông tin vào modal
-    document.getElementById('ct-ten-phong').textContent    = 'Phòng ' + soPhong;
-    document.getElementById('ct-gia-phong').textContent    = formatGia(gia) + '/tháng';
-    document.getElementById('ct-nguoi-thue').textContent   = nguoiThue;
-    document.getElementById('ct-trang-thai').textContent   = formatTrangThai(trangThai);
+              // Điền thông tin vào modal
+              document.getElementById('ct-ten-phong').textContent    = 'Phòng ' + soPhong;
+              document.getElementById('ct-gia-phong').textContent    = formatGia(gia) + '/tháng';
+              document.getElementById('ct-nguoi-thue').textContent   = nguoiThue;
+              document.getElementById('ct-trang-thai').textContent   = formatTrangThai(trangThai);
 
-    // Lấy thêm thông tin từ các element trong card
-    const thongTinItems = phanTuPhong.querySelectorAll('.thong-tin-nhap');
-    if (thongTinItems[0]) document.getElementById('ct-dien-tich').textContent = thongTinItems[0].textContent.trim();
-    if (thongTinItems[1]) document.getElementById('ct-tang').textContent      = thongTinItems[1].textContent.trim();
-    if (thongTinItems[2]) document.getElementById('ct-loai-phong').textContent = thongTinItems[2].textContent.trim();
+              // Lấy thêm thông tin từ các element trong card
+              const thongTinItems = phanTuPhong.querySelectorAll('.thong-tin-nhap');
+              if (thongTinItems[0]) document.getElementById('ct-dien-tich').textContent = thongTinItems[0].textContent.trim();
+              if (thongTinItems[1]) document.getElementById('ct-tang').textContent      = thongTinItems[1].textContent.trim();
+              if (thongTinItems[2]) document.getElementById('ct-loai-phong').textContent = thongTinItems[2].textContent.trim();
 
-    // Cập nhật badge trạng thái
-    const badge = document.getElementById('badge-ct-trang-thai');
-    badge.className = 'badge-trang-thai ' + trangThai;
-    badge.textContent = '● ' + formatTrangThai(trangThai);
+              // Cập nhật badge trạng thái
+              const badge = document.getElementById('badge-ct-trang-thai');
+              badge.className = 'badge-trang-thai ' + trangThai;
+              badge.textContent = '● ' + formatTrangThai(trangThai);
 
-    // Hiện modal
-    document.getElementById('modal-chi-tiet-phong').classList.add('hien');
-  }
+              // Hiện modal
+              document.getElementById('modal-chi-tiet-phong').classList.add('hien');
+            }
 
-  // ========================================================
-  // HÀM: MỞ MODAL THÊM PHÒNG MỚI
-  // ========================================================
-  function moModalThemPhong() {
-    // Đặt lại tiêu đề modal về "Thêm mới"
-    document.getElementById('tieu-de-modal-phong').innerHTML =
-      '<i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:8px;"></i>Thêm phòng mới';
-    // Xóa dữ liệu form cũ
-    document.getElementById('nhap-so-phong').value  = '';
-    document.getElementById('nhap-gia-thue').value  = '';
-    document.getElementById('nhap-dien-tich').value = '';
-    document.getElementById('nhap-ghi-chu').value   = '';
-    document.getElementById('modal-them-chinh-sua-phong').classList.add('hien');
-  }
+            // ========================================================
+            // HÀM: MỞ MODAL THÊM PHÒNG MỚI
+            // ========================================================
+            function moModalThemPhong() {
+              // Đặt lại tiêu đề modal về "Thêm mới"
+              document.getElementById('tieu-de-modal-phong').innerHTML =
+                '<i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:8px;"></i>Thêm phòng mới';
+              // Xóa dữ liệu form cũ
+              document.getElementById('nhap-so-phong').value  = '';
+              document.getElementById('nhap-gia-thue').value  = '';
+              document.getElementById('nhap-dien-tich').value = '';
+              document.getElementById('nhap-ghi-chu').value   = '';
+              document.getElementById('modal-them-chinh-sua-phong').classList.add('hien');
+            }
 
-  // ========================================================
-  // HÀM: MỞ MODAL CHỈNH SỬA PHÒNG
-  // (Gọi khi bấm nút chỉnh sửa trên card hoặc trong modal chi tiết)
-  // ========================================================
-  function chinhSuaPhong(event, soPhong) {
-    event.stopPropagation(); // Ngăn sự kiện click lan lên card
+            // ========================================================
+            // HÀM: MỞ MODAL CHỈNH SỬA PHÒNG
+            // (Gọi khi bấm nút chỉnh sửa trên card hoặc trong modal chi tiết)
+            // ========================================================
+            function chinhSuaPhong(event, soPhong) {
+              event.stopPropagation(); // Ngăn sự kiện click lan lên card
 
-    // ⚙️ BACKEND: GET /api/phong/{soPhong} để load dữ liệu điền vào form
-    document.getElementById('tieu-de-modal-phong').innerHTML =
-      '<i class="fas fa-pen" style="color:var(--mau-chu-de);margin-right:8px;"></i>Chỉnh sửa phòng ' + soPhong;
-    document.getElementById('nhap-so-phong').value = soPhong;
-    document.getElementById('modal-them-chinh-sua-phong').classList.add('hien');
-    dongModal('modal-chi-tiet-phong');
-  }
+              // ⚙️ BACKEND: GET /api/phong/{soPhong} để load dữ liệu điền vào form
+              document.getElementById('tieu-de-modal-phong').innerHTML =
+                '<i class="fas fa-pen" style="color:var(--mau-chu-de);margin-right:8px;"></i>Chỉnh sửa phòng ' + soPhong;
+              document.getElementById('nhap-so-phong').value = soPhong;
+              document.getElementById('modal-them-chinh-sua-phong').classList.add('hien');
+              dongModal('modal-chi-tiet-phong');
+            }
 
-  function chinhSuaPhongTuChiTiet() {
-    if (!phongDangChon) return;
-    dongModal('modal-chi-tiet-phong');
-    const soPhong = phongDangChon.dataset.soPhong;
-    document.getElementById('tieu-de-modal-phong').innerHTML =
-      '<i class="fas fa-pen" style="color:var(--mau-chu-de);margin-right:8px;"></i>Chỉnh sửa phòng ' + soPhong;
-    document.getElementById('nhap-so-phong').value = soPhong;
-    document.getElementById('modal-them-chinh-sua-phong').classList.add('hien');
-  }
+            function chinhSuaPhongTuChiTiet() {
+              if (!phongDangChon) return;
+              dongModal('modal-chi-tiet-phong');
+              const soPhong = phongDangChon.dataset.soPhong;
+              document.getElementById('tieu-de-modal-phong').innerHTML =
+                '<i class="fas fa-pen" style="color:var(--mau-chu-de);margin-right:8px;"></i>Chỉnh sửa phòng ' + soPhong;
+              document.getElementById('nhap-so-phong').value = soPhong;
+              document.getElementById('modal-them-chinh-sua-phong').classList.add('hien');
+            }
 
-  // ========================================================
-  // HÀM: LƯU PHÒNG (thêm mới hoặc cập nhật)
-  // ⚙️ BACKEND: POST hoặc PUT /api/phong
-  // ========================================================
-  function luuPhong() {
-    const soPhong = document.getElementById('nhap-so-phong').value.trim();
-    const giaThue = document.getElementById('nhap-gia-thue').value.trim();
+            // ========================================================
+            // HÀM: LƯU PHÒNG (thêm mới hoặc cập nhật)
+            // ⚙️ BACKEND: POST hoặc PUT /api/phong
+            // ========================================================
+            function luuPhong() {
+              const soPhong = document.getElementById('nhap-so-phong').value.trim();
+              const giaThue = document.getElementById('nhap-gia-thue').value.trim();
 
-    if (!soPhong || !giaThue) {
-      alert('Vui lòng điền đầy đủ thông tin bắt buộc (*)!');
-      return;
-    }
-    // ⚙️ BACKEND: fetch('/api/phong', { method:'POST', body: JSON.stringify({...}) })
-    alert(`Đã lưu phòng ${soPhong} thành công!\n(Kết nối backend để lưu vào database)`);
-    dongModal('modal-them-chinh-sua-phong');
-  }
+              if (!soPhong || !giaThue) {
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc (*)!');
+                return;
+              }
+              // ⚙️ BACKEND: fetch('/api/phong', { method:'POST', body: JSON.stringify({...}) })
+              alert(`Đã lưu phòng ${soPhong} thành công!\n(Kết nối backend để lưu vào database)`);
+              dongModal('modal-them-chinh-sua-phong');
+            }
 
-  // ========================================================
-  // HÀM: XÓA PHÒNG
-  // ⚙️ BACKEND: DELETE /api/phong/{soPhong}
-  // ========================================================
-  function xoaPhong(event, soPhong) {
-    event.stopPropagation(); // Ngăn click lan lên card
-    const xacNhan = confirm(`Bạn có chắc muốn xóa phòng ${soPhong} không?\nHành động này không thể hoàn tác!`);
-    if (xacNhan) {
-      // ⚙️ BACKEND: fetch(`/api/phong/${soPhong}`, { method: 'DELETE' })
-      alert(`Đã xóa phòng ${soPhong}! (Kết nối backend để xóa thật)`);
-    }
-  }
+            // ========================================================
+            // HÀM: XÓA PHÒNG
+            // ⚙️ BACKEND: DELETE /api/phong/{soPhong}
+            // ========================================================
+            function xoaPhong(event, soPhong) {
+              event.stopPropagation(); // Ngăn click lan lên card
+              const xacNhan = confirm(`Bạn có chắc muốn xóa phòng ${soPhong} không?\nHành động này không thể hoàn tác!`);
+              if (xacNhan) {
+                // ⚙️ BACKEND: fetch(`/api/phong/${soPhong}`, { method: 'DELETE' })
+                alert(`Đã xóa phòng ${soPhong}! (Kết nối backend để xóa thật)`);
+              }
+            }
 
-  function xoaPhongTuChiTiet() {
-    if (!phongDangChon) return;
-    const soPhong = phongDangChon.dataset.soPhong;
-    dongModal('modal-chi-tiet-phong');
-    const xacNhan = confirm(`Bạn có chắc muốn xóa phòng ${soPhong} không?`);
-    if (xacNhan) {
-      alert(`Đã xóa phòng ${soPhong}! (Kết nối backend để xóa thật)`);
-    }
-  }
+            function xoaPhongTuChiTiet() {
+              if (!phongDangChon) return;
+              const soPhong = phongDangChon.dataset.soPhong;
+              dongModal('modal-chi-tiet-phong');
+              const xacNhan = confirm(`Bạn có chắc muốn xóa phòng ${soPhong} không?`);
+              if (xacNhan) {
+                alert(`Đã xóa phòng ${soPhong}! (Kết nối backend để xóa thật)`);
+              }
+            }
 
-  // ========================================================
-  // HÀM: TẠO HÓA ĐƠN TỪ CHI TIẾT PHÒNG
-  // ⚙️ BACKEND: Chuyển trang tạo hóa đơn với soPhong được điền sẵn
-  // ========================================================
-  function taoHoaDon() {
-    if (!phongDangChon) return;
-    const soPhong = phongDangChon.dataset.soPhong;
-    // ⚙️ BACKEND: window.location.href = '/HoaDon?taoMoi=true&soPhong=' + soPhong;
-    alert(`Chuyển đến trang tạo hóa đơn cho phòng ${soPhong}`);
-    dongModal('modal-chi-tiet-phong');
-  }
+            // ========================================================
+            // HÀM: TẠO HÓA ĐƠN TỪ CHI TIẾT PHÒNG
+            // ⚙️ BACKEND: Chuyển trang tạo hóa đơn với soPhong được điền sẵn
+            // ========================================================
+            function taoHoaDon() {
+              if (!phongDangChon) return;
+              const soPhong = phongDangChon.dataset.soPhong;
+              // ⚙️ BACKEND: window.location.href = '/HoaDon?taoMoi=true&soPhong=' + soPhong;
+              alert(`Chuyển đến trang tạo hóa đơn cho phòng ${soPhong}`);
+              dongModal('modal-chi-tiet-phong');
+            }
 
-  // ========================================================
-  // HÀM: ĐÓNG MODAL
-  // ========================================================
-  function dongModal(idModal) {
-    document.getElementById(idModal).classList.remove('hien');
-  }
+            // ========================================================
+            // HÀM: ĐÓNG MODAL
+            // ========================================================
+            function dongModal(idModal) {
+              document.getElementById(idModal).classList.remove('hien');
+            }
 
-  function dongModalNeuNhanNgoai(event, idModal) {
-    if (event.target.id === idModal) dongModal(idModal);
-  }
+            function dongModalNeuNhanNgoai(event, idModal) {
+              if (event.target.id === idModal) dongModal(idModal);
+            }
 
-  // ========================================================
-  // HÀM: TÌM KIẾM TOÀN CỤC (ô tìm kiếm trên header)
-  // ========================================================
-  function timKiemToanCuc(tuKhoa) {
-    // Đồng bộ với ô tìm kiếm trong thanh lọc
-    document.getElementById('o-nhap-tim-kiem').value = tuKhoa;
-    timKiemPhong(tuKhoa);
-  }
+            // ========================================================
+            // HÀM: TÌM KIẾM TOÀN CỤC (ô tìm kiếm trên header)
+            // ========================================================
+            function timKiemToanCuc(tuKhoa) {
+              // Đồng bộ với ô tìm kiếm trong thanh lọc
+              document.getElementById('o-nhap-tim-kiem').value = tuKhoa;
+              timKiemPhong(tuKhoa);
+            }
 
-  // ========================================================
-  // HÀM HỖ TRỢ: FORMAT GIÁ TIỀN
-  // ========================================================
-  function formatGia(gia) {
-    if (gia >= 1000000) return (gia / 1000000).toFixed(1).replace('.0','') + 'M';
-    return gia.toLocaleString('vi-VN') + 'đ';
-  }
+            // ========================================================
+            // HÀM HỖ TRỢ: FORMAT GIÁ TIỀN
+            // ========================================================
+            function formatGia(gia) {
+              if (gia >= 1000000) return (gia / 1000000).toFixed(1).replace('.0','') + 'M';
+              return gia.toLocaleString('vi-VN') + 'đ';
+            }
 
-  // ========================================================
-  // HÀM HỖ TRỢ: FORMAT TRẠNG THÁI
-  // ========================================================
-  function formatTrangThai(trangThai) {
-    const bangDich = {
-      'dang-thue': 'Đang thuê',
-      'con-trong': 'Còn trống',
-      'bao-tri':   'Bảo trì',
-    };
-    return bangDich[trangThai] || trangThai;
-  }
+            // ========================================================
+            // HÀM HỖ TRỢ: FORMAT TRẠNG THÁI
+            // ========================================================
+            function formatTrangThai(trangThai) {
+              const bangDich = {
+                'dang-thue': 'Đang thuê',
+                'con-trong': 'Còn trống',
+                'bao-tri':   'Bảo trì',
+              };
+              return bangDich[trangThai] || trangThai;
+            }
 
-  // ========================================================
-  // CÁC HÀM GIAO DIỆN PHỤ
-  // ========================================================
-  function moThongBao()     { alert('Mở danh sách thông báo (5 chưa đọc)'); }
-  function moMenuAdmin()    { alert('Menu tài khoản: Đổi mật khẩu / Đăng xuất'); }
-  function moThongTinAdmin(){ alert('Thông tin quản trị viên'); }
+            // ========================================================
+            // CÁC HÀM GIAO DIỆN PHỤ
+            // ========================================================
+            function moThongBao()     { alert('Mở danh sách thông báo (5 chưa đọc)'); }
+            function moMenuAdmin()    { alert('Menu tài khoản: Đổi mật khẩu / Đăng xuất'); }
+            function moThongTinAdmin(){ alert('Thông tin quản trị viên'); }
 
-</script>
+    </script>
 
 </body>
 </html>

@@ -352,34 +352,36 @@ namespace QuanLyNhaTro.Models
         [Required]
         public int IDPhong { get; set; }
 
+        // Khóa ngoại cho phép Null khi chưa chốt điện nước
         public int? IDDienNuoc { get; set; }
 
+        // Khóa ngoại cho phép Null khi chưa có người duyệt
         public int? IDManagerDuyet { get; set; }
 
         [Required]
         [StringLength(7)]
-        public string KyThanhToan { get; set; } = null!; // "MM/yyyy"
+        public string? KyThanhToan { get; set; } = null!; // Định dạng: "MM/yyyy"
 
         [Required]
         [Column(TypeName = "decimal(15, 2)")]
-        public decimal TienPhong { get; set; }
+        public decimal? TienPhong { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(15, 2)")]
-        public decimal TienDienSum { get; set; }
+        public decimal? TienDienSum { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(15, 2)")]
-        public decimal TienNuocSum { get; set; }
+        public decimal? TienNuocSum { get; set; }
 
         // TienDV: dịch vụ đã thanh toán đúng hạn trong tháng
         [Column(TypeName = "decimal(15, 2)")]
-        public decimal TienDV { get; set; } = 0;
+        public decimal? TienDV { get; set; } = 0;
 
         // TienNoDV: nợ dịch vụ quá hạn bị cộng thêm vào hóa đơn
-        // Cột này thêm mới — cần chạy migration
+        // Trong SQL Server cột này cho phép (null) -> Bắt buộc dùng decimal?
         [Column(TypeName = "decimal(15, 2)")]
-        public decimal TienNoDV { get; set; } = 0;
+        public decimal? TienNoDV { get; set; } = 0;
 
         [Required]
         [Column(TypeName = "decimal(15, 2)")]
@@ -392,22 +394,13 @@ namespace QuanLyNhaTro.Models
 
         [Required]
         [StringLength(20)]
-        // 'Chưa đóng'|'Chờ duyệt'|'Đã hoàn thành'|'Quá hạn'
+        // Các trạng thái: 'Chưa đóng' | 'Chờ duyệt' | 'Đã hoàn thành' | 'Quá hạn'
         public string TrangThai_TT { get; set; } = "Chưa đóng";
 
         [StringLength(255)]
         public string? AnhChuyenKhoan { get; set; }
 
         public DateTime? NgayDuyet { get; set; }
-
-        // NgayHetHan: mốc chuyển sang trạng thái "Quá hạn" (thường = HanDong + 3~7 ngày)
-        // Cột này thêm mới — cần chạy migration
-
-        // DaCoNhacNo: 0=chưa nhắc | 1=đã gửi thông báo nhắc
-        // Cột này thêm mới — cần chạy migration
-
-        // DuocCongVaoTro: 0=chưa cộng nợ DV | 1=đã cộng vào hóa đơn tháng
-        // Cột này thêm mới — cần chạy migration
 
         [StringLength(200)]
         public string? GhiChuDuyet { get; set; }
@@ -416,7 +409,20 @@ namespace QuanLyNhaTro.Models
 
         public DateTime UpdatedAt { get; set; }
 
+        // NgayHetHan: mốc chuyển sang trạng thái "Quá hạn"
+        // Cho phép Null -> Khớp với DB
+        public DateTime? NgayHetHan { get; set; }
+
+        // DaCoNhacNo và DuocCongVaoTro: Dùng bool? để an toàn tuyệt đối tránh lỗi SqlNullValueException
+        // Gán sẵn giá trị mặc định là false để tiện cho logic C#
+        public bool? DaCoNhacNo { get; set; } = false;
+
+        public bool? DuocCongVaoTro { get; set; } = false;
+
+
+        // ==========================================
         // Navigation Properties
+        // ==========================================
         [ForeignKey("IDPhong")]
         public virtual PHONG Phong { get; set; } = null!;
 
@@ -425,9 +431,6 @@ namespace QuanLyNhaTro.Models
 
         [ForeignKey("IDManagerDuyet")]
         public virtual ACCOUNT? ManagerDuyet { get; set; }
-        public DateTime? NgayHetHan { get; set; }
-        public bool DaCoNhacNo { get; set; }
-        public bool DuocCongVaoTro { get; set; }
     }
 
     // ================================================================

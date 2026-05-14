@@ -25,18 +25,16 @@ namespace QuanLyNhaTro.Pages.KhachThue
         public int TongThongBao => DanhSachThongBao.Count;
         public int SoChuaDoc => DanhSachThongBao.Count(tb => !tb.DaDoc);
 
+        // ── GET ────────────────────────────────────────────────────
         public async Task<IActionResult> OnGetAsync()
         {
-            // Lấy IDUser từ Cookie Authentication Claims
             var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(idUserStr) || !int.TryParse(idUserStr, out int idUser))
                 return RedirectToPage("/Index");
 
-            // Thông tin tài khoản
             KhachThue = await _db.ACCOUNT.FindAsync(idUser)
                         ?? throw new Exception("Không tìm thấy tài khoản");
 
-            // Lấy hợp đồng đang hiệu lực để biết phòng/tầng
             var hopDong = await _db.HOPDONG
                 .Include(hd => hd.Phong)
                 .FirstOrDefaultAsync(hd => hd.IDUser == idUser && hd.TrangThaiHD == "Đang hiệu lực");
@@ -47,7 +45,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 Tang = hopDong.Phong.Tang;
             }
 
-            // Lấy thông báo: gửi riêng cho user HOẶC broadcast (IDUser == null)
             DanhSachThongBao = await _db.THONGBAO
                 .Where(tb => tb.IDUser == idUser || tb.IDUser == null)
                 .OrderByDescending(tb => tb.NgayTao)
@@ -56,7 +53,49 @@ namespace QuanLyNhaTro.Pages.KhachThue
             return Page();
         }
 
-        // ── Helper: CSS class theo LoaiTB ─────────────────────────
+        // ── POST: Đánh dấu 1 thông báo đã đọc ────────────────────
+        public async Task<IActionResult> OnPostDanhDauDaDocAsync([FromBody] DaDocRequest req)
+        {
+            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(idUserStr, out int idUser))
+                return Unauthorized();
+
+            var tb = await _db.THONGBAO
+                .FirstOrDefaultAsync(t => t.IDThongBao == req.IdThongBao
+                                       && (t.IDUser == idUser || t.IDUser == null));
+
+            if (tb == null) return NotFound();
+
+            tb.DaDoc = true;
+            await _db.SaveChangesAsync();
+
+            return new JsonResult(new { ok = true });
+        }
+
+        // ── POST: Đánh dấu tất cả đã đọc ─────────────────────────
+        public async Task<IActionResult> OnPostDanhDauHetAsync()
+        {
+            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(idUserStr, out int idUser))
+                return Unauthorized();
+
+            var danhSach = await _db.THONGBAO
+                .Where(t => (t.IDUser == idUser || t.IDUser == null) && !t.DaDoc)
+                .ToListAsync();
+
+            foreach (var tb in danhSach) tb.DaDoc = true;
+            await _db.SaveChangesAsync();
+
+            return new JsonResult(new { ok = true });
+        }
+
+        // ── DTO ────────────────────────────────────────────────────
+        public class DaDocRequest
+        {
+            public int IdThongBao { get; set; }
+        }
+
+        // ── Helpers ────────────────────────────────────────────────
         public string GetLoaiClass(string loaiTB) => loaiTB switch
         {
             "canh-bao" => "the-loai-canh-bao",
@@ -66,7 +105,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
             _ => "the-loai-thong-tin"
         };
 
-        // ── Helper: Nhãn hiển thị theo LoaiTB ────────────────────
         public string GetLoaiNhan(string loaiTB) => loaiTB switch
         {
             "canh-bao" => "⚡ Cảnh báo",
@@ -76,7 +114,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
             _ => "📋 Thông tin"
         };
 
-        // ── Helper: CSS icon + item class theo LoaiTB ─────────────
         public string GetBieuTuongClass(string loaiTB) => loaiTB switch
         {
             "canh-bao" => "bt-canh-bao",

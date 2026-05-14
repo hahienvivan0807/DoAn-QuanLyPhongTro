@@ -216,6 +216,24 @@ function layTokenCSRF() {
 }
 
 /* =============================================
+   HELPER — đọc JSON an toàn từ Response
+   Nếu server trả HTML (ví dụ trang login / lỗi 401/302),
+   ném lỗi rõ ràng thay vì crash "Unexpected token '<'"
+============================================= */
+async function safeJson(res) {
+    const ct = res.headers.get('Content-Type') || '';
+    if (!ct.includes('application/json')) {
+        const text = await res.text();
+        // Nếu là trang HTML → có thể do session hết hạn, CSRF sai, hoặc redirect login
+        if (text.trim().startsWith('<')) {
+            throw new Error('Phiên đăng nhập đã hết hạn hoặc token bảo mật không hợp lệ. Vui lòng tải lại trang.');
+        }
+        throw new Error(text || `Lỗi HTTP ${res.status}`);
+    }
+    return res.json();
+}
+
+/* =============================================
    FORM GIẶT SẤY
 ============================================= */
 function moFormGS() {
@@ -248,8 +266,15 @@ async function guiDonGS() {
             headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': layTokenCSRF() },
             body: JSON.stringify({ loaiDV: loai, ghiChu })
         });
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
+        if (!res.ok) {
+            const ct = res.headers.get('Content-Type') || '';
+            const body = await res.text();
+            if (body.trim().startsWith('<') || res.status === 401 || res.redirected) {
+                throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng tải lại trang.');
+            }
+            throw new Error(body || `Lỗi HTTP ${res.status}`);
+        }
+        const data = await safeJson(res);
         gsDonId = data.id;
 
         // Bắt đầu polling chờ quản lý báo giá
@@ -301,8 +326,8 @@ function dongFormNuoc() {
 function tinhTienNuoc() {
     const sl = parseInt(document.getElementById('nuoc-so-luong').value) || 1;
     const tvo = parseInt(document.getElementById('nuoc-tra-vo').value) || 0;
-    // Giá cố định: 30,000đ/bình, trả vỏ giảm 5,000đ/bình
-    const tien = sl * 30000 - (tvo ? sl * 5000 : 0);
+    // Giá cố định: 15,000đ/bình, trả vỏ giảm 5,000đ/bình
+    const tien = sl * 15000 - (tvo ? sl * 5000 : 0);
     nuocTienThanhToan = tien;
     document.getElementById('nuoc-du-tinh').textContent = tien.toLocaleString('vi-VN') + ' đ';
     document.getElementById('nuoc-tong-tien').textContent = tien.toLocaleString('vi-VN') + ' đ';
@@ -329,8 +354,15 @@ async function guiDonNuoc() {
             headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': layTokenCSRF() },
             body: JSON.stringify({ soLuong: sl, traVo: tvo === 1, ghiChu, tongTien: nuocTienThanhToan })
         });
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
+        if (!res.ok) {
+            const ct = res.headers.get('Content-Type') || '';
+            const body = await res.text();
+            if (body.trim().startsWith('<') || res.status === 401 || res.redirected) {
+                throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng tải lại trang.');
+            }
+            throw new Error(body || `Lỗi HTTP ${res.status}`);
+        }
+        const data = await safeJson(res);
         nuocDonId = data.id;
 
         // Bắt đầu polling chờ quản lý cập nhật trạng thái giao
@@ -606,7 +638,13 @@ async function guiXacNhan() {
             headers: { 'RequestVerificationToken': layTokenCSRF() },
             body: fd   // không set Content-Type, browser tự thêm boundary
         });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+            const body = await res.text();
+            if (body.trim().startsWith('<') || res.status === 401 || res.redirected) {
+                throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng tải lại trang.');
+            }
+            throw new Error(body || `Lỗi HTTP ${res.status}`);
+        }
 
         // Thành công → cập nhật UI
         document.getElementById('modal-pay-body').style.display = 'none';
