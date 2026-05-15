@@ -13,12 +13,14 @@
   <link rel="stylesheet" href="/css/ChuTro.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Javascript-->
+  <script src="/js/ChuTro/ChuTro-ThongBao.js"></script>
   <script src="/js/ChuTro/ChuTro-core.js"></script>
   <script src="/js/ChuTro/ChuTro-quanLy.js"></script>
   <script src="/js/ChuTro/ChuTro-bieuDo.js"></script>
   <script src="/js/ChuTro/ChuTro-cauHinh.js"></script>
   <script src="/js/ChuTro/ChuTro-pheDuyet.js"></script>
   <script src="/js/ChuTro/ChuTro-NguoiThue.js"></script>
+  <script src="/js/ChuTro/ChuTro-suaChua.js"></script>
   <style>
 
     /* =========================================================
@@ -1425,6 +1427,502 @@
   from { r: 0; opacity: 0; }
   to   { r: 1.2; opacity: 1; }
 }
+/* ── BOX ── */
+.psc-box {
+  width: 680px;
+  max-width: 96vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.06),
+    0 8px 24px rgba(0,0,0,0.10),
+    0 32px 64px rgba(0,0,0,0.12);
+  animation: pscPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@@keyframes pscPop {
+  from { opacity: 0; transform: scale(0.93) translateY(-16px); }
+  to   { opacity: 1; transform: none; }
+}
+ 
+/* ── HEADER ── */
+.psc-hd {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 18px;
+  background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 60%, #3b82f6 100%);
+  position: relative;
+  overflow: hidden;
+}
+/* decorative circles */
+.psc-hd::before {
+  content: '';
+  position: absolute; top: -36px; right: -36px;
+  width: 130px; height: 130px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  pointer-events: none;
+}
+.psc-hd::after {
+  content: '';
+  position: absolute; bottom: -28px; right: 90px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+.psc-hd-left {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  position: relative;
+  z-index: 1;
+}
+.psc-hd-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+.psc-hd-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+.psc-hd-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.60);
+  margin-top: 2px;
+}
+.psc-close {
+  position: relative; z-index: 1;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.16);
+  border: none; color: #fff;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.psc-close:hover { background: rgba(255,255,255,0.30); }
+ 
+/* ── STATS BAR ── */
+.psc-stats {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 14px 24px;
+  background: #f8f9fd;
+  border-bottom: 1px solid #e5e9f5;
+}
+.psc-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.psc-stat-num {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.psc-stat-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6b7a99;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.psc-stat--urgent .psc-stat-num  { color: #dc2626; }
+.psc-stat--medium .psc-stat-num  { color: #d97706; }
+.psc-stat--low    .psc-stat-num  { color: #059669; }
+.psc-stat--budget .psc-stat-num  { color: #1d4ed8; font-size: 14px; }
+.psc-stat-div {
+  width: 1px; height: 32px;
+  background: #e5e9f5;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+ 
+/* ── NOTICE ── */
+.psc-notice {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 14px 24px 0;
+  padding: 10px 14px;
+  background: #fff8f0;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 10px 10px 0;
+  font-size: 12.5px;
+  color: #78350f;
+  line-height: 1.55;
+}
+.psc-notice strong { font-weight: 800; }
+ 
+/* ── TOOLBAR ── */
+.psc-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #e5e9f5;
+  flex-wrap: wrap;
+}
+.psc-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 180px;
+  background: #f0f2f8;
+  border: 1.5px solid #e5e9f5;
+  border-radius: 9999px;
+  padding: 7px 14px;
+  transition: all 0.18s;
+}
+.psc-search-wrap:focus-within {
+  border-color: #1d4ed8;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+}
+.psc-search-wrap svg { color: #9ca3af; flex-shrink: 0; }
+.psc-search-wrap input {
+  border: none; background: none; outline: none;
+  font-size: 12.5px; color: #111827; width: 100%;
+  font-family: inherit;
+}
+.psc-search-wrap input::placeholder { color: #9ca3af; }
+.psc-filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.psc-chip {
+  padding: 5px 13px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid #e5e9f5;
+  background: #f0f2f8;
+  color: #6b7a99;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.psc-chip:hover { background: #e5e9f5; }
+.psc-chip--active {
+  background: #1d4ed8; color: #fff;
+  border-color: #1d4ed8;
+}
+.psc-chip--urgent  { }
+.psc-chip--medium  { }
+.psc-chip--low     { }
+ 
+/* ── LIST ── */
+.psc-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 24px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.psc-list::-webkit-scrollbar { width: 4px; }
+.psc-list::-webkit-scrollbar-thumb { background: #d4d9e6; border-radius: 3px; }
+ 
+/* ── ITEM CARD ── */
+.psc-item {
+  border-radius: 14px;
+  border: 1.5px solid #e5e9f5;
+  padding: 14px 16px;
+  background: #fff;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+/* left accent bar */
+.psc-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 4px;
+  border-radius: 14px 0 0 14px;
+}
+.psc-item--urgent::before { background: linear-gradient(180deg, #dc2626, #ef4444); }
+.psc-item--medium::before { background: linear-gradient(180deg, #d97706, #f59e0b); }
+.psc-item--low::before    { background: linear-gradient(180deg, #059669, #10b981); }
+ 
+.psc-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+  border-color: #c7d2fe;
+}
+.psc-item--urgent:hover { border-color: #fca5a5; }
+.psc-item--medium:hover { border-color: #fcd34d; }
+.psc-item--low:hover    { border-color: #6ee7b7; }
+ 
+/* card content */
+.psc-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+.psc-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.psc-room-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #1e3a5f;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 9px;
+  border-radius: 9999px;
+}
+.psc-type-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #6b7a99;
+  background: #f0f2f8;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+ 
+/* badges */
+.psc-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.psc-badge--urgent {
+  background: #fee2e2; color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+.psc-badge--medium {
+  background: #fef3c7; color: #d97706;
+  border: 1px solid #fcd34d;
+}
+.psc-badge--low {
+  background: #dcfce7; color: #15803d;
+  border: 1px solid #86efac;
+}
+ 
+.psc-item-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 5px;
+  line-height: 1.35;
+}
+.psc-item-body {
+  font-size: 12.5px;
+  color: #6b7a99;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+ 
+.psc-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.psc-item-info-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.psc-info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.psc-info-chip--person {
+  background: #f5f3ff; color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+.psc-info-chip--time {
+  background: #f0f2f8; color: #6b7a99;
+  border: 1px solid #e5e9f5;
+}
+.psc-cost-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+ 
+/* action buttons */
+.psc-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.psc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  font-family: inherit;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.psc-btn--approve {
+  background: #dcfce7; color: #16a34a;
+  border-color: #86efac;
+}
+.psc-btn--approve:hover {
+  background: #16a34a; color: #fff;
+  border-color: #16a34a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22,163,74,0.3);
+}
+.psc-btn--reject {
+  background: #fee2e2; color: #dc2626;
+  border-color: #fca5a5;
+}
+.psc-btn--reject:hover {
+  background: #dc2626; color: #fff;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+}
+.psc-btn--view {
+  background: #f0f2f8; color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+.psc-btn--view:hover {
+  background: #eff6ff; color: #1d4ed8;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+ 
+/* ── EMPTY STATE ── */
+.psc-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+ 
+/* ── FOOTER ── */
+.psc-ft {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 24px 16px;
+  border-top: 1px solid #e5e9f5;
+  background: #f8f9fd;
+}
+.psc-ft-count {
+  font-size: 11.5px;
+  color: #6b7a99;
+}
+.psc-ft-count strong {
+  color: #111827;
+  font-weight: 800;
+}
+.psc-ft-btns {
+  display: flex;
+  gap: 8px;
+}
+.psc-btn-cancel {
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 1.5px solid #e5e9f5;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #6b7a99;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.psc-btn-cancel:hover { background: #f0f2f8; }
+.psc-btn-approve-all {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(5,150,105,0.32);
+  transition: all 0.2s;
+}
+.psc-btn-approve-all:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(5,150,105,0.44);
+}
+ 
+/* ── RESPONSIVE ── */
+@@media (max-width: 640px) {
+  .psc-box { max-height: 95vh; border-radius: 16px; }
+  .psc-stats { flex-wrap: wrap; gap: 10px; }
+  .psc-stat-div { display: none; }
+  .psc-item-footer { flex-direction: column; align-items: flex-start; }
+  .psc-toolbar { flex-direction: column; }
+  .psc-search-wrap { width: 100%; }
+}
+#tb-badge-muc-do.muc-canh-bao {
+  background: #fef3c7; color: #d97706; border-color: #fcd34d;
+}
+#tb-badge-muc-do.muc-khan-cap {
+  background: #fee2e2; color: #dc2626; border-color: #fca5a5;
+}
+#tb-badge-muc-do.muc-thong-tin {
+  background: #dbeafe; color: #1d4ed8; border-color: #bfdbfe;
+}
 </style>
 </head>
 <body>
@@ -1491,7 +1989,7 @@
   </div>
   <div class="muc-menu" onclick="moModal('modal-chi-phi-dich-vu')">
     <i class="fas fa-bolt"></i>
-    <span>Chi phí dịch vụ</span>
+    <span>Dịch vụ thông báo</span>
   </div>
   <div class="muc-menu" onclick="moModal('modal-dat-coc')">
     <i class="fas fa-hand-holding-usd"></i>
@@ -1675,14 +2173,14 @@
         <span class="the-tinh-nang">3 mức giá đang áp dụng</span>
       </div>
 
-      <div class="card-tinh-nang" onclick="moModal('modal-chi-phi-dich-vu')">
-        <div class="dau-tinh-nang mau-luc-nhat"><i class="fas fa-bolt"></i></div>
+    <div class="card-tinh-nang" onclick="moModalThongBao()">
+        <div class="dau-tinh-nang mau-luc-nhat"><i class="fas fa-bell"></i></div>
         <div>
-          <div class="ten-tinh-nang">Chi phí dịch vụ</div>
-          <div class="mo-ta-tinh-nang">Cài đặt đơn giá điện, nước, internet, vệ sinh áp dụng cho tất cả phòng.</div>
+        <div class="ten-tinh-nang">Gửi thông báo</div>
+        <div class="mo-ta-tinh-nang">Gửi thông báo đến người thuê theo phòng hoặc toàn bộ.</div>
         </div>
-        <span class="the-tinh-nang">Cập nhật tháng 5/2025</span>
-      </div>
+        <span class="the-tinh-nang">Gửi ngay hoặc hẹn giờ</span>
+    </div>
 
       <div class="card-tinh-nang" onclick="moModal('modal-dat-coc')">
         <div class="dau-tinh-nang mau-hong-nhat"><i class="fas fa-hand-holding-usd"></i></div>
@@ -1693,7 +2191,7 @@
         <span class="the-tinh-nang">Cọc = 2 tháng tiền thuê</span>
       </div>
 
-      <div class="card-tinh-nang" onclick="moModal('modal-phe-duyet-sua-chua')">
+      <div class="card-tinh-nang" onclick="moModalPheDouyetSuaChua()">
         <div class="dau-tinh-nang mau-xanh-nhat-icon"><i class="fas fa-hammer"></i></div>
         <div>
           <div class="ten-tinh-nang">Phê duyệt sửa chữa lớn</div>
@@ -1849,7 +2347,7 @@
             <div style="font-size:12.5px;font-weight:700;">Sửa chữa lớn đang chờ duyệt</div>
             <div style="font-size:11px;color:var(--mau-chu-phu);">3 yêu cầu · Chi phí ước tính: 12.5M</div>
           </div>
-          <button class="nut-hanh-dong-chinh" style="font-size:12px;padding:7px 14px;" onclick="moModal('modal-phe-duyet-sua-chua')">
+          <button class="nut-hanh-dong-chinh" style="font-size:12px;padding:7px 14px;" onclick="moModalPheDouyetSuaChua()">
             Xem duyệt
           </button>
         </div>
@@ -2243,83 +2741,109 @@ function taoTruong(nhan, giatri) {
 </div>
 
 
-<!-- MODAL 4: CHI PHÍ DỊCH VỤ -->
+<!-- MODAL 4: THÔNG BÁO DỊCH VỤ -->
 <div class="lop-phu-modal" id="modal-chi-phi-dich-vu" onclick="dongModalNhapNgoai(event,'modal-chi-phi-dich-vu')">
-  <div class="hop-modal">
-    <div class="tieu-de-modal">
-      <h3>
-        <span style="width:32px;height:32px;background:linear-gradient(135deg,#15803d,#4ade80);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;"><i class="fas fa-bolt"></i></span>
-        Cấu hình chi phí dịch vụ
-      </h3>
-      <button class="nut-dong-modal" onclick="dongModal('modal-chi-phi-dich-vu')">✕</button>
+  <div class="hop-modal" style="width:580px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px 16px;flex-shrink:0;background:linear-gradient(135deg,#0f52ba,#0891b2,#06b6d4);border-radius:16px 16px 0 0;margin:-28px -28px 22px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-36px;right:-36px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-28px;right:80px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"></div>
+      <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+        <div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0;">
+          <i class="fas fa-bell"></i>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#fff;font-family:'Lexend',sans-serif;">Gửi thông báo</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.62);margin-top:2px;">Gửi thông báo đến người thuê</div>
+        </div>
+      </div>
+      <button class="nut-dong-modal" style="background:rgba(255,255,255,0.18);color:#fff;" onclick="dongModal('modal-chi-phi-dich-vu')">✕</button>
     </div>
 
-    <div class="tieu-de-muc-modal"><i class="fas fa-bolt" style="color:#f59e0b;"></i> Tiền điện</div>
-    <div class="luoi-form-3" style="margin-bottom:16px;">
+    <!-- Tiêu đề thông báo -->
+    <div class="tieu-de-muc-modal" style="color:#0891b2;"><i class="fas fa-heading"></i> Nội dung thông báo</div>
+    <div class="nhom-nhap" style="margin-bottom:14px;">
+      <label class="nhan-nhap">Tiêu đề <span style="color:#dc2626;">*</span></label>
+      <input class="o-nhap" type="text" id="tb-tieu-de" placeholder="VD: Thông báo lịch cắt điện tháng 6..." maxlength="200" />
+      <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">Tối đa 200 ký tự</div>
+    </div>
+    <div class="nhom-nhap" style="margin-bottom:18px;">
+      <label class="nhan-nhap">Nội dung <span style="color:#dc2626;">*</span></label>
+      <textarea class="o-nhap" id="tb-noi-dung" rows="4" placeholder="Nhập nội dung thông báo chi tiết..." maxlength="500" style="resize:vertical;"></textarea>
+      <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">Tối đa 500 ký tự</div>
+    </div>
+
+    <hr class="duong-ke-modal" />
+
+    <!-- Người nhận -->
+    <div class="tieu-de-muc-modal" style="color:#0891b2;"><i class="fas fa-users"></i> Người nhận</div>
+    <div class="nhom-nhap" style="margin-bottom:14px;">
+      <label class="nhan-nhap">Loại người nhận <span style="color:#dc2626;">*</span></label>
+      <select class="o-nhap o-chon" id="tb-loai-nguoi-nhan" onchange="tbChuyenLoaiNguoiNhan(this.value)">
+        <option value="all">Tất cả người thuê</option>
+        <option value="phong">Theo phòng</option>
+        <option value="nguoi">Theo người thuê cụ thể</option>
+      </select>
+    </div>
+
+    <!-- Chọn phòng (ẩn mặc định) -->
+    <div id="tb-chon-phong" style="display:none;margin-bottom:14px;">
+      <label class="nhan-nhap">Chọn phòng <span style="color:#dc2626;">*</span></label>
+      <select class="o-nhap o-chon" id="tb-phong-id">
+        <option value="">-- Đang tải danh sách phòng... --</option>
+      </select>
+    </div>
+
+    <!-- Chọn người thuê cụ thể (ẩn mặc định) -->
+    <div id="tb-chon-nguoi" style="display:none;margin-bottom:14px;">
+      <label class="nhan-nhap">Chọn người thuê <span style="color:#dc2626;">*</span></label>
+      <select class="o-nhap o-chon" id="tb-user-id">
+        <option value="">-- Đang tải danh sách người thuê... --</option>
+      </select>
+    </div>
+
+    <!-- Preview người nhận -->
+    <div id="tb-preview-nguoi-nhan" style="display:none;padding:10px 14px;background:#f0f9ff;border-left:3px solid #0891b2;border-radius:0 10px 10px 0;font-size:12.5px;color:#0c4a6e;margin-bottom:14px;line-height:1.6;">
+      <i class="fas fa-info-circle" style="margin-right:6px;color:#0891b2;"></i>
+      <span id="tb-preview-text">Sẽ gửi đến tất cả người thuê</span>
+    </div>
+
+    <hr class="duong-ke-modal" />
+
+    <!-- Mức độ + Ngày gửi -->
+    <div class="tieu-de-muc-modal" style="color:#0891b2;"><i class="fas fa-cog"></i> Cài đặt</div>
+    <div class="luoi-form-2">
       <div class="nhom-nhap">
-        <label class="nhan-nhap">Giá điện (đ/kWh)</label>
-        <input class="o-nhap" type="number" id="gia-dien" value="3500" placeholder="3500" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Phí cơ bản (đ/tháng)</label>
-        <input class="o-nhap" type="number" id="phi-co-ban-dien" value="0" placeholder="0 nếu không có" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Cách tính</label>
-        <select class="o-nhap o-chon" id="cach-tinh-dien">
-          <option>Theo công tơ từng phòng</option>
-          <option>Chia đều số phòng</option>
-          <option>Khoán cố định/phòng</option>
+        <label class="nhan-nhap">Mức độ thông báo <span style="color:#dc2626;">*</span></label>
+        <select class="o-nhap o-chon" id="tb-muc-do" onchange="tbCapNhatMucDo(this.value)">
+          <option value="thong-tin">🔵 Bình thường</option>
+          <option value="canh-bao">🟡 Quan trọng</option>
+          <option value="khan-cap">🔴 Khẩn cấp</option>
         </select>
       </div>
-    </div>
-
-    <div class="tieu-de-muc-modal"><i class="fas fa-tint" style="color:#3b82f6;"></i> Tiền nước</div>
-    <div class="luoi-form-3" style="margin-bottom:16px;">
       <div class="nhom-nhap">
-        <label class="nhan-nhap">Giá nước (đ/m³)</label>
-        <input class="o-nhap" type="number" id="gia-nuoc" value="15000" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Khoán cố định (đ/phòng)</label>
-        <input class="o-nhap" type="number" id="khoan-nuoc" value="100000" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Cách tính</label>
-        <select class="o-nhap o-chon" id="cach-tinh-nuoc">
-          <option>Theo đồng hồ</option>
-          <option>Khoán cố định/người</option>
-          <option>Khoán cố định/phòng</option>
-        </select>
+        <label class="nhan-nhap">Ngày gửi <span style="color:#dc2626;">*</span></label>
+        <input class="o-nhap" type="datetime-local" id="tb-ngay-gui" />
       </div>
     </div>
 
-    <div class="tieu-de-muc-modal"><i class="fas fa-wifi" style="color:#8b5cf6;"></i> Internet & Vệ sinh</div>
-    <div class="luoi-form-2" style="margin-bottom:4px;">
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Phí internet (đ/phòng/tháng)</label>
-        <input class="o-nhap" type="number" id="phi-internet" value="100000" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Phí vệ sinh (đ/phòng/tháng)</label>
-        <input class="o-nhap" type="number" id="phi-ve-sinh" value="50000" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Phí đỗ xe máy (đ/xe/tháng)</label>
-        <input class="o-nhap" type="number" id="phi-xe-may" value="80000" />
-      </div>
-      <div class="nhom-nhap">
-        <label class="nhan-nhap">Phí đỗ ô tô (đ/xe/tháng)</label>
-        <input class="o-nhap" type="number" id="phi-o-to" value="500000" />
-      </div>
+    <!-- Badge preview mức độ -->
+    <div id="tb-muc-do-preview" style="margin-bottom:4px;">
+      <span id="tb-badge-muc-do" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 14px;border-radius:9999px;background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;">
+        🔵 Thông tin thông thường
+      </span>
     </div>
 
-    <div class="nhom-nut-duoi-modal">
+    <div class="nhom-nut-duoi-modal" style="margin-top:22px;">
       <button class="nut-huy-modal" onclick="dongModal('modal-chi-phi-dich-vu')">Hủy</button>
-      <button class="nut-luu-modal" onclick="luuCauHinhDichVu()">
-        <i class="fas fa-save"></i> Lưu cấu hình dịch vụ
+      <button class="nut-luu-modal" id="tb-btn-gui"
+              style="background:linear-gradient(135deg,#0f52ba,#0891b2);box-shadow:0 4px 14px rgba(8,145,178,0.35);"
+              onclick="guiThongBao()">
+        <i class="fas fa-paper-plane"></i> Gửi thông báo
       </button>
     </div>
+
   </div>
 </div>
 
@@ -2404,89 +2928,161 @@ function taoTruong(nhan, giatri) {
 
 
 <!-- MODAL 6: PHÊ DUYỆT SỬA CHỮA LỚN -->
-<div class="lop-phu-modal" id="modal-phe-duyet-sua-chua" onclick="dongModalNhapNgoai(event,'modal-phe-duyet-sua-chua')">
-  <div class="hop-modal rong">
-    <div class="tieu-de-modal">
-      <h3>
-        <span style="width:32px;height:32px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;"><i class="fas fa-hammer"></i></span>
-        Phê duyệt sửa chữa lớn
-      </h3>
-      <button class="nut-dong-modal" onclick="dongModal('modal-phe-duyet-sua-chua')">✕</button>
-    </div>
-
-    <p style="font-size:12.5px;color:var(--mau-chu-phu);margin-bottom:16px;padding:10px 14px;background:#fff7ed;border-radius:10px;border-left:3px solid #f59e0b;">
-      Các yêu cầu sửa chữa có chi phí ước tính trên <strong>2,000,000 đ</strong> cần chủ trọ phê duyệt trước khi thực hiện.
-    </p>
-
-    <!-- Yêu cầu 1 -->
-    <div style="background:var(--mau-nen);border-radius:14px;padding:16px;margin-bottom:12px;border:1.5px solid var(--mau-vien);">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-        <div>
-          <div style="font-size:14px;font-weight:800;">Phòng 201 – Thay toàn bộ hệ thống điện</div>
-          <div style="font-size:12px;color:var(--mau-chu-phu);margin-top:3px;">Báo cáo bởi: Nguyễn Thị Lan · 2 ngày trước</div>
+<div class="lop-phu-modal" id="modal-phe-duyet-sua-chua"
+     onclick="dongModalNhapNgoai(event,'modal-phe-duyet-sua-chua')">
+ 
+  <div class="psc-box" onclick="event.stopPropagation()">
+ 
+    <!-- ── HEADER ── -->
+    <div class="psc-hd">
+      <div class="psc-hd-left">
+        <div class="psc-hd-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77
+                     a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91
+                     a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
         </div>
-        <span style="background:#fee2e2;color:#dc2626;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Khẩn cấp</span>
-      </div>
-      <div style="font-size:13px;margin-bottom:10px;line-height:1.6;">
-        Hệ thống dây điện cũ, nguy cơ cháy nổ cao. Cần thay toàn bộ dây điện tầng 2 và lắp MCB mới.
-        <br><strong>Chi phí ước tính: 5,500,000 đ</strong>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="nut-duyet" onclick="pheDuyetSuaChua('SC-201')">✓ Phê duyệt</button>
-        <button class="nut-tu-choi" onclick="tuChoiSuaChua('SC-201')">✕ Từ chối</button>
-        <button class="nut-xem-chi-tiet-pd">Xem ảnh / hồ sơ</button>
-        <div style="flex:1;"></div>
-        <div style="font-size:12px;font-weight:700;color:var(--mau-chu-de);">Ngân sách còn: 15M</div>
-      </div>
-    </div>
-
-    <!-- Yêu cầu 2 -->
-    <div style="background:var(--mau-nen);border-radius:14px;padding:16px;margin-bottom:12px;border:1.5px solid var(--mau-vien);">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
         <div>
-          <div style="font-size:14px;font-weight:800;">Sảnh chung – Sơn lại toàn bộ hành lang</div>
-          <div style="font-size:12px;color:var(--mau-chu-phu);margin-top:3px;">Báo cáo bởi: Trần Văn Toàn · 5 ngày trước</div>
+          <div class="psc-hd-title">Phê duyệt yêu cầu sửa chữa</div>
+          <!-- render số lượng yêu cầu bằng JS -->
+          <div class="psc-hd-sub" id="psc-sub-count">Đang tải...</div>
         </div>
-        <span style="background:#fef3c7;color:#d97706;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Trung bình</span>
       </div>
-      <div style="font-size:13px;margin-bottom:10px;line-height:1.6;">
-        Hành lang tầng 3 &amp; 4 xuống cấp, tường bong tróc. Cần sơn lại để đảm bảo thẩm mỹ.
-        <br><strong>Chi phí ước tính: 3,200,000 đ</strong>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="nut-duyet" onclick="pheDuyetSuaChua('SC-HANH-LANG')">✓ Phê duyệt</button>
-        <button class="nut-tu-choi" onclick="tuChoiSuaChua('SC-HANH-LANG')">✕ Từ chối</button>
-        <button class="nut-xem-chi-tiet-pd">Xem ảnh / hồ sơ</button>
-      </div>
-    </div>
-
-    <!-- Yêu cầu 3 -->
-    <div style="background:var(--mau-nen);border-radius:14px;padding:16px;border:1.5px solid var(--mau-vien);">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-        <div>
-          <div style="font-size:14px;font-weight:800;">Phòng 305 – Thay máy bơm nước</div>
-          <div style="font-size:12px;color:var(--mau-chu-phu);margin-top:3px;">Báo cáo bởi: Nguyễn Thị Lan · 1 tuần trước</div>
-        </div>
-        <span style="background:#fef3c7;color:#d97706;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Trung bình</span>
-      </div>
-      <div style="font-size:13px;margin-bottom:10px;line-height:1.6;">
-        Máy bơm nước trục trặc, áp lực yếu. Cần thay mới để đảm bảo sinh hoạt các phòng tầng 3.
-        <br><strong>Chi phí ước tính: 3,800,000 đ</strong>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="nut-duyet" onclick="pheDuyetSuaChua('SC-305')">✓ Phê duyệt</button>
-        <button class="nut-tu-choi" onclick="tuChoiSuaChua('SC-305')">✕ Từ chối</button>
-        <button class="nut-xem-chi-tiet-pd">Xem ảnh / hồ sơ</button>
-      </div>
-    </div>
-
-    <div class="nhom-nut-duoi-modal">
-      <button class="nut-huy-modal" onclick="dongModal('modal-phe-duyet-sua-chua')">Đóng</button>
-      <button class="nut-luu-modal" style="background:linear-gradient(135deg,#059669,#34d399);" onclick="pheDuyetTatCa()">
-        <i class="fas fa-check-double"></i> Duyệt tất cả
+      <button class="psc-close" onclick="dongModal('modal-phe-duyet-sua-chua')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
       </button>
     </div>
-  </div>
+ 
+    <!-- ── STATS BAR ── -->
+    <!-- render 3 con số đếm từ dữ liệu fetch() -->
+    <div class="psc-stats" id="psc-stats-bar">
+      <div class="psc-stat psc-stat--urgent">
+        <span class="psc-stat-num" id="psc-count-khan-cap">—</span>
+        <span class="psc-stat-lbl">Khẩn cấp</span>
+      </div>
+      <div class="psc-stat-div"></div>
+      <div class="psc-stat psc-stat--medium">
+        <span class="psc-stat-num" id="psc-count-trung-binh">—</span>
+        <span class="psc-stat-lbl">Trung bình</span>
+      </div>
+      <div class="psc-stat-div"></div>
+      <div class="psc-stat psc-stat--low">
+        <span class="psc-stat-num" id="psc-count-thap">—</span>
+        <span class="psc-stat-lbl">Thấp</span>
+      </div>
+      <div class="psc-stat-div"></div>
+      <div class="psc-stat psc-stat--budget">
+        <span class="psc-stat-num" id="psc-budget-total">—</span>
+        <span class="psc-stat-lbl">Chi phí ước tính</span>
+      </div>
+    </div>
+ 
+    <!-- ── NOTICE BANNER ── -->
+    <div class="psc-notice">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Yêu cầu có chi phí ước tính trên
+      <strong>2,000,000 đ</strong> cần chủ trọ phê duyệt trước khi thực hiện.
+    </div>
+ 
+    <!-- ── TOOLBAR ── -->
+    <div class="psc-toolbar">
+      <div class="psc-search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.3"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="psc-search-input"
+               placeholder="Tìm phòng, mô tả sự cố..."
+               oninput="pscFilter(this.value)" />
+      </div>
+      <div class="psc-filter-chips">
+        <button class="psc-chip psc-chip--active"
+                id="psc-chip-all"
+                onclick="pscSetChip('all', this)">Tất cả</button>
+        <button class="psc-chip psc-chip--urgent"
+                id="psc-chip-khan"
+                onclick="pscSetChip('Khẩn cấp', this)">🔴 Khẩn cấp</button>
+        <button class="psc-chip psc-chip--medium"
+                id="psc-chip-trung"
+                onclick="pscSetChip('Trung bình', this)">🟡 Trung bình</button>
+        <button class="psc-chip psc-chip--low"
+                id="psc-chip-thap"
+                onclick="pscSetChip('Thấp', this)">🟢 Thấp</button>
+      </div>
+    </div>
+ 
+    <!-- ── DANH SÁCH YÊU CẦU ── -->
+    <!-- ================================================================
+         render danh sách bằng fetch ở đây
+         
+         Gọi: GET /api/dondv?trangThai=Chờ%20xử%20lý&mucDo=...
+         Sau đó dùng hàm pscRenderList(data) để inject vào #psc-list
+         
+         Template mỗi item: xem <!-- item template bên dưới
+    ================================================================ -->
+    <div class="psc-list" id="psc-list">
+ 
+      <!-- ── item template ──
+           Copy đoạn này để render động, thay các {{...}} bằng dữ liệu thực.
+           Các class badge: psc-badge--urgent / psc-badge--medium / psc-badge--low
+           Các hàm JS giữ nguyên: pheDuyetSuaChua(id), tuChoiSuaChua(id), xemAnhHoSo(id)
+      -->
+ 
+  
+ 
+      <!-- empty state – hiển thị khi không có yêu cầu nào -->
+      <!-- render danh sách bằng fetch ở đây -->
+      <!-- JS inject vào #psc-list, ẩn/hiện #psc-empty tuỳ trường hợp -->
+      <div class="psc-empty" id="psc-empty" style="display:none;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <div>Không có yêu cầu nào phù hợp</div>
+      </div>
+ 
+    </div><!-- /psc-list -->
+ 
+    <!-- ── FOOTER ── -->
+    <div class="psc-ft">
+      <!-- render số lượng hiển thị -->
+      <div class="psc-ft-count">
+        Hiển thị <strong id="psc-result-count">3</strong> yêu cầu
+      </div>
+      <div class="psc-ft-btns">
+        <button class="psc-btn-cancel"
+                onclick="dongModal('modal-phe-duyet-sua-chua')">Đóng</button>
+        <!-- JS: pheDuyetTatCa() – giữ nguyên -->
+        <button class="psc-btn-approve-all"
+                onclick="pheDuyetTatCa()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Duyệt tất cả
+        </button>
+      </div>
+    </div>
+ 
+  </div><!-- /psc-box -->
 </div>
 
 
