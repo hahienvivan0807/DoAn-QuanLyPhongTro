@@ -416,7 +416,6 @@ namespace QuanLyNhaTro.Models
         // DaCoNhacNo và DuocCongVaoTro: Dùng bool? để an toàn tuyệt đối tránh lỗi SqlNullValueException
         // Gán sẵn giá trị mặc định là false để tiện cho logic C#
         public bool? DaCoNhacNo { get; set; } = false;
-
         public bool? DuocCongVaoTro { get; set; } = false;
 
 

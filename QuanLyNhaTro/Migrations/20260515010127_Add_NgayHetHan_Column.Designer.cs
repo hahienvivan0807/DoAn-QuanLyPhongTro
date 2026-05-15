@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuanLyNhaTro.Models;
 
@@ -11,9 +12,11 @@ using QuanLyNhaTro.Models;
 namespace QuanLyNhaTro.Migrations
 {
     [DbContext(typeof(QuanLyKhuNhaTro))]
-    partial class QuanLyKhuNhaTroModelSnapshot : ModelSnapshot
+    [Migration("20260515010127_Add_NgayHetHan_Column")]
+    partial class Add_NgayHetHan_Column
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

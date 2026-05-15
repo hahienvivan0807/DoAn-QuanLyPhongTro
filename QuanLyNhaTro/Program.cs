@@ -23,17 +23,15 @@ builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>
     {
         options.Cookie.Name = "MyCookieAuth";
-        options.LoginPath = "/Index";          // Trang chuyển hướng khi chưa đăng nhập
-        options.AccessDeniedPath = "/AccessDenied"; // Trang chuyển hướng khi sai quyền (403)
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie hết hạn sau 30p
-        options.SlidingExpiration = true;      // Tự động gia hạn khi người dùng còn hoạt động
+        options.LoginPath = "/Index";
+        options.AccessDeniedPath = "/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration = true;
     });
 
-// 4. Cấu hình Phân quyền (Authorization) - CÁCH LÀM TRIỆT ĐỂ
+// 4. Cấu hình Phân quyền
 builder.Services.AddAuthorization(options =>
 {
-    // Tạo một chính sách mặc định: Mọi trang đều yêu cầu đăng nhập
-    // Nếu bạn muốn mở trang nào cho khách, hãy dùng [AllowAnonymous] ở file .cshtml.cs đó
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
@@ -53,11 +51,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 // THỨ TỰ CỰC KỲ QUAN TRỌNG: 
-// Authentication (Xác thực) phải đứng TRƯỚC Authorization (Phân quyền)
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -65,5 +61,29 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
 app.MapControllers();
+
+// ============================================================
+// VÙNG 3: TỰ ĐỘNG CẬP NHẬT CẤU TRÚC SQL (MIGRATION)
+// ============================================================
+// Đoạn code này giúp bạn không cần gõ lệnh Update-Database nữa
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Lấy DbContext ra
+        var context = services.GetRequiredService<QuanLyKhuNhaTro>();
+
+        // Tự động đẩy các thay đổi (Migration) lên SQL Server khi khởi chạy app
+        context.Database.Migrate();
+
+        Console.WriteLine(">>> Database đã được cập nhật thành công!");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Lỗi xảy ra khi đang tự động cập nhật Database.");
+    }
+}
 
 app.Run();
