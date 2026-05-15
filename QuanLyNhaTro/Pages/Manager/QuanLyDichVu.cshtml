@@ -46,8 +46,8 @@
             }
 
             /* =============================================
-                                               SIDEBAR - THANH ĐIỀU HƯỚNG BÊN TRÁI
-                                            ============================================= */
+                                                           SIDEBAR - THANH ĐIỀU HƯỚNG BÊN TRÁI
+                                                        ============================================= */
             #thanh-sidebar {
                 width: 220px;
                 min-width: 220px;
@@ -122,16 +122,22 @@
             }
 
                 .logo-sidebar .bieu-tuong {
-                    width: 42px;
-                    height: 42px;
-                    background: var(--mau-chu-de);
+                    width: 60px;
+                    height: 60px;
                     border-radius: 10px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 20px;
-                    color: #fff;
+                    overflow: hidden;
+                    background: transparent;
                 }
+
+                    .logo-sidebar .bieu-tuong img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                        border-radius: 10px;
+                    }
 
                 .logo-sidebar .ten-logo {
                     color: #fff;
@@ -254,8 +260,8 @@
                 }
 
             /* =============================================
-                                               KHU VỰC CHÍNH (HEADER + NỘI DUNG)
-                                            ============================================= */
+                                                           KHU VỰC CHÍNH (HEADER + NỘI DUNG)
+                                                        ============================================= */
             #khu-vuc-chinh {
                 flex: 1;
                 display: flex;
@@ -420,8 +426,8 @@
                 }
 
             /* =============================================
-                                               NỘI DUNG TRANG ĐIỀU HÀNH
-                                            ============================================= */
+                                                           NỘI DUNG TRANG ĐIỀU HÀNH
+                                                        ============================================= */
             #noi-dung-trang {
                 flex: 1;
                 overflow-y: auto;
@@ -448,8 +454,8 @@
                 }
 
             /* =============================================
-                                               TABS CHUYỂN PHẦN
-                                            ============================================= */
+                                                           TABS CHUYỂN PHẦN
+                                                        ============================================= */
             .khu-vuc-tabs {
                 display: flex;
                 gap: 4px;
@@ -513,8 +519,8 @@
                 }
 
             /* =============================================
-                                               CARD KHUNG CHỨA BẢNG
-                                            ============================================= */
+                                                           CARD KHUNG CHỨA BẢNG
+                                                        ============================================= */
             .card-bang {
                 background: var(--mau-trang);
                 border-radius: 16px;
@@ -592,8 +598,8 @@
                     }
 
             /* =============================================
-                                               BẢNG DỮ LIỆU CHUNG
-                                            ============================================= */
+                                                           BẢNG DỮ LIỆU CHUNG
+                                                        ============================================= */
             .bang-du-lieu {
                 width: 100%;
                 border-collapse: collapse;
@@ -627,8 +633,8 @@
                 }
 
             /* =============================================
-                                               BADGE TRẠNG THÁI
-                                            ============================================= */
+                                                           BADGE TRẠNG THÁI
+                                                        ============================================= */
             .badge {
                 padding: 3px 10px;
                 border-radius: 20px;
@@ -694,8 +700,8 @@
                 }
 
             /* =============================================
-                                               NÚT HÀNH ĐỘNG
-                                            ============================================= */
+                                                           NÚT HÀNH ĐỘNG
+                                                        ============================================= */
             .nut-hanh-dong {
                 background: none;
                 border: 1px solid var(--mau-vien);
@@ -779,8 +785,8 @@
                 }
 
             /* =============================================
-                                               THÔNG TIN PHI PHÒNG TRONG BẢNG
-                                            ============================================= */
+                                                           THÔNG TIN PHI PHÒNG TRONG BẢNG
+                                                        ============================================= */
             .thong-tin-phong {
                 display: flex;
                 flex-direction: column;
@@ -798,8 +804,8 @@
             }
 
             /* =============================================
-                                               INPUT INLINE TRONG BẢNG (Báo giá giặt sấy)
-                                            ============================================= */
+                                                           INPUT INLINE TRONG BẢNG (Báo giá giặt sấy)
+                                                        ============================================= */
             .nhom-nhap-bao-gia {
                 display: flex;
                 gap: 6px;
@@ -823,8 +829,8 @@
                 }
 
             /* =============================================
-                                               MODAL POPUP (dùng chung)
-                                            ============================================= */
+                                                           MODAL POPUP (dùng chung)
+                                                        ============================================= */
             .lop-che-modal {
                 display: none;
                 position: fixed;
@@ -1152,8 +1158,8 @@
                 }
 
             /* =============================================
-                                               SCROLLBAR TÙY CHỈNH
-                                            ============================================= */
+                                                           SCROLLBAR TÙY CHỈNH
+                                                        ============================================= */
             ::-webkit-scrollbar {
                 width: 6px;
             }
@@ -1172,8 +1178,8 @@
                 }
 
             /* =============================================
-                                               RESPONSIVE
-                                            ============================================= */
+                                                           RESPONSIVE
+                                                        ============================================= */
             @@media (max-width: 1100px) {
                 .hang-thong-tin-modal {
                     grid-template-columns: 1fr;
@@ -1203,8 +1209,8 @@
             }
 
             /* =============================================
-                                               TRẠNG THÁI RỖNG (Không có dữ liệu)
-                                            ============================================= */
+                                                           TRẠNG THÁI RỖNG (Không có dữ liệu)
+                                                        ============================================= */
             .trang-thai-rong {
                 text-align: center;
                 padding: 40px 20px;
@@ -1267,8 +1273,7 @@
         <!-- Logo + Tên hệ thống -->
         <div class="logo-sidebar">
             <div class="bieu-tuong">
-                <!-- Chỗ này cần hình ảnh: Logo nhà trọ (thay icon bằng <img>) -->
-                <i class="fas fa-building"></i>
+                <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
             </div>
             <div class="ten-logo">
                 <!-- ⚠️ CẦN CAN THIỆP: Đổi tên thương hiệu / nhà trọ ở đây -->
@@ -2405,7 +2410,7 @@
                     'trang-chu':           '/Manager/Manager',
                     'quan-ly-phong':       '/Manager/ChiTietPhong',
                     'quan-ly-nguoi-thue':  '/Manager/QuanLyDichVu',
-                    'hoa-don':             '/HoaDon',
+                    'hoa-don':             '/Manager/HoaDon',
                     'dich-vu-dien-nuoc':   '/DieuHanhDichVuDienNuoc',
                     'su-co-bao-tri':       '/SuCoBaoTri',
                     'bao-cao':             '/BaoCao',
