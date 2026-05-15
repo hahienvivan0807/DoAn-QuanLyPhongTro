@@ -80,7 +80,7 @@ namespace QuanLyNhaTro.Controllers
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-            // ============================================================
+            HttpContext.Session.SetInt32("IDUser", user.IDUser);
 
             return Ok(new { message = "Đăng nhập thành công!", chucVu = user.Roles });
         }

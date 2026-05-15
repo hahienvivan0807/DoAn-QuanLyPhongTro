@@ -37,6 +37,15 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
+// 5. CẤU HÌNH SESSION (MỚI THÊM)
+builder.Services.AddDistributedMemoryCache(); // Đăng ký bộ nhớ đệm
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Session hết hạn sau 30 phút
+    options.Cookie.HttpOnly = true;                // Bảo mật Cookie
+    options.Cookie.IsEssential = true;             // Đánh dấu là Cookie thiết yếu
+});
+
 var app = builder.Build();
 
 // ============================================================
@@ -54,6 +63,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // THỨ TỰ CỰC KỲ QUAN TRỌNG: 
+app.UseSession(); // (MỚI THÊM - Phải đặt sau UseRouting và trước Authentication)
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -65,18 +76,13 @@ app.MapControllers();
 // ============================================================
 // VÙNG 3: TỰ ĐỘNG CẬP NHẬT CẤU TRÚC SQL (MIGRATION)
 // ============================================================
-// Đoạn code này giúp bạn không cần gõ lệnh Update-Database nữa
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        // Lấy DbContext ra
         var context = services.GetRequiredService<QuanLyKhuNhaTro>();
-
-        // Tự động đẩy các thay đổi (Migration) lên SQL Server khi khởi chạy app
         context.Database.Migrate();
-
         Console.WriteLine(">>> Database đã được cập nhật thành công!");
     }
     catch (Exception ex)

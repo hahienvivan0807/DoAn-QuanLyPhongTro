@@ -46,8 +46,8 @@
             }
 
             /* =============================================
-                                                           SIDEBAR - THANH ĐIỀU HƯỚNG BÊN TRÁI
-                                                        ============================================= */
+                                                                       SIDEBAR - THANH ĐIỀU HƯỚNG BÊN TRÁI
+                                                                    ============================================= */
             #thanh-sidebar {
                 width: 220px;
                 min-width: 220px;
@@ -251,7 +251,7 @@
                 .admin-sidebar .ten-admin strong {
                     display: block;
                     color: #fff;
-                    font-size: 13px;
+                    font-size: 10px;
                 }
 
                 .admin-sidebar .ten-admin span {
@@ -260,8 +260,8 @@
                 }
 
             /* =============================================
-                                                           KHU VỰC CHÍNH (HEADER + NỘI DUNG)
-                                                        ============================================= */
+                                                                       KHU VỰC CHÍNH (HEADER + NỘI DUNG)
+                                                                    ============================================= */
             #khu-vuc-chinh {
                 flex: 1;
                 display: flex;
@@ -426,8 +426,8 @@
                 }
 
             /* =============================================
-                                                           NỘI DUNG TRANG ĐIỀU HÀNH
-                                                        ============================================= */
+                                                                       NỘI DUNG TRANG ĐIỀU HÀNH
+                                                                    ============================================= */
             #noi-dung-trang {
                 flex: 1;
                 overflow-y: auto;
@@ -454,8 +454,8 @@
                 }
 
             /* =============================================
-                                                           TABS CHUYỂN PHẦN
-                                                        ============================================= */
+                                                                       TABS CHUYỂN PHẦN
+                                                                    ============================================= */
             .khu-vuc-tabs {
                 display: flex;
                 gap: 4px;
@@ -519,8 +519,8 @@
                 }
 
             /* =============================================
-                                                           CARD KHUNG CHỨA BẢNG
-                                                        ============================================= */
+                                                                       CARD KHUNG CHỨA BẢNG
+                                                                    ============================================= */
             .card-bang {
                 background: var(--mau-trang);
                 border-radius: 16px;
@@ -598,8 +598,8 @@
                     }
 
             /* =============================================
-                                                           BẢNG DỮ LIỆU CHUNG
-                                                        ============================================= */
+                                                                       BẢNG DỮ LIỆU CHUNG
+                                                                    ============================================= */
             .bang-du-lieu {
                 width: 100%;
                 border-collapse: collapse;
@@ -633,8 +633,8 @@
                 }
 
             /* =============================================
-                                                           BADGE TRẠNG THÁI
-                                                        ============================================= */
+                                                                       BADGE TRẠNG THÁI
+                                                                    ============================================= */
             .badge {
                 padding: 3px 10px;
                 border-radius: 20px;
@@ -700,8 +700,8 @@
                 }
 
             /* =============================================
-                                                           NÚT HÀNH ĐỘNG
-                                                        ============================================= */
+                                                                       NÚT HÀNH ĐỘNG
+                                                                    ============================================= */
             .nut-hanh-dong {
                 background: none;
                 border: 1px solid var(--mau-vien);
@@ -785,8 +785,8 @@
                 }
 
             /* =============================================
-                                                           THÔNG TIN PHI PHÒNG TRONG BẢNG
-                                                        ============================================= */
+                                                                       THÔNG TIN PHI PHÒNG TRONG BẢNG
+                                                                    ============================================= */
             .thong-tin-phong {
                 display: flex;
                 flex-direction: column;
@@ -804,8 +804,8 @@
             }
 
             /* =============================================
-                                                           INPUT INLINE TRONG BẢNG (Báo giá giặt sấy)
-                                                        ============================================= */
+                                                                       INPUT INLINE TRONG BẢNG (Báo giá giặt sấy)
+                                                                    ============================================= */
             .nhom-nhap-bao-gia {
                 display: flex;
                 gap: 6px;
@@ -829,8 +829,8 @@
                 }
 
             /* =============================================
-                                                           MODAL POPUP (dùng chung)
-                                                        ============================================= */
+                                                                       MODAL POPUP (dùng chung)
+                                                                    ============================================= */
             .lop-che-modal {
                 display: none;
                 position: fixed;
@@ -1158,8 +1158,8 @@
                 }
 
             /* =============================================
-                                                           SCROLLBAR TÙY CHỈNH
-                                                        ============================================= */
+                                                                       SCROLLBAR TÙY CHỈNH
+                                                                    ============================================= */
             ::-webkit-scrollbar {
                 width: 6px;
             }
@@ -1178,8 +1178,8 @@
                 }
 
             /* =============================================
-                                                           RESPONSIVE
-                                                        ============================================= */
+                                                                       RESPONSIVE
+                                                                    ============================================= */
             @@media (max-width: 1100px) {
                 .hang-thong-tin-modal {
                     grid-template-columns: 1fr;
@@ -1209,8 +1209,8 @@
             }
 
             /* =============================================
-                                                           TRẠNG THÁI RỖNG (Không có dữ liệu)
-                                                        ============================================= */
+                                                                       TRẠNG THÁI RỖNG (Không có dữ liệu)
+                                                                    ============================================= */
             .trang-thai-rong {
                 text-align: center;
                 padding: 40px 20px;
@@ -1276,7 +1276,6 @@
                 <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
             </div>
             <div class="ten-logo">
-                <!-- ⚠️ CẦN CAN THIỆP: Đổi tên thương hiệu / nhà trọ ở đây -->
                 <strong>Nhà Trọ Bà Năm</strong>
                 <span>Quản lý hệ thống</span>
             </div>
@@ -1285,7 +1284,6 @@
         <!-- ===== NHÓM MENU CHÍNH ===== -->
         <div class="nhan-nhom">Tổng quan</div>
 
-        <!-- Dashboard (Trang chủ) -->
         <div class="menu-item" onclick="chuyenTrang('trang-chu', this)">
             <i class="fas fa-home"></i>
             <span>Trang chủ</span>
@@ -1294,44 +1292,42 @@
         <!-- ===== NHÓM QUẢN LÝ ===== -->
         <div class="nhan-nhom">Quản lý</div>
 
-        <!-- Module 1: Quản lý phòng trọ -->
         <div class="menu-item" onclick="chuyenTrang('quan-ly-phong', this)">
             <i class="fas fa-door-open"></i>
             <span>Quản lý phòng trọ</span>
         </div>
 
-        <!-- Module 2: Quản lý người thuê -->
         <div class="menu-item dang-chon" onclick="chuyenTrang('quan-ly-nguoi-thue', this)">
             <i class="fas fa-users"></i>
             <span>Quản lý dịch vụ và tiện ích</span>
-            <span class="huy-hieu-menu">2</span>
+            @if (Model.SoDonDVChoXuLy > 0)
+            {
+                <span class="huy-hieu-menu">@Model.SoDonDVChoXuLy</span>
+            }
         </div>
 
-        <!-- Module 3: Quản lý hóa đơn -->
         <div class="menu-item" onclick="chuyenTrang('hoa-don', this)">
             <i class="fas fa-file-invoice-dollar"></i>
             <span>Hóa đơn & Thu tiền</span>
         </div>
 
-        <!-- ===== NHÓM BÁO CÁO ===== -->
+        <!-- ===== NHÓM HỖ TRỢ ===== -->
         <div class="nhan-nhom">Hỗ trợ</div>
 
-        <!-- Module 4: Báo cáo sự cố / Bảo trì -->
         <div class="menu-item" onclick="chuyenTrang('su-co-bao-tri', this)">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
-            <!-- Badge đỏ: số sự cố chưa xử lý -->
-            <!-- ⚙️ BACKEND: Lấy số lượng sự cố chưa xử lý từ API -->
-            <span class="huy-hieu-menu">3</span>
+            @if (Model.SoDonBaoTriChoXuLy > 0)
+            {
+                <span class="huy-hieu-menu">@Model.SoDonBaoTriChoXuLy</span>
+            }
         </div>
 
-        <!-- Module 5: Thống kê & Báo cáo -->
         <div class="menu-item" onclick="chuyenTrang('bao-cao', this)">
             <i class="fas fa-chart-bar"></i>
             <span>Thống kê & Báo cáo</span>
         </div>
 
-        <!-- Module 6: Cài đặt -->
         <div class="menu-item" onclick="chuyenTrang('cai-dat', this)">
             <i class="fas fa-cog"></i>
             <span>Cài đặt hệ thống</span>
@@ -1340,18 +1336,22 @@
         <!-- Thông tin admin dưới đáy sidebar -->
         <div class="admin-sidebar" onclick="moThongTinAdmin()">
             <div class="anh-admin">
-                <!-- ⚠️ CẦN CAN THIỆP: Thay chữ "A" bằng <img> ảnh thật của admin -->
-                A
+                @if (!string.IsNullOrEmpty(Model.Avatar))
+                {
+                    <img src="@Model.Avatar" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                }
+                else
+                {
+                    @(Model.TenNguoiDung?.Length > 0 ? Model.TenNguoiDung[0].ToString().ToUpper() : "A")
+                }
             </div>
             <div class="ten-admin">
-                <!-- ⚙️ BACKEND: Lấy tên admin từ session/token đăng nhập -->
-                <strong>Admin</strong>
-                <span>Quản trị viên</span>
+                <strong>@(Model.TenNguoiDung ?? "Admin")</strong>
+                <span>@(Model.ChucVu ?? "Quản trị viên")</span>
             </div>
         </div>
 
     </nav><!-- Kết thúc SIDEBAR -->
-    <!-- Kết thúc SIDEBAR -->
     <!-- =============================================
          KHU VỰC CHÍNH
     ============================================= -->
@@ -1381,17 +1381,27 @@
                 <!-- Chuông thông báo -->
                 <button class="nut-thong-bao" onclick="moThongBao()">
                     <i class="fas fa-bell"></i>
-                    <!-- ⚙️ BACKEND: Số thông báo chưa đọc -->
-                    <span class="so-thong-bao">5</span>
+                    @if (Model.SoThongBaoChuaDoc > 0)
+                    {
+                        <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
+                    }
                 </button>
 
                 <!-- Avatar + tên admin -->
                 <div class="thong-tin-admin" onclick="moMenuAdmin()">
-                    <div class="anh-dai-dien">A</div>
+                    <div class="anh-dai-dien">
+                        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                        {
+                            <img src="@Model.AvatarUrl" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                        }
+                        else
+                        {
+                            @(Model.TenNguoiDung?.Length > 0 ? Model.TenNguoiDung[0].ToString().ToUpper() : "A")
+                        }
+                    </div>
                     <div>
-                        <!-- ⚙️ BACKEND: Tên manager từ session -->
-                        <div class="ten">Nguyễn Văn Admin</div>
-                        <div class="chuc-vu">Quản trị viên</div>
+                        <div class="ten">@(Model.TenNguoiDung ?? "Admin")</div>
+                        <div class="chuc-vu">@(Model.ChucVu ?? "Quản trị viên")</div>
                     </div>
                     <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
                 </div>

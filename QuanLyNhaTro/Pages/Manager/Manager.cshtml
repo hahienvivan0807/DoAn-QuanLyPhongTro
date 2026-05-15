@@ -1,7 +1,18 @@
 ﻿@page
 @model QuanLyNhaTro.Pages.ManagerModel
+@using System.Text.Json
 @{
     Layout = null;
+    // Serialize mảng doanh thu thành JSON để truyền vào Chart.js
+    var doanhThuJson = JsonSerializer.Serialize(Model.DoanhThuTheoThang);
+    // Chữ cái đầu tên người dùng để hiển thị avatar mặc định
+    var initials = Model.TenNguoiDung?.Length > 0 ? Model.TenNguoiDung[0].ToString().ToUpper() : "A";
+    // Tỉ lệ lấp đầy dạng chuỗi
+    var tiLeLapDay = Model.ThongKeTong.TiLeLapDay.ToString("0.##");
+    // Doanh thu tháng hiện tại dạng "XX.XM"
+    var doanhThuThang = (Model.ThongKeTong.DoanhThuThangNay / 1_000_000m).ToString("0.#") + "M";
+    // Tháng hiện tại
+    var thangHienTai = DateTime.Now.Month;
 }
 <html lang="vi">
 <head>
@@ -255,7 +266,7 @@
         .admin-sidebar .ten-admin strong {
         display: block;
         color: #fff;
-        font-size: 13px;
+        font-size: 10px;
         }
 
         .admin-sidebar .ten-admin span {
@@ -1698,7 +1709,6 @@
                 <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm" />
             </div>
             <div class="ten-logo">
-                <!-- ⚠️ CẦN CAN THIỆP: Đổi tên thương hiệu / nhà trọ ở đây -->
                 <strong>Nhà Trọ Bà Năm</strong>
                 <span>Quản lý hệ thống</span>
             </div>
@@ -1707,7 +1717,6 @@
         <!-- ===== NHÓM MENU CHÍNH ===== -->
         <div class="nhan-nhom">Tổng quan</div>
 
-        <!-- Dashboard (Trang chủ) -->
         <div class="menu-item dang-chon" onclick="chuyenTrang('trang-chu', this)">
             <i class="fas fa-home"></i>
             <span>Trang chủ</span>
@@ -1716,45 +1725,42 @@
         <!-- ===== NHÓM QUẢN LÝ ===== -->
         <div class="nhan-nhom">Quản lý</div>
 
-        <!-- Module 1: Quản lý phòng trọ -->
         <div class="menu-item" onclick="chuyenTrang('quan-ly-phong', this)">
             <i class="fas fa-door-open"></i>
             <span>Quản lý phòng trọ</span>
         </div>
 
-        <!-- Module 2: Quản lý người thuê -->
         <div class="menu-item" onclick="chuyenTrang('quan-ly-nguoi-thue', this)">
             <i class="fas fa-users"></i>
             <span>Quản lý dịch vụ và tiện ích</span>
-            <!-- Badge hiển thị số người thuê mới -->
-            <span class="huy-hieu-menu">2</span>
+            @if (Model.SoDichVuMoi > 0)
+            {
+                <span class="huy-hieu-menu">@Model.SoDichVuMoi</span>
+            }
         </div>
 
-        <!-- Module 3: Quản lý hóa đơn -->
         <div class="menu-item" onclick="chuyenTrang('hoa-don', this)">
             <i class="fas fa-file-invoice-dollar"></i>
             <span>Hóa đơn & Thu tiền</span>
         </div>
 
-        <!-- ===== NHÓM BÁO CÁO ===== -->
+        <!-- ===== NHÓM HỖ TRỢ ===== -->
         <div class="nhan-nhom">Hỗ trợ</div>
 
-        <!-- Module 4: Báo cáo sự cố / Bảo trì -->
         <div class="menu-item" onclick="chuyenTrang('su-co-bao-tri', this)">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
-            <!-- Badge đỏ: số sự cố chưa xử lý -->
-            <!-- ⚙️ BACKEND: Lấy số lượng sự cố chưa xử lý từ API -->
-            <span class="huy-hieu-menu">3</span>
+            @if (Model.SoDonDVChoXuLy > 0)
+            {
+                <span class="huy-hieu-menu">@Model.SoDonDVChoXuLy</span>
+            }
         </div>
 
-        <!-- Module 5: Thống kê & Báo cáo -->
         <div class="menu-item" onclick="chuyenTrang('bao-cao', this)">
             <i class="fas fa-chart-bar"></i>
             <span>Thống kê & Báo cáo</span>
         </div>
 
-        <!-- Module 6: Cài đặt -->
         <div class="menu-item" onclick="chuyenTrang('cai-dat', this)">
             <i class="fas fa-cog"></i>
             <span>Cài đặt hệ thống</span>
@@ -1763,13 +1769,18 @@
         <!-- Thông tin admin dưới đáy sidebar -->
         <div class="admin-sidebar" onclick="moThongTinAdmin()">
             <div class="anh-admin">
-                <!-- ⚠️ CẦN CAN THIỆP: Thay chữ "A" bằng <img> ảnh thật của admin -->
-                A
+                @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                {
+                    <img src="@Model.AvatarUrl" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                }
+                else
+                {
+                    @initials
+                }
             </div>
             <div class="ten-admin">
-                <!-- ⚙️ BACKEND: Lấy tên admin từ session/token đăng nhập -->
-                <strong>Admin</strong>
-                <span>Quản trị viên</span>
+                <strong>@Model.TenNguoiDung</strong>
+                <span>@Model.ChucVu</span>
             </div>
         </div>
 
@@ -1782,7 +1793,6 @@
         <!-- ===== HEADER ===== -->
         <header id="thanh-header">
             <div class="header-trai">
-                <!-- Nút ≡ để đóng/mở sidebar trên mobile -->
                 <button class="nut-ham-menu" onclick="dongMoSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -1793,30 +1803,33 @@
             </div>
 
             <div class="header-phai">
-                <!-- Ô tìm kiếm -->
                 <div class="o-tim-kiem">
                     <i class="fas fa-search"></i>
-                    <!-- ⚙️ BACKEND: Kết nối API tìm kiếm phòng/người thuê -->
                     <input type="text" placeholder="Tìm phòng, người thuê..." oninput="timKiem(this.value)" />
                 </div>
 
-                <!-- Nút chuông thông báo -->
                 <button class="nut-thong-bao" onclick="moThongBao()">
                     <i class="fas fa-bell"></i>
-                    <!-- ⚙️ BACKEND: Lấy số thông báo chưa đọc từ API -->
-                    <span class="so-thong-bao">5</span>
+                    @if (Model.SoThongBaoChuaDoc > 0)
+                    {
+                        <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
+                    }
                 </button>
 
-                <!-- Tên + ảnh admin trên header -->
                 <div class="thong-tin-admin" onclick="moMenuAdmin()">
                     <div class="anh-dai-dien">
-                        <!-- ⚠️ CẦN CAN THIỆP: Thay bằng <img src="duong-dan-anh.jpg"> -->
-                        A
+                        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                        {
+                            <img src="@Model.AvatarUrl" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                        }
+                        else
+                        {
+                            @initials
+                        }
                     </div>
                     <div>
-                        <!-- ⚙️ BACKEND: Lấy tên từ session đăng nhập -->
-                        <div class="ten">Nguyễn Văn Admin</div>
-                        <div class="chuc-vu">Quản trị viên</div>
+                        <div class="ten">@Model.TenNguoiDung</div>
+                        <div class="chuc-vu">@Model.ChucVu</div>
                     </div>
                     <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
                 </div>
@@ -1830,15 +1843,13 @@
             <!-- Dòng tiêu đề + nút thêm mới -->
             <div class="hang-chao-mung">
                 <div>
-                    <h2>Xin chào, Admin! 👋</h2>
-                    <!-- ⚙️ BACKEND: Hiển thị ngày giờ thực từ server hoặc JS -->
-                    <p id="ngay-gio-hien-tai">Thứ Tư, 07 tháng 5 năm 2025</p>
+                    <h2>Xin chào, @Model.TenNguoiDung! 👋</h2>
+                    <p id="ngay-gio-hien-tai"></p>
                 </div>
             </div>
 
             <!-- =============================================
          HÀNG 1: 4 CARD THỐNG KÊ TỔNG QUAN
-         Gồm: Tổng phòng | Đang thuê | Phòng trống | Doanh thu
     ============================================= -->
             <div class="hang-thong-ke">
 
@@ -1847,12 +1858,9 @@
                     <div class="card-noi-dung">
                         <div class="bieu-tuong-card"><i class="fas fa-building"></i></div>
                         <div class="so-lieu">
-                            <div class="con-so">
-                                <!-- ⚙️ BACKEND: Lấy tổng số phòng từ database -->
-                                48
-                            </div>
+                            <div class="con-so">@Model.ThongKeTong.TongSoPhong</div>
                             <div class="ten-thong-ke">Tổng số phòng</div>
-                            <span class="ty-le-thay-doi tang">↑ +2 tháng này</span>
+                            <span class="ty-le-thay-doi tang">↑ +@Model.ThongKeTong.PhongDangThue đang thuê</span>
                         </div>
                     </div>
                 </div>
@@ -1862,12 +1870,9 @@
                     <div class="card-noi-dung">
                         <div class="bieu-tuong-card"><i class="fas fa-user-check"></i></div>
                         <div class="so-lieu">
-                            <div class="con-so">
-                                <!-- ⚙️ BACKEND: Đếm số phòng có trạng thái = "đang thuê" -->
-                                39
-                            </div>
+                            <div class="con-so">@Model.ThongKeTong.PhongDangThue</div>
                             <div class="ten-thong-ke">Phòng đang thuê</div>
-                            <span class="ty-le-thay-doi tang">↑ 100.00% lấp đầy</span>
+                            <span class="ty-le-thay-doi tang">↑ @tiLeLapDay% lấp đầy</span>
                         </div>
                     </div>
                 </div>
@@ -1877,12 +1882,9 @@
                     <div class="card-noi-dung">
                         <div class="bieu-tuong-card"><i class="fas fa-door-closed"></i></div>
                         <div class="so-lieu">
-                            <div class="con-so">
-                                <!-- ⚙️ BACKEND: Đếm số phòng có trạng thái = "trống" -->
-                                9
-                            </div>
+                            <div class="con-so">@Model.ThongKeTong.PhongConTrong</div>
                             <div class="ten-thong-ke">Phòng còn trống</div>
-                            <span class="ty-le-thay-doi giam">↓ 3 đang bảo trì</span>
+                            <span class="ty-le-thay-doi giam">↓ @Model.ThongKeTong.PhongDangSua đang bảo trì</span>
                         </div>
                     </div>
                 </div>
@@ -1892,19 +1894,23 @@
                     <div class="card-noi-dung">
                         <div class="bieu-tuong-card"><i class="fas fa-coins"></i></div>
                         <div class="so-lieu">
-                            <div class="con-so" style="font-size:20px;">
-                                <!-- ⚙️ BACKEND: Tính tổng tiền thu được trong tháng hiện tại -->
-                                58.5M
-                            </div>
-                            <div class="ten-thong-ke">Doanh thu tháng 5</div>
-                            <span class="ty-le-thay-doi tang">↑ +12% so tháng trước</span>
+                            <div class="con-so" style="font-size:20px;">@doanhThuThang</div>
+                            <div class="ten-thong-ke">Doanh thu tháng @thangHienTai</div>
+                            @if (Model.ThongKeTong.TangTruongDoanhThu >= 0)
+                            {
+                                <span class="ty-le-thay-doi tang">↑ +@Model.ThongKeTong.TangTruongDoanhThu.ToString("0.#")% so tháng trước</span>
+                            }
+                            else
+                            {
+                                <span class="ty-le-thay-doi giam">↓ @Model.ThongKeTong.TangTruongDoanhThu.ToString("0.#")% so tháng trước</span>
+                            }
                         </div>
                     </div>
                 </div>
 
             </div><!-- Kết thúc HÀNG 1 -->
             <!-- =============================================
-         HÀNG 2: BIỂU ĐỒ DOANH THU + THÔNG BÁO SỰ CỐ
+         HÀNG 2: BIỂU ĐỒ DOANH THU + SỰ CỐ MỚI NHẤT
     ============================================= -->
             <div class="hang-bieu-do">
 
@@ -1913,60 +1919,43 @@
                     <div class="tieu-de-card">
                         <h3><i class="fas fa-chart-line"></i> Biểu đồ doanh thu theo tháng</h3>
                         <div style="display:flex;gap:8px;align-items:center;">
-                            <!-- ⚙️ BACKEND: Thêm bộ lọc năm, kết nối dữ liệu thật -->
                             <select class="truong-nhap chon-lua" style="padding:5px 10px;font-size:12px;width:90px;" onchange="thayDoiNam(this.value)">
-                                <option>2025</option>
-                                <option>2024</option>
+                                <option>@Model.NamBieuDo</option>
+                                <option>@(Model.NamBieuDo - 1)</option>
                             </select>
                             <button class="nut-xem-them" onclick="xemBaoCaoDoanhThu()">Báo cáo đầy đủ</button>
                         </div>
                     </div>
-                    <!-- Canvas vẽ biểu đồ Chart.js -->
                     <canvas id="bieu-do-doanh-thu" height="110"></canvas>
                 </div>
 
-                <!-- ===== Card thông báo / sự cố mới nhất ===== -->
+                <!-- ===== Card sự cố mới nhất ===== -->
                 <div class="card-thong-bao">
                     <div class="tieu-de-card">
                         <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Sự cố mới nhất</h3>
                         <button class="nut-xem-them" onclick="xemTatCaSuCo()">Xem tất cả</button>
                     </div>
 
-                    <!-- ⚙️ BACKEND: Lấy danh sách sự cố mới từ API, render danh sách dưới đây -->
-                    <div class="muc-thong-bao">
-                        <div class="dot-trang-thai do"></div>
-                        <div class="noi-dung-thong-bao">
-                            <div class="tieu-de-thong-bao">Phòng 201 – Hư điện</div>
-                            <div class="mo-ta-thong-bao">Mất điện cục bộ, chờ thợ</div>
+                    @foreach (var suCo in Model.SuCoMoiNhat)
+                    {
+                        var dotMau = suCo.MucDo == "Khẩn cấp" ? "do"
+                                   : suCo.TrangThai_DV == "Thành công" ? "xanh"
+                                   : "vang";
+                        var thoiGian = (DateTime.Now - suCo.NgayTao).TotalMinutes < 60
+                            ? $"{(int)(DateTime.Now - suCo.NgayTao).TotalMinutes} phút trước"
+                            : (DateTime.Now - suCo.NgayTao).TotalHours < 24
+                                ? $"{(int)(DateTime.Now - suCo.NgayTao).TotalHours} giờ trước"
+                                : "Hôm qua";
+                        <div class="muc-thong-bao">
+                            <div class="dot-trang-thai @dotMau"></div>
+                            <div class="noi-dung-thong-bao">
+                                <div class="tieu-de-thong-bao">Phòng @suCo.Phong.SoPhong – @suCo.LoaiDV</div>
+                                <div class="mo-ta-thong-bao">@suCo.NoiDung</div>
+                            </div>
+                            <div class="thoi-gian">@thoiGian</div>
                         </div>
-                        <div class="thoi-gian">5 phút trước</div>
-                    </div>
-                    <div class="muc-thong-bao">
-                        <div class="dot-trang-thai vang"></div>
-                        <div class="noi-dung-thong-bao">
-                            <div class="tieu-de-thong-bao">Phòng 305 – Hỏng vòi nước</div>
-                            <div class="mo-ta-thong-bao">Đã ghi nhận, đang xử lý</div>
-                        </div>
-                        <div class="thoi-gian">2 giờ trước</div>
-                    </div>
-                    <div class="muc-thong-bao">
-                        <div class="dot-trang-thai do"></div>
-                        <div class="noi-dung-thong-bao">
-                            <div class="tieu-de-thong-bao">Phòng 108 – Khóa cửa hỏng</div>
-                            <div class="mo-ta-thong-bao">Khẩn cấp, cần xử lý ngay</div>
-                        </div>
-                        <div class="thoi-gian">3 giờ trước</div>
-                    </div>
-                    <div class="muc-thong-bao">
-                        <div class="dot-trang-thai xanh"></div>
-                        <div class="noi-dung-thong-bao">
-                            <div class="tieu-de-thong-bao">Phòng 410 – Đã sửa xong</div>
-                            <div class="mo-ta-thong-bao">Sự cố điện đã được khắc phục</div>
-                        </div>
-                        <div class="thoi-gian">Hôm qua</div>
-                    </div>
+                    }
 
-                    <!-- Nút báo sự cố mới -->
                     <button style="width:100%;margin-top:14px;background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;" onclick="moModalBaoSuCo()">
                         <i class="fas fa-plus"></i> Ghi nhận sự cố mới
                     </button>
@@ -1985,7 +1974,6 @@
                         <button class="nut-xem-them" onclick="xemTatCaHoaDon()">Xem tất cả</button>
                     </div>
 
-                    <!-- ⚙️ BACKEND: Truy vấn DB lấy danh sách hóa đơn có ngày hết hạn trong 7 ngày tới -->
                     <table class="bang-hoa-don">
                         <thead>
                             <tr>
@@ -1998,47 +1986,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- ⚙️ BACKEND: Render từng dòng hóa đơn từ vòng lặp -->
-                            <tr>
-                                <td><strong>P.101</strong></td>
-                                <td>Nguyễn Văn B</td>
-                                <td style="font-weight:700;color:var(--mau-chu-de);">3,500,000đ</td>
-                                <td>08/05/2025</td>
-                                <td><span class="trang-thai-thanh-toan chua-thanh-toan">Chưa thanh toán</span></td>
-                                <td><button class="nut-hanh-dong" onclick="nhacNhoThanhToan('P.101')">Nhắc</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>P.203</strong></td>
-                                <td>Trần Thị C</td>
-                                <td style="font-weight:700;color:var(--mau-chu-de);">2,800,000đ</td>
-                                <td>09/05/2025</td>
-                                <td><span class="trang-thai-thanh-toan sap-den-han">Sắp đến hạn</span></td>
-                                <td><button class="nut-hanh-dong" onclick="nhacNhoThanhToan('P.203')">Nhắc</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>P.312</strong></td>
-                                <td>Lê Văn D</td>
-                                <td style="font-weight:700;color:var(--mau-chu-de);">4,200,000đ</td>
-                                <td>10/05/2025</td>
-                                <td><span class="trang-thai-thanh-toan sap-den-han">Sắp đến hạn</span></td>
-                                <td><button class="nut-hanh-dong" onclick="nhacNhoThanhToan('P.312')">Nhắc</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>P.405</strong></td>
-                                <td>Phạm Thị E</td>
-                                <td style="font-weight:700;color:var(--mau-chu-de);">3,000,000đ</td>
-                                <td>05/05/2025</td>
-                                <td><span class="trang-thai-thanh-toan chua-thanh-toan">Quá hạn</span></td>
-                                <td><button class="nut-hanh-dong" onclick="nhacNhoThanhToan('P.405')">Nhắc</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>P.208</strong></td>
-                                <td>Hoàng Văn F</td>
-                                <td style="font-weight:700;color:#16a34a;">3,800,000đ</td>
-                                <td>07/05/2025</td>
-                                <td><span class="trang-thai-thanh-toan da-thanh-toan">Đã thanh toán</span></td>
-                                <td><button class="nut-hanh-dong" onclick="xemHoaDon('P.208')">Xem</button></td>
-                            </tr>
+                            @foreach (var hd in Model.HoaDonSapDenHan)
+                            {
+                                <tr>
+                                    <td><strong>P.@hd.SoPhong</strong></td>
+                                    <td>@hd.TenNguoiThue</td>
+                                    <td style="font-weight:700;color:@(hd.TrangThai == "Đã hoàn thành" ? "#16a34a" : "var(--mau-chu-de)");">
+                                        @hd.TongCong.ToString("N0")đ
+                                    </td>
+                                    <td>@hd.HanDong.ToString("dd/MM/yyyy")</td>
+                                    <td><span class="trang-thai-thanh-toan @hd.CssClass">@hd.TrangThai</span></td>
+                                    <td><button class="nut-hanh-dong" onclick="@hd.NutOnClick">@hd.NutHanhDong</button></td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -2050,366 +2010,378 @@
                         <button class="nut-xem-them" onclick="xemTatCaPhong()">Tất cả phòng</button>
                     </div>
 
-                    <!-- ⚙️ BACKEND: Lấy danh sách phòng trống hoặc cần chú ý từ DB -->
                     <div class="danh-sach-phong">
-                        <div class="muc-phong" onclick="xemChiTietPhongCuThe('P.102')">
-                            <div>
-                                <div class="ten-phong">Phòng 102</div>
-                                <div class="loai-phong">Phòng đơn • 15m²</div>
+                        @foreach (var phong in Model.PhongConTrong)
+                        {
+                            var badgeCss = phong.TrangThai == "Trống" ? "trong"
+                                         : phong.TrangThai == "Đã thuê" ? "thue"
+                                         : "sua";
+                            var badgeText = phong.TrangThai == "Trống" ? "Còn trống"
+                                          : phong.TrangThai == "Đã thuê" ? "Đã thuê"
+                                          : "Đang sửa";
+                            <div class="muc-phong" onclick="xemChiTietPhongCuThe('P.@phong.SoPhong')">
+                                <div>
+                                    <div class="ten-phong">Phòng @phong.SoPhong</div>
+                                    <div class="loai-phong">Tầng @phong.Tang • @phong.DienTich m²</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="gia-phong">@((phong.GiaPhongFix / 1_000_000m).ToString("0.#"))M/th</div>
+                                    <span class="trang-thai-phong @badgeCss">@badgeText</span>
+                                </div>
                             </div>
-                            <div style="text-align:right;">
-                                <div class="gia-phong">2.5M/th</div>
-                                <span class="trang-thai-phong trong">Còn trống</span>
-                            </div>
-                        </div>
-
+                        }
                     </div>
 
-                </div><!-- Kết thúc HÀNG 3 -->
+                </div><!-- Kết thúc card phòng -->
 
-            </main><!-- Kết thúc DASHBOARD -->
+            </div><!-- Kết thúc HÀNG 3 -->
 
-        </div><!-- Kết thúc KHU VỰC CHÍNH -->
-        <!-- =============================================
-     MODAL: THÊM PHÒNG MỚI
-     ⚠️ Khi bấm "Lưu" cần gọi API POST /api/phong để thêm vào DB
-============================================= -->
-        <div class="lop-che-modal" id="modal-them-phong" onclick="dongModalNeuNhanNgoai(event, 'modal-them-phong')">
-            <div class="hop-modal">
-                <div class="tieu-de-modal">
-                    <h3><i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:8px;"></i>Thêm phòng mới</h3>
-                    <button class="nut-dong-modal" onclick="dongModal('modal-them-phong')">✕</button>
+        </main><!-- Kết thúc DASHBOARD -->
+
+    </div><!-- Kết thúc KHU VỰC CHÍNH -->
+
+    <div class="lop-che-modal" id="modal-them-phong" onclick="dongModalNeuNhanNgoai(event, 'modal-them-phong')">
+        <div class="hop-modal">
+            <div class="tieu-de-modal">
+                <h3><i class="fas fa-door-open" style="color:var(--mau-chu-de);margin-right:8px;"></i>Thêm phòng mới</h3>
+                <button class="nut-dong-modal" onclick="dongModal('modal-them-phong')">✕</button>
+            </div>
+            <div class="hang-form">
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Số phòng *</label>
+                    <!-- ⚠️ CẦN CAN THIỆP: Validate số phòng không trùng -->
+                    <input class="truong-nhap" type="text" id="so-phong" placeholder="VD: 101, 202..." />
                 </div>
-                <div class="hang-form">
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Số phòng *</label>
-                        <!-- ⚠️ CẦN CAN THIỆP: Validate số phòng không trùng -->
-                        <input class="truong-nhap" type="text" id="so-phong" placeholder="VD: 101, 202..." />
-                    </div>
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Loại phòng *</label>
-                        <select class="truong-nhap chon-lua" id="loai-phong">
-                            <option value="">-- Chọn loại --</option>
-                            <option>Phòng đơn</option>
-                            <option>Phòng đôi</option>
-                            <option>Phòng cao cấp</option>
-                        </select>
-                    </div>
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Diện tích (m²)</label>
-                        <input class="truong-nhap" type="number" id="dien-tich" placeholder="VD: 15" />
-                    </div>
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Giá thuê (đồng/tháng) *</label>
-                        <!-- ⚙️ BACKEND: Giá sẽ lưu vào bảng phong trong DB -->
-                        <input class="truong-nhap" type="number" id="gia-thue" placeholder="VD: 3500000" />
-                    </div>
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Tầng</label>
-                        <select class="truong-nhap chon-lua" id="tang">
-                            <option>Tầng 1</option>
-                            <option>Tầng 2</option>
-                            <option>Tầng 3</option>
-                            <option>Tầng 4</option>
-                        </select>
-                    </div>
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Trạng thái</label>
-                        <select class="truong-nhap chon-lua" id="trang-thai-phong-moi">
-                            <option>Còn trống</option>
-                            <option>Đang thuê</option>
-                            <option>Bảo trì</option>
-                        </select>
-                    </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Loại phòng *</label>
+                    <select class="truong-nhap chon-lua" id="loai-phong">
+                        <option value="">-- Chọn loại --</option>
+                        <option>Phòng đơn</option>
+                        <option>Phòng đôi</option>
+                        <option>Phòng cao cấp</option>
+                    </select>
                 </div>
-                <div class="nhom-truong-nhap" style="margin-top:14px;">
-                    <label class="nhan-truong-nhap">Ghi chú</label>
-                    <textarea class="truong-nhap" rows="2" id="ghi-chu-phong" placeholder="Tiện nghi, lưu ý đặc biệt..."></textarea>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Diện tích (m²)</label>
+                    <input class="truong-nhap" type="number" id="dien-tich" placeholder="VD: 15" />
                 </div>
-                <div class="nhom-nut-modal">
-                    <button class="nut-huy" onclick="dongModal('modal-them-phong')">Hủy</button>
-                    <!-- ⚙️ BACKEND: Gọi API POST /api/phong với dữ liệu form -->
-                    <button class="nut-luu" onclick="luuPhongMoi()"><i class="fas fa-save"></i> Lưu phòng</button>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Giá thuê (đồng/tháng) *</label>
+                    <!-- ⚙️ BACKEND: Giá sẽ lưu vào bảng phong trong DB -->
+                    <input class="truong-nhap" type="number" id="gia-thue" placeholder="VD: 3500000" />
+                </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Tầng</label>
+                    <select class="truong-nhap chon-lua" id="tang">
+                        <option>Tầng 1</option>
+                        <option>Tầng 2</option>
+                        <option>Tầng 3</option>
+                        <option>Tầng 4</option>
+                    </select>
+                </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Trạng thái</label>
+                    <select class="truong-nhap chon-lua" id="trang-thai-phong-moi">
+                        <option>Còn trống</option>
+                        <option>Đang thuê</option>
+                        <option>Bảo trì</option>
+                    </select>
                 </div>
             </div>
+            <div class="nhom-truong-nhap" style="margin-top:14px;">
+                <label class="nhan-truong-nhap">Ghi chú</label>
+                <textarea class="truong-nhap" rows="2" id="ghi-chu-phong" placeholder="Tiện nghi, lưu ý đặc biệt..."></textarea>
+            </div>
+            <div class="nhom-nut-modal">
+                <button class="nut-huy" onclick="dongModal('modal-them-phong')">Hủy</button>
+                <!-- ⚙️ BACKEND: Gọi API POST /api/phong với dữ liệu form -->
+                <button class="nut-luu" onclick="luuPhongMoi()"><i class="fas fa-save"></i> Lưu phòng</button>
+            </div>
         </div>
+    </div>
 
 
-        <!-- =============================================
+    <!-- =============================================
      MODAL: BÁO SỰ CỐ
      ⚙️ BACKEND: POST /api/su-co khi lưu
 ============================================= -->
-        <div class="lop-che-modal" id="modal-bao-su-co" onclick="dongModalNeuNhanNgoai(event, 'modal-bao-su-co')">
-            <div class="hop-modal">
-                <div class="tieu-de-modal">
-                    <h3><i class="fas fa-tools" style="color:#ef4444;margin-right:8px;"></i>Ghi nhận sự cố mới</h3>
-                    <button class="nut-dong-modal" onclick="dongModal('modal-bao-su-co')">✕</button>
+    <div class="lop-che-modal" id="modal-bao-su-co" onclick="dongModalNeuNhanNgoai(event, 'modal-bao-su-co')">
+        <div class="hop-modal">
+            <div class="tieu-de-modal">
+                <h3><i class="fas fa-tools" style="color:#ef4444;margin-right:8px;"></i>Ghi nhận sự cố mới</h3>
+                <button class="nut-dong-modal" onclick="dongModal('modal-bao-su-co')">✕</button>
+            </div>
+            <div class="hang-form">
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Phòng *</label>
+                    <select class="truong-nhap chon-lua" id="phong-su-co">
+                        <!-- ⚙️ BACKEND: Load danh sách phòng từ API GET /api/phong -->
+                        <option value="">-- Chọn phòng --</option>
+                        @foreach (var p in Model.TatCaPhong)
+                        {
+                            <option value="@p.IDPhong">Phòng @p.SoPhong</option>
+                        }
+                    </select>
                 </div>
-                <div class="hang-form">
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Phòng *</label>
-                        <select class="truong-nhap chon-lua" id="phong-su-co">
-                            <!-- ⚙️ BACKEND: Load danh sách phòng từ API GET /api/phong -->
-                            <option>-- Chọn phòng --</option>
-                            <option>Phòng 101</option>
-                            <option>Phòng 201</option>
-                            <option>Phòng 301</option>
-                        </select>
-                    </div>
-                    <div class="nhom-truong-nhap">
-                        <label class="nhan-truong-nhap">Mức độ *</label>
-                        <select class="truong-nhap chon-lua" id="muc-do-su-co">
-                            <option>Thấp</option>
-                            <option>Trung bình</option>
-                            <option>Khẩn cấp</option>
-                        </select>
-                    </div>
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Mức độ *</label>
+                    <select class="truong-nhap chon-lua" id="muc-do-su-co">
+                        <option>Thấp</option>
+                        <option>Trung bình</option>
+                        <option>Khẩn cấp</option>
+                    </select>
                 </div>
-                <div class="nhom-truong-nhap" style="margin-top:14px;">
-                    <label class="nhan-truong-nhap">Mô tả sự cố *</label>
-                    <textarea class="truong-nhap" rows="3" id="mo-ta-su-co" placeholder="Mô tả chi tiết sự cố..."></textarea>
-                </div>
-                <div class="nhom-nut-modal">
-                    <button class="nut-huy" onclick="dongModal('modal-bao-su-co')">Hủy</button>
-                    <button class="nut-luu" style="background:linear-gradient(135deg,#ef4444,#f97316);" onclick="luuSuCo()">
-                        <i class="fas fa-save"></i> Ghi nhận
+            </div>
+            <div class="nhom-truong-nhap" style="margin-top:14px;">
+                <label class="nhan-truong-nhap">Mô tả sự cố *</label>
+                <textarea class="truong-nhap" rows="3" id="mo-ta-su-co" placeholder="Mô tả chi tiết sự cố..."></textarea>
+            </div>
+            <div class="nhom-nut-modal">
+                <button class="nut-huy" onclick="dongModal('modal-bao-su-co')">Hủy</button>
+                <button class="nut-luu" style="background:linear-gradient(135deg,#ef4444,#f97316);" onclick="luuSuCo()">
+                    <i class="fas fa-save"></i> Ghi nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-danh-sach-phong"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+        z-index:1000; align-items:center; justify-content:center;
+        backdrop-filter:blur(4px);"
+         onclick="dongModalPhong(event)">
+
+        <div id="mainModal"
+             style="background:#fff; border-radius:16px; border:1px solid #e2e8f0;
+            width:700px; max-width:95vw; max-height:85vh;
+            overflow:hidden; display:flex; flex-direction:column;
+            box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+
+            <!-- ===== LIST VIEW ===== -->
+            <div id="listView">
+
+                <div class="modal-header">
+                    <h2><i class="fas fa-building" style="margin-right:6px;font-size:15px;color:#2563eb"></i>Danh sách chi tiết phòng</h2>
+                    <button class="btn-close" aria-label="Đóng" onclick="document.getElementById('overlay-danh-sach-phong').style.display='none'; showList();">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
-            </div>
-        </div>
 
-        <div id="overlay-danh-sach-phong"
-             style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
-            z-index:1000; align-items:center; justify-content:center;
-            backdrop-filter:blur(4px);"
-             onclick="dongModalPhong(event)">
-
-            <div id="mainModal"
-                 style="background:#fff; border-radius:16px; border:1px solid #e2e8f0;
-                width:700px; max-width:95vw; max-height:85vh;
-                overflow:hidden; display:flex; flex-direction:column;
-                box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-
-                <!-- ===== LIST VIEW ===== -->
-                <div id="listView">
-
-                    <div class="modal-header">
-                        <h2><i class="fas fa-building" style="margin-right:6px;font-size:15px;color:#2563eb"></i>Danh sách chi tiết phòng</h2>
-                        <button class="btn-close" aria-label="Đóng" onclick="document.getElementById('overlay-danh-sach-phong').style.display='none'; showList();">
-                            <i class="fas fa-times"></i>
-                        </button>
+                <div class="toolbar">
+                    <div class="pills">
+                        <button class="pill active-all" data-filter="all">Tất cả</button>
+                        <button class="pill" data-filter="Trống">Phòng trống</button>
+                        <button class="pill" data-filter="Đã thuê">Đã thuê</button>
+                        <button class="pill" data-filter="Đang sửa">Đang sửa chữa</button>
                     </div>
-
-                    <div class="toolbar">
-                        <div class="pills">
-                            <button class="pill active-all" data-filter="all">Tất cả</button>
-                            <button class="pill" data-filter="Trống">Phòng trống</button>
-                            <button class="pill" data-filter="Đã thuê">Đã thuê</button>
-                            <button class="pill" data-filter="Đang sửa">Đang sửa chữa</button>
-                        </div>
-                        <div class="search-wrap">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchInput" placeholder="Nhập số phòng..." />
-                        </div>
+                    <div class="search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Nhập số phòng..." />
                     </div>
-
-                    <div class="summary">
-                        <span class="stat trong"><strong id="sTrong">0</strong> trống</span>
-                        <span class="stat" style="color:var(--mau-vien)">·</span>
-                        <span class="stat thue"><strong id="sThue">0</strong> đã thuê</span>
-                        <span class="stat" style="color:var(--mau-vien)">·</span>
-                        <span class="stat sua"><strong id="sSua">0</strong> đang sửa</span>
-                        <span class="stat" style="margin-left:auto;font-size:11px;" id="sCount"></span>
-                    </div>
-
-                    <div class="room-grid" id="roomGrid"></div>
-
                 </div>
 
-                <!-- ===== DETAIL VIEW ===== -->
-                <div class="detail-view" id="detailView">
+                <div class="summary">
+                    <span class="stat trong"><strong id="sTrong">0</strong> trống</span>
+                    <span class="stat" style="color:var(--mau-vien)">·</span>
+                    <span class="stat thue"><strong id="sThue">0</strong> đã thuê</span>
+                    <span class="stat" style="color:var(--mau-vien)">·</span>
+                    <span class="stat sua"><strong id="sSua">0</strong> đang sửa</span>
+                    <span class="stat" style="margin-left:auto;font-size:11px;" id="sCount"></span>
+                </div>
 
-                    <div class="detail-header">
-                        <button class="btn-back" id="btnBack" onclick="showList()">
-                            <i class="fas fa-arrow-left" style="font-size:12px"></i> Quay lại
-                        </button>
-                        <h2 id="detailTitle"></h2>
-                        <span id="detailBadge" class="badge"></span>
-                        <button class="btn-close" id="detailClose" onclick="showList()" aria-label="Đóng">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
+                <div class="room-grid" id="roomGrid"></div>
 
-                    <div class="detail-tabs">
-                        <button class="dtab on" data-tab="info">Thông tin chung</button>
-                        <button class="dtab" data-tab="tenant">Người thuê</button>
-                        <button class="dtab" data-tab="history">Lịch sử</button>
-                    </div>
+            </div>
 
-                    <div class="detail-body">
-                        <div class="tab-panel on" id="tabInfo"></div>
-                        <div class="tab-panel" id="tabTenant"></div>
-                        <div class="tab-panel" id="tabHistory"></div>
-                    </div>
+            <!-- ===== DETAIL VIEW ===== -->
+            <div class="detail-view" id="detailView">
 
+                <div class="detail-header">
+                    <button class="btn-back" id="btnBack" onclick="showList()">
+                        <i class="fas fa-arrow-left" style="font-size:12px"></i> Quay lại
+                    </button>
+                    <h2 id="detailTitle"></h2>
+                    <span id="detailBadge" class="badge"></span>
+                    <button class="btn-close" id="detailClose" onclick="showList()" aria-label="Đóng">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="detail-tabs">
+                    <button class="dtab on" data-tab="info">Thông tin chung</button>
+                    <button class="dtab" data-tab="tenant">Người thuê</button>
+                    <button class="dtab" data-tab="history">Lịch sử</button>
+                </div>
+
+                <div class="detail-body">
+                    <div class="tab-panel on" id="tabInfo"></div>
+                    <div class="tab-panel" id="tabTenant"></div>
+                    <div class="tab-panel" id="tabHistory"></div>
                 </div>
 
             </div>
+
         </div>
-        <!-- =============================================
+    </div>
+    <!-- =============================================
      JAVASCRIPT - XỬ LÝ TƯƠNG TÁC
 ============================================= -->
-        <script>
 
-            // ===== CẬP NHẬT NGÀY GIỜ =====
-            function capNhatNgayGio() {
-            const ngay = new Date();
-            const tuan = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
-            document.getElementById('ngay-gio-hien-tai').textContent =
-            `${tuan[ngay.getDay()]}, ${ngay.getDate()} tháng ${ngay.getMonth()+1} năm ${ngay.getFullYear()}`;
-            }
-            capNhatNgayGio();
+    <script>
 
-            // ===== BIỂU ĐỒ DOANH THU Chart.js =====
-            // ⚙️ BACKEND: Thay mảng duLieuDoanhThu bằng dữ liệu thật từ API GET /api/doanh-thu?nam=2025
-            const duLieuDoanhThu = [42, 38, 51, 47, 55, 58.5, 0, 0, 0, 0, 0, 0]; // đơn vị triệu đồng
-            const ctx = document.getElementById('bieu-do-doanh-thu').getContext('2d');
+        // ===== CẬP NHẬT NGÀY GIỜ =====
+        function capNhatNgayGio() {
+        const ngay = new Date();
+        const tuan = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+        document.getElementById('ngay-gio-hien-tai').textContent =
+        `${tuan[ngay.getDay()]}, ${ngay.getDate()} tháng ${ngay.getMonth()+1} năm ${ngay.getFullYear()}`;
+        }
+        capNhatNgayGio();
 
-            // Tạo gradient nền cho biểu đồ
-            const grd = ctx.createLinearGradient(0, 0, 0, 200);
-            grd.addColorStop(0, 'rgba(26,86,219,0.25)');
-            grd.addColorStop(1, 'rgba(26,86,219,0.0)');
+        // ===== DỮ LIỆU PHÒNG TỪ SERVER (cho modal danh sách phòng) =====
+        const roomData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    Model.TatCaPhong.Select(p => new
+                    {
+                        id = p.IDPhong,
+                        soPhong = p.SoPhong,
+                        tang = (int)p.Tang,
+                        dienTich = p.DienTich,
+                        gia = p.GiaPhongFix,
+                        trangThai = p.TrangThai
+                    })
+                ));
 
-            new Chart(ctx, {
-            type: 'line',
-            data: {
-            labels: ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'],
-            datasets: [{
-            label: 'Doanh thu (triệu đồng)',
-            data: duLieuDoanhThu,
-            borderColor: '#1a56db',
-            backgroundColor: grd,
-            borderWidth: 2.5,
-            pointBackgroundColor: '#fff',
-            pointBorderColor: '#1a56db',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            fill: true,
-            tension: 0.4,
-            }]
-            },
-            options: {
-            responsive: true, maintainAspectRatio: true,
-            plugins: {
-            legend: { display: false },
-            tooltip: {
-            backgroundColor: '#1e293b',
-            titleColor: '#94a3b8', bodyColor: '#fff',
-            padding: 10, borderRadius: 8,
-            callbacks: { label: ctx => ` ${ctx.raw} triệu đồng` }
-            }
-            },
-            scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-            y: {
-            grid: { color: '#f1f5f9' },
-            ticks: { font: { size: 11 }, callback: val => val + 'M' },
-            beginAtZero: true
-            }
-            }
-            }
-            });
+        // ===== BIỂU ĐỒ DOANH THU Chart.js — dữ liệu từ server =====
+        const duLieuDoanhThu = @Html.Raw(doanhThuJson); // đơn vị triệu đồng
+        const ctx = document.getElementById('bieu-do-doanh-thu').getContext('2d');
 
-            // ===== CÁC HÀM ĐIỀU HƯỚNG & TƯƠNG TÁC =====
+        const grd = ctx.createLinearGradient(0, 0, 0, 200);
+        grd.addColorStop(0, 'rgba(26,86,219,0.25)');
+        grd.addColorStop(1, 'rgba(26,86,219,0.0)');
 
-            // Chuyển trang khi click menu sidebar
-            function chuyenTrang(tenTrang, phanTu) {
-            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
-            phanTu.classList.add('dang-chon');
-            // Bản đồ tên trang → đường dẫn Razor Page
-            const bangDieuHuong = {
-            'trang-chu':           '/Manager/Manager',
-            'quan-ly-phong':       '/Manager/ChiTietPhong',
-            'quan-ly-nguoi-thue':  '/Manager/QuanLyDichVu',
-            'hoa-don':             '/Manager/HoaDon',
-            'su-co-bao-tri':       '/SuCoBaoTri',
-            'bao-cao':             '/BaoCao',
-            'cai-dat':             '/CaiDat',
-            };
-            const duongDan = bangDieuHuong[tenTrang];
-            if (duongDan) {
-            window.location.href = duongDan;
-            } else {
-            console.log('Chưa có trang:', tenTrang);
-            }
-            }
+        new Chart(ctx, {
+        type: 'line',
+        data: {
+        labels: ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'],
+        datasets: [{
+        label: 'Doanh thu (triệu đồng)',
+        data: duLieuDoanhThu,
+        borderColor: '#1a56db',
+        backgroundColor: grd,
+        borderWidth: 2.5,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#1a56db',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        fill: true,
+        tension: 0.4,
+        }]
+        },
+        options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+        legend: { display: false },
+        tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#94a3b8', bodyColor: '#fff',
+        padding: 10, borderRadius: 8,
+        callbacks: { label: ctx => ` ${ctx.raw} triệu đồng` }
+        }
+        },
+        scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: {
+        grid: { color: '#f1f5f9' },
+        ticks: { font: { size: 11 }, callback: val => val + 'M' },
+        beginAtZero: true
+        }
+        }
+        }
+        });
 
-            // Đóng/mở sidebar trên mobile
-            function dongMoSidebar() {
-            document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
-            }
+        // ===== CÁC HÀM ĐIỀU HƯỚNG & TƯƠNG TÁC =====
 
-            // Mở modal thêm phòng
-            function moModalThemPhong() {
-            document.getElementById('modal-them-phong').classList.add('hien');
-            }
+        function chuyenTrang(tenTrang, phanTu) {
+        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('dang-chon'));
+        phanTu.classList.add('dang-chon');
+        const bangDieuHuong = {
+        'trang-chu':           '/Manager/Manager',
+        'quan-ly-phong':       '/Manager/ChiTietPhong',
+        'quan-ly-nguoi-thue':  '/Manager/QuanLyDichVu',
+        'hoa-don':             '/Manager/HoaDon',
+        'su-co-bao-tri':       '/SuCoBaoTri',
+        'bao-cao':             '/BaoCao',
+        'cai-dat':             '/CaiDat',
+        };
+        const duongDan = bangDieuHuong[tenTrang];
+        if (duongDan) {
+        window.location.href = duongDan;
+        } else {
+        console.log('Chưa có trang:', tenTrang);
+        }
+        }
 
-            // Mở modal báo sự cố
-            function moModalBaoSuCo() {
-            document.getElementById('modal-bao-su-co').classList.add('hien');
-            }
+        function dongMoSidebar() {
+        document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
+        }
 
-            // Đóng modal theo id
-            function dongModal(idModal) {
-            document.getElementById(idModal).classList.remove('hien');
-            }
+        function moModalThemPhong() {
+        document.getElementById('modal-them-phong').classList.add('hien');
+        }
 
-            // Đóng modal khi nhấn vùng tối bên ngoài
-            function dongModalNeuNhanNgoai(event, idModal) {
-            if (event.target.id === idModal) dongModal(idModal);
-            }
+        function moModalBaoSuCo() {
+        document.getElementById('modal-bao-su-co').classList.add('hien');
+        }
 
-            // Lưu phòng mới – ⚙️ BACKEND: Gọi API POST /api/phong
-            function luuPhongMoi() {
-            const soPhong = document.getElementById('so-phong').value;
-            const giaThue = document.getElementById('gia-thue').value;
-            if (!soPhong || !giaThue) { alert('Vui lòng điền đầy đủ thông tin bắt buộc!'); return; }
-            // ⚙️ BACKEND: fetch('/api/phong', { method:'POST', body: JSON.stringify({...}) })
-            alert(`Đã lưu phòng ${soPhong} thành công! (Kết nối backend để lưu thật)`);
-            dongModal('modal-them-phong');
-            }
+        function dongModal(idModal) {
+        document.getElementById(idModal).classList.remove('hien');
+        }
 
-            // Lưu sự cố – ⚙️ BACKEND: Gọi API POST /api/su-co
-            function luuSuCo() {
-            const moTa = document.getElementById('mo-ta-su-co').value;
-            if (!moTa) { alert('Vui lòng mô tả sự cố!'); return; }
-            // ⚙️ BACKEND: fetch('/api/su-co', { method:'POST', body: JSON.stringify({...}) })
-            alert('Đã ghi nhận sự cố! (Kết nối backend để lưu thật)');
-            dongModal('modal-bao-su-co');
-            }
+        function dongModalNeuNhanNgoai(event, idModal) {
+        if (event.target.id === idModal) dongModal(idModal);
+        }
 
-            // Nhắc thanh toán – ⚙️ BACKEND: Gửi SMS/email qua API thông báo
-            function nhacNhoThanhToan(soPhong) {
-            alert(`Đã gửi nhắc nhở thanh toán tới người thuê phòng ${soPhong}! (Kết nối backend/SMS API)`);
-            }
+        function luuPhongMoi() {
+        const soPhong = document.getElementById('so-phong').value;
+        const giaThue = document.getElementById('gia-thue').value;
+        if (!soPhong || !giaThue) { alert('Vui lòng điền đầy đủ thông tin bắt buộc!'); return; }
+        alert(`Đã lưu phòng ${soPhong} thành công! (Kết nối backend để lưu thật)`);
+        dongModal('modal-them-phong');
+        }
 
-            // Các hàm xem chi tiết – điều hướng thật sang trang tương ứng
-            function xemChiTietPhong() { window.location.href = 'Manager/ChiTietPhong'; }
-            function xemPhongDangThue() { window.location.href = '/ChiTietPhong?trangThai=dang-thue'; }
-            function xemPhongTrong() { window.location.href = '/ChiTietPhong?trangThai=trong'; }
-            function xemDoanhThu() { window.location.href = '/BaoCao'; }
-            function xemBaoCaoDoanhThu() { window.location.href = '/BaoCao'; }
-            function xemTatCaSuCo() { window.location.href = '/SuCoBaoTri'; }
-            function xemTatCaHoaDon() { window.location.href = '/HoaDon'; }
-            function xemChiTietPhongCuThe(soPhong) { window.location.href = '/ChiTietPhong?soPhong=' + soPhong; }
-            function xemHoaDon(soPhong) { window.location.href = '/HoaDon?soPhong=' + soPhong; }
-            function moThongBao() { alert('Mở danh sách thông báo (5 chưa đọc)'); }
-            function moMenuAdmin() { alert('Menu tài khoản: Đổi mật khẩu / Đăng xuất'); }
-            function moThongTinAdmin() { alert('Thông tin quản trị viên'); }
-            function timKiem(tuKhoa) { console.log('Tìm kiếm:', tuKhoa); /* ⚙️ BACKEND: gọi API tìm kiếm */ }
-            function thayDoiNam(nam) { console.log('Đổi năm biểu đồ:', nam); /* ⚙️ BACKEND: reload data biểu đồ */ }
-        </script>
-    </body>
+        function luuSuCo() {
+        const moTa = document.getElementById('mo-ta-su-co').value;
+        if (!moTa) { alert('Vui lòng mô tả sự cố!'); return; }
+        alert('Đã ghi nhận sự cố! (Kết nối backend để lưu thật)');
+        dongModal('modal-bao-su-co');
+        }
+
+        function nhacNhoThanhToan(soPhong) {
+        alert(`Đã gửi nhắc nhở thanh toán tới người thuê phòng ${soPhong}!`);
+        }
+
+        function xemChiTietPhong() { window.location.href = 'Manager/ChiTietPhong'; }
+        function xemPhongDangThue() { window.location.href = '/ChiTietPhong?trangThai=dang-thue'; }
+        function xemPhongTrong() { window.location.href = '/ChiTietPhong?trangThai=trong'; }
+        function xemDoanhThu() { window.location.href = '/BaoCao'; }
+        function xemBaoCaoDoanhThu() { window.location.href = '/BaoCao'; }
+        function xemTatCaSuCo() { window.location.href = '/SuCoBaoTri'; }
+        function xemTatCaHoaDon() { window.location.href = '/HoaDon'; }
+        function xemChiTietPhongCuThe(soPhong) { window.location.href = '/ChiTietPhong?soPhong=' + soPhong; }
+        function xemHoaDon(soPhong) { window.location.href = '/HoaDon?soPhong=' + soPhong; }
+        function moThongBao() { alert('Mở danh sách thông báo (@Model.SoThongBaoChuaDoc chưa đọc)'); }
+        function moMenuAdmin() { alert('Menu tài khoản: Đổi mật khẩu / Đăng xuất'); }
+        function moThongTinAdmin() { alert('Thông tin quản trị viên'); }
+        function xemTatCaPhong() {
+        document.getElementById('overlay-danh-sach-phong').style.display = 'flex';
+        }
+        function dongModalPhong(event) {
+        if (event.target.id === 'overlay-danh-sach-phong')
+        document.getElementById('overlay-danh-sach-phong').style.display = 'none';
+        }
+        function timKiem(tuKhoa) { console.log('Tìm kiếm:', tuKhoa); }
+        function thayDoiNam(nam) { console.log('Đổi năm biểu đồ:', nam); }
+    </script>
+</body>
 </html>
-
