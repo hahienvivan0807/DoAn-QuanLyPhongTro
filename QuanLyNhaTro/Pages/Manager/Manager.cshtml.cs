@@ -18,8 +18,8 @@ namespace QuanLyNhaTro.Pages
 
         // ── Thông tin người dùng đăng nhập ──────────────────────────
         public string TenNguoiDung { get; set; } = "Admin";
-        public string ChucVu { get; set; } = "Quản trị viên";
-        public string? AvatarUrl { get; set; }
+        public string ChucVu { get; set; } = "Manager";
+        public string? Avatar { get; set; }
 
         // ── Thống kê tổng quan ──────────────────────────────────────
         public THONGKE_TONG ThongKeTong { get; set; } = new();

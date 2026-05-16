@@ -1769,9 +1769,9 @@
         <!-- Thông tin admin dưới đáy sidebar -->
         <div class="admin-sidebar" onclick="moThongTinAdmin()">
             <div class="anh-admin">
-                @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                @if (!string.IsNullOrEmpty(Model.Avatar))
                 {
-                    <img src="@Model.AvatarUrl" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                    <img src="@Model.Avatar" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
                 }
                 else
                 {
@@ -1818,9 +1818,9 @@
 
                 <div class="thong-tin-admin" onclick="moMenuAdmin()">
                     <div class="anh-dai-dien">
-                        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                        @if (!string.IsNullOrEmpty(Model.Avatar))
                         {
-                            <img src="@Model.AvatarUrl" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                            <img src="@Model.Avatar" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
                         }
                         else
                         {
