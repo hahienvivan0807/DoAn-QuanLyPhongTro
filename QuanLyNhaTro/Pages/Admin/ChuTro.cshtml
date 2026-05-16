@@ -1923,6 +1923,79 @@
 #tb-badge-muc-do.muc-thong-tin {
   background: #dbeafe; color: #1d4ed8; border-color: #bfdbfe;
 }
+/* =========================================================
+   ADMIN HEADER DROPDOWN
+========================================================= */
+.khoi-admin-header { position: relative; }
+
+.admin-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 240px;
+  background: var(--mau-trang);
+  border-radius: 14px;
+  border: 1px solid var(--mau-vien);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(13,27,46,0.12), 0 2px 8px rgba(13,27,46,0.06);
+  z-index: 999;
+  transform-origin: top right;
+  transform: scale(0.92) translateY(-8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease;
+}
+.admin-dropdown.show {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.add-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--mau-vien);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.add-header-avatar {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 15px; font-weight: 800;
+}
+.add-header-name { font-size: 13px; font-weight: 700; color: var(--mau-chu); }
+.add-header-email { font-size: 11px; color: var(--mau-chu-phu); margin-top: 2px; }
+.add-header-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9.5px; font-weight: 800; letter-spacing: 0.4px;
+  padding: 2px 8px; border-radius: var(--radius-full); margin-top: 4px;
+  background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+  color: #fff;
+}
+
+.add-body { padding: 6px; }
+
+.add-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 12px; border-radius: 9px;
+  cursor: pointer; transition: background 0.14s;
+  border: none; background: none;
+  width: 100%; font-family: inherit; text-align: left;
+}
+.add-item:hover { background: var(--mau-nen); }
+.add-item-icon {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.add-item-icon.vang { background: var(--mau-chu-de-nhat); color: var(--mau-chu-de); }
+.add-item-icon.do   { background: var(--mau-do-nhat);     color: var(--mau-do); }
+.add-item-label { font-size: 13px; font-weight: 700; color: var(--mau-chu); }
+.add-item-sub   { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 1px; }
+.add-item.danger:hover { background: var(--mau-do-nhat); }
+.add-item.danger:hover .add-item-label { color: var(--mau-do); }
+
+.add-divider { height: 1px; background: var(--mau-vien); margin: 4px 0; }
 </style>
 </head>
 <body>
@@ -2061,14 +2134,53 @@
       <span class="the-chu-tro"><i class="fas fa-crown" style="margin-right:4px;font-size:8px;"></i>CHỦ TRỌ</span>
 
       <!-- Avatar + tên -->
-      <div class="khoi-admin-header">
-        <div class="anh-dai-dien-header">C</div>
-        <div>
-          <div class="ten-admin-header">Nguyễn Văn Chủ</div>
-          <div class="vai-tro-header">Chủ sở hữu</div>
+        <div class="khoi-admin-header" id="adminHeaderWrap">
+          <button onclick="toggleAdminMenu()" id="adminHeaderBtn"
+                  style="display:flex;align-items:center;gap:9px;cursor:pointer;padding:5px 10px;border-radius:var(--radius-full);border:none;background:none;font-family:inherit;transition:background 0.2s;"
+                  onmouseover="this.style.background='var(--mau-chu-de-nhat)'"
+                  onmouseout="this.style.background='none'">
+            <div class="anh-dai-dien-header">C</div>
+            <div>
+              <div class="ten-admin-header" id="header-ten-chu">Nguyễn Văn Chủ</div>
+              <div class="vai-tro-header">Chủ sở hữu</div>
+            </div>
+            <i class="fas fa-chevron-down" id="adminChevron"
+               style="font-size:9px;color:var(--mau-chu-phu);margin-left:2px;transition:transform 0.2s;"></i>
+          </button>
+
+          <div class="admin-dropdown" id="adminDropdown">
+            <div class="add-header">
+              <div class="add-header-avatar" id="dd-avatar">C</div>
+              <div>
+                <div class="add-header-name" id="dd-ten">Nguyễn Văn Chủ</div>
+                <div class="add-header-email" id="dd-email">chusonguyen@nhatrobanum.vn</div>
+                <span class="add-header-badge">
+                  <i class="fas fa-crown" style="font-size:8px;"></i> Chủ trọ
+                </span>
+              </div>
+            </div>
+
+            <div class="add-body">
+              <button class="add-item" onclick="moDoiMatKhau()">
+                <div class="add-item-icon vang"><i class="fas fa-key"></i></div>
+                <div>
+                  <div class="add-item-label">Đổi mật khẩu</div>
+                  <div class="add-item-sub">Cập nhật mật khẩu đăng nhập</div>
+                </div>
+              </button>
+
+              <div class="add-divider"></div>
+
+              <button class="add-item danger" onclick="xacNhanDangXuat()">
+                <div class="add-item-icon do"><i class="fas fa-sign-out-alt"></i></div>
+                <div>
+                  <div class="add-item-label">Đăng xuất</div>
+                  <div class="add-item-sub">Thoát khỏi hệ thống</div>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
-        <i class="fas fa-chevron-down" style="font-size:9px;color:var(--mau-chu-phu);margin-left:2px;"></i>
-      </div>
     </div>
   </header>
 
@@ -3249,7 +3361,7 @@ function taoTruong(nhan, giatri) {
           oninput="locDanhSachQuanLy(this.value)"
           style="border:none;background:none;outline:none;font-size:13px;width:100%;font-family:inherit;color:var(--mau-chu);" />
       </div>
-      <button onclick="moModal('modal-tai-khoan-quan-ly')"
+      <button onclick="moModal('modal-them-quan-ly')"
         style="background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:6px;">
         <i class="fas fa-plus"></i> Thêm mới
       </button>
@@ -3642,6 +3754,151 @@ function taoTruong(nhan, giatri) {
 
 <!-- Thông báo-->
 <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;"></div>
+<!-- MODAL: THÊM TÀI KHOẢN QUẢN LÝ -->
+<div class="lop-phu-modal" id="modal-them-quan-ly"
+     onclick="dongModalNhapNgoai(event,'modal-them-quan-ly')">
+  <div class="hop-modal" style="width:560px;">
+
+    <!-- Header tím -->
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:18px 24px 16px;flex-shrink:0;
+                background:linear-gradient(135deg,#5b21b6,#7c3aed,#8b5cf6);
+                border-radius:16px 16px 0 0;margin:-28px -28px 20px;
+                position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-30px;right:-30px;width:110px;height:110px;
+                  border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-20px;right:70px;width:70px;height:70px;
+                  border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"></div>
+      <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+        <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.2);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-user-plus" style="font-size:16px;color:#fff;"></i>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#fff;font-family:'Lexend',sans-serif;">
+            Thêm tài khoản quản lý
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.62);margin-top:2px;">
+            Tạo tài khoản mới với quyền Manager
+          </div>
+        </div>
+      </div>
+      <button class="nut-dong-modal"
+              style="background:rgba(255,255,255,0.18);color:#fff;"
+              onclick="dongModal('modal-them-quan-ly')">✕</button>
+    </div>
+
+    <!-- Banner thông tin -->
+    <div style="display:flex;align-items:flex-start;gap:9px;padding:10px 13px;
+                background:#f5f3ff;border-left:3px solid #7c3aed;
+                border-radius:0 10px 10px 0;font-size:12.5px;color:#3c3489;
+                line-height:1.55;margin-bottom:18px;">
+      <i class="fas fa-info-circle" style="color:#7c3aed;margin-top:2px;flex-shrink:0;"></i>
+      <span>Tài khoản sẽ được cấp quyền <strong>Manager</strong> – có thể quản lý phòng,
+            người thuê và hóa đơn. Mật khẩu được mã hóa BCrypt trước khi lưu.</span>
+    </div>
+
+    <!-- Section label -->
+    <div class="tieu-de-muc-modal" style="color:#7c3aed;">
+      <i class="fas fa-id-badge"></i> Thông tin tài khoản
+    </div>
+
+    <!-- Form 2 cột -->
+    <div class="luoi-form-2">
+      <!-- Họ và tên -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">
+          Họ và tên <span style="color:#dc2626;">*</span>
+        </label>
+        <input class="o-nhap" type="text" id="fullname-moi"
+               placeholder="VD: Nguyễn Văn Quản Lý" />
+        <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">
+          Chỉ chữ cái và khoảng trắng, không ký tự đặc biệt
+        </div>
+      </div>
+      <!-- Username -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">
+          Username <span style="color:#dc2626;">*</span>
+        </label>
+        <input class="o-nhap" type="text" id="username-moi"
+               placeholder="VD: nguyenvanql" maxlength="50" />
+        <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">
+          Chỉ chữ và số, tối đa 50 ký tự
+        </div>
+      </div>
+      <!-- Số điện thoại -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">
+          Số điện thoại <span style="color:#dc2626;">*</span>
+        </label>
+        <input class="o-nhap" type="tel" id="phone-moi"
+               placeholder="VD: 0901234567" maxlength="10" />
+        <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">
+          Đúng 10 chữ số
+        </div>
+      </div>
+      <!-- Mật khẩu -->
+      <div class="nhom-nhap">
+        <label class="nhan-nhap">
+          Mật khẩu <span style="color:#dc2626;">*</span>
+        </label>
+        <div style="position:relative;">
+          <input class="o-nhap" type="password" id="password-moi"
+                 placeholder="Tối thiểu 6 ký tự"
+                 style="padding-right:40px;" />
+          <button type="button"
+                  onclick="
+                    const i=document.getElementById('password-moi');
+                    const c=this.querySelector('i');
+                    if(i.type==='password'){i.type='text';c.className='fas fa-eye-slash';}
+                    else{i.type='password';c.className='fas fa-eye';}
+                  "
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;
+                         color:var(--mau-chu-phu);font-size:13px;">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">
+          Sẽ được mã hóa BCrypt
+        </div>
+      </div>
+    </div>
+
+    <!-- Vai trò cố định (readonly) -->
+    <div class="nhom-nhap" style="margin-top:14px;">
+      <label class="nhan-nhap">Vai trò</label>
+      <input type="hidden" id="role-moi" value="Manager" />
+      <div style="display:flex;align-items:center;gap:9px;padding:10px 13px;
+                  border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);
+                  background:var(--mau-nen);">
+        <i class="fas fa-shield-alt" style="color:#7c3aed;font-size:14px;flex-shrink:0;"></i>
+        <span style="font-size:13px;font-weight:700;flex:1;">Manager</span>
+        <span style="font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:9999px;
+                     background:#f5f3ff;color:#3c3489;border:1px solid #afa9ec;">
+          Cố định
+        </span>
+      </div>
+      <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">
+        Giá trị <code style="font-size:10.5px;">Manager</code> được gửi tự động lên API
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="nhom-nut-duoi-modal" style="margin-top:22px;">
+      <button class="nut-huy-modal"
+              onclick="dongModal('modal-them-quan-ly')">Hủy</button>
+      <button class="nut-luu-modal"
+              style="background:linear-gradient(135deg,#5b21b6,#7c3aed);
+                     box-shadow:0 4px 14px rgba(124,58,237,0.32);"
+              onclick="ThemUser()">
+        <i class="fas fa-user-plus"></i> Tạo tài khoản
+      </button>
+    </div>
+
+  </div>
+</div>
 <script>
   // ===== CẬP NHẬT NGÀY GIỜ =====
   (function capNhatNgayGio() {
