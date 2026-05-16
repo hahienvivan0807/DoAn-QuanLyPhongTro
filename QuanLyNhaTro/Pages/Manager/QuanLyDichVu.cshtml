@@ -1195,7 +1195,7 @@
                                     </td>
                                     <td>
                                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                                            @if (don.TrangThai_DV == "Chờ xử lý")
+                                                @if (don.TrangThai_DV == "Chờ xử lý" || don.TrangThai_DV == "Đang xử lý")
                                             {
                                                 <button class="btn btn-warning btn-sm"
                                                         onclick="moModalNhapGiaNuoc(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung', @don.TongTien)">

@@ -10,1408 +10,2421 @@
     <title>Hóa Đơn – Quản Lý Nhà Trọ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-        /* ============================================================
-           BIẾN MÀU & RESET
-        ============================================================ */
-        :root {
-            --sidebar: #0d1b3e;
-            --sidebar-dark: #091429;
-            --primary: #1a56db;
-            --primary-light: #3b82f6;
-            --bg: #f0f4f8;
-            --white: #ffffff;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --blue-50: #eff6ff;
-            --blue-100: #dbeafe;
-            --shadow: 0 4px 24px rgba(26,86,219,.10);
-            --shadow-hover: 0 8px 32px rgba(26,86,219,.18);
-            --red: #ef4444;
-            --orange: #f97316;
-            --green: #22c55e;
-            --yellow: #eab308;
-            --purple: #8b5cf6;
-        }
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+            /* ============================================================
+                                   BIẾN MÀU & RESET
+                                ============================================================ */
+            :root {
+                --sidebar: #0d1b3e;
+                --sidebar-dark: #091429;
+                --primary: #1a56db;
+                --primary-light: #3b82f6;
+                --bg: #f0f4f8;
+                --white: #ffffff;
+                --text: #1e293b;
+                --text-muted: #64748b;
+                --border: #e2e8f0;
+                --blue-50: #eff6ff;
+                --blue-100: #dbeafe;
+                --shadow: 0 4px 24px rgba(26,86,219,.10);
+                --shadow-hover: 0 8px 32px rgba(26,86,219,.18);
+                --red: #ef4444;
+                --orange: #f97316;
+                --green: #22c55e;
+                --yellow: #eab308;
+                --purple: #8b5cf6;
+            }
 
-        /* ============================================================
-           SIDEBAR
-        ============================================================ */
-        #sidebar {
-            width: 220px; min-width: 220px;
-            background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-dark) 100%);
-            display: flex; flex-direction: column;
-            height: 100vh; position: relative; z-index: 100;
-            box-shadow: 4px 0 24px rgba(0,0,0,.18);
-            overflow-y: hidden;
-            transition: width .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1);
-        }
-        #sidebar.hidden { width:0; min-width:0; overflow:hidden; }
+            *, *::before, *::after {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        .logo-wrap {
-            display:flex; align-items:center; gap:12px;
-            padding:28px 20px 24px; border-bottom:1px solid rgba(255,255,255,.07);
-        }
-        .logo-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 10px;
-        }
-        .logo-icon {
-            width:42px; height:42px; border-radius:10px;
-            background:linear-gradient(135deg,var(--primary),var(--primary-light));
-            display:flex; align-items:center; justify-content:center;
-            color:#fff; font-size:20px; flex-shrink:0;
-        }
-        .logo-text strong { display:block; color:#fff; font-size:13px; letter-spacing:.5px; }
-        .logo-text span { color:rgba(255,255,255,.4); font-size:11px; }
+            body {
+                font-family: 'Segoe UI', Tahoma, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                display: flex;
+                height: 100vh;
+                overflow: hidden;
+            }
 
-        .menu-label {
-            font-size:10px; font-weight:700; letter-spacing:1.5px;
-            color:rgba(255,255,255,.3); text-transform:uppercase;
-            padding:18px 20px 6px;
-        }
-        .menu-item {
-            display:flex; align-items:center; gap:13px;
-            padding:9px 20px; color:rgba(255,255,255,.65);
-            cursor:pointer; border-radius:0 30px 30px 0;
-            margin:2px 10px 2px 0;
-            transition:all .2s; font-size:14px;
-            text-decoration:none; position:relative;
-        }
-        .menu-item i { width:20px; text-align:center; font-size:15px; }
-        .menu-item:hover { background:rgba(59,130,246,.15); color:#fff; }
-        .menu-item.active {
-            background:linear-gradient(90deg,rgba(26,86,219,.85),rgba(59,130,246,.6));
-            color:#fff; font-weight:600;
-            box-shadow:0 4px 16px rgba(26,86,219,.3);
-        }
-        .menu-item.active::before {
-            content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
-            height:70%; width:4px; background:#60a5fa; border-radius:0 4px 4px 0;
-        }
-        .menu-badge {
-            margin-left:auto; background:var(--red); color:#fff;
-            font-size:10px; font-weight:700; border-radius:20px;
-            padding:1px 7px; min-width:20px; text-align:center;
-        }
-        .sidebar-user {
-            margin-top:auto; padding:18px 16px;
-            border-top:1px solid rgba(255,255,255,.07);
-            display:flex; align-items:center; gap:10px; cursor:pointer;
-        }
-        .sidebar-avatar {
-            width:38px; height:38px; border-radius:50%;
-            background:linear-gradient(135deg,var(--primary),var(--primary-light));
-            display:flex; align-items:center; justify-content:center;
-            color:#fff; font-size:16px; border:2px solid rgba(255,255,255,.2);
-            flex-shrink:0;
-        }
-        .sidebar-user .name { color:#fff; font-size:10px; display:block; font-weight:600; }
-        .sidebar-user .role { color:rgba(255,255,255,.45); font-size:11px; }
+            /* ============================================================
+                                   SIDEBAR
+                                ============================================================ */
+            #sidebar {
+                width: 220px;
+                min-width: 220px;
+                background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-dark) 100%);
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                position: relative;
+                z-index: 100;
+                box-shadow: 4px 0 24px rgba(0,0,0,.18);
+                overflow-y: hidden;
+                transition: width .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1);
+            }
 
-        /* ============================================================
-           MAIN
-        ============================================================ */
-        #main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+                #sidebar.hidden {
+                    width: 0;
+                    min-width: 0;
+                    overflow: hidden;
+                }
 
-        /* HEADER */
-        #header {
-            background:var(--white); padding:0 28px; height:64px;
-            display:flex; align-items:center; justify-content:space-between;
-            border-bottom:1px solid var(--border);
-            box-shadow:0 2px 8px rgba(0,0,0,.05); flex-shrink:0;
-        }
-        .header-left { display:flex; align-items:center; gap:16px; }
-        .btn-menu {
-            background:none; border:none; cursor:pointer;
-            font-size:20px; color:var(--text-muted); padding:6px;
-            border-radius:8px; transition:background .2s;
-        }
-        .btn-menu:hover { background:var(--blue-50); color:var(--primary); }
-        .page-title { font-size:16px; font-weight:700; }
-        .breadcrumb { font-size:12px; color:var(--text-muted); }
-        .header-right { display:flex; align-items:center; gap:16px; }
-        .search-box {
-            display:flex; align-items:center; gap:8px;
-            background:var(--bg); border:1px solid var(--border);
-            border-radius:24px; padding:7px 16px; transition:all .2s;
-        }
-        .search-box:focus-within { border-color:var(--primary-light); background:#fff; }
-        .search-box input { border:none; background:none; outline:none; font-size:13px; width:180px; }
-        .search-box i { color:var(--text-muted); font-size:13px; }
-        .btn-bell {
-            position:relative; background:none; border:none; cursor:pointer;
-            font-size:18px; color:var(--text-muted); padding:8px;
-            border-radius:50%; transition:all .2s;
-        }
-        .btn-bell:hover { background:var(--blue-50); color:var(--primary); }
-        .bell-badge {
-            position:absolute; top:2px; right:2px;
-            background:var(--red); color:#fff; font-size:9px; font-weight:700;
-            border-radius:50%; width:16px; height:16px;
-            display:flex; align-items:center; justify-content:center;
-            border:2px solid #fff;
-        }
-        .user-chip {
-            display:flex; align-items:center; gap:10px; cursor:pointer;
-            padding:6px 12px; border-radius:24px; transition:background .2s;
-        }
-        .user-chip:hover { background:var(--blue-50); }
-        .user-avatar {
-            width:36px; height:36px; border-radius:50%;
-            background:linear-gradient(135deg,var(--primary),var(--primary-light));
-            display:flex; align-items:center; justify-content:center;
-            color:#fff; font-size:14px; font-weight:700;
-        }
-        .user-chip .uname { font-size:13px; font-weight:600; }
-        .user-chip .urole { font-size:11px; color:var(--text-muted); }
+            .logo-wrap {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 28px 20px 24px;
+                border-bottom: 1px solid rgba(255,255,255,.07);
+            }
 
-        /* ============================================================
-           PAGE CONTENT
-        ============================================================ */
-        #content { flex:1; overflow-y:auto; padding:24px 28px; }
+            .logo-icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                border-radius: 10px;
+            }
 
-        .page-header {
-            display:flex; align-items:flex-start; justify-content:space-between;
-            margin-bottom:22px;
-        }
-        .page-header h2 { font-size:20px; font-weight:800; }
-        .page-header p { font-size:13px; color:var(--text-muted); margin-top:2px; }
-        .btn-group { display:flex; gap:10px; }
+            .logo-icon {
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                background: linear-gradient(135deg,var(--primary),var(--primary-light));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
 
-        .btn-primary {
-            background:linear-gradient(135deg,var(--primary),var(--primary-light));
-            color:#fff; border:none; border-radius:10px; padding:10px 20px;
-            font-size:13px; font-weight:600; cursor:pointer;
-            display:flex; align-items:center; gap:8px;
-            box-shadow:0 4px 12px rgba(26,86,219,.3); transition:all .2s;
-        }
-        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(26,86,219,.4); }
-        .btn-secondary {
-            background:var(--white); color:var(--text); border:1px solid var(--border);
-            border-radius:10px; padding:10px 20px; font-size:13px; font-weight:600;
-            cursor:pointer; display:flex; align-items:center; gap:8px; transition:all .2s;
-        }
-        .btn-secondary:hover { background:var(--blue-50); border-color:var(--primary-light); }
+            .logo-text strong {
+                display: block;
+                color: #fff;
+                font-size: 13px;
+                letter-spacing: .5px;
+            }
 
-        /* ============================================================
-           STATS CARDS
-        ============================================================ */
-        .stats-grid {
-            display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:22px;
-        }
-        .stat-card {
-            background:var(--white); border-radius:14px; padding:16px 18px;
-            box-shadow:var(--shadow); display:flex; align-items:center; gap:12px;
-            border:1px solid transparent; transition:all .25s; cursor:pointer;
-        }
-        .stat-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-2px); }
-        .stat-icon {
-            width:44px; height:44px; border-radius:12px;
-            display:flex; align-items:center; justify-content:center;
-            font-size:18px; flex-shrink:0;
-        }
-        .stat-num { font-size:22px; font-weight:800; line-height:1; }
-        .stat-label { font-size:11px; color:var(--text-muted); margin-top:3px; }
+            .logo-text span {
+                color: rgba(255,255,255,.4);
+                font-size: 11px;
+            }
 
-        .stat-card.all .stat-icon   { background:var(--blue-100); color:var(--primary); }
-        .stat-card.all .stat-num    { color:var(--primary); }
-        .stat-card.overdue .stat-icon { background:#fee2e2; color:var(--red); }
-        .stat-card.overdue .stat-num  { color:var(--red); }
-        .stat-card.upcoming .stat-icon { background:#fff7ed; color:var(--orange); }
-        .stat-card.upcoming .stat-num  { color:var(--orange); }
-        .stat-card.pending .stat-icon  { background:#fefce8; color:var(--yellow); }
-        .stat-card.pending .stat-num   { color:var(--yellow); }
-        .stat-card.done .stat-icon  { background:#f0fdf4; color:var(--green); }
-        .stat-card.done .stat-num   { color:var(--green); }
+            .menu-label {
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                color: rgba(255,255,255,.3);
+                text-transform: uppercase;
+                padding: 18px 20px 6px;
+            }
 
-        /* ============================================================
-           MAIN TABS (2 mục chính)
-        ============================================================ */
-        .main-tabs {
-            display:flex; gap:0; margin-bottom:0;
-            background:var(--white); border-radius:14px 14px 0 0;
-            border:1px solid var(--border); border-bottom:none;
-            overflow:hidden;
-        }
-        .main-tab {
-            flex:1; padding:16px 24px; border:none; background:none;
-            font-size:14px; font-weight:600; color:var(--text-muted);
-            cursor:pointer; display:flex; align-items:center; justify-content:center;
-            gap:10px; transition:all .2s; position:relative;
-            border-right:1px solid var(--border);
-        }
-        .main-tab:last-child { border-right:none; }
-        .main-tab:hover { background:var(--blue-50); color:var(--primary); }
-        .main-tab.active {
-            background:linear-gradient(135deg,var(--primary),var(--primary-light));
-            color:#fff;
-        }
-        .main-tab .tab-icon { font-size:18px; }
-        .main-tab .tab-count {
-            background:rgba(255,255,255,.25); color:#fff;
-            font-size:11px; font-weight:700; border-radius:20px; padding:2px 8px;
-        }
-        .main-tab:not(.active) .tab-count {
-            background:var(--blue-100); color:var(--primary);
-        }
+            .menu-item {
+                display: flex;
+                align-items: center;
+                gap: 13px;
+                padding: 9px 20px;
+                color: rgba(255,255,255,.65);
+                cursor: pointer;
+                border-radius: 0 30px 30px 0;
+                margin: 2px 10px 2px 0;
+                transition: all .2s;
+                font-size: 14px;
+                text-decoration: none;
+                position: relative;
+            }
 
-        /* ============================================================
-           TAB PANEL WRAPPER
-        ============================================================ */
-        .tab-panel-wrap {
-            background:var(--white); border-radius:0 0 14px 14px;
-            border:1px solid var(--border); border-top:2px solid var(--primary);
-            padding:20px; margin-bottom:20px;
-        }
-        .tab-panel { display:none; }
-        .tab-panel.active { display:block; }
+                .menu-item i {
+                    width: 20px;
+                    text-align: center;
+                    font-size: 15px;
+                }
 
-        /* ============================================================
-           SUB TABS (trạng thái bên trong mỗi panel)
-        ============================================================ */
-        .sub-tabs {
-            display:flex; gap:6px; margin-bottom:16px;
-            border-bottom:2px solid var(--border); padding-bottom:0;
-        }
-        .sub-tab {
-            padding:8px 18px; border:none; background:none;
-            font-size:13px; font-weight:600; color:var(--text-muted);
-            cursor:pointer; border-bottom:3px solid transparent;
-            margin-bottom:-2px; transition:all .2s;
-            display:flex; align-items:center; gap:6px; border-radius:8px 8px 0 0;
-        }
-        .sub-tab:hover { color:var(--primary); background:var(--blue-50); }
-        .sub-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
-        .sub-tab .ct {
-            font-size:10px; font-weight:700; border-radius:20px;
-            padding:1px 6px; min-width:18px; text-align:center;
-            background:var(--blue-100); color:var(--primary);
-        }
-        .sub-tab.active .ct { background:var(--primary); color:#fff; }
-        .sub-tab.red .ct { background:#fee2e2; color:var(--red); }
-        .sub-tab.red.active .ct { background:var(--red); color:#fff; }
-        .sub-tab.orange .ct { background:#fff7ed; color:var(--orange); }
-        .sub-tab.orange.active .ct { background:var(--orange); color:#fff; }
-        .sub-tab.yellow .ct { background:#fefce8; color:#ca8a04; }
-        .sub-tab.yellow.active .ct { background:#ca8a04; color:#fff; }
-        .sub-tab.green .ct { background:#f0fdf4; color:var(--green); }
-        .sub-tab.green.active .ct { background:var(--green); color:#fff; }
+                .menu-item:hover {
+                    background: rgba(59,130,246,.15);
+                    color: #fff;
+                }
 
-        /* ============================================================
-           TOOLBAR
-        ============================================================ */
-        .toolbar {
-            display:flex; align-items:center; justify-content:space-between;
-            margin-bottom:14px; gap:12px;
-        }
-        .filter-group { display:flex; gap:8px; flex-wrap:wrap; }
-        .select-month {
-            padding:8px 14px; border:1px solid var(--border); border-radius:8px;
-            font-size:13px; background:var(--white); color:var(--text);
-            cursor:pointer; outline:none;
-        }
-        .search-sm {
-            display:flex; align-items:center; gap:8px;
-            background:var(--white); border:1px solid var(--border);
-            border-radius:8px; padding:8px 14px;
-        }
-        .search-sm input { border:none; outline:none; font-size:13px; width:180px; }
-        .search-sm i { color:var(--text-muted); font-size:12px; }
+                .menu-item.active {
+                    background: linear-gradient(90deg,rgba(26,86,219,.85),rgba(59,130,246,.6));
+                    color: #fff;
+                    font-weight: 600;
+                    box-shadow: 0 4px 16px rgba(26,86,219,.3);
+                }
 
-        /* ============================================================
-           INVOICE LIST
-        ============================================================ */
-        .invoice-list { display:flex; flex-direction:column; gap:10px; }
+                    .menu-item.active::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 70%;
+                        width: 4px;
+                        background: #60a5fa;
+                        border-radius: 0 4px 4px 0;
+                    }
 
-        .invoice-card {
-            background:var(--white); border-radius:12px; padding:16px 18px;
-            box-shadow:0 2px 8px rgba(0,0,0,.05); border:1px solid var(--border);
-            display:flex; align-items:center; gap:14px;
-            cursor:pointer; transition:all .2s; position:relative;
-        }
-        .invoice-card:hover { box-shadow:var(--shadow-hover); border-color:var(--primary-light); transform:translateY(-1px); }
-        .invoice-card.overdue  { border-left:4px solid var(--red); }
-        .invoice-card.upcoming { border-left:4px solid var(--orange); }
-        .invoice-card.pending  { border-left:4px solid var(--yellow); }
-        .invoice-card.done     { border-left:4px solid var(--green); }
+            .menu-badge {
+                margin-left: auto;
+                background: var(--red);
+                color: #fff;
+                font-size: 10px;
+                font-weight: 700;
+                border-radius: 20px;
+                padding: 1px 7px;
+                min-width: 20px;
+                text-align: center;
+            }
 
-        /* loại hóa đơn badge nhỏ ở góc trên phải card */
-        .card-type-badge {
-            position:absolute; top:10px; right:14px;
-            font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px;
-            opacity:.75;
-        }
-        .card-type-badge.dv   { background:#ede9fe; color:#7c3aed; }
-        .card-type-badge.month{ background:#dbeafe; color:#1d4ed8; }
+            .sidebar-user {
+                margin-top: auto;
+                padding: 18px 16px;
+                border-top: 1px solid rgba(255,255,255,.07);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+            }
 
-        .room-badge {
-            width:50px; height:50px; border-radius:12px;
-            background:var(--blue-100); color:var(--primary);
-            font-size:13px; font-weight:800;
-            display:flex; align-items:center; justify-content:center; flex-shrink:0;
-        }
-        .card-info { flex:1; min-width:0; }
-        .card-row1 { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
-        .card-room { font-size:14px; font-weight:700; }
-        .card-tenant { font-size:13px; color:var(--text-muted); }
-        .card-row2 { font-size:12px; color:var(--text-muted); display:flex; gap:14px; flex-wrap:wrap; }
-        .card-row2 i { margin-right:3px; }
+            .sidebar-avatar {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                background: linear-gradient(135deg,var(--primary),var(--primary-light));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 16px;
+                border: 2px solid rgba(255,255,255,.2);
+                flex-shrink: 0;
+            }
 
-        /* nợ DV badge */
-        .debt-badge {
-            font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px;
-            background:#fee2e2; color:var(--red);
-        }
+            .sidebar-user .name {
+                color: #fff;
+                font-size: 10px;
+                display: block;
+                font-weight: 600;
+            }
 
-        .status-chip {
-            font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
-        }
-        .status-chip.overdue  { background:#fee2e2; color:var(--red); }
-        .status-chip.upcoming { background:#fff7ed; color:var(--orange); }
-        .status-chip.pending  { background:#fefce8; color:#ca8a04; }
-        .status-chip.done     { background:#f0fdf4; color:var(--green); }
+            .sidebar-user .role {
+                color: rgba(255,255,255,.45);
+                font-size: 11px;
+            }
 
-        .card-amount { text-align:right; flex-shrink:0; }
-        .card-amount .amt { font-size:16px; font-weight:800; color:var(--primary); }
-        .card-amount .amt.red { color:var(--red); }
-        .card-amount .period { font-size:11px; color:var(--text-muted); margin-top:2px; }
-        .card-amount .debt-note { font-size:10px; color:var(--red); font-weight:600; margin-top:2px; }
+            /* ============================================================
+                                   MAIN
+                                ============================================================ */
+            #main {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
 
-        .card-actions { display:flex; gap:6px; flex-shrink:0; }
-        .btn-action {
-            border:none; border-radius:8px; padding:7px 12px;
-            font-size:12px; font-weight:600; cursor:pointer;
-            display:flex; align-items:center; gap:5px; transition:all .2s;
-        }
-        .btn-action.remind { background:#fff7ed; color:var(--orange); }
-        .btn-action.remind:hover { background:var(--orange); color:#fff; }
-        .btn-action.view { background:var(--blue-100); color:var(--primary); }
-        .btn-action.view:hover { background:var(--primary); color:#fff; }
-        .btn-action.confirm { background:#f0fdf4; color:var(--green); }
-        .btn-action.confirm:hover { background:var(--green); color:#fff; }
+            #header {
+                background: var(--white);
+                padding: 0 28px;
+                height: 64px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--border);
+                box-shadow: 0 2px 8px rgba(0,0,0,.05);
+                flex-shrink: 0;
+            }
 
-        .empty-state { text-align:center; padding:48px 0; color:var(--text-muted); }
-        .empty-state i { font-size:40px; margin-bottom:12px; display:block; opacity:.3; }
-        .empty-state p { font-size:14px; }
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
 
-        /* ============================================================
-           MODAL
-        ============================================================ */
-        .modal-overlay {
-            display:none; position:fixed; inset:0; z-index:1000;
-            background:rgba(15,23,42,.55); align-items:center; justify-content:center;
-            backdrop-filter:blur(3px);
-        }
-        .modal-overlay.open { display:flex; }
+            .btn-menu {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 20px;
+                color: var(--text-muted);
+                padding: 6px;
+                border-radius: 8px;
+                transition: background .2s;
+            }
 
-        .modal-box {
-            background:var(--white); border-radius:20px;
-            width:560px; max-width:95vw; max-height:90vh;
-            display:flex; flex-direction:column;
-            box-shadow:0 24px 80px rgba(0,0,0,.18);
-            animation:modalIn .25s cubic-bezier(.4,0,.2,1);
-        }
-        @@keyframes modalIn {
-            from { opacity:0; transform:translateY(20px) scale(.96); }
-            to   { opacity:1; transform:none; }
-        }
+                .btn-menu:hover {
+                    background: var(--blue-50);
+                    color: var(--primary);
+                }
 
-        .modal-head {
-            padding:20px 24px 14px; border-bottom:1px solid var(--border);
-            display:flex; align-items:center; justify-content:space-between;
-        }
-        .modal-head h3 { font-size:17px; font-weight:800; }
-        .modal-type-tag {
-            font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
-            margin-left:10px;
-        }
-        .modal-type-tag.dv    { background:#ede9fe; color:#7c3aed; }
-        .modal-type-tag.month { background:#dbeafe; color:#1d4ed8; }
-        .btn-close-modal {
-            background:none; border:none; font-size:18px; color:var(--text-muted);
-            cursor:pointer; padding:4px 8px; border-radius:8px; transition:background .2s;
-        }
-        .btn-close-modal:hover { background:var(--bg); color:var(--text); }
+            .page-title {
+                font-size: 16px;
+                font-weight: 700;
+            }
 
-        .modal-body { padding:20px 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:14px; }
-        .modal-footer { padding:14px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+            .breadcrumb {
+                font-size: 12px;
+                color: var(--text-muted);
+            }
 
-        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-        .info-item .lbl {
-            font-size:10px; color:var(--text-muted); font-weight:700;
-            text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;
-        }
-        .info-item .val { font-size:14px; font-weight:600; }
+            .header-right {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
 
-        .cost-table { width:100%; border-collapse:collapse; font-size:13px; }
-        .cost-table th {
-            background:var(--bg); padding:9px 12px; text-align:left;
-            font-size:10px; font-weight:700; text-transform:uppercase;
-            letter-spacing:.5px; color:var(--text-muted);
-        }
-        .cost-table td { padding:9px 12px; border-bottom:1px solid var(--border); }
-        .cost-table tr:last-child td { border-bottom:none; }
-        .cost-table .debt-row td { background:#fff5f5; color:var(--red); }
+            .search-box {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 24px;
+                padding: 7px 16px;
+                transition: all .2s;
+            }
 
-        .total-box {
-            background:var(--blue-50); border:2px solid var(--blue-100);
-            border-radius:12px; padding:14px 18px;
-            display:flex; align-items:center; justify-content:space-between;
-        }
-        .total-box .total-lbl { font-size:14px; font-weight:700; color:var(--primary); }
-        .total-box .total-amt { font-size:22px; font-weight:900; color:var(--primary); }
+                .search-box:focus-within {
+                    border-color: var(--primary-light);
+                    background: #fff;
+                }
 
-        /* debt detail box */
-        .debt-detail-box {
-            background:#fff5f5; border:1.5px solid #fecaca; border-radius:10px; padding:12px 16px;
-        }
-        .debt-detail-box .debt-title { font-size:12px; font-weight:700; color:var(--red); margin-bottom:8px; }
-        .debt-detail-box .debt-row2 {
-            display:flex; align-items:center; justify-content:space-between;
-            font-size:12px; padding:3px 0; border-bottom:1px solid #fecaca;
-        }
-        .debt-detail-box .debt-row2:last-child { border-bottom:none; }
+                .search-box input {
+                    border: none;
+                    background: none;
+                    outline: none;
+                    font-size: 13px;
+                    width: 180px;
+                }
 
-        /* confirm box */
-        .confirm-box {
-            border:2px solid #bbf7d0; border-radius:12px; padding:14px;
-            background:#f0fdf4;
-        }
-        .confirm-box .conf-title { font-size:13px; font-weight:700; color:#16a34a; margin-bottom:10px; }
-        .confirm-box .proof-img {
-            width:100%; border-radius:8px; cursor:zoom-in;
-            max-height:180px; object-fit:cover;
-        }
-        .confirm-box .conf-time { font-size:12px; color:#16a34a; margin-top:6px; }
+                .search-box i {
+                    color: var(--text-muted);
+                    font-size: 13px;
+                }
 
-        .btn-confirm-big {
-            background:linear-gradient(135deg,var(--green),#16a34a);
-            color:#fff; border:none; border-radius:10px; padding:12px 24px;
-            font-size:14px; font-weight:700; cursor:pointer;
-            display:flex; align-items:center; justify-content:center; gap:8px;
-            width:100%; box-shadow:0 4px 14px rgba(34,197,94,.35); transition:all .2s;
-        }
-        .btn-confirm-big:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(34,197,94,.45); }
-        .btn-reject-big {
-            background:#fff; color:var(--red); border:1.5px solid var(--red);
-            border-radius:10px; padding:10px 24px; font-size:13px; font-weight:700;
-            cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
-            width:100%; transition:all .2s; margin-top:6px;
-        }
-        .btn-reject-big:hover { background:#fee2e2; }
+            .btn-bell {
+                position: relative;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 18px;
+                color: var(--text-muted);
+                padding: 8px;
+                border-radius: 50%;
+                transition: all .2s;
+            }
 
-        /* image lightbox */
-        .lightbox {
-            display:none; position:fixed; inset:0; z-index:2000;
-            background:rgba(0,0,0,.85); align-items:center; justify-content:center;
-        }
-        .lightbox.open { display:flex; }
-        .lightbox img { max-width:90vw; max-height:90vh; border-radius:8px; }
-        .lightbox-close {
-            position:absolute; top:20px; right:24px; background:rgba(255,255,255,.15);
-            border:none; color:#fff; font-size:24px; cursor:pointer;
-            border-radius:50%; width:40px; height:40px;
-            display:flex; align-items:center; justify-content:center;
-        }
+                .btn-bell:hover {
+                    background: var(--blue-50);
+                    color: var(--primary);
+                }
 
-        /* remind modal */
-        .remind-modal-box { width:420px; }
+            .bell-badge {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                background: var(--red);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid #fff;
+            }
 
-        /* toast */
-        #toast {
-            position:fixed; bottom:24px; right:24px; z-index:9999;
-            background:var(--white); border:1px solid var(--border);
-            border-radius:12px; padding:14px 20px; font-size:13px; font-weight:600;
-            box-shadow:0 8px 32px rgba(0,0,0,.15);
-            transform:translateY(80px); opacity:0;
-            transition:all .35s cubic-bezier(.4,0,.2,1);
-            display:flex; align-items:center; gap:10px; max-width:340px;
-        }
-        #toast.show { transform:none; opacity:1; }
-        #toast.success { border-left:4px solid var(--green); }
-        #toast.warning { border-left:4px solid var(--orange); }
-        #toast.error   { border-left:4px solid var(--red); }
+            .user-chip {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                padding: 6px 12px;
+                border-radius: 24px;
+                transition: background .2s;
+            }
 
-        /* section header inside panel */
-        .section-header {
-            display:flex; align-items:center; gap:10px;
-            font-size:13px; color:var(--text-muted); margin-bottom:10px;
-            padding-bottom:8px; border-bottom:1px dashed var(--border);
-        }
-        .section-header i { color:var(--primary); }
+                .user-chip:hover {
+                    background: var(--blue-50);
+                }
 
-        /* responsive */
-        @@media (max-width:900px) {
-            .stats-grid { grid-template-columns:repeat(2,1fr); }
-            #sidebar { display:none; }
-        }
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: linear-gradient(135deg,var(--primary),var(--primary-light));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+            .user-chip .uname {
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .user-chip .urole {
+                font-size: 11px;
+                color: var(--text-muted);
+            }
+
+            /* ============================================================
+                                   PAGE CONTENT
+                                ============================================================ */
+            #content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 24px 28px;
+            }
+
+            .page-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                margin-bottom: 22px;
+            }
+
+                .page-header h2 {
+                    font-size: 20px;
+                    font-weight: 800;
+                }
+
+                .page-header p {
+                    font-size: 13px;
+                    color: var(--text-muted);
+                    margin-top: 2px;
+                }
+
+            .btn-group {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg,var(--primary),var(--primary-light));
+                color: #fff;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 20px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 4px 12px rgba(26,86,219,.3);
+                transition: all .2s;
+            }
+
+                .btn-primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(26,86,219,.4);
+                }
+
+            .btn-secondary {
+                background: var(--white);
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 10px 20px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all .2s;
+            }
+
+                .btn-secondary:hover {
+                    background: var(--blue-50);
+                    border-color: var(--primary-light);
+                }
+
+            /* ============================================================
+                                   STATS CARDS
+                                ============================================================ */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(5,1fr);
+                gap: 16px;
+                margin-bottom: 22px;
+            }
+
+            .stat-card {
+                background: var(--white);
+                border-radius: 14px;
+                padding: 16px 18px;
+                box-shadow: var(--shadow);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                border: 1px solid transparent;
+                transition: all .25s;
+                cursor: pointer;
+            }
+
+                .stat-card:hover {
+                    box-shadow: var(--shadow-hover);
+                    transform: translateY(-2px);
+                }
+
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                flex-shrink: 0;
+            }
+
+            .stat-num {
+                font-size: 22px;
+                font-weight: 800;
+                line-height: 1;
+            }
+
+            .stat-label {
+                font-size: 11px;
+                color: var(--text-muted);
+                margin-top: 3px;
+            }
+
+            .stat-card.all .stat-icon {
+                background: var(--blue-100);
+                color: var(--primary);
+            }
+
+            .stat-card.all .stat-num {
+                color: var(--primary);
+            }
+
+            .stat-card.overdue .stat-icon {
+                background: #fee2e2;
+                color: var(--red);
+            }
+
+            .stat-card.overdue .stat-num {
+                color: var(--red);
+            }
+
+            .stat-card.upcoming .stat-icon {
+                background: #fff7ed;
+                color: var(--orange);
+            }
+
+            .stat-card.upcoming .stat-num {
+                color: var(--orange);
+            }
+
+            .stat-card.pending .stat-icon {
+                background: #fefce8;
+                color: var(--yellow);
+            }
+
+            .stat-card.pending .stat-num {
+                color: var(--yellow);
+            }
+
+            .stat-card.done .stat-icon {
+                background: #f0fdf4;
+                color: var(--green);
+            }
+
+            .stat-card.done .stat-num {
+                color: var(--green);
+            }
+
+            /* ============================================================
+                                   MAIN TABS
+                                ============================================================ */
+            .main-tabs {
+                display: flex;
+                gap: 0;
+                margin-bottom: 0;
+                background: var(--white);
+                border-radius: 14px 14px 0 0;
+                border: 1px solid var(--border);
+                border-bottom: none;
+                overflow: hidden;
+            }
+
+            .main-tab {
+                flex: 1;
+                padding: 16px 24px;
+                border: none;
+                background: none;
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--text-muted);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                transition: all .2s;
+                position: relative;
+                border-right: 1px solid var(--border);
+            }
+
+                .main-tab:last-child {
+                    border-right: none;
+                }
+
+                .main-tab:hover {
+                    background: var(--blue-50);
+                    color: var(--primary);
+                }
+
+                .main-tab.active {
+                    background: linear-gradient(135deg,var(--primary),var(--primary-light));
+                    color: #fff;
+                }
+
+                .main-tab .tab-icon {
+                    font-size: 18px;
+                }
+
+                .main-tab .tab-count {
+                    background: rgba(255,255,255,.25);
+                    color: #fff;
+                    font-size: 11px;
+                    font-weight: 700;
+                    border-radius: 20px;
+                    padding: 2px 8px;
+                }
+
+                .main-tab:not(.active) .tab-count {
+                    background: var(--blue-100);
+                    color: var(--primary);
+                }
+
+            /* ============================================================
+                                   TAB PANEL WRAPPER
+                                ============================================================ */
+            .tab-panel-wrap {
+                background: var(--white);
+                border-radius: 0 0 14px 14px;
+                border: 1px solid var(--border);
+                border-top: 2px solid var(--primary);
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .tab-panel {
+                display: none;
+            }
+
+                .tab-panel.active {
+                    display: block;
+                }
+
+            /* ============================================================
+                                   SUB TABS
+                                ============================================================ */
+            .sub-tabs {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 16px;
+                border-bottom: 2px solid var(--border);
+                padding-bottom: 0;
+            }
+
+            .sub-tab {
+                padding: 8px 18px;
+                border: none;
+                background: none;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text-muted);
+                cursor: pointer;
+                border-bottom: 3px solid transparent;
+                margin-bottom: -2px;
+                transition: all .2s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                border-radius: 8px 8px 0 0;
+            }
+
+                .sub-tab:hover {
+                    color: var(--primary);
+                    background: var(--blue-50);
+                }
+
+                .sub-tab.active {
+                    color: var(--primary);
+                    border-bottom-color: var(--primary);
+                }
+
+                .sub-tab .ct {
+                    font-size: 10px;
+                    font-weight: 700;
+                    border-radius: 20px;
+                    padding: 1px 6px;
+                    min-width: 18px;
+                    text-align: center;
+                    background: var(--blue-100);
+                    color: var(--primary);
+                }
+
+                .sub-tab.active .ct {
+                    background: var(--primary);
+                    color: #fff;
+                }
+
+                .sub-tab.red .ct {
+                    background: #fee2e2;
+                    color: var(--red);
+                }
+
+                .sub-tab.red.active .ct {
+                    background: var(--red);
+                    color: #fff;
+                }
+
+                .sub-tab.orange .ct {
+                    background: #fff7ed;
+                    color: var(--orange);
+                }
+
+                .sub-tab.orange.active .ct {
+                    background: var(--orange);
+                    color: #fff;
+                }
+
+                .sub-tab.yellow .ct {
+                    background: #fefce8;
+                    color: #ca8a04;
+                }
+
+                .sub-tab.yellow.active .ct {
+                    background: #ca8a04;
+                    color: #fff;
+                }
+
+                .sub-tab.green .ct {
+                    background: #f0fdf4;
+                    color: var(--green);
+                }
+
+                .sub-tab.green.active .ct {
+                    background: var(--green);
+                    color: #fff;
+                }
+
+            /* ============================================================
+                                   TOOLBAR
+                                ============================================================ */
+            .toolbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 14px;
+                gap: 12px;
+            }
+
+            .filter-group {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .select-month {
+                padding: 8px 14px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                font-size: 13px;
+                background: var(--white);
+                color: var(--text);
+                cursor: pointer;
+                outline: none;
+            }
+
+            .search-sm {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: var(--white);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 8px 14px;
+            }
+
+                .search-sm input {
+                    border: none;
+                    outline: none;
+                    font-size: 13px;
+                    width: 180px;
+                }
+
+                .search-sm i {
+                    color: var(--text-muted);
+                    font-size: 12px;
+                }
+
+            /* ============================================================
+                                   INVOICE LIST
+                                ============================================================ */
+            .invoice-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .invoice-card {
+                background: var(--white);
+                border-radius: 12px;
+                padding: 16px 18px;
+                box-shadow: 0 2px 8px rgba(0,0,0,.05);
+                border: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                cursor: pointer;
+                transition: all .2s;
+                position: relative;
+            }
+
+                .invoice-card:hover {
+                    box-shadow: var(--shadow-hover);
+                    border-color: var(--primary-light);
+                    transform: translateY(-1px);
+                }
+
+                .invoice-card.overdue {
+                    border-left: 4px solid var(--red);
+                }
+
+                .invoice-card.upcoming {
+                    border-left: 4px solid var(--orange);
+                }
+
+                .invoice-card.pending {
+                    border-left: 4px solid var(--yellow);
+                }
+
+                .invoice-card.done {
+                    border-left: 4px solid var(--green);
+                }
+
+            .card-type-badge {
+                position: absolute;
+                top: 10px;
+                right: 14px;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 20px;
+                opacity: .75;
+            }
+
+                .card-type-badge.dv {
+                    background: #ede9fe;
+                    color: #7c3aed;
+                }
+
+                .card-type-badge.month {
+                    background: #dbeafe;
+                    color: #1d4ed8;
+                }
+
+            .room-badge {
+                width: 50px;
+                height: 50px;
+                border-radius: 12px;
+                background: var(--blue-100);
+                color: var(--primary);
+                font-size: 13px;
+                font-weight: 800;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .card-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .card-row1 {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 4px;
+            }
+
+            .card-room {
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+            .card-tenant {
+                font-size: 13px;
+                color: var(--text-muted);
+            }
+
+            .card-row2 {
+                font-size: 12px;
+                color: var(--text-muted);
+                display: flex;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+
+                .card-row2 i {
+                    margin-right: 3px;
+                }
+
+            .debt-badge {
+                font-size: 11px;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 20px;
+                background: #fee2e2;
+                color: var(--red);
+            }
+
+            /* ── Badge "Có ảnh CK" hiển thị trên card chờ xác nhận ── */
+            .anh-ck-badge {
+                font-size: 11px;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 20px;
+                background: #fefce8;
+                color: #ca8a04;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .status-chip {
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 10px;
+                border-radius: 20px;
+            }
+
+                .status-chip.overdue {
+                    background: #fee2e2;
+                    color: var(--red);
+                }
+
+                .status-chip.upcoming {
+                    background: #fff7ed;
+                    color: var(--orange);
+                }
+
+                .status-chip.pending {
+                    background: #fefce8;
+                    color: #ca8a04;
+                }
+
+                .status-chip.done {
+                    background: #f0fdf4;
+                    color: var(--green);
+                }
+
+            .card-amount {
+                text-align: right;
+                flex-shrink: 0;
+            }
+
+                .card-amount .amt {
+                    font-size: 16px;
+                    font-weight: 800;
+                    color: var(--primary);
+                }
+
+                    .card-amount .amt.red {
+                        color: var(--red);
+                    }
+
+                .card-amount .period {
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    margin-top: 2px;
+                }
+
+                .card-amount .debt-note {
+                    font-size: 10px;
+                    color: var(--red);
+                    font-weight: 600;
+                    margin-top: 2px;
+                }
+
+            .card-actions {
+                display: flex;
+                gap: 6px;
+                flex-shrink: 0;
+            }
+
+            .btn-action {
+                border: none;
+                border-radius: 8px;
+                padding: 7px 12px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                transition: all .2s;
+            }
+
+                .btn-action.remind {
+                    background: #fff7ed;
+                    color: var(--orange);
+                }
+
+                    .btn-action.remind:hover {
+                        background: var(--orange);
+                        color: #fff;
+                    }
+
+                .btn-action.view {
+                    background: var(--blue-100);
+                    color: var(--primary);
+                }
+
+                    .btn-action.view:hover {
+                        background: var(--primary);
+                        color: #fff;
+                    }
+
+                .btn-action.confirm {
+                    background: #f0fdf4;
+                    color: var(--green);
+                }
+
+                    .btn-action.confirm:hover {
+                        background: var(--green);
+                        color: #fff;
+                    }
+
+            .empty-state {
+                text-align: center;
+                padding: 48px 0;
+                color: var(--text-muted);
+            }
+
+                .empty-state i {
+                    font-size: 40px;
+                    margin-bottom: 12px;
+                    display: block;
+                    opacity: .3;
+                }
+
+                .empty-state p {
+                    font-size: 14px;
+                }
+
+            /* ============================================================
+                                   MODAL
+                                ============================================================ */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 1000;
+                background: rgba(15,23,42,.55);
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(3px);
+            }
+
+                .modal-overlay.open {
+                    display: flex;
+                }
+
+            .modal-box {
+                background: var(--white);
+                border-radius: 20px;
+                width: 560px;
+                max-width: 95vw;
+                max-height: 90vh;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 24px 80px rgba(0,0,0,.18);
+                animation: modalIn .25s cubic-bezier(.4,0,.2,1);
+            }
+
+            @@keyframes modalIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px) scale(.96);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
+
+            .modal-head {
+                padding: 20px 24px 14px;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+                .modal-head h3 {
+                    font-size: 17px;
+                    font-weight: 800;
+                }
+
+            .modal-type-tag {
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 10px;
+                border-radius: 20px;
+                margin-left: 10px;
+            }
+
+                .modal-type-tag.dv {
+                    background: #ede9fe;
+                    color: #7c3aed;
+                }
+
+                .modal-type-tag.month {
+                    background: #dbeafe;
+                    color: #1d4ed8;
+                }
+
+            .btn-close-modal {
+                background: none;
+                border: none;
+                font-size: 18px;
+                color: var(--text-muted);
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: background .2s;
+            }
+
+                .btn-close-modal:hover {
+                    background: var(--bg);
+                    color: var(--text);
+                }
+
+            .modal-body {
+                padding: 20px 24px;
+                overflow-y: auto;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .modal-footer {
+                padding: 14px 24px;
+                border-top: 1px solid var(--border);
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+            }
+
+            .info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .info-item .lbl {
+                font-size: 10px;
+                color: var(--text-muted);
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                margin-bottom: 3px;
+            }
+
+            .info-item .val {
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .cost-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+            }
+
+                .cost-table th {
+                    background: var(--bg);
+                    padding: 9px 12px;
+                    text-align: left;
+                    font-size: 10px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: .5px;
+                    color: var(--text-muted);
+                }
+
+                .cost-table td {
+                    padding: 9px 12px;
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .cost-table tr:last-child td {
+                    border-bottom: none;
+                }
+
+                .cost-table .debt-row td {
+                    background: #fff5f5;
+                    color: var(--red);
+                }
+
+            .total-box {
+                background: var(--blue-50);
+                border: 2px solid var(--blue-100);
+                border-radius: 12px;
+                padding: 14px 18px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+                .total-box .total-lbl {
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: var(--primary);
+                }
+
+                .total-box .total-amt {
+                    font-size: 22px;
+                    font-weight: 900;
+                    color: var(--primary);
+                }
+
+            .debt-detail-box {
+                background: #fff5f5;
+                border: 1.5px solid #fecaca;
+                border-radius: 10px;
+                padding: 12px 16px;
+            }
+
+                .debt-detail-box .debt-title {
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: var(--red);
+                    margin-bottom: 8px;
+                }
+
+                .debt-detail-box .debt-row2 {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-size: 12px;
+                    padding: 3px 0;
+                    border-bottom: 1px solid #fecaca;
+                }
+
+                    .debt-detail-box .debt-row2:last-child {
+                        border-bottom: none;
+                    }
+
+            /* ── Confirm box – hiển thị ảnh CK ── */
+            .confirm-box {
+                border: 2px solid #bbf7d0;
+                border-radius: 12px;
+                padding: 14px;
+                background: #f0fdf4;
+            }
+
+                .confirm-box .conf-title {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #16a34a;
+                    margin-bottom: 10px;
+                }
+
+                .confirm-box .proof-img {
+                    width: 100%;
+                    border-radius: 8px;
+                    cursor: zoom-in;
+                    max-height: 200px;
+                    object-fit: cover;
+                }
+
+                .confirm-box .conf-time {
+                    font-size: 12px;
+                    color: #16a34a;
+                    margin-top: 6px;
+                }
+
+            /* ── Nút xác nhận / từ chối trong modal ── */
+            .action-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn-confirm-big {
+                background: linear-gradient(135deg,var(--green),#16a34a);
+                color: #fff;
+                border: none;
+                border-radius: 10px;
+                padding: 12px 24px;
+                font-size: 14px;
+                font-weight: 700;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                box-shadow: 0 4px 14px rgba(34,197,94,.35);
+                transition: all .2s;
+            }
+
+                .btn-confirm-big:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(34,197,94,.45);
+                }
+
+                .btn-confirm-big:disabled {
+                    opacity: .5;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+
+            .btn-reject-big {
+                background: #fff;
+                color: var(--red);
+                border: 1.5px solid var(--red);
+                border-radius: 10px;
+                padding: 10px 24px;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                transition: all .2s;
+            }
+
+                .btn-reject-big:hover {
+                    background: #fee2e2;
+                }
+
+            /* ── Trạng thái "đã hoàn thành" trong modal ── */
+            .done-box {
+                border: 2px solid #bbf7d0;
+                border-radius: 12px;
+                padding: 14px 18px;
+                background: #f0fdf4;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+                .done-box i {
+                    font-size: 24px;
+                    color: var(--green);
+                }
+
+                .done-box .done-msg {
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #15803d;
+                }
+
+                .done-box .done-sub {
+                    font-size: 12px;
+                    color: #16a34a;
+                    margin-top: 2px;
+                }
+
+            /* image lightbox */
+            .lightbox {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 2000;
+                background: rgba(0,0,0,.85);
+                align-items: center;
+                justify-content: center;
+            }
+
+                .lightbox.open {
+                    display: flex;
+                }
+
+                .lightbox img {
+                    max-width: 90vw;
+                    max-height: 90vh;
+                    border-radius: 8px;
+                }
+
+            .lightbox-close {
+                position: absolute;
+                top: 20px;
+                right: 24px;
+                background: rgba(255,255,255,.15);
+                border: none;
+                color: #fff;
+                font-size: 24px;
+                cursor: pointer;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .remind-modal-box {
+                width: 420px;
+            }
+
+            /* toast */
+            #toast {
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                z-index: 9999;
+                background: var(--white);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 14px 20px;
+                font-size: 13px;
+                font-weight: 600;
+                box-shadow: 0 8px 32px rgba(0,0,0,.15);
+                transform: translateY(80px);
+                opacity: 0;
+                transition: all .35s cubic-bezier(.4,0,.2,1);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 340px;
+            }
+
+                #toast.show {
+                    transform: none;
+                    opacity: 1;
+                }
+
+                #toast.success {
+                    border-left: 4px solid var(--green);
+                }
+
+                #toast.warning {
+                    border-left: 4px solid var(--orange);
+                }
+
+                #toast.error {
+                    border-left: 4px solid var(--red);
+                }
+
+            .section-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 13px;
+                color: var(--text-muted);
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+                border-bottom: 1px dashed var(--border);
+            }
+
+                .section-header i {
+                    color: var(--primary);
+                }
+
+            @@media (max-width:900px) {
+                .stats-grid {
+                    grid-template-columns: repeat(2,1fr);
+                }
+
+                #sidebar {
+                    display: none;
+                }
+            }
     </style>
 </head>
 <body>
 
-<!-- ===================== SIDEBAR ===================== -->
-<nav id="sidebar">
-    <div class="logo-wrap">
-        <div class="logo-icon" style="background:transparent;width:60px;height:60px;">
-            <img src="~/images/LogoBaNam.png" alt="Logo"
-                 style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />
-        </div>
-        <div class="logo-text">
-            <strong>Nhà Trọ Bà Năm</strong>
-            <span>Quản lý hệ thống</span>
-        </div>
-    </div>
-
-    <!-- NHÓM: TỔNG QUAN -->
-    <div class="menu-label">Tổng quan</div>
-    <a class="menu-item" onclick="navigate('trang-chu', this)">
-        <i class="fas fa-home"></i> Trang chủ
-    </a>
-
-    <!-- NHÓM: QUẢN LÝ -->
-    <div class="menu-label">Quản lý</div>
-    <a class="menu-item" onclick="navigate('quan-ly-phong', this)">
-        <i class="fas fa-door-open"></i> Quản lý phòng trọ
-    </a>
-    <a class="menu-item" onclick="navigate('quan-ly-nguoi-thue', this)">
-        <i class="fas fa-users"></i> Quản lý dịch vụ và tiện ích
-        @if (Model.SoChoXacNhan > 0)
-        {
-            <span class="menu-badge">@Model.SoChoXacNhan</span>
-        }
-    </a>
-    <a class="menu-item active" onclick="navigate('hoa-don', this)">
-        <i class="fas fa-file-invoice-dollar"></i> Hóa đơn &amp; Thu tiền
-    </a>
-
-    <!-- NHÓM: HỖ TRỢ -->
-    <div class="menu-label">Hỗ trợ</div>
-    <a class="menu-item" onclick="navigate('su-co', this)">
-        <i class="fas fa-tools"></i> Sự cố / Bảo trì
-        @if (Model.SoChoXacNhan > 0)
-        {
-            <span class="menu-badge">@Model.SoChoXacNhan</span>
-        }
-    </a>
-    <a class="menu-item" onclick="navigate('bao-cao', this)">
-        <i class="fas fa-chart-bar"></i> Thống kê &amp; Báo cáo
-    </a>
-    <a class="menu-item" onclick="navigate('cai-dat', this)">
-        <i class="fas fa-cog"></i> Cài đặt hệ thống
-    </a>
-
-    <!-- User dưới đáy sidebar -->
-    <div class="sidebar-user" onclick="moMenuUser()">
-        <div class="sidebar-avatar"><i class="fas fa-user"></i></div>
-        <div>
-            <span class="name">@Model.TenManager</span>
-            <span class="role">@Model.ChucVuManager</span>
-        </div>
-    </div>
-</nav>
-
-<!-- ===================== MAIN ===================== -->
-<div id="main">
-    <!-- HEADER -->
-    <header id="header">
-        <div class="header-left">
-            <button class="btn-menu" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-            <div>
-                <div class="page-title">Quản lý Hóa đơn</div>
-                <div class="breadcrumb">Trang chủ / Hóa đơn</div>
+    <!-- ===================== SIDEBAR ===================== -->
+    <nav id="sidebar">
+        <div class="logo-wrap">
+            <div class="logo-icon" style="background:transparent;width:60px;height:60px;">
+                <img src="~/images/LogoBaNam.png" alt="Logo" />
             </div>
-        </div>
-        <div class="header-right">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Tìm phòng, tên khách..." oninput="timKiem(this.value)">
-            </div>
-            <button class="btn-bell" onclick="moThongBao()">
-                <i class="fas fa-bell"></i>
-                @if (Model.SoChoXacNhan > 0)
-                {
-                    <span class="bell-badge">@Model.SoChoXacNhan</span>
-                }
-            </button>
-            <div class="user-chip" onclick="moMenuUser()">
-                <div class="user-avatar">@(Model.TenManager.Length > 0 ? Model.TenManager[0].ToString().ToUpper() : "A")</div>
-                <div>
-                    <div class="uname">@Model.TenManager</div>
-                    <div class="urole">@Model.ChucVuManager</div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- CONTENT -->
-    <div id="content">
-        <!-- Page header -->
-        <div class="page-header">
-            <div>
-                <h2><i class="fas fa-file-invoice-dollar" style="color:var(--primary);margin-right:8px"></i>Hóa đơn kỳ @Model.KyXem</h2>
-                <p>Tổng hợp hóa đơn dịch vụ và hóa đơn cuối tháng của tất cả phòng được giao</p>
-            </div>
-            <div class="btn-group">
-                <button class="btn-secondary" onclick="xuatExcel()">
-                    <i class="fas fa-file-excel"></i> Xuất Excel
-                </button>
-                <select class="select-month" onchange="locTheoThang(this.value)">
-                    @{
-                        var thangHienTai = DateTime.Now;
-                        for (int i = 0; i < 6; i++)
-                        {
-                            var t = thangHienTai.AddMonths(-i);
-                            var val = t.ToString("MM/yyyy");
-                            var lbl = "Tháng " + val;
-                            var selected = val == Model.KyXem ? "selected" : "";
-                            <option value="@val" @@selected>@lbl</option>
-                        }
-                    }
-                </select>
+            <div class="logo-text">
+                <strong>Nhà Trọ Bà Năm</strong>
+                <span>Quản lý hệ thống</span>
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card all" onclick="locTongQuan('all')">
-                <div class="stat-icon"><i class="fas fa-receipt"></i></div>
-                <div>
-                    <div class="stat-num" id="stat-tong">@Model.TongHoaDon</div>
-                    <div class="stat-label">Tổng hóa đơn</div>
-                </div>
-            </div>
-            <div class="stat-card overdue" onclick="locTongQuan('qua-han')">
-                <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
-                <div>
-                    <div class="stat-num" id="stat-quahan">@Model.SoQuaHan</div>
-                    <div class="stat-label">Quá hạn</div>
-                </div>
-            </div>
-            <div class="stat-card upcoming" onclick="locTongQuan('sap-den')">
-                <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                <div>
-                    <div class="stat-num" id="stat-sapden">@Model.SoSapDen</div>
-                    <div class="stat-label">Sắp đến hạn</div>
-                </div>
-            </div>
-            <div class="stat-card pending" onclick="locTongQuan('cho-xac-nhan')">
-                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
-                <div>
-                    <div class="stat-num" id="stat-choxn">@Model.SoChoXacNhan</div>
-                    <div class="stat-label">Chờ xác nhận</div>
-                </div>
-            </div>
-            <div class="stat-card done" onclick="locTongQuan('hoan-thanh')">
-                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                <div>
-                    <div class="stat-num" id="stat-hoantathanh">@Model.SoHoanThanh</div>
-                    <div class="stat-label">Hoàn thành</div>
-                </div>
-            </div>
-        </div>
+        <div class="menu-label">Tổng quan</div>
+        <a class="menu-item" onclick="navigate('trang-chu', this)">
+            <i class="fas fa-home"></i> Trang chủ
+        </a>
 
-        <!-- ===== 2 MAIN TABS ===== -->
-        <div class="main-tabs">
-            <button class="main-tab active" id="main-tab-dv" onclick="chonMainTab('dv')">
-                <i class="tab-icon fas fa-concierge-bell"></i>
-                <span>Hóa đơn Dịch vụ</span>
-                <span class="tab-count" id="count-dv">0</span>
-            </button>
-            <button class="main-tab" id="main-tab-month" onclick="chonMainTab('month')">
-                <i class="tab-icon fas fa-calendar-alt"></i>
-                <span>Hóa đơn Cuối tháng</span>
-                <span class="tab-count" id="count-month">0</span>
-            </button>
-        </div>
-
-        <!-- ===== PANEL: HÓA ĐƠN DỊCH VỤ ===== -->
-        <div class="tab-panel-wrap">
-            <div class="tab-panel active" id="panel-dv">
-                <div class="section-header">
-                    <i class="fas fa-info-circle"></i>
-                    Hóa đơn dịch vụ (giặt sấy, nước bình…). Khách upload ảnh chuyển khoản → Quản lý xác nhận.
-                </div>
-
-                <!-- Sub tabs -->
-                <div class="sub-tabs" id="subtabs-dv">
-                    <button class="sub-tab active" data-panel="dv" data-status="all" onclick="chonSubTab(this,'dv','all')">
-                        Tất cả <span class="ct" id="dv-ct-all">0</span>
-                    </button>
-                    <button class="sub-tab red" data-panel="dv" data-status="qua-han" onclick="chonSubTab(this,'dv','qua-han')">
-                        Quá hạn <span class="ct" id="dv-ct-quahan">0</span>
-                    </button>
-                    <button class="sub-tab orange" data-panel="dv" data-status="sap-den" onclick="chonSubTab(this,'dv','sap-den')">
-                        Sắp đến <span class="ct" id="dv-ct-sapden">0</span>
-                    </button>
-                    <button class="sub-tab yellow" data-panel="dv" data-status="cho-xac-nhan" onclick="chonSubTab(this,'dv','cho-xac-nhan')">
-                        Chờ xác nhận <span class="ct" id="dv-ct-choxn">0</span>
-                    </button>
-                    <button class="sub-tab green" data-panel="dv" data-status="hoan-thanh" onclick="chonSubTab(this,'dv','hoan-thanh')">
-                        Hoàn thành <span class="ct" id="dv-ct-hoanthanh">0</span>
-                    </button>
-                </div>
-
-                <!-- Toolbar -->
-                <div class="toolbar">
-                    <div class="filter-group">
-                        <select class="select-month" id="filter-loai-dv" onchange="renderDanhSach()">
-                            <option value="">Tất cả loại DV</option>
-                            <option value="Nước bình">Nước bình</option>
-                            <option value="Giặt sấy">Giặt sấy</option>
-                            <option value="Dịch vụ">Dịch vụ khác</option>
-                        </select>
-                    </div>
-                    <div class="search-sm">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="search-dv" placeholder="Tìm phòng, tên khách..." oninput="renderDanhSach()">
-                    </div>
-                </div>
-
-                <div class="invoice-list" id="list-dv"></div>
-            </div>
-
-            <!-- ===== PANEL: HÓA ĐƠN CUỐI THÁNG ===== -->
-            <div class="tab-panel" id="panel-month">
-                <div class="section-header">
-                    <i class="fas fa-info-circle"></i>
-                    Hóa đơn cuối tháng = tiền phòng + điện + nước. Nếu khách nợ dịch vụ (giặt sấy, nước bình) sẽ tự động cộng dồn vào tổng.
-                </div>
-
-                <!-- Sub tabs -->
-                <div class="sub-tabs" id="subtabs-month">
-                    <button class="sub-tab active" data-panel="month" data-status="all" onclick="chonSubTab(this,'month','all')">
-                        Tất cả <span class="ct" id="month-ct-all">0</span>
-                    </button>
-                    <button class="sub-tab red" data-panel="month" data-status="qua-han" onclick="chonSubTab(this,'month','qua-han')">
-                        Quá hạn <span class="ct" id="month-ct-quahan">0</span>
-                    </button>
-                    <button class="sub-tab orange" data-panel="month" data-status="sap-den" onclick="chonSubTab(this,'month','sap-den')">
-                        Sắp đến <span class="ct" id="month-ct-sapden">0</span>
-                    </button>
-                    <button class="sub-tab yellow" data-panel="month" data-status="cho-xac-nhan" onclick="chonSubTab(this,'month','cho-xac-nhan')">
-                        Chờ xác nhận <span class="ct" id="month-ct-choxn">0</span>
-                    </button>
-                    <button class="sub-tab green" data-panel="month" data-status="hoan-thanh" onclick="chonSubTab(this,'month','hoan-thanh')">
-                        Hoàn thành <span class="ct" id="month-ct-hoanthanh">0</span>
-                    </button>
-                </div>
-
-                <!-- Toolbar -->
-                <div class="toolbar">
-                    <div class="filter-group"></div>
-                    <div class="search-sm">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="search-month" placeholder="Tìm phòng, tên khách..." oninput="renderDanhSach()">
-                    </div>
-                </div>
-
-                <div class="invoice-list" id="list-month"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ===================== MODAL CHI TIẾT ===================== -->
-<div class="modal-overlay" id="modal-detail" onclick="dongModalNgoai(event,'modal-detail')">
-    <div class="modal-box" id="modal-detail-box">
-        <div class="modal-head">
-            <div style="display:flex;align-items:center;gap:8px">
-                <h3 id="modal-title">Chi tiết hóa đơn</h3>
-                <span class="modal-type-tag" id="modal-type-tag"></span>
-            </div>
-            <button class="btn-close-modal" onclick="dongModal('modal-detail')"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="modal-body" id="modal-body"></div>
-        <div class="modal-footer" id="modal-footer"></div>
-    </div>
-</div>
-
-<!-- ===================== MODAL NHẮC NHỞ ===================== -->
-<div class="modal-overlay" id="modal-remind" onclick="dongModalNgoai(event,'modal-remind')">
-    <div class="modal-box remind-modal-box">
-        <div class="modal-head">
-            <h3><i class="fas fa-bell" style="color:var(--orange);margin-right:8px"></i>Gửi nhắc nhở</h3>
-            <button class="btn-close-modal" onclick="dongModal('modal-remind')"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="modal-body">
-            <p style="font-size:14px;color:var(--text-muted)">
-                Gửi thông báo nhắc nhở đến <strong id="remind-tenant"></strong> – Phòng <strong id="remind-room"></strong>.
-            </p>
-            <div style="background:var(--blue-50);border-radius:10px;padding:14px;font-size:13px;color:var(--text-muted)">
-                <i class="fas fa-paper-plane" style="color:var(--primary);margin-right:6px"></i>
-                Thông báo sẽ được gửi đến ứng dụng của khách thuê ngay lập tức.
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" onclick="dongModal('modal-remind')">Hủy</button>
-            <button class="btn-primary" onclick="guiNhacNho()">
-                <i class="fas fa-paper-plane"></i> Gửi nhắc nhở
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ===================== LIGHTBOX ẢNH ===================== -->
-<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
-    <button class="lightbox-close" onclick="document.getElementById('lightbox').classList.remove('open')"><i class="fas fa-times"></i></button>
-    <img id="lightbox-img" src="" alt="Ảnh chuyển khoản">
-</div>
-
-<!-- ===================== TOAST ===================== -->
-<div id="toast"></div>
-
-<!-- ===================== DATA & SCRIPTS ===================== -->
-<script>
-    // ================================================================
-    // DỮ LIỆU TỪ SERVER (HÓA ĐƠN CUỐI THÁNG)
-    // ================================================================
-    const dsHoaDonThang = @Html.Raw(Model.DanhSachHoaDonJson);
-
-    // ================================================================
-    // DỮ LIỆU HÓA ĐƠN DỊCH VỤ — tải qua API
-    // Cấu trúc mỗi phần tử: { id, soPhong, tenNguoiThue, loaiDV, trangThai,
-    //   hanNop, ngayNop, tongTien, soDienThoai, anhBienLai, ghiChu }
-    // ================================================================
-    let dsHoaDonDV = [];
-
-    // Trạng thái UI
-    let activeMainTab = 'dv';      // 'dv' | 'month'
-    let activeStatusDV    = 'all';
-    let activeStatusMonth = 'all';
-    let toastTimer = null;
-    let currentDetailId = null;
-    let currentDetailType = null; // 'dv' | 'month'
-
-    // ================================================================
-    // KHỞI ĐỘNG
-    // ================================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-        await taiDonDV();
-        capNhatCounters();
-        renderDanhSach();
-    });
-
-    // ================================================================
-    // TẢI ĐƠN DỊCH VỤ TỪ API
-    // ================================================================
-    async function taiDonDV() {
-        try {
-            const res = await fetch('/api/hoa-don/danh-sach-dv?ky=@Model.KyXem');
-            if (res.ok) {
-                dsHoaDonDV = await res.json();
+        <div class="menu-label">Quản lý</div>
+        <a class="menu-item" onclick="navigate('quan-ly-phong', this)">
+            <i class="fas fa-door-open"></i> Quản lý phòng trọ
+        </a>
+        <a class="menu-item" onclick="navigate('quan-ly-nguoi-thue', this)">
+            <i class="fas fa-users"></i> Quản lý dịch vụ và tiện ích
+            @if (Model.SoChoXacNhan > 0)
+            {
+                <span class="menu-badge">@Model.SoChoXacNhan</span>
             }
-        } catch (e) {
-            // Fallback: demo data khi chưa có API
-            dsHoaDonDV = [];
-        }
-    }
+        </a>
+        <a class="menu-item active" onclick="navigate('hoa-don', this)">
+            <i class="fas fa-file-invoice-dollar"></i> Hóa đơn &amp; Thu tiền
+        </a>
 
-    // ================================================================
-    // TABS CHÍNH
-    // ================================================================
-    function chonMainTab(tab) {
-        activeMainTab = tab;
-        document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('main-tab-' + tab).classList.add('active');
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('panel-' + tab).classList.add('active');
-        renderDanhSach();
-    }
+        <div class="menu-label">Hỗ trợ</div>
+        <a class="menu-item" onclick="navigate('su-co', this)">
+            <i class="fas fa-tools"></i> Sự cố / Bảo trì
+            @if (Model.SoChoXacNhan > 0)
+            {
+                <span class="menu-badge">@Model.SoChoXacNhan</span>
+            }
+        </a>
+        <a class="menu-item" onclick="navigate('bao-cao', this)">
+            <i class="fas fa-chart-bar"></i> Thống kê &amp; Báo cáo
+        </a>
+        <a class="menu-item" onclick="navigate('cai-dat', this)">
+            <i class="fas fa-cog"></i> Cài đặt hệ thống
+        </a>
 
-    function chonSubTab(el, panel, status) {
-        if (panel === 'dv') activeStatusDV = status;
-        else activeStatusMonth = status;
+        <div class="sidebar-user" onclick="moMenuUser()">
+            <div class="sidebar-avatar"><i class="fas fa-user"></i></div>
+            <div>
+                <span class="name">@Model.TenManager</span>
+                <span class="role">@Model.ChucVuManager</span>
+            </div>
+        </div>
+    </nav>
 
-        const container = document.getElementById('subtabs-' + panel);
-        container.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        renderDanhSach();
-    }
-
-    // ================================================================
-    // CẬP NHẬT COUNTER
-    // ================================================================
-    function capNhatCounters() {
-        // DV counters
-        const dvAll  = dsHoaDonDV.length;
-        const dvQH   = dsHoaDonDV.filter(d => d.trangThai === 'qua-han').length;
-        const dvSD   = dsHoaDonDV.filter(d => d.trangThai === 'sap-den').length;
-        const dvCXN  = dsHoaDonDV.filter(d => d.trangThai === 'cho-xac-nhan').length;
-        const dvHT   = dsHoaDonDV.filter(d => d.trangThai === 'hoan-thanh').length;
-        setText('count-dv', dvAll);
-        setText('dv-ct-all', dvAll); setText('dv-ct-quahan', dvQH);
-        setText('dv-ct-sapden', dvSD); setText('dv-ct-choxn', dvCXN);
-        setText('dv-ct-hoanthanh', dvHT);
-
-        // Month counters
-        const mAll  = dsHoaDonThang.length;
-        const mQH   = dsHoaDonThang.filter(d => d.trangThai === 'qua-han').length;
-        const mSD   = dsHoaDonThang.filter(d => d.trangThai === 'sap-den').length;
-        const mCXN  = dsHoaDonThang.filter(d => d.trangThai === 'cho-xac-nhan').length;
-        const mHT   = dsHoaDonThang.filter(d => d.trangThai === 'hoan-thanh').length;
-        setText('count-month', mAll);
-        setText('month-ct-all', mAll); setText('month-ct-quahan', mQH);
-        setText('month-ct-sapden', mSD); setText('month-ct-choxn', mCXN);
-        setText('month-ct-hoanthanh', mHT);
-    }
-
-    function setText(id, val) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-    }
-
-    // ================================================================
-    // LỌC VÀ RENDER
-    // ================================================================
-    function renderDanhSach() {
-        renderDV();
-        renderMonth();
-    }
-
-    function locDS(ds, status, keyword) {
-        return ds.filter(h => {
-            const matchStatus = status === 'all' || h.trangThai === status;
-            const kw = (keyword || '').toLowerCase().trim();
-            const matchKW = !kw ||
-                (h.soPhong || '').toLowerCase().includes(kw) ||
-                (h.tenNguoiThue || '').toLowerCase().includes(kw);
-            return matchStatus && matchKW;
-        });
-    }
-
-    // --- DỊCH VỤ ---
-    function renderDV() {
-        const loai  = document.getElementById('filter-loai-dv')?.value || '';
-        const kw    = document.getElementById('search-dv')?.value || '';
-        let ds = locDS(dsHoaDonDV, activeStatusDV, kw);
-        if (loai) ds = ds.filter(d => d.loaiDV === loai);
-
-        const container = document.getElementById('list-dv');
-        container.innerHTML = ds.length ? ds.map(d => cardDV(d)).join('') : emptyState('Không có hóa đơn dịch vụ nào');
-    }
-
-    function cardDV(d) {
-        const cls = d.trangThai.replace('cho-xac-nhan', 'pending').replace('qua-han','overdue').replace('sap-den','upcoming').replace('hoan-thanh','done');
-        const chip = chipHTML(d.trangThai);
-        const loaiIcon = d.loaiDV === 'Giặt sấy' ? 'fas fa-tshirt' : d.loaiDV === 'Nước bình' ? 'fas fa-jug-water' : 'fas fa-concierge-bell';
-        const nutDong = d.trangThai === 'cho-xac-nhan'
-            ? `<button class="btn-action confirm" onclick="xacNhanDV(event,${d.id})"><i class="fas fa-check"></i> Duyệt</button>`
-            : (d.trangThai === 'qua-han' || d.trangThai === 'sap-den')
-            ? `<button class="btn-action remind" onclick="moNhacNho(event,${d.id},'dv')"><i class="fas fa-bell"></i> Nhắc</button>`
-            : '';
-        return `
-        <div class="invoice-card ${cls}" onclick="xemChiTiet(${d.id},'dv')">
-            <span class="card-type-badge dv"><i class="${loaiIcon}"></i> ${d.loaiDV || 'Dịch vụ'}</span>
-            <div class="room-badge">${d.soPhong}</div>
-            <div class="card-info">
-                <div class="card-row1">
-                    <span class="card-room">Phòng ${d.soPhong}</span>
-                    <span class="card-tenant">${d.tenNguoiThue}</span>
-                    ${chip}
-                </div>
-                <div class="card-row2">
-                    <span><i class="fas fa-calendar-alt"></i> Hạn: ${d.hanNop}</span>
-                    <span><i class="fas fa-phone"></i> ${d.soDienThoai || '—'}</span>
-                    ${d.ngayNop ? `<span><i class="fas fa-check"></i> Đã nộp: ${d.ngayNop}</span>` : ''}
+    <!-- ===================== MAIN ===================== -->
+    <div id="main">
+        <header id="header">
+            <div class="header-left">
+                <button class="btn-menu" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <div>
+                    <div class="page-title">Quản lý Hóa đơn</div>
+                    <div class="breadcrumb">Trang chủ / Hóa đơn</div>
                 </div>
             </div>
-            <div class="card-amount">
-                <div class="amt">${fmtTien(d.tongTien)}</div>
-                <div class="period">${d.loaiDV || 'Dịch vụ'}</div>
-            </div>
-            <div class="card-actions">
-                ${nutDong}
-                <button class="btn-action view" onclick="xemChiTiet(event,${d.id},'dv')"><i class="fas fa-eye"></i> Xem</button>
-            </div>
-        </div>`;
-    }
-
-    // --- CUỐI THÁNG ---
-    function renderMonth() {
-        const kw = document.getElementById('search-month')?.value || '';
-        const ds = locDS(dsHoaDonThang, activeStatusMonth, kw);
-        const container = document.getElementById('list-month');
-        container.innerHTML = ds.length ? ds.map(d => cardMonth(d)).join('') : emptyState('Không có hóa đơn cuối tháng nào');
-    }
-
-    function cardMonth(h) {
-        const cls = h.trangThai.replace('cho-xac-nhan','pending').replace('qua-han','overdue').replace('sap-den','upcoming').replace('hoan-thanh','done');
-        const chip = chipHTML(h.trangThai);
-        const coNo = (h.tienDichVu || 0) > 0;
-        const tong = (h.tienPhong||0) + (h.tienDien||0) + (h.tienNuoc||0) + (h.tienDichVu||0);
-        const nutDong = h.trangThai === 'cho-xac-nhan'
-            ? `<button class="btn-action confirm" onclick="xacNhanThang(event,${h.id})"><i class="fas fa-check"></i> Duyệt</button>`
-            : (h.trangThai === 'qua-han' || h.trangThai === 'sap-den')
-            ? `<button class="btn-action remind" onclick="moNhacNho(event,${h.id},'month')"><i class="fas fa-bell"></i> Nhắc</button>`
-            : '';
-        return `
-        <div class="invoice-card ${cls}" onclick="xemChiTiet(${h.id},'month')">
-            <span class="card-type-badge month"><i class="fas fa-calendar-alt"></i> Cuối tháng</span>
-            <div class="room-badge">${h.soPhong}</div>
-            <div class="card-info">
-                <div class="card-row1">
-                    <span class="card-room">Phòng ${h.soPhong}</span>
-                    <span class="card-tenant">${h.tenNguoiThue}</span>
-                    ${chip}
-                    ${coNo ? `<span class="debt-badge"><i class="fas fa-exclamation-triangle"></i> Có nợ DV</span>` : ''}
+            <div class="header-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Tìm phòng, tên khách..." oninput="timKiem(this.value)">
                 </div>
-                <div class="card-row2">
-                    <span><i class="fas fa-calendar-alt"></i> ${h.kyThanhToan}</span>
-                    <span><i class="fas fa-clock"></i> Hạn: ${h.hanNop}</span>
-                    <span><i class="fas fa-phone"></i> ${h.soDienThoai || '—'}</span>
-                    ${h.ngayNop ? `<span><i class="fas fa-check"></i> Đã nộp: ${h.ngayNop}</span>` : ''}
+                <button class="btn-bell" onclick="moThongBao()">
+                    <i class="fas fa-bell"></i>
+                    @if (Model.SoChoXacNhan > 0)
+                    {
+                        <span class="bell-badge">@Model.SoChoXacNhan</span>
+                    }
+                </button>
+                <div class="user-chip" onclick="moMenuUser()">
+                    <div class="user-avatar">@(Model.TenManager.Length > 0 ? Model.TenManager[0].ToString().ToUpper() : "A")</div>
+                    <div>
+                        <div class="uname">@Model.TenManager</div>
+                        <div class="urole">@Model.ChucVuManager</div>
+                    </div>
                 </div>
             </div>
-            <div class="card-amount">
-                <div class="amt ${h.trangThai === 'qua-han' ? 'red' : ''}">${fmtTien(tong)}</div>
-                <div class="period">${h.kyThanhToan}</div>
-                ${coNo ? `<div class="debt-note">Gồm nợ DV: ${fmtTien(h.tienDichVu)}</div>` : ''}
+        </header>
+
+        <div id="content">
+            <!-- Page header -->
+            <div class="page-header">
+                <div>
+                    <h2><i class="fas fa-file-invoice-dollar" style="color:var(--primary);margin-right:8px"></i>Hóa đơn kỳ @Model.KyXem</h2>
+                    <p>Tổng hợp hóa đơn dịch vụ và hóa đơn cuối tháng của tất cả phòng được giao</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="xuatExcel()">
+                        <i class="fas fa-file-excel"></i> Xuất Excel
+                    </button>
+                    <select class="select-month" onchange="locTheoThang(this.value)">
+                        @{
+                            var thangHienTai = DateTime.Now;
+                            for (int i = 0; i < 6; i++)
+                            {
+                                var t = thangHienTai.AddMonths(-i);
+                                var val = t.ToString("MM/yyyy");
+                                var lbl = "Tháng " + val;
+                                var selected = val == Model.KyXem ? "selected" : "";
+                                <option value="@val" @@selected>@lbl</option>
+                            }
+                        }
+                    </select>
+                </div>
             </div>
-            <div class="card-actions">
-                ${nutDong}
-                <button class="btn-action view" onclick="xemChiTiet(event,${h.id},'month')"><i class="fas fa-eye"></i> Xem</button>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card all" onclick="locTongQuan('all')">
+                    <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+                    <div>
+                        <div class="stat-num" id="stat-tong">@Model.TongHoaDon</div>
+                        <div class="stat-label">Tổng hóa đơn</div>
+                    </div>
+                </div>
+                <div class="stat-card overdue" onclick="locTongQuan('qua-han')">
+                    <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    <div>
+                        <div class="stat-num" id="stat-quahan">@Model.SoQuaHan</div>
+                        <div class="stat-label">Quá hạn</div>
+                    </div>
+                </div>
+                <div class="stat-card upcoming" onclick="locTongQuan('sap-den')">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div class="stat-num" id="stat-sapden">@Model.SoSapDen</div>
+                        <div class="stat-label">Sắp đến hạn</div>
+                    </div>
+                </div>
+                <div class="stat-card pending" onclick="locTongQuan('cho-xac-nhan')">
+                    <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                    <div>
+                        <div class="stat-num" id="stat-choxn">@Model.SoChoXacNhan</div>
+                        <div class="stat-label">Chờ xác nhận</div>
+                    </div>
+                </div>
+                <div class="stat-card done" onclick="locTongQuan('hoan-thanh')">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <div class="stat-num" id="stat-hoanthanh">@Model.SoHoanThanh</div>
+                        <div class="stat-label">Hoàn thành</div>
+                    </div>
+                </div>
             </div>
-        </div>`;
-    }
 
-    function emptyState(msg) {
-        return `<div class="empty-state"><i class="fas fa-file-invoice"></i><p>${msg}</p></div>`;
-    }
-
-    function chipHTML(trangThai) {
-        const map = {
-            'qua-han':      ['overdue',  'Quá hạn'],
-            'sap-den':      ['upcoming', 'Sắp đến hạn'],
-            'cho-xac-nhan': ['pending',  'Chờ xác nhận'],
-            'hoan-thanh':   ['done',     'Hoàn thành'],
-        };
-        const [cls, txt] = map[trangThai] || ['upcoming', trangThai];
-        return `<span class="status-chip ${cls}">${txt}</span>`;
-    }
-
-    // ================================================================
-    // XEM CHI TIẾT
-    // ================================================================
-    function xemChiTiet(idOrEvent, typeOrId, typeArg) {
-        let id, type;
-        if (typeof idOrEvent === 'object' && idOrEvent instanceof Event) {
-            idOrEvent.stopPropagation();
-            id = typeOrId; type = typeArg;
-        } else {
-            id = idOrEvent; type = typeOrId;
-        }
-        currentDetailId   = id;
-        currentDetailType = type;
-
-        if (type === 'dv') {
-            const d = dsHoaDonDV.find(x => x.id === id);
-            if (!d) return;
-            hienModalDV(d);
-        } else {
-            const h = dsHoaDonThang.find(x => x.id === id);
-            if (!h) return;
-            hienModalThang(h);
-        }
-        document.getElementById('modal-detail').classList.add('open');
-    }
-
-    function hienModalDV(d) {
-        document.getElementById('modal-title').textContent = `Phòng ${d.soPhong} – ${d.loaiDV || 'Dịch vụ'}`;
-        document.getElementById('modal-type-tag').className = 'modal-type-tag dv';
-        document.getElementById('modal-type-tag').textContent = 'Hóa đơn DV';
-
-        const chip = chipHTML(d.trangThai);
-        let confirmHTML = '';
-        if (d.trangThai === 'cho-xac-nhan' && d.anhBienLai) {
-            confirmHTML = `
-            <div class="confirm-box">
-                <div class="conf-title"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản của khách</div>
-                <img class="proof-img" src="${d.anhBienLai}" onclick="xemAnh('${d.anhBienLai}')">
-                ${d.ngayNop ? `<div class="conf-time"><i class="fas fa-clock"></i> Gửi lúc: ${d.ngayNop}</div>` : ''}
+            <!-- 2 MAIN TABS -->
+            <div class="main-tabs">
+                <button class="main-tab active" id="main-tab-dv" onclick="chonMainTab('dv')">
+                    <i class="tab-icon fas fa-concierge-bell"></i>
+                    <span>Hóa đơn Dịch vụ</span>
+                    <span class="tab-count" id="count-dv">0</span>
+                </button>
+                <button class="main-tab" id="main-tab-month" onclick="chonMainTab('month')">
+                    <i class="tab-icon fas fa-calendar-alt"></i>
+                    <span>Hóa đơn Cuối tháng</span>
+                    <span class="tab-count" id="count-month">0</span>
+                </button>
             </div>
-            <button class="btn-confirm-big" onclick="xacNhanDV2(${d.id})"><i class="fas fa-check-double"></i> Xác nhận thanh toán thành công</button>
-            <button class="btn-reject-big" onclick="tuChoiDV(${d.id})"><i class="fas fa-times-circle"></i> Từ chối – Yêu cầu gửi lại</button>`;
-        }
 
-        document.getElementById('modal-body').innerHTML = `
-            <div class="info-grid">
-                <div class="info-item"><div class="lbl">Trạng thái</div><div class="val">${chip}</div></div>
-                <div class="info-item"><div class="lbl">Loại dịch vụ</div><div class="val">${d.loaiDV || '—'}</div></div>
-                <div class="info-item"><div class="lbl">Hạn thanh toán</div><div class="val">${d.hanNop}</div></div>
-                <div class="info-item"><div class="lbl">Số điện thoại</div><div class="val">${d.soDienThoai || '—'}</div></div>
-                ${d.ngayNop ? `<div class="info-item"><div class="lbl">Ngày nộp</div><div class="val">${d.ngayNop}</div></div>` : ''}
-                ${d.ghiChu ? `<div class="info-item"><div class="lbl">Ghi chú</div><div class="val">${d.ghiChu}</div></div>` : ''}
+            <div class="tab-panel-wrap">
+                <!-- PANEL DV -->
+                <div class="tab-panel active" id="panel-dv">
+                    <div class="section-header">
+                        <i class="fas fa-info-circle"></i>
+                        Hóa đơn dịch vụ (giặt sấy, nước bình…). Khách upload ảnh chuyển khoản → Quản lý xác nhận.
+                    </div>
+                    <div class="sub-tabs" id="subtabs-dv">
+                        <button class="sub-tab active" data-panel="dv" data-status="all" onclick="chonSubTab(this,'dv','all')">Tất cả <span class="ct" id="dv-ct-all">0</span></button>
+                        <button class="sub-tab red" data-panel="dv" data-status="qua-han" onclick="chonSubTab(this,'dv','qua-han')">Quá hạn <span class="ct" id="dv-ct-quahan">0</span></button>
+                        <button class="sub-tab orange" data-panel="dv" data-status="sap-den" onclick="chonSubTab(this,'dv','sap-den')">Sắp đến <span class="ct" id="dv-ct-sapden">0</span></button>
+                        <button class="sub-tab yellow" data-panel="dv" data-status="cho-xac-nhan" onclick="chonSubTab(this,'dv','cho-xac-nhan')">Chờ xác nhận <span class="ct" id="dv-ct-choxn">0</span></button>
+                        <button class="sub-tab green" data-panel="dv" data-status="hoan-thanh" onclick="chonSubTab(this,'dv','hoan-thanh')">Hoàn thành <span class="ct" id="dv-ct-hoanthanh">0</span></button>
+                    </div>
+                    <div class="toolbar">
+                        <div class="filter-group">
+                            <select class="select-month" id="filter-loai-dv" onchange="renderDanhSach()">
+                                <option value="">Tất cả loại DV</option>
+                                <option value="Nước bình">Nước bình</option>
+                                <option value="Giặt sấy">Giặt sấy</option>
+                                <option value="Dịch vụ">Dịch vụ khác</option>
+                            </select>
+                        </div>
+                        <div class="search-sm">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-dv" placeholder="Tìm phòng, tên khách..." oninput="renderDanhSach()">
+                        </div>
+                    </div>
+                    <div class="invoice-list" id="list-dv"></div>
+                </div>
+
+                <!-- PANEL CUỐI THÁNG -->
+                <div class="tab-panel" id="panel-month">
+                    <div class="section-header">
+                        <i class="fas fa-info-circle"></i>
+                        Hóa đơn cuối tháng = tiền phòng + điện + nước. Nếu khách nợ dịch vụ sẽ tự động cộng dồn vào tổng.
+                    </div>
+                    <div class="sub-tabs" id="subtabs-month">
+                        <button class="sub-tab active" data-panel="month" data-status="all" onclick="chonSubTab(this,'month','all')">Tất cả <span class="ct" id="month-ct-all">0</span></button>
+                        <button class="sub-tab red" data-panel="month" data-status="qua-han" onclick="chonSubTab(this,'month','qua-han')">Quá hạn <span class="ct" id="month-ct-quahan">0</span></button>
+                        <button class="sub-tab orange" data-panel="month" data-status="sap-den" onclick="chonSubTab(this,'month','sap-den')">Sắp đến <span class="ct" id="month-ct-sapden">0</span></button>
+                        <button class="sub-tab yellow" data-panel="month" data-status="cho-xac-nhan" onclick="chonSubTab(this,'month','cho-xac-nhan')">Chờ xác nhận <span class="ct" id="month-ct-choxn">0</span></button>
+                        <button class="sub-tab green" data-panel="month" data-status="hoan-thanh" onclick="chonSubTab(this,'month','hoan-thanh')">Hoàn thành <span class="ct" id="month-ct-hoanthanh">0</span></button>
+                    </div>
+                    <div class="toolbar">
+                        <div class="filter-group"></div>
+                        <div class="search-sm">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-month" placeholder="Tìm phòng, tên khách..." oninput="renderDanhSach()">
+                        </div>
+                    </div>
+                    <div class="invoice-list" id="list-month"></div>
+                </div>
             </div>
-            <div class="total-box">
-                <span class="total-lbl">Tổng tiền dịch vụ</span>
-                <span class="total-amt">${fmtTien(d.tongTien)}</span>
+        </div>
+    </div>
+
+    <!-- MODAL CHI TIẾT -->
+    <div class="modal-overlay" id="modal-detail" onclick="dongModalNgoai(event,'modal-detail')">
+        <div class="modal-box" id="modal-detail-box">
+            <div class="modal-head">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <h3 id="modal-title">Chi tiết hóa đơn</h3>
+                    <span class="modal-type-tag" id="modal-type-tag"></span>
+                </div>
+                <button class="btn-close-modal" onclick="dongModal('modal-detail')"><i class="fas fa-times"></i></button>
             </div>
-            ${confirmHTML}
-        `;
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer" id="modal-footer"></div>
+        </div>
+    </div>
 
-        let footer = '';
-        if (d.trangThai === 'qua-han' || d.trangThai === 'sap-den') {
-            footer = `
-                <button class="btn-secondary" onclick="moNhacNho(null,${d.id},'dv');dongModal('modal-detail')"><i class="fas fa-bell"></i> Nhắc nhở</button>
-                <button class="btn-primary" onclick="thuTienMatDV(${d.id})"><i class="fas fa-hand-holding-usd"></i> Ghi thu tiền mặt</button>`;
-        } else if (d.trangThai === 'hoan-thanh') {
-            footer = `<button class="btn-secondary" onclick="inHoaDon(${d.id})"><i class="fas fa-print"></i> In hóa đơn</button>`;
-        } else {
-            footer = `<button class="btn-secondary" onclick="dongModal('modal-detail')">Đóng</button>`;
-        }
-        document.getElementById('modal-footer').innerHTML = footer;
-    }
-
-    function hienModalThang(h) {
-        const tong = (h.tienPhong||0)+(h.tienDien||0)+(h.tienNuoc||0)+(h.tienDichVu||0);
-        const coNo = (h.tienDichVu||0) > 0;
-        document.getElementById('modal-title').textContent = `Phòng ${h.soPhong} – ${h.kyThanhToan}`;
-        document.getElementById('modal-type-tag').className = 'modal-type-tag month';
-        document.getElementById('modal-type-tag').textContent = 'Cuối tháng';
-
-        const chip = chipHTML(h.trangThai);
-
-        let debtHTML = '';
-        if (coNo) {
-            debtHTML = `
-            <div class="debt-detail-box">
-                <div class="debt-title"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Khách đang nợ dịch vụ – đã cộng dồn vào hóa đơn</div>
-                <div class="debt-row2"><span>Nợ dịch vụ (giặt sấy / nước bình)</span><span style="font-weight:700;color:var(--red)">${fmtTien(h.tienDichVu)}</span></div>
-            </div>`;
-        }
-
-        let confirmHTML = '';
-        if (h.trangThai === 'cho-xac-nhan' && h.anhChuyenKhoan) {
-            confirmHTML = `
-            <div class="confirm-box">
-                <div class="conf-title"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản của khách</div>
-                <img class="proof-img" src="${h.anhChuyenKhoan}" onclick="xemAnh('${h.anhChuyenKhoan}')">
-                ${h.ngayNop ? `<div class="conf-time"><i class="fas fa-clock"></i> Gửi lúc: ${h.ngayNop}</div>` : ''}
+    <!-- MODAL NHẮC NHỞ -->
+    <div class="modal-overlay" id="modal-remind" onclick="dongModalNgoai(event,'modal-remind')">
+        <div class="modal-box remind-modal-box">
+            <div class="modal-head">
+                <h3><i class="fas fa-bell" style="color:var(--orange);margin-right:8px"></i>Gửi nhắc nhở</h3>
+                <button class="btn-close-modal" onclick="dongModal('modal-remind')"><i class="fas fa-times"></i></button>
             </div>
-            <button class="btn-confirm-big" onclick="xacNhanThang2(${h.id})"><i class="fas fa-check-double"></i> Xác nhận thanh toán thành công</button>
-            <button class="btn-reject-big" onclick="tuChoiThang(${h.id})"><i class="fas fa-times-circle"></i> Từ chối – Yêu cầu gửi lại</button>`;
-        }
-
-        document.getElementById('modal-body').innerHTML = `
-            <div class="info-grid">
-                <div class="info-item"><div class="lbl">Trạng thái</div><div class="val">${chip}</div></div>
-                <div class="info-item"><div class="lbl">Kỳ thanh toán</div><div class="val">${h.kyThanhToan}</div></div>
-                <div class="info-item"><div class="lbl">Hạn thanh toán</div><div class="val">${h.hanNop}</div></div>
-                <div class="info-item"><div class="lbl">Số điện thoại</div><div class="val">${h.soDienThoai || '—'}</div></div>
-                ${h.ngayNop ? `<div class="info-item"><div class="lbl">Ngày nộp</div><div class="val">${h.ngayNop}</div></div>` : ''}
+            <div class="modal-body">
+                <p style="font-size:14px;color:var(--text-muted)">
+                    Gửi thông báo nhắc nhở đến <strong id="remind-tenant"></strong> – Phòng <strong id="remind-room"></strong>.
+                </p>
+                <div style="background:var(--blue-50);border-radius:10px;padding:14px;font-size:13px;color:var(--text-muted)">
+                    <i class="fas fa-paper-plane" style="color:var(--primary);margin-right:6px"></i>
+                    Thông báo sẽ được gửi đến ứng dụng của khách thuê ngay lập tức.
+                </div>
             </div>
-            <table class="cost-table">
-                <thead><tr><th>Khoản mục</th><th style="text-align:right">Số tiền</th></tr></thead>
-                <tbody>
-                    <tr><td><i class="fas fa-home" style="color:var(--primary);margin-right:8px"></i>Tiền phòng</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienPhong)}</td></tr>
-                    <tr><td><i class="fas fa-bolt" style="color:var(--orange);margin-right:8px"></i>Tiền điện</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienDien)}</td></tr>
-                    <tr><td><i class="fas fa-tint" style="color:var(--primary-light);margin-right:8px"></i>Tiền nước</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienNuoc)}</td></tr>
-                    ${coNo ? `<tr class="debt-row"><td><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>Nợ dịch vụ cộng dồn</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienDichVu)}</td></tr>` : ''}
-                </tbody>
-            </table>
-            <div class="total-box">
-                <span class="total-lbl">Tổng cộng phải thu</span>
-                <span class="total-amt">${fmtTien(tong)}</span>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="dongModal('modal-remind')">Hủy</button>
+                <button class="btn-primary" onclick="guiNhacNho()">
+                    <i class="fas fa-paper-plane"></i> Gửi nhắc nhở
+                </button>
             </div>
-            ${debtHTML}
-            ${confirmHTML}
-            ${h.ghiChu ? `<div style="font-size:13px;color:var(--text-muted);padding:10px 14px;background:var(--bg);border-radius:10px"><i class="fas fa-sticky-note" style="margin-right:6px"></i>${h.ghiChu}</div>` : ''}
-        `;
+        </div>
+    </div>
 
-        let footer = '';
-        if (h.trangThai === 'qua-han' || h.trangThai === 'sap-den') {
-            footer = `
-                <button class="btn-secondary" onclick="moNhacNho(null,${h.id},'month');dongModal('modal-detail')"><i class="fas fa-bell"></i> Nhắc nhở</button>
-                <button class="btn-primary" onclick="thuTienMatThang(${h.id})"><i class="fas fa-hand-holding-usd"></i> Ghi thu tiền mặt</button>`;
-        } else if (h.trangThai === 'hoan-thanh') {
-            footer = `<button class="btn-secondary" onclick="inHoaDon(${h.id})"><i class="fas fa-print"></i> In hóa đơn</button>`;
-        } else {
-            footer = `<button class="btn-secondary" onclick="dongModal('modal-detail')">Đóng</button>`;
-        }
-        document.getElementById('modal-footer').innerHTML = footer;
-    }
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
+        <button class="lightbox-close" onclick="document.getElementById('lightbox').classList.remove('open')"><i class="fas fa-times"></i></button>
+        <img id="lightbox-img" src="" alt="Ảnh chuyển khoản">
+    </div>
 
-    // ================================================================
-    // XÁC NHẬN / TỪ CHỐI – HÓA ĐƠN DỊCH VỤ
-    // ================================================================
-    function xacNhanDV(event, id) {
-        if (event) event.stopPropagation();
-        xacNhanDV2(id);
-    }
-    async function xacNhanDV2(id) {
-        try {
-            await fetch('/api/hoa-don/dv/xac-nhan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-        } catch(e) {}
-        const d = dsHoaDonDV.find(x => x.id === id);
-        if (d) { d.trangThai = 'hoan-thanh'; d.ngayNop = new Date().toLocaleString('vi-VN'); }
-        dongModal('modal-detail');
-        capNhatCounters(); renderDanhSach();
-        toast(`✅ Đã xác nhận thanh toán dịch vụ phòng ${d?.soPhong || id}`, 'success');
-    }
-    async function tuChoiDV(id) {
-        try {
-            await fetch('/api/hoa-don/dv/tu-choi', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-        } catch(e) {}
-        const d = dsHoaDonDV.find(x => x.id === id);
-        if (d) { d.trangThai = 'qua-han'; d.anhBienLai = null; }
-        dongModal('modal-detail');
-        capNhatCounters(); renderDanhSach();
-        toast(`⚠️ Đã từ chối – đã thông báo lại cho khách phòng ${d?.soPhong || id}`, 'warning');
-    }
-    async function thuTienMatDV(id) {
-        try {
-            await fetch('/api/hoa-don/dv/thu-tien-mat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-        } catch(e) {}
-        const d = dsHoaDonDV.find(x => x.id === id);
-        if (d) { d.trangThai = 'hoan-thanh'; d.ngayNop = new Date().toLocaleString('vi-VN'); }
-        dongModal('modal-detail');
-        capNhatCounters(); renderDanhSach();
-        toast(`✅ Ghi nhận thu tiền mặt dịch vụ phòng ${d?.soPhong || id}`, 'success');
-    }
+    <!-- TOAST -->
+    <div id="toast"></div>
 
-    // ================================================================
-    // XÁC NHẬN / TỪ CHỐI – HÓA ĐƠN CUỐI THÁNG
-    // ================================================================
-    function xacNhanThang(event, id) {
-        if (event) event.stopPropagation();
-        xacNhanThang2(id);
-    }
-    async function xacNhanThang2(id) {
-        try {
-            await fetch('/api/hoa-don/xac-nhan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-        } catch(e) {}
-        const h = dsHoaDonThang.find(x => x.id === id);
-        if (h) { h.trangThai = 'hoan-thanh'; h.ngayNop = new Date().toLocaleString('vi-VN'); }
-        dongModal('modal-detail');
-        capNhatCounters(); renderDanhSach();
-        toast(`✅ Đã xác nhận thanh toán cuối tháng phòng ${h?.soPhong || id}`, 'success');
-    }
-    async function tuChoiThang(id) {
-        try {
-            await fetch('/api/hoa-don/tu-choi', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-        } catch(e) {}
-        const h = dsHoaDonThang.find(x => x.id === id);
-        if (h) { h.trangThai = 'qua-han'; h.anhChuyenKhoan = null; }
-        dongModal('modal-detail');
-        capNhatCounters(); renderDanhSach();
-        toast(`⚠️ Đã từ chối – đã thông báo lại cho khách phòng ${h?.soPhong || id}`, 'warning');
-    }
-    async function thuTienMatThang(id) {
-        try {
-            await fetch('/api/hoa-don/thu-tien-mat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-        } catch(e) {}
-        const h = dsHoaDonThang.find(x => x.id === id);
-        if (h) { h.trangThai = 'hoan-thanh'; h.ngayNop = new Date().toLocaleString('vi-VN'); }
-        dongModal('modal-detail');
-        capNhatCounters(); renderDanhSach();
-        toast(`✅ Ghi nhận thu tiền mặt cuối tháng phòng ${h?.soPhong || id}`, 'success');
-    }
+    <!-- ===================== SCRIPTS ===================== -->
+    @Html.AntiForgeryToken()
+    <script>
+            // CSRF token cho tất cả POST requests
+            const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
 
-    // ================================================================
-    // NHẮC NHỞ
-    // ================================================================
-    let remindId = null, remindType = null;
-    function moNhacNho(event, id, type) {
-        if (event) event.stopPropagation();
-        remindId = id; remindType = type;
-        const ds = type === 'dv' ? dsHoaDonDV : dsHoaDonThang;
-        const item = ds.find(x => x.id === id);
-        document.getElementById('remind-tenant').textContent = item?.tenNguoiThue || '—';
-        document.getElementById('remind-room').textContent = item?.soPhong || '—';
-        document.getElementById('modal-remind').classList.add('open');
-    }
-    async function guiNhacNho() {
-        try {
-            await fetch('/api/thong-bao/gui-nhac', { method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({id: remindId, type: remindType}) });
-        } catch(e) {}
-        dongModal('modal-remind');
-        toast('✅ Đã gửi nhắc nhở thành công!', 'success');
-    }
+            // ================================================================
+            // DỮ LIỆU SERVER
+            // ================================================================
+            // dsHoaDonThang: từ Razor (SQL → ViewModel → JSON)
+            // coAnhChoXacNhan = true → khách ĐÃ gửi ảnh, quản lý CHƯA xác nhận
+            // trangThai = 'hoan-thanh' → quản lý ĐÃ xác nhận, KHÔNG hiện nút duyệt
+            const dsHoaDonThang = @Html.Raw(Model.DanhSachHoaDonJson);
 
-    // ================================================================
-    // HELPERS
-    // ================================================================
-    function xemAnh(src) {
-        document.getElementById('lightbox-img').src = src;
-        document.getElementById('lightbox').classList.add('open');
-    }
-    function inHoaDon(id) { window.open('/api/hoa-don/in?id=' + id); }
-    function xuatExcel() { window.location.href = '/api/hoa-don/xuat-excel?ky=@Model.KyXem'; }
-    function locTheoThang(val) { window.location.href = '/Manager/HoaDon?kyXem=' + val; }
-    function locTongQuan(status) {
-        // quick filter: switch to appropriate panel & sub tab
-        if (status === 'all') { chonMainTab('dv'); return; }
-        // switch both panels to that status
-        activeStatusDV = status; activeStatusMonth = status;
-        // update sub tab UI
-        ['dv','month'].forEach(panel => {
-            const container = document.getElementById('subtabs-' + panel);
-            container.querySelectorAll('.sub-tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.status === status);
+            // dsHoaDonDV: lấy trực tiếp từ server (DONDV đang "Chờ duyệt" có ảnh biên lai)
+            let dsHoaDonDV = @Html.Raw(Model.DanhSachDonDVChoXacNhanJson);
+
+            let activeMainTab    = 'dv';
+            let activeStatusDV   = 'all';
+            let activeStatusMonth = 'all';
+            let toastTimer = null;
+            let currentDetailId   = null;
+            let currentDetailType = null;
+
+            // ================================================================
+            // KHỞI ĐỘNG
+            // ================================================================
+            document.addEventListener('DOMContentLoaded', () => {
+
+                capNhatCounters();
+                renderDanhSach();
             });
-        });
-        renderDanhSach();
-    }
-    function timKiem(kw) {
-        const sd = document.getElementById('search-dv');
-        const sm = document.getElementById('search-month');
-        if (sd) sd.value = kw;
-        if (sm) sm.value = kw;
-        renderDanhSach();
-    }
-    function fmtTien(n) {
-        if (!n && n !== 0) return '0 ₫';
-        return Number(n).toLocaleString('vi-VN') + ' ₫';
-    }
 
-    // ================================================================
-    // MODAL UTILS
-    // ================================================================
-    function dongModal(id) { document.getElementById(id).classList.remove('open'); }
-    function dongModalNgoai(e, id) { if (e.target.id === id) dongModal(id); }
+            // ================================================================
+            // TẢI ĐƠN DỊCH VỤ
+            // ================================================================
+            async function taiDonDV() {
+                try {
+                    const res = await fetch('/api/hoa-don/danh-sach-dv?ky=@Model.KyXem');
+                    if (res.ok) dsHoaDonDV = await res.json();
+                } catch (e) {
+                    dsHoaDonDV = [];
+                }
+            }
 
-    // ================================================================
-    // TOAST
-    // ================================================================
-    function toast(msg, type = '') {
-        const el = document.getElementById('toast');
-        el.textContent = msg;
-        el.className = 'show ' + type;
-        if (toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => { el.className = ''; }, 3200);
-    }
+            // ================================================================
+            // TABS
+            // ================================================================
+            function chonMainTab(tab) {
+                activeMainTab = tab;
+                document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+                document.getElementById('main-tab-' + tab).classList.add('active');
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('panel-' + tab).classList.add('active');
+                renderDanhSach();
+            }
 
-    // ================================================================
-    // NAVIGATION
-    // ================================================================
-    function navigate(page, el) {
-        const map = {
-            'trang-chu':          '/Manager/Manager',
-            'quan-ly-phong':      '/Manager/ChiTietPhong',
-            'quan-ly-nguoi-thue': '/Manager/QuanLyDichVu',
-            'hoa-don':            '/Manager/HoaDon',
-            'su-co':              '/SuCoBaoTri',
-            'bao-cao':            '/BaoCao',
-            'cai-dat':            '/CaiDat',
-        };
-        if (map[page]) window.location.href = map[page];
-    }
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
-    function moThongBao() { toast(`⚠️ Có @Model.SoChoXacNhan hóa đơn chờ xác nhận`, 'warning'); }
-    function moMenuUser() { }
-</script>
+            function chonSubTab(el, panel, status) {
+                if (panel === 'dv') activeStatusDV = status;
+                else activeStatusMonth = status;
+                const container = document.getElementById('subtabs-' + panel);
+                container.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+                el.classList.add('active');
+                renderDanhSach();
+            }
+
+            // ================================================================
+            // COUNTERS
+            // ================================================================
+            function capNhatCounters() {
+                const dvAll = dsHoaDonDV.length;
+                const dvQH  = dsHoaDonDV.filter(d => d.trangThai === 'qua-han').length;
+                const dvSD  = dsHoaDonDV.filter(d => d.trangThai === 'sap-den').length;
+                const dvCXN = dsHoaDonDV.filter(d => d.trangThai === 'cho-xac-nhan').length;
+                const dvHT  = dsHoaDonDV.filter(d => d.trangThai === 'hoan-thanh').length;
+                setText('count-dv', dvAll);
+                setText('dv-ct-all', dvAll); setText('dv-ct-quahan', dvQH);
+                setText('dv-ct-sapden', dvSD); setText('dv-ct-choxn', dvCXN);
+                setText('dv-ct-hoanthanh', dvHT);
+
+                const mAll = dsHoaDonThang.length;
+                const mQH  = dsHoaDonThang.filter(d => d.trangThai === 'qua-han').length;
+                const mSD  = dsHoaDonThang.filter(d => d.trangThai === 'sap-den').length;
+                const mCXN = dsHoaDonThang.filter(d => d.trangThai === 'cho-xac-nhan').length;
+                const mHT  = dsHoaDonThang.filter(d => d.trangThai === 'hoan-thanh').length;
+                setText('count-month', mAll);
+                setText('month-ct-all', mAll); setText('month-ct-quahan', mQH);
+                setText('month-ct-sapden', mSD); setText('month-ct-choxn', mCXN);
+                setText('month-ct-hoanthanh', mHT);
+            }
+
+            function setText(id, val) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            }
+
+            // ================================================================
+            // RENDER
+            // ================================================================
+            function renderDanhSach() { renderDV(); renderMonth(); }
+
+            function locDS(ds, status, keyword) {
+                return ds.filter(h => {
+                    const matchStatus = status === 'all' || h.trangThai === status;
+                    const kw = (keyword || '').toLowerCase().trim();
+                    const matchKW = !kw ||
+                        (h.soPhong || '').toLowerCase().includes(kw) ||
+                        (h.tenNguoiThue || '').toLowerCase().includes(kw);
+                    return matchStatus && matchKW;
+                });
+            }
+
+            // --- DỊCH VỤ ---
+            function renderDV() {
+                const loai = document.getElementById('filter-loai-dv')?.value || '';
+                const kw   = document.getElementById('search-dv')?.value || '';
+                let ds = locDS(dsHoaDonDV, activeStatusDV, kw);
+                if (loai) ds = ds.filter(d => d.loaiDV === loai);
+                const container = document.getElementById('list-dv');
+                container.innerHTML = ds.length ? ds.map(d => cardDV(d)).join('') : emptyState('Không có hóa đơn dịch vụ nào');
+            }
+
+            function cardDV(d) {
+                const cls = statusToCls(d.trangThai);
+                const chip = chipHTML(d.trangThai);
+                const loaiIcon = d.loaiDV === 'Giặt sấy' ? 'fas fa-tshirt'
+                               : d.loaiDV === 'Nước bình' ? 'fas fa-jug-water'
+                               : 'fas fa-concierge-bell';
+
+                // Nút hành động trên card:
+                // – "cho-xac-nhan" + có ảnh → nút Duyệt (khách đã gửi ảnh, đợi quản lý xác nhận)
+                // – "cho-xac-nhan" + chưa có ảnh → KHÔNG có nút (khách chưa gửi ảnh)
+                // – "hoan-thanh" → KHÔNG có nút (đã thanh toán xong, không cần thao tác)
+                // – "qua-han" / "sap-den" → nút Nhắc nhở
+                let nutDong = '';
+                if (d.trangThai === 'hoan-thanh') {
+                    nutDong = ''; // Đã xong – không hiện bất kỳ nút nào trên card
+                } else if (d.trangThai === 'cho-xac-nhan' && d.anhBienLai) {
+                    nutDong = `<button class="btn-action confirm" onclick="xacNhanDV(event,${d.id})"><i class="fas fa-check"></i> Duyệt</button>`;
+                } else if (d.trangThai === 'qua-han' || d.trangThai === 'sap-den') {
+                    nutDong = `<button class="btn-action remind" onclick="moNhacNho(event,${d.id},'dv')"><i class="fas fa-bell"></i> Nhắc</button>`;
+                }
+                // "cho-xac-nhan" không có ảnh → nutDong = '' (khách chưa gửi, chờ thêm)
+
+                const anhBadge = (d.trangThai === 'cho-xac-nhan' && d.anhBienLai)
+                    ? `<span class="anh-ck-badge"><i class="fas fa-image"></i> Có ảnh CK</span>` : '';
+
+                return `
+                <div class="invoice-card ${cls}" onclick="xemChiTiet(${d.id},'dv')">
+                    <span class="card-type-badge dv"><i class="${loaiIcon}"></i> ${d.loaiDV || 'Dịch vụ'}</span>
+                    <div class="room-badge">${d.soPhong}</div>
+                    <div class="card-info">
+                        <div class="card-row1">
+                            <span class="card-room">Phòng ${d.soPhong}</span>
+                            <span class="card-tenant">${d.tenNguoiThue}</span>
+                            ${chip} ${anhBadge}
+                        </div>
+                        <div class="card-row2">
+                            <span><i class="fas fa-calendar-alt"></i> Hạn: ${d.hanNop}</span>
+                            <span><i class="fas fa-phone"></i> ${d.soDienThoai || '—'}</span>
+                            ${d.ngayNop ? `<span><i class="fas fa-check"></i> Đã nộp: ${d.ngayNop}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="card-amount">
+                        <div class="amt">${fmtTien(d.tongTien)}</div>
+                        <div class="period">${d.loaiDV || 'Dịch vụ'}</div>
+                    </div>
+                    <div class="card-actions">
+                        ${nutDong}
+                        <button class="btn-action view" onclick="xemChiTiet(event,${d.id},'dv')"><i class="fas fa-eye"></i> Xem</button>
+                    </div>
+                </div>`;
+            }
+
+            // --- CUỐI THÁNG ---
+            function renderMonth() {
+                const kw = document.getElementById('search-month')?.value || '';
+                const ds = locDS(dsHoaDonThang, activeStatusMonth, kw);
+                const container = document.getElementById('list-month');
+                container.innerHTML = ds.length ? ds.map(d => cardMonth(d)).join('') : emptyState('Không có hóa đơn cuối tháng nào');
+            }
+
+            function cardMonth(h) {
+                const cls = statusToCls(h.trangThai);
+                const chip = chipHTML(h.trangThai);
+                const coNo = (h.tienDichVu || 0) > 0;
+                const tong = (h.tienPhong||0) + (h.tienDien||0) + (h.tienNuoc||0) + (h.tienDichVu||0);
+
+                // ── LOGIC NÚT TRÊN CARD ──────────────────────────────────────
+                // "hoan-thanh"                              → KHÔNG hiện nút (đã thanh toán xong)
+                // "cho-xac-nhan" + coAnhChoXacNhan = true  → Quản lý thấy nút Duyệt
+                // "cho-xac-nhan" nhưng chưa có ảnh         → KHÔNG hiện nút (chờ khách gửi)
+                // "qua-han" hoặc "sap-den"                 → nút Nhắc nhở
+                let nutDong = '';
+                if (h.trangThai === 'hoan-thanh') {
+                    nutDong = ''; // Đã xong – không hiện bất kỳ nút nào trên card
+                } else if (h.trangThai === 'cho-xac-nhan' && h.coAnhChoXacNhan) {
+                    nutDong = `<button class="btn-action confirm" onclick="xacNhanThang(event,${h.id})"><i class="fas fa-check"></i> Duyệt</button>`;
+                } else if (h.trangThai === 'qua-han' || h.trangThai === 'sap-den') {
+                    nutDong = `<button class="btn-action remind" onclick="moNhacNho(event,${h.id},'month')"><i class="fas fa-bell"></i> Nhắc</button>`;
+                }
+                // "cho-xac-nhan" không có ảnh → nutDong = '' (chờ khách)
+
+                const anhBadge = (h.trangThai === 'cho-xac-nhan' && h.coAnhChoXacNhan)
+                    ? `<span class="anh-ck-badge"><i class="fas fa-image"></i> Có ảnh CK</span>` : '';
+
+                return `
+                <div class="invoice-card ${cls}" onclick="xemChiTiet(${h.id},'month')">
+                    <span class="card-type-badge month"><i class="fas fa-calendar-alt"></i> Cuối tháng</span>
+                    <div class="room-badge">${h.soPhong}</div>
+                    <div class="card-info">
+                        <div class="card-row1">
+                            <span class="card-room">Phòng ${h.soPhong}</span>
+                            <span class="card-tenant">${h.tenNguoiThue}</span>
+                            ${chip} ${anhBadge}
+                            ${coNo ? `<span class="debt-badge"><i class="fas fa-exclamation-triangle"></i> Có nợ DV</span>` : ''}
+                        </div>
+                        <div class="card-row2">
+                            <span><i class="fas fa-calendar-alt"></i> ${h.kyThanhToan}</span>
+                            <span><i class="fas fa-clock"></i> Hạn: ${h.hanNop}</span>
+                            <span><i class="fas fa-phone"></i> ${h.soDienThoai || '—'}</span>
+                            ${h.ngayNop ? `<span><i class="fas fa-check"></i> Đã nộp: ${h.ngayNop}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="card-amount">
+                        <div class="amt ${h.trangThai === 'qua-han' ? 'red' : ''}">${fmtTien(tong)}</div>
+                        <div class="period">${h.kyThanhToan}</div>
+                        ${coNo ? `<div class="debt-note">Gồm nợ DV: ${fmtTien(h.tienDichVu)}</div>` : ''}
+                    </div>
+                    <div class="card-actions">
+                        ${nutDong}
+                        <button class="btn-action view" onclick="xemChiTiet(event,${h.id},'month')"><i class="fas fa-eye"></i> Xem</button>
+                    </div>
+                </div>`;
+            }
+
+            function emptyState(msg) {
+                return `<div class="empty-state"><i class="fas fa-file-invoice"></i><p>${msg}</p></div>`;
+            }
+
+            function statusToCls(s) {
+                return s === 'cho-xac-nhan' ? 'pending'
+                     : s === 'qua-han'     ? 'overdue'
+                     : s === 'sap-den'     ? 'upcoming'
+                     : s === 'hoan-thanh'  ? 'done' : '';
+            }
+
+            function chipHTML(trangThai) {
+                const map = {
+                    'qua-han':      ['overdue',  'Quá hạn'],
+                    'sap-den':      ['upcoming', 'Sắp đến hạn'],
+                    'cho-xac-nhan': ['pending',  'Chờ xác nhận'],
+                    'hoan-thanh':   ['done',     'Hoàn thành'],
+                };
+                const [cls, txt] = map[trangThai] || ['upcoming', trangThai];
+                return `<span class="status-chip ${cls}">${txt}</span>`;
+            }
+
+            // ================================================================
+            // XEM CHI TIẾT – MODAL
+            // ================================================================
+            function xemChiTiet(idOrEvent, typeOrId, typeArg) {
+                let id, type;
+                if (typeof idOrEvent === 'object' && idOrEvent instanceof Event) {
+                    idOrEvent.stopPropagation(); id = typeOrId; type = typeArg;
+                } else { id = idOrEvent; type = typeOrId; }
+                currentDetailId   = id;
+                currentDetailType = type;
+                if (type === 'dv') {
+                    const d = dsHoaDonDV.find(x => x.id === id);
+                    if (!d) return; hienModalDV(d);
+                } else {
+                    const h = dsHoaDonThang.find(x => x.id === id);
+                    if (!h) return; hienModalThang(h);
+                }
+                document.getElementById('modal-detail').classList.add('open');
+            }
+
+            // ── Modal DV ───────────────────────────────────────────────────
+            function hienModalDV(d) {
+                document.getElementById('modal-title').textContent = `Phòng ${d.soPhong} – ${d.loaiDV || 'Dịch vụ'}`;
+                document.getElementById('modal-type-tag').className = 'modal-type-tag dv';
+                document.getElementById('modal-type-tag').textContent = 'Hóa đơn DV';
+
+                const chip = chipHTML(d.trangThai);
+
+                // ── Xác định block ảnh / xác nhận / đã xong ───────────────
+                // QUAN TRỌNG: khi trangThai = 'hoan-thanh', tuyệt đối không hiện nút Duyệt/Từ chối
+                // dù anhBienLai có giá trị hay không – khách đã thanh toán, luồng đã kết thúc
+                let confirmHTML = '';
+                if (d.trangThai === 'hoan-thanh') {
+                    // Đã hoàn thành → chỉ hiện thông báo xanh, KHÔNG có nút duyệt
+                    confirmHTML = `
+                    <div class="done-box">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <div class="done-msg">Thanh toán đã được xác nhận</div>
+                            ${d.ngayNop ? `<div class="done-sub"><i class="fas fa-clock"></i> Xác nhận lúc: ${d.ngayNop}</div>` : ''}
+                            ${d.ghiChu === 'Thu tiền mặt trực tiếp' ? `<div class="done-sub"><i class="fas fa-money-bill"></i> Hình thức: Thu tiền mặt</div>` : ''}
+                        </div>
+                    </div>
+                    ${d.anhBienLai ? `
+                    <div class="confirm-box" style="border-color:#dbeafe;background:#eff6ff;">
+                        <div class="conf-title" style="color:var(--primary)"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản (đã duyệt)</div>
+                        <img class="proof-img" src="${d.anhBienLai}" onclick="xemAnh('${d.anhBienLai}')">
+                    </div>` : ''}`;
+                } else if (d.trangThai === 'cho-xac-nhan' && d.anhBienLai) {
+                    // Khách đã gửi ảnh, quản lý CHƯA xác nhận → hiện nút xác nhận + từ chối
+                    confirmHTML = `
+                    <div class="confirm-box">
+                        <div class="conf-title"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản của khách</div>
+                        <img class="proof-img" src="${d.anhBienLai}" onclick="xemAnh('${d.anhBienLai}')">
+                        ${d.ngayNop ? `<div class="conf-time"><i class="fas fa-clock"></i> Gửi lúc: ${d.ngayNop}</div>` : ''}
+                    </div>
+                    <div class="action-group">
+                        <button class="btn-confirm-big" onclick="xacNhanDV2(${d.id})"><i class="fas fa-check-double"></i> Xác nhận thanh toán thành công</button>
+                        <button class="btn-reject-big" onclick="tuChoiDV(${d.id})"><i class="fas fa-times-circle"></i> Từ chối – Yêu cầu gửi lại</button>
+                    </div>`;
+                } else if (d.trangThai === 'cho-xac-nhan') {
+                    // Khách chưa gửi ảnh → chỉ thông báo, không có nút
+                    confirmHTML = `
+                    <div style="background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:14px;font-size:13px;color:#854d0e;display:flex;align-items:center;gap:10px">
+                        <i class="fas fa-hourglass-half" style="font-size:20px;color:#ca8a04"></i>
+                        <div>Đang chờ khách thuê gửi ảnh chuyển khoản. Chưa thể xác nhận.</div>
+                    </div>`;
+                }
+
+                document.getElementById('modal-body').innerHTML = `
+                    <div class="info-grid">
+                        <div class="info-item"><div class="lbl">Trạng thái</div><div class="val">${chip}</div></div>
+                        <div class="info-item"><div class="lbl">Loại dịch vụ</div><div class="val">${d.loaiDV || '—'}</div></div>
+                        <div class="info-item"><div class="lbl">Hạn thanh toán</div><div class="val">${d.hanNop}</div></div>
+                        <div class="info-item"><div class="lbl">Số điện thoại</div><div class="val">${d.soDienThoai || '—'}</div></div>
+                        ${d.ghiChu ? `<div class="info-item" style="grid-column:1/-1"><div class="lbl">Ghi chú</div><div class="val">${d.ghiChu}</div></div>` : ''}
+                    </div>
+                    <div class="total-box">
+                        <span class="total-lbl">Tổng tiền dịch vụ</span>
+                        <span class="total-amt">${fmtTien(d.tongTien)}</span>
+                    </div>
+                    ${confirmHTML}`;
+
+                // Footer
+                let footer = '';
+                if (d.trangThai === 'qua-han' || d.trangThai === 'sap-den') {
+                    footer = `
+                        <button class="btn-secondary" onclick="moNhacNho(null,${d.id},'dv');dongModal('modal-detail')"><i class="fas fa-bell"></i> Nhắc nhở</button>
+                        <button class="btn-primary" onclick="thuTienMatDV(${d.id})"><i class="fas fa-hand-holding-usd"></i> Ghi thu tiền mặt</button>`;
+                } else if (d.trangThai === 'hoan-thanh') {
+                    footer = `<button class="btn-secondary" onclick="inHoaDon(${d.id})"><i class="fas fa-print"></i> In hóa đơn</button>`;
+                } else {
+                    footer = `<button class="btn-secondary" onclick="dongModal('modal-detail')">Đóng</button>`;
+                }
+                document.getElementById('modal-footer').innerHTML = footer;
+            }
+
+            // ── Modal Cuối tháng ──────────────────────────────────────────
+            function hienModalThang(h) {
+                const tong = (h.tienPhong||0)+(h.tienDien||0)+(h.tienNuoc||0)+(h.tienDichVu||0);
+                const coNo = (h.tienDichVu||0) > 0;
+                document.getElementById('modal-title').textContent = `Phòng ${h.soPhong} – ${h.kyThanhToan}`;
+                document.getElementById('modal-type-tag').className = 'modal-type-tag month';
+                document.getElementById('modal-type-tag').textContent = 'Cuối tháng';
+
+                const chip = chipHTML(h.trangThai);
+
+                let debtHTML = '';
+                if (coNo) {
+                    debtHTML = `
+                    <div class="debt-detail-box">
+                        <div class="debt-title"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Khách đang nợ dịch vụ – đã cộng dồn vào hóa đơn</div>
+                        <div class="debt-row2"><span>Nợ dịch vụ (giặt sấy / nước bình)</span><span style="font-weight:700;color:var(--red)">${fmtTien(h.tienDichVu)}</span></div>
+                    </div>`;
+                }
+
+                // ── LOGIC HIỂN THỊ XÁC NHẬN ──────────────────────────────
+                // QUAN TRỌNG: khi trangThai = 'hoan-thanh', tuyệt đối không hiện nút Duyệt/Từ chối
+                // dù coAnhChoXacNhan có giá trị gì – khách đã thanh toán, luồng đã kết thúc
+                // "cho-xac-nhan" + coAnhChoXacNhan = true → hiện ảnh + nút Duyệt / Từ chối
+                // "cho-xac-nhan" + chưa có ảnh → thông báo chờ, không có nút
+                let confirmHTML = '';
+                if (h.trangThai === 'hoan-thanh') {
+                    // Đã hoàn thành → chỉ hiện "Đã xác nhận", KHÔNG có nút Duyệt
+                    confirmHTML = `
+                    <div class="done-box">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <div class="done-msg">Thanh toán đã được xác nhận</div>
+                            ${h.ngayNop ? `<div class="done-sub"><i class="fas fa-clock"></i> Xác nhận lúc: ${h.ngayNop}</div>` : ''}
+                            ${h.ghiChu === 'Thu tiền mặt' ? `<div class="done-sub"><i class="fas fa-money-bill"></i> Hình thức: Thu tiền mặt</div>` : ''}
+                        </div>
+                    </div>
+                    ${h.anhChuyenKhoan ? `
+                    <div class="confirm-box" style="border-color:#dbeafe;background:#eff6ff;">
+                        <div class="conf-title" style="color:var(--primary)"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản (đã duyệt)</div>
+                        <img class="proof-img" src="${h.anhChuyenKhoan}" onclick="xemAnh('${h.anhChuyenKhoan}')">
+                    </div>` : ''}`;
+                } else if (h.trangThai === 'cho-xac-nhan' && h.coAnhChoXacNhan && h.anhChuyenKhoan) {
+                    // Khách đã gửi ảnh, quản lý CHƯA xác nhận → hiện nút Duyệt / Từ chối
+                    confirmHTML = `
+                    <div class="confirm-box">
+                        <div class="conf-title"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản của khách</div>
+                        <img class="proof-img" src="${h.anhChuyenKhoan}" onclick="xemAnh('${h.anhChuyenKhoan}')">
+                        ${h.ngayNop ? `<div class="conf-time"><i class="fas fa-clock"></i> Gửi lúc: ${h.ngayNop}</div>` : ''}
+                    </div>
+                    <div class="action-group">
+                        <button class="btn-confirm-big" onclick="xacNhanThang2(${h.id})"><i class="fas fa-check-double"></i> Xác nhận thanh toán thành công</button>
+                        <button class="btn-reject-big" onclick="tuChoiThang(${h.id})"><i class="fas fa-times-circle"></i> Từ chối – Yêu cầu gửi lại</button>
+                    </div>`;
+                } else if (h.trangThai === 'cho-xac-nhan') {
+                    // Khách chưa gửi ảnh → chỉ thông báo, không có nút
+                    confirmHTML = `
+                    <div style="background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:14px;font-size:13px;color:#854d0e;display:flex;align-items:center;gap:10px">
+                        <i class="fas fa-hourglass-half" style="font-size:20px;color:#ca8a04"></i>
+                        <div>Đang chờ khách thuê gửi ảnh chuyển khoản. Chưa thể xác nhận.</div>
+                    </div>`;
+                }
+
+                document.getElementById('modal-body').innerHTML = `
+                    <div class="info-grid">
+                        <div class="info-item"><div class="lbl">Trạng thái</div><div class="val">${chip}</div></div>
+                        <div class="info-item"><div class="lbl">Kỳ thanh toán</div><div class="val">${h.kyThanhToan}</div></div>
+                        <div class="info-item"><div class="lbl">Hạn thanh toán</div><div class="val">${h.hanNop}</div></div>
+                        <div class="info-item"><div class="lbl">Số điện thoại</div><div class="val">${h.soDienThoai || '—'}</div></div>
+                        ${h.ngayNop && h.trangThai === 'hoan-thanh' ? `<div class="info-item"><div class="lbl">Ngày duyệt</div><div class="val">${h.ngayNop}</div></div>` : ''}
+                    </div>
+                    <table class="cost-table">
+                        <thead><tr><th>Khoản mục</th><th style="text-align:right">Số tiền</th></tr></thead>
+                        <tbody>
+                            <tr><td><i class="fas fa-home" style="color:var(--primary);margin-right:8px"></i>Tiền phòng</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienPhong)}</td></tr>
+                            <tr><td><i class="fas fa-bolt" style="color:var(--orange);margin-right:8px"></i>Tiền điện</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienDien)}</td></tr>
+                            <tr><td><i class="fas fa-tint" style="color:var(--primary-light);margin-right:8px"></i>Tiền nước</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienNuoc)}</td></tr>
+                            ${coNo ? `<tr class="debt-row"><td><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>Nợ dịch vụ cộng dồn</td><td style="text-align:right;font-weight:600">${fmtTien(h.tienDichVu)}</td></tr>` : ''}
+                        </tbody>
+                    </table>
+                    <div class="total-box">
+                        <span class="total-lbl">Tổng cộng phải thu</span>
+                        <span class="total-amt">${fmtTien(tong)}</span>
+                    </div>
+                    ${debtHTML}
+                    ${confirmHTML}`;
+
+                let footer = '';
+                if (h.trangThai === 'qua-han' || h.trangThai === 'sap-den') {
+                    footer = `
+                        <button class="btn-secondary" onclick="moNhacNho(null,${h.id},'month');dongModal('modal-detail')"><i class="fas fa-bell"></i> Nhắc nhở</button>
+                        <button class="btn-primary" onclick="thuTienMatThang(${h.id})"><i class="fas fa-hand-holding-usd"></i> Ghi thu tiền mặt</button>`;
+                } else if (h.trangThai === 'hoan-thanh') {
+                    footer = `<button class="btn-secondary" onclick="inHoaDon(${h.id})"><i class="fas fa-print"></i> In hóa đơn</button>`;
+                } else {
+                    footer = `<button class="btn-secondary" onclick="dongModal('modal-detail')">Đóng</button>`;
+                }
+                document.getElementById('modal-footer').innerHTML = footer;
+            }
+
+            // ================================================================
+            // XÁC NHẬN / TỪ CHỐI – HÓA ĐƠN DỊCH VỤ
+            // ================================================================
+            function xacNhanDV(event, id) {
+                if (event) event.stopPropagation();
+                xacNhanDV2(id);
+            }
+            async function xacNhanDV2(id) {
+                try {
+                    const res = await fetch('?handler=XacNhanDichVu', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
+                        body: JSON.stringify({ id })
+                    });
+                    if (!res.ok) { toast('❌ Lỗi xác nhận. Vui lòng thử lại.', 'error'); return; }
+                } catch (e) { toast('❌ Mất kết nối máy chủ.', 'error'); return; }
+
+                const d = dsHoaDonDV.find(x => x.id === id);
+                if (d) {
+                    d.trangThai = 'hoan-thanh';
+                    d.ngayNop   = new Date().toLocaleString('vi-VN');
+                    // Reset các trường liên quan để card/modal không render lại nút duyệt
+                    d.coAnhChoXacNhan = false;
+                }
+                dongModal('modal-detail');
+                capNhatCounters(); renderDanhSach();
+                toast(`✅ Đã xác nhận thanh toán dịch vụ phòng ${d?.soPhong || id}`, 'success');
+            }
+            async function tuChoiDV(id) {
+                try {
+                    const res = await fetch('?handler=TuChoiDichVu', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
+                        body: JSON.stringify({ id })
+                    });
+                    if (!res.ok) { toast('❌ Lỗi từ chối. Vui lòng thử lại.', 'error'); return; }
+                } catch (e) { toast('❌ Mất kết nối máy chủ.', 'error'); return; }
+
+                const d = dsHoaDonDV.find(x => x.id === id);
+                if (d) {
+                    d.trangThai = 'qua-han';
+                    d.anhBienLai = null;         // Xóa ảnh cũ, chờ khách gửi lại
+                    d.coAnhChoXacNhan = false;
+                }
+                dongModal('modal-detail');
+                capNhatCounters(); renderDanhSach();
+                toast(`⚠️ Đã từ chối – đã thông báo lại cho khách phòng ${d?.soPhong || id}`, 'warning');
+            }
+            async function thuTienMatDV(id) {
+                try {
+                    const res = await fetch('?handler=ThuTienMatDichVu', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
+                        body: JSON.stringify({ id })
+                    });
+                    if (!res.ok) { toast('❌ Ghi nhận thất bại.', 'error'); return; }
+                } catch (e) { toast('❌ Mất kết nối máy chủ.', 'error'); return; }
+
+                const d = dsHoaDonDV.find(x => x.id === id);
+                if (d) {
+                    d.trangThai = 'hoan-thanh';
+                    d.ngayNop   = new Date().toLocaleString('vi-VN');
+                    d.ghiChu    = 'Thu tiền mặt trực tiếp';
+                    d.coAnhChoXacNhan = false; // Đã thanh toán – ẩn nút duyệt
+                }
+                dongModal('modal-detail');
+                capNhatCounters(); renderDanhSach();
+                toast(`✅ Ghi nhận thu tiền mặt dịch vụ phòng ${d?.soPhong || id}`, 'success');
+            }
+
+            // ================================================================
+            // XÁC NHẬN / TỪ CHỐI – HÓA ĐƠN CUỐI THÁNG
+            // ================================================================
+            function xacNhanThang(event, id) {
+                if (event) event.stopPropagation();
+                xacNhanThang2(id);
+            }
+            async function xacNhanThang2(id) {
+                try {
+                    const res = await fetch('?handler=XacNhan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
+                        body: JSON.stringify({ id })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        toast(`❌ ${err.message || 'Lỗi xác nhận. Vui lòng thử lại.'}`, 'error');
+                        return;
+                    }
+                } catch (e) { toast('❌ Mất kết nối máy chủ.', 'error'); return; }
+
+                const h = dsHoaDonThang.find(x => x.id === id);
+                if (h) {
+                    h.trangThai = 'hoan-thanh';
+                    h.ngayNop   = new Date().toLocaleString('vi-VN');
+                    h.coAnhChoXacNhan = false; // Đã xác nhận → ẩn nút duyệt
+                }
+                dongModal('modal-detail');
+                capNhatCounters(); renderDanhSach();
+                toast(`✅ Đã xác nhận thanh toán cuối tháng phòng ${h?.soPhong || id}`, 'success');
+            }
+            async function tuChoiThang(id) {
+                try {
+                    const res = await fetch('?handler=TuChoi', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
+                        body: JSON.stringify({ id })
+                    });
+                    if (!res.ok) { toast('❌ Lỗi từ chối. Vui lòng thử lại.', 'error'); return; }
+                } catch (e) { toast('❌ Mất kết nối máy chủ.', 'error'); return; }
+
+                const h = dsHoaDonThang.find(x => x.id === id);
+                if (h) {
+                    h.trangThai = 'qua-han';
+                    h.anhChuyenKhoan  = null;
+                    h.coAnhChoXacNhan = false;
+                }
+                dongModal('modal-detail');
+                capNhatCounters(); renderDanhSach();
+                toast(`⚠️ Đã từ chối – đã thông báo lại cho khách phòng ${h?.soPhong || id}`, 'warning');
+            }
+            async function thuTienMatThang(id) {
+                try {
+                    const res = await fetch('?handler=ThuTienMat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
+                        body: JSON.stringify({ id })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        toast(`❌ ${err.message || 'Ghi nhận thất bại.'}`, 'error');
+                        return;
+                    }
+                } catch (e) { toast('❌ Mất kết nối máy chủ.', 'error'); return; }
+
+                const h = dsHoaDonThang.find(x => x.id === id);
+                if (h) {
+                    h.trangThai = 'hoan-thanh';
+                    h.ngayNop   = new Date().toLocaleString('vi-VN');
+                    h.ghiChu    = 'Thu tiền mặt';
+                    h.coAnhChoXacNhan = false; // Đã thanh toán – ẩn nút duyệt
+                }
+                dongModal('modal-detail');
+                capNhatCounters(); renderDanhSach();
+                toast(`✅ Ghi nhận thu tiền mặt cuối tháng phòng ${h?.soPhong || id}`, 'success');
+            }
+
+            // ================================================================
+            // NHẮC NHỞ
+            // ================================================================
+            let remindId = null, remindType = null;
+            function moNhacNho(event, id, type) {
+                if (event) event.stopPropagation();
+                remindId = id; remindType = type;
+                const ds   = type === 'dv' ? dsHoaDonDV : dsHoaDonThang;
+                const item = ds.find(x => x.id === id);
+                document.getElementById('remind-tenant').textContent = item?.tenNguoiThue || '—';
+                document.getElementById('remind-room').textContent   = item?.soPhong || '—';
+                document.getElementById('modal-remind').classList.add('open');
+            }
+            async function guiNhacNho() {
+                try {
+                    await fetch('/api/thong-bao/gui-nhac', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
+                        body: JSON.stringify({ id: remindId, type: remindType })
+                    });
+                } catch (e) {}
+                dongModal('modal-remind');
+                toast('✅ Đã gửi nhắc nhở thành công!', 'success');
+            }
+
+            // ================================================================
+            // HELPERS
+            // ================================================================
+            function xemAnh(src) {
+                document.getElementById('lightbox-img').src = src;
+                document.getElementById('lightbox').classList.add('open');
+            }
+            function inHoaDon(id) { window.open('/api/hoa-don/in?id=' + id); }
+            function xuatExcel()  { window.location.href = '/api/hoa-don/xuat-excel?ky=@Model.KyXem'; }
+            function locTheoThang(val) { window.location.href = '/Manager/HoaDon?kyXem=' + val; }
+            function locTongQuan(status) {
+                if (status === 'all') { chonMainTab('dv'); return; }
+                activeStatusDV = status; activeStatusMonth = status;
+                ['dv', 'month'].forEach(panel => {
+                    const container = document.getElementById('subtabs-' + panel);
+                    container.querySelectorAll('.sub-tab').forEach(t => {
+                        t.classList.toggle('active', t.dataset.status === status);
+                    });
+                });
+                renderDanhSach();
+            }
+            function timKiem(kw) {
+                const sd = document.getElementById('search-dv');
+                const sm = document.getElementById('search-month');
+                if (sd) sd.value = kw;
+                if (sm) sm.value = kw;
+                renderDanhSach();
+            }
+            function fmtTien(n) {
+                if (!n && n !== 0) return '0 ₫';
+                return Number(n).toLocaleString('vi-VN') + ' ₫';
+            }
+
+            // ================================================================
+            // MODAL UTILS
+            // ================================================================
+            function dongModal(id) { document.getElementById(id).classList.remove('open'); }
+            function dongModalNgoai(e, id) { if (e.target.id === id) dongModal(id); }
+
+            // ================================================================
+            // TOAST
+            // ================================================================
+            function toast(msg, type = '') {
+                const el = document.getElementById('toast');
+                el.textContent = msg;
+                el.className = 'show ' + type;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+            }
+
+            // ================================================================
+            // NAVIGATION
+            // ================================================================
+            function navigate(page, el) {
+                const map = {
+                    'trang-chu':          '/Manager/Manager',
+                    'quan-ly-phong':      '/Manager/ChiTietPhong',
+                    'quan-ly-nguoi-thue': '/Manager/QuanLyDichVu',
+                    'hoa-don':            '/Manager/HoaDon',
+                    'su-co':              '/Manager/SuCoBaoTri',
+                    'bao-cao':            '/Manager/ThongKe',
+                    'cai-dat':            '/CaiDat',
+                };
+                if (map[page]) window.location.href = map[page];
+            }
+            function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
+            function moThongBao()    { toast(`⚠️ Có @Model.SoChoXacNhan hóa đơn chờ xác nhận`, 'warning'); }
+            function moMenuUser()    { }
+    </script>
 </body>
 </html>
