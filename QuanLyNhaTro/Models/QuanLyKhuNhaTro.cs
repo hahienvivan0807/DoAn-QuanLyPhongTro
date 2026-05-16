@@ -268,6 +268,7 @@ namespace QuanLyNhaTro.Models
         public DateTime? NgayXuLy { get; set; }
 
         public DateTime? NgayHoanThanh { get; set; }
+        public DateTime? NgayHetHan { get; set; }
 
         public DateTime NgayTao { get; set; }
 

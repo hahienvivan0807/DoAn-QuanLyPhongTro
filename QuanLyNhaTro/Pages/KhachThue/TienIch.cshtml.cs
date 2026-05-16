@@ -43,6 +43,20 @@ namespace QuanLyNhaTro.Pages.KhachThue
             return hopDong == null ? (idUser, -1) : (idUser, hopDong.IDPhong);
         }
 
+        // Helper: lấy IDManager đang phụ trách phòng (dùng khi tạo đơn)
+        private async Task<int?> LayIDManagerPhongAsync(int idPhong)
+        {
+            return await _db.PHONG_MANAGER
+                .Where(pm => pm.IDPhong == idPhong && pm.IsActive)
+                .Select(pm => (int?)pm.IDManager)
+                .FirstOrDefaultAsync();
+        }
+
+        // Danh sách trạng thái "chưa xong" – dùng thống nhất ở nhiều nơi
+        // Gồm cả "Chờ duyệt" để polling vẫn thấy đơn sau khi khách gửi ảnh
+        private static readonly string[] TrangThaiChuaXong =
+            { "Chờ xử lý", "Đang xử lý", "Chờ thanh toán", "Chờ duyệt" };
+
         public async Task<IActionResult> OnGetAsync()
         {
             var (idUser, idPhong) = await LayThongTinPhong();
@@ -69,15 +83,14 @@ namespace QuanLyNhaTro.Pages.KhachThue
 
             SoThongBaoChuaDoc = await _db.THONGBAO.CountAsync(t => t.IDUser == idUser && !t.DaDoc);
 
+            // Dùng TrangThaiChuaXong thống nhất – gồm cả "Chờ xác nhận"
             var donDangXuLy = await _db.DONDV
-                .Where(d => d.IDPhong == idPhong && !new[] { "Thành công", "Đã hủy", "Đã thanh toán" }.Contains(d.TrangThai_DV))
+                .Where(d => d.IDPhong == idPhong && TrangThaiChuaXong.Contains(d.TrangThai_DV))
                 .ToListAsync();
 
             DonGiatSay = donDangXuLy.FirstOrDefault(d => d.LoaiDV == "Giặt sấy");
             DonNuocBinh = donDangXuLy.FirstOrDefault(d => d.LoaiDV == "Nước bình");
 
-            // Kiểm tra đơn nợ đã cộng vào hóa đơn tháng
-            // DuocCongVaoTro nằm trong HDTHANG, không phải DONDV
             var kyHienTai = DateTime.Now.ToString("MM/yyyy");
             var hdThang = await _db.HDTHANG
                 .FirstOrDefaultAsync(h => h.IDPhong == idPhong && h.KyThanhToan == kyHienTai);
@@ -110,19 +123,24 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (idPhong < 0) return Unauthorized();
 
             if (await _db.DONDV.AnyAsync(d => d.IDPhong == idPhong && d.LoaiDV == "Giặt sấy"
-                && !new[] { "Thành công", "Đã hủy", "Đã thanh toán" }.Contains(d.TrangThai_DV)))
+                && TrangThaiChuaXong.Contains(d.TrangThai_DV)))
                 return BadRequest("Bạn đang có đơn giặt sấy chờ xử lý.");
+
+            // Lấy IDManager phụ trách phòng để gán ngay khi tạo đơn
+            var idManager = await LayIDManagerPhongAsync(idPhong);
 
             var don = new DONDV
             {
                 IDPhong = idPhong,
                 IDUser = idUser,
+                IDManagerXuLy = idManager,          // ← gán manager phụ trách
                 LoaiDV = "Giặt sấy",
-                TrangThai_DV = "Chờ xử lý",
+                TrangThai_DV = "Chờ xử lý",       
                 NoiDung = $"[{req.LoaiDV}] {req.GhiChu}".Trim(),
                 MucDo = "Trung bình",
                 TongTien = 0,
                 NgayTao = DateTime.Now,
+                NgayHetHan = DateTime.Now.AddDays(7),
                 UpdatedAt = DateTime.Now
             };
 
@@ -141,22 +159,26 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (idPhong < 0) return Unauthorized();
 
             if (await _db.DONDV.AnyAsync(d => d.IDPhong == idPhong && d.LoaiDV == "Nước bình"
-                && !new[] { "Thành công", "Đã hủy", "Đã thanh toán" }.Contains(d.TrangThai_DV)))
+                && TrangThaiChuaXong.Contains(d.TrangThai_DV)))
                 return BadRequest("Bạn đang có đơn nước bình chờ xử lý.");
 
-            // Server tự tính lại giá, không tin client
+            // Lấy IDManager phụ trách phòng để gán ngay khi tạo đơn
+            var idManager = await LayIDManagerPhongAsync(idPhong);
+
             decimal tongTien = req.SoLuong * 15000m - (req.TraVo ? req.SoLuong * 5000m : 0);
 
             var don = new DONDV
             {
                 IDPhong = idPhong,
                 IDUser = idUser,
+                IDManagerXuLy = idManager,          // ← gán manager phụ trách
                 LoaiDV = "Nước bình",
-                TrangThai_DV = "Chờ xử lý",
+                TrangThai_DV = "Đang xử lý",       // ← "Đang xử lý" để map đúng sang "sap-den"
                 NoiDung = $"Số lượng: {req.SoLuong} bình. Trả vỏ: {(req.TraVo ? "Có" : "Không")}. {req.GhiChu}".Trim(),
                 MucDo = "Trung bình",
                 TongTien = tongTien,
                 NgayTao = DateTime.Now,
+                NgayHetHan = DateTime.Now.AddDays(7),
                 UpdatedAt = DateTime.Now
             };
 
@@ -168,29 +190,26 @@ namespace QuanLyNhaTro.Pages.KhachThue
             return new JsonResult(new { id = don.IDDonDV });
         }
 
-        // --- API Polling trạng thái đơn (GET ?handler=TrangThai) ---
-        // DuocCongVaoTro lấy từ HDTHANG kỳ hiện tại, không phải DONDV
+        // --- API Polling trạng thái đơn ---
         public async Task<IActionResult> OnGetTrangThaiAsync()
         {
             var (_, idPhong) = await LayThongTinPhong();
             if (idPhong < 0) return new JsonResult(new { });
 
+            // Dùng TrangThaiChuaXong thống nhất – gồm cả "Chờ xác nhận"
             var donDangXuLy = await _db.DONDV
-                .Where(d => d.IDPhong == idPhong
-                    && !new[] { "Thành công", "Đã hủy", "Đã thanh toán" }.Contains(d.TrangThai_DV))
+                .Where(d => d.IDPhong == idPhong && TrangThaiChuaXong.Contains(d.TrangThai_DV))
                 .ToListAsync();
 
             var gs = donDangXuLy.FirstOrDefault(d => d.LoaiDV == "Giặt sấy");
             var nuoc = donDangXuLy.FirstOrDefault(d => d.LoaiDV == "Nước bình");
 
-            // Kiểm tra hóa đơn tháng có cộng nợ DV không
             var kyHienTai = DateTime.Now.ToString("MM/yyyy");
             var duocCongVaoTro = await _db.HDTHANG
                 .Where(h => h.IDPhong == idPhong && h.KyThanhToan == kyHienTai)
                 .Select(h => h.DuocCongVaoTro)
                 .FirstOrDefaultAsync() == true;
 
-            // Ngưỡng 7 ngày để xác định đơn nào bị cộng vào hóa đơn
             var ngayNguong = DateTime.Now.AddDays(-7);
 
             return new JsonResult(new
@@ -200,8 +219,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
                     id = gs.IDDonDV,
                     trangThai = gs.TrangThai_DV,
                     tongTien = gs.TongTien,
-                    // Đơn bị cộng vào HD nếu: HD tháng có DuocCongVaoTro=true
-                    // VÀ đơn đang "Chờ thanh toán" quá 7 ngày
+                    ngayHetHan = gs.NgayHetHan?.ToString("dd/MM/yyyy"),
+                    conHan = gs.NgayHetHan.HasValue ? (gs.NgayHetHan.Value - DateTime.Now).Days : (int?)null,
                     duocCongVaoTro = duocCongVaoTro
                         && gs.TrangThai_DV == "Chờ thanh toán"
                         && gs.NgayTao <= ngayNguong
@@ -211,6 +230,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
                     id = nuoc.IDDonDV,
                     trangThai = nuoc.TrangThai_DV,
                     tongTien = nuoc.TongTien,
+                    ngayHetHan = nuoc.NgayHetHan?.ToString("dd/MM/yyyy"),
+                    conHan = nuoc.NgayHetHan.HasValue ? (nuoc.NgayHetHan.Value - DateTime.Now).Days : (int?)null,
                     duocCongVaoTro = duocCongVaoTro
                         && nuoc.TrangThai_DV == "Chờ thanh toán"
                         && nuoc.NgayTao <= ngayNguong
@@ -218,8 +239,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
             });
         }
 
-        // --- API Xác nhận thanh toán (POST ?handler=XacNhanThanhToan) ---
-        // Dùng AnhBienLai (đúng tên field trong model DONDV)
+        // --- API Xác nhận thanh toán ---
         public async Task<IActionResult> OnPostXacNhanThanhToanAsync(
             [FromForm] string loaiTT,
             [FromForm] string? gsDonId,
@@ -229,7 +249,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
             var (idUser, idPhong) = await LayThongTinPhong();
             if (idPhong < 0) return Unauthorized();
 
-            // Lưu ảnh bill
             string? anhPath = null;
             if (anhBill != null && anhBill.Length > 0)
             {
@@ -244,25 +263,25 @@ namespace QuanLyNhaTro.Pages.KhachThue
 
             var now = DateTime.Now;
 
-            // Cập nhật đơn giặt sấy — dùng AnhBienLai (đúng field trong DONDV)
+            // Giặt sấy: khách chuyển khoản → chờ quản lý xác nhận
             if ((loaiTT == "gs" || loaiTT == "gop") && int.TryParse(gsDonId, out int gsId))
             {
                 var don = await _db.DONDV.FirstOrDefaultAsync(d => d.IDDonDV == gsId && d.IDPhong == idPhong);
                 if (don != null)
                 {
-                    don.TrangThai_DV = "Chờ xác nhận";
+                    don.TrangThai_DV = "Chờ duyệt";   // ← unified with HDTHANG convention
                     don.AnhBienLai = anhPath;
                     don.UpdatedAt = now;
                 }
             }
 
-            // Cập nhật đơn nước bình — dùng AnhBienLai
+            // Nước bình: thu tiền mặt trực tiếp → hoàn tất ngay
             if ((loaiTT == "nuoc" || loaiTT == "gop") && int.TryParse(nuocDonId, out int nuocId))
             {
                 var don = await _db.DONDV.FirstOrDefaultAsync(d => d.IDDonDV == nuocId && d.IDPhong == idPhong);
                 if (don != null)
                 {
-                    don.TrangThai_DV = "Chờ xác nhận";
+                    don.TrangThai_DV = "Thành công";
                     don.AnhBienLai = anhPath;
                     don.UpdatedAt = now;
                 }
@@ -276,7 +295,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
         }
 
         // --- API Hủy nợ cộng vào hóa đơn tháng ---
-        // DuocCongVaoTro nằm trong HDTHANG, không phải DONDV
         public async Task<IActionResult> OnPostHuyNoDVAsync([FromBody] XacNhanRequest req)
         {
             var (_, idPhong) = await LayThongTinPhong();
@@ -285,18 +303,15 @@ namespace QuanLyNhaTro.Pages.KhachThue
             var don = await _db.DONDV.FirstOrDefaultAsync(d => d.IDDonDV == req.DonId && d.IDPhong == idPhong);
             if (don == null) return NotFound("Không tìm thấy đơn.");
 
-            // Đổi trạng thái đơn về "Chờ thanh toán" để khách tự thanh toán riêng
             don.TrangThai_DV = "Chờ thanh toán";
             don.UpdatedAt = DateTime.Now;
 
-            // Tắt cờ DuocCongVaoTro trong hóa đơn tháng hiện tại
             var kyHienTai = DateTime.Now.ToString("MM/yyyy");
             var hdThang = await _db.HDTHANG
                 .FirstOrDefaultAsync(h => h.IDPhong == idPhong && h.KyThanhToan == kyHienTai);
             if (hdThang != null)
             {
                 hdThang.DuocCongVaoTro = false;
-                // Trừ TienNoDV ra khỏi hóa đơn và cập nhật TongCong
                 var tienNo = don.TongTien;
                 hdThang.TienNoDV = Math.Max(0, (hdThang.TienNoDV ?? 0) - tienNo);
                 hdThang.TongCong = Math.Max(0, hdThang.TongCong - tienNo);
@@ -341,8 +356,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (nM.HasValue && nM < (last?.SoNuocMoi ?? 0))
                 return BadRequest("Chỉ số nước mới không được nhỏ hơn chỉ số cũ.");
 
-            // Lưu ảnh đồng hồ (ưu tiên ảnh điện, nếu không có thì ảnh nước)
-            // AnhChupDongHo là [Required] nên phải có giá trị, dùng chuỗi rỗng nếu không có ảnh
             string anhPath = "";
             var file = anhDien ?? anhNuoc;
             if (file != null && file.Length > 0)
@@ -364,7 +377,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 SoDienMoi = dM ?? (last?.SoDienMoi ?? 0),
                 SoNuocCu = last?.SoNuocMoi ?? 0,
                 SoNuocMoi = nM ?? (last?.SoNuocMoi ?? 0),
-                AnhChupDongHo = anhPath,   // [Required] — luôn có giá trị (ít nhất là "")
+                AnhChupDongHo = anhPath,
                 NgayGhi = DateTime.Now,
                 TrangThaiDuyet = 0
             };
@@ -400,10 +413,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
         }
 
         // ── Request DTOs ─────────────────────────────────────────────────
-        public class XacNhanRequest
-        {
-            public int DonId { get; set; }
-        }
+        public class XacNhanRequest { public int DonId { get; set; } }
 
         public class DatGSRequest
         {
@@ -416,7 +426,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
             public int SoLuong { get; set; } = 1;
             public bool TraVo { get; set; } = false;
             public string GhiChu { get; set; } = "";
-            public decimal TongTien { get; set; } // client gửi lên nhưng server tự tính lại
+            public decimal TongTien { get; set; }
         }
     }
 }

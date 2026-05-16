@@ -439,9 +439,11 @@ namespace QuanLyNhaTro.Pages.Manager
                 DanhSachDonNuoc = LayDanhSachDon(conn, "Nước bình");
                 SoDonNuocChoBinhChoXuLy = DanhSachDonNuoc.Count(d => d.TrangThai_DV == "Chờ xử lý");
 
+                
                 // ── Đơn giặt sấy
                 DanhSachDonGiatSay = LayDanhSachDon(conn, "Giặt sấy");
-                SoDonGiatSayChoXuLy = DanhSachDonGiatSay.Count(d => d.TrangThai_DV == "Chờ xử lý");
+                SoDonGiatSayChoXuLy = DanhSachDonGiatSay.Count(d => d.TrangThai_DV == "Chờ xử lý" || d.TrangThai_DV == "Đang xử lý");
+
 
                 // Tổng đơn chờ xử lý (cho badge sidebar)
                 SoDonChoXuLy = SoDonNuocChoBinhChoXuLy + SoDonGiatSayChoXuLy;
@@ -483,6 +485,7 @@ namespace QuanLyNhaTro.Pages.Manager
                 ORDER BY
                     CASE d.TrangThai_DV
                         WHEN N'Chờ xử lý'    THEN 0
+                        WHEN N'Đang xử lý'    THEN 0
                         WHEN N'Chờ thanh toán' THEN 1
                         ELSE 2
                     END, d.NgayTao DESC";
