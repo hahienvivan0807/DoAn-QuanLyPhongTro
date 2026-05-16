@@ -1,0 +1,537 @@
+﻿@page
+@model QuanLyNhaTro.Pages.Admin.QuanLyNguoiThueModel
+@{
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Quản Lý – Chủ Trọ</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/QuanLyNguoiThue.css" />
+    <script src="/js/ChuTro/QuanLyNguoiThue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION: QUẢN LÝ NGƯỜI THUÊ
+     Thêm id="section-nguoi-thue" vào div container tương ứng
+     trong ChuTro.cshtml (cùng cấp với các section khác)
+════════════════════════════════════════════════════════════════ -->
+<div id="section-nguoi-thue" class="noi-dung-trang an">
+
+    <!-- ── TIÊU ĐỀ TRANG ── -->
+    <div class="nt-page-header">
+        <div class="nt-page-title">
+            <div class="nt-page-icon"><i class="fas fa-users"></i></div>
+            <div>
+                <h2>Danh Sách Người Thuê</h2>
+                <p>Quản lý thông tin toàn bộ khách thuê trong hệ thống</p>
+            </div>
+        </div>
+        <button class="nt-btn-them" onclick="ntMoModalThem()">
+            <i class="fas fa-plus"></i>
+            Thêm người thuê
+        </button>
+    </div>
+
+    <!-- ── THANH THỐNG KÊ NHANH ── -->
+    <div class="nt-stat-row">
+        <div class="nt-stat-card nt-stat-blue">
+            <div class="nt-stat-icon"><i class="fas fa-user-check"></i></div>
+            <div class="nt-stat-info">
+                <span class="nt-stat-num" id="nt-stat-dang-o">—</span>
+                <span class="nt-stat-lbl">Đang ở</span>
+            </div>
+        </div>
+        <div class="nt-stat-card nt-stat-gray">
+            <div class="nt-stat-icon"><i class="fas fa-user-slash"></i></div>
+            <div class="nt-stat-info">
+                <span class="nt-stat-num" id="nt-stat-da-roi">—</span>
+                <span class="nt-stat-lbl">Đã rời đi</span>
+            </div>
+        </div>
+        <div class="nt-stat-card nt-stat-gold">
+            <div class="nt-stat-icon"><i class="fas fa-users"></i></div>
+            <div class="nt-stat-info">
+                <span class="nt-stat-num" id="nt-stat-tong">—</span>
+                <span class="nt-stat-lbl">Tổng cộng</span>
+            </div>
+        </div>
+        <div class="nt-stat-card nt-stat-teal">
+            <div class="nt-stat-icon"><i class="fas fa-door-open"></i></div>
+            <div class="nt-stat-info">
+                <span class="nt-stat-num" id="nt-stat-phong">—</span>
+                <span class="nt-stat-lbl">Phòng có người</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── THANH CÔNG CỤ / BỘ LỌC ── -->
+    <div class="nt-toolbar">
+        <div class="nt-search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="nt-search-input"
+                   placeholder="Tìm theo tên, SĐT, CCCD..."
+                   oninput="ntLocDuLieu()" />
+            <button class="nt-search-clear" id="nt-btn-clear-search"
+                    onclick="ntXoaTimKiem()" style="display:none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="nt-filters">
+            <select class="nt-select" id="nt-filter-phong" onchange="ntLocDuLieu()">
+                <option value="">Tất cả phòng</option>
+                <!-- Render động từ JS -->
+            </select>
+
+            <select class="nt-select" id="nt-filter-trang-thai" onchange="ntLocDuLieu()">
+                <option value="">Tất cả trạng thái</option>
+                <option value="dang-o">🟢 Đang ở</option>
+                <option value="da-roi">⚫ Đã rời đi</option>
+            </select>
+
+            <select class="nt-select" id="nt-filter-gioi-tinh" onchange="ntLocDuLieu()">
+                <option value="">Tất cả giới tính</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+            </select>
+        </div>
+
+        <div class="nt-toolbar-right">
+            <button class="nt-btn-reset" onclick="ntDatLaiLoc()" title="Đặt lại bộ lọc">
+                <i class="fas fa-rotate-left"></i>
+                Đặt lại
+            </button>
+            <div class="nt-view-toggle">
+                <button class="nt-view-btn active" id="nt-btn-view-table"
+                        onclick="ntChuyenView('table')" title="Dạng bảng">
+                    <i class="fas fa-table"></i>
+                </button>
+                <button class="nt-view-btn" id="nt-btn-view-grid"
+                        onclick="ntChuyenView('grid')" title="Dạng lưới">
+                    <i class="fas fa-th-large"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── BẢNG DANH SÁCH (TABLE VIEW) ── -->
+    <div class="nt-table-wrap" id="nt-view-table">
+        <table class="nt-table">
+            <thead>
+                <tr>
+                    <th class="col-stt">STT</th>
+                    <th class="col-khach" onclick="ntSapXep('HoTen')" style="cursor:pointer;">
+                        Khách thuê <i class="fas fa-sort nt-sort-icon" id="sort-HoTen"></i>
+                    </th>
+                    <th class="col-phong" onclick="ntSapXep('SoPhong')" style="cursor:pointer;">
+                        Phòng <i class="fas fa-sort nt-sort-icon" id="sort-SoPhong"></i>
+                    </th>
+                    <th class="col-ngaysinh">Ngày sinh / CCCD</th>
+                    <th class="col-ngayvao" onclick="ntSapXep('NgayVaoO')" style="cursor:pointer;">
+                        Ngày vào ở <i class="fas fa-sort nt-sort-icon" id="sort-NgayVaoO"></i>
+                    </th>
+                    <th class="col-trangthai">Trạng thái</th>
+                    <th class="col-hanh-dong">Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="nt-table-body">
+                <!-- Render bằng JS -->
+            </tbody>
+        </table>
+
+        <!-- Trạng thái rỗng -->
+        <div class="nt-empty" id="nt-empty-state" style="display:none;">
+            <div class="nt-empty-icon"><i class="fas fa-users-slash"></i></div>
+            <h3>Không tìm thấy người thuê</h3>
+            <p>Thử thay đổi bộ lọc hoặc thêm người thuê mới</p>
+            <button class="nt-btn-them" onclick="ntMoModalThem()" style="margin-top:12px;">
+                <i class="fas fa-plus"></i> Thêm người thuê
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="nt-loading" id="nt-loading">
+            <div class="nt-spinner"></div>
+            <span>Đang tải dữ liệu...</span>
+        </div>
+    </div>
+
+    <!-- ── DẠNG LƯỚI (GRID VIEW) ── -->
+    <div class="nt-grid-wrap" id="nt-view-grid" style="display:none;">
+        <div class="nt-grid" id="nt-grid-body">
+            <!-- Render bằng JS -->
+        </div>
+    </div>
+
+    <!-- ── PHÂN TRANG ── -->
+    <div class="nt-pagination-bar" id="nt-pagination">
+        <div class="nt-pagination-info" id="nt-page-info">
+            Hiển thị <strong>1–10</strong> trong <strong>0</strong> người thuê
+        </div>
+        <div class="nt-pagination-btns" id="nt-page-btns">
+            <!-- Render bằng JS -->
+        </div>
+    </div>
+
+</div><!-- /section-nguoi-thue -->
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: THÊM / SỬA NGƯỜI THUÊ
+     Mapping: KHACH_THUE + ACCOUNT (Roles='Tenant')
+════════════════════════════════════════════════════════════ -->
+<div class="nt-modal-overlay" id="nt-modal-overlay" onclick="ntDongModal(event)">
+    <div class="nt-modal-box" id="nt-modal-box">
+
+        <!-- Header -->
+        <div class="nt-modal-header">
+            <div class="nt-modal-title">
+                <div class="nt-modal-icon" id="nt-modal-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div>
+                    <h3 id="nt-modal-tieu-de">Thêm người thuê mới</h3>
+                    <p id="nt-modal-mo-ta">Điền thông tin để tạo tài khoản và hồ sơ khách thuê</p>
+                </div>
+            </div>
+            <button class="nt-modal-close" onclick="ntDongModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="nt-modal-tabs">
+            <button class="nt-tab-btn active" data-tab="thong-tin-co-ban" onclick="ntChuyenTab(this)">
+                <i class="fas fa-id-card"></i> Thông tin cơ bản
+            </button>
+            <button class="nt-tab-btn" data-tab="thong-tin-cu-tru" onclick="ntChuyenTab(this)">
+                <i class="fas fa-map-marker-alt"></i> Cư trú & Liên hệ
+            </button>
+            <button class="nt-tab-btn" data-tab="thong-tin-phong" onclick="ntChuyenTab(this)">
+                <i class="fas fa-door-open"></i> Phòng & Hợp đồng
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="nt-modal-body">
+
+            <!-- Tab 1: Thông tin cơ bản -->
+            <div class="nt-tab-panel active" id="tab-thong-tin-co-ban">
+                <!-- Avatar upload -->
+                <div class="nt-avatar-upload">
+                    <div class="nt-avatar-preview" id="nt-avatar-preview">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="nt-avatar-actions">
+                        <label class="nt-btn-upload" for="inp-anh-chan-dung">
+                            <i class="fas fa-camera"></i> Chọn ảnh
+                        </label>
+                        <input type="file" id="inp-anh-chan-dung" accept="image/*"
+                               style="display:none;" onchange="ntXemTruocAnh(this)" />
+                        <span class="nt-avatar-note">JPG, PNG — tối đa 2MB</span>
+                    </div>
+                </div>
+
+                <div class="nt-form-grid">
+                    <!-- HoTen — KHACH_THUE.HoTen -->
+                    <div class="nt-field full">
+                        <label class="nt-label">Họ và tên <span class="req">*</span></label>
+                        <input class="nt-inp" type="text" id="inp-ho-ten"
+                               placeholder="VD: Nguyễn Văn An" maxlength="100" />
+                        <div class="nt-field-err" id="err-ho-ten"></div>
+                    </div>
+
+                    <!-- SoDienThoai — KHACH_THUE.SoDienThoai / ACCOUNT.Phone -->
+                    <div class="nt-field">
+                        <label class="nt-label">Số điện thoại <span class="req">*</span></label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-phone"></i>
+                            <input class="nt-inp" type="tel" id="inp-so-dien-thoai"
+                                   placeholder="0912 345 678" maxlength="15" />
+                        </div>
+                        <div class="nt-field-err" id="err-so-dien-thoai"></div>
+                    </div>
+
+                    <!-- Email — ACCOUNT.Email -->
+                    <div class="nt-field">
+                        <label class="nt-label">Email</label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input class="nt-inp" type="email" id="inp-email"
+                                   placeholder="example@gmail.com" maxlength="100" />
+                        </div>
+                    </div>
+
+                    <!-- NgaySinh — KHACH_THUE.NgaySinh -->
+                    <div class="nt-field">
+                        <label class="nt-label">Ngày sinh</label>
+                        <input class="nt-inp" type="date" id="inp-ngay-sinh" />
+                    </div>
+
+                    <!-- GioiTinh — KHACH_THUE.GioiTinh -->
+                    <div class="nt-field">
+                        <label class="nt-label">Giới tính</label>
+                        <select class="nt-inp" id="inp-gioi-tinh">
+                            <option value="">-- Chọn --</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+
+                    <!-- SoCCCD — KHACH_THUE.SoCCCD -->
+                    <div class="nt-field">
+                        <label class="nt-label">Số CCCD / CMND</label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-id-card"></i>
+                            <input class="nt-inp" type="text" id="inp-so-cccd"
+                                   placeholder="012345678901" maxlength="15" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Cư trú & Liên hệ -->
+            <div class="nt-tab-panel" id="tab-thong-tin-cu-tru">
+                <div class="nt-form-grid">
+                    <!-- QueQuan — KHACH_THUE.QueQuan -->
+                    <div class="nt-field full">
+                        <label class="nt-label">Quê quán</label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-map-pin"></i>
+                            <input class="nt-inp" type="text" id="inp-que-quan"
+                                   placeholder="VD: Cần Thơ, Việt Nam" maxlength="255" />
+                        </div>
+                    </div>
+
+                    <!-- DiaChiThuongTru — KHACH_THUE.DiaChiThuongTru -->
+                    <div class="nt-field full">
+                        <label class="nt-label">Địa chỉ thường trú</label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-home"></i>
+                            <input class="nt-inp" type="text" id="inp-dia-chi-thuong-tru"
+                                   placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP"
+                                   maxlength="255" />
+                        </div>
+                    </div>
+
+                    <!-- GhiChu — KHACH_THUE.GhiChu -->
+                    <div class="nt-field full">
+                        <label class="nt-label">Ghi chú</label>
+                        <textarea class="nt-inp" id="inp-ghi-chu" rows="3"
+                                  placeholder="Ghi chú thêm về khách thuê (tùy chọn)..."
+                                  maxlength="500"></textarea>
+                    </div>
+
+                    <!-- Tài khoản đăng nhập -->
+                    <div class="nt-form-section full">
+                        <div class="nt-sec-title"><i class="fas fa-key"></i> Tài khoản đăng nhập</div>
+                    </div>
+
+                    <!-- Username — ACCOUNT.Username -->
+                    <div class="nt-field">
+                        <label class="nt-label">Tên đăng nhập <span class="req">*</span></label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-at"></i>
+                            <input class="nt-inp" type="text" id="inp-username"
+                                   placeholder="VD: nguyenvanan" maxlength="50" />
+                        </div>
+                        <div class="nt-field-err" id="err-username"></div>
+                        <div class="nt-field-note">Dùng để đăng nhập ứng dụng người thuê</div>
+                    </div>
+
+                    <!-- Password — ACCOUNT.Passwords (chỉ khi thêm mới) -->
+                    <div class="nt-field" id="field-password">
+                        <label class="nt-label">Mật khẩu <span class="req">*</span></label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-lock"></i>
+                            <input class="nt-inp" type="password" id="inp-password"
+                                   placeholder="Tối thiểu 6 ký tự" maxlength="100" />
+                            <button type="button" class="nt-toggle-pw"
+                                    onclick="ntTogglePassword('inp-password', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="nt-field-err" id="err-password"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Phòng & Hợp đồng -->
+            <div class="nt-tab-panel" id="tab-thong-tin-phong">
+                <div class="nt-form-grid">
+                    <!-- NgayVaoO — KHACH_THUE.NgayVaoO -->
+                    <div class="nt-field">
+                        <label class="nt-label">Ngày vào ở <span class="req">*</span></label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-calendar-check"></i>
+                            <input class="nt-inp" type="date" id="inp-ngay-vao-o" />
+                        </div>
+                        <div class="nt-field-err" id="err-ngay-vao-o"></div>
+                    </div>
+
+                    <!-- IDPhong — HOPDONG.IDPhong -->
+                    <div class="nt-field">
+                        <label class="nt-label">Phòng <span class="req">*</span></label>
+                        <select class="nt-inp" id="inp-id-phong">
+                            <option value="">-- Chọn phòng --</option>
+                            <!-- Render từ JS (danh sách phòng Trống) -->
+                        </select>
+                        <div class="nt-field-err" id="err-id-phong"></div>
+                        <div class="nt-field-note">Chỉ hiển thị phòng đang trống</div>
+                    </div>
+
+                    <!-- TienCocBanDau — HOPDONG.TienCocBanDau -->
+                    <div class="nt-field">
+                        <label class="nt-label">Tiền cọc ban đầu</label>
+                        <div class="nt-inp-unit">
+                            <input class="nt-inp" type="number" id="inp-tien-coc"
+                                   placeholder="VD: 3000000" min="0" step="100000" />
+                            <span class="unit">đ</span>
+                        </div>
+                    </div>
+
+                    <!-- DienDauKy — HOPDONG.DienDauKy -->
+                    <div class="nt-field">
+                        <label class="nt-label">Chỉ số điện đầu kỳ</label>
+                        <div class="nt-inp-unit">
+                            <input class="nt-inp" type="number" id="inp-dien-dau-ky"
+                                   placeholder="VD: 1250" min="0" />
+                            <span class="unit">kWh</span>
+                        </div>
+                    </div>
+
+                    <!-- NuocDauKy — HOPDONG.NuocDauKy -->
+                    <div class="nt-field">
+                        <label class="nt-label">Chỉ số nước đầu kỳ</label>
+                        <div class="nt-inp-unit">
+                            <input class="nt-inp" type="number" id="inp-nuoc-dau-ky"
+                                   placeholder="VD: 300" min="0" />
+                            <span class="unit">m³</span>
+                        </div>
+                    </div>
+
+                    <!-- NgayKetThuc — HOPDONG.NgayKetThuc -->
+                    <div class="nt-field">
+                        <label class="nt-label">Ngày hết hạn hợp đồng</label>
+                        <div class="nt-inp-icon">
+                            <i class="fas fa-calendar-times"></i>
+                            <input class="nt-inp" type="date" id="inp-ngay-ket-thuc" />
+                        </div>
+                        <div class="nt-field-note">Để trống nếu hợp đồng không xác định thời hạn</div>
+                    </div>
+
+                    <!-- GhiChu HD — HOPDONG.GhiChu -->
+                    <div class="nt-field full">
+                        <label class="nt-label">Ghi chú hợp đồng</label>
+                        <textarea class="nt-inp" id="inp-ghi-chu-hd" rows="2"
+                                  placeholder="Điều khoản thêm, thỏa thuận đặc biệt..."
+                                  maxlength="500"></textarea>
+                    </div>
+                </div>
+
+                <!-- Tóm tắt phòng được chọn -->
+                <div class="nt-room-preview" id="nt-room-preview" style="display:none;">
+                    <div class="nt-rp-title"><i class="fas fa-door-open"></i> Thông tin phòng</div>
+                    <div class="nt-rp-body" id="nt-rp-body"></div>
+                </div>
+            </div>
+
+        </div><!-- /modal-body -->
+        <!-- Footer -->
+        <div class="nt-modal-footer">
+            <div class="nt-footer-note"><span>*</span> Trường bắt buộc</div>
+            <div class="nt-footer-btns">
+                <button class="nt-btn-cancel" onclick="ntDongModal()">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <button class="nt-btn-luu" id="nt-btn-submit" onclick="ntLuuNguoiThue()">
+                    <i class="fas fa-check"></i>
+                    <span id="nt-btn-submit-label">Thêm người thuê</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Hidden: ID khi đang sửa -->
+        <input type="hidden" id="inp-id-khach-thue" value="" />
+        <input type="hidden" id="inp-id-user" value="" />
+        <input type="hidden" id="nt-modal-mode" value="them" />
+    </div>
+</div><!-- /modal overlay -->
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: XEM CHI TIẾT NGƯỜI THUÊ
+════════════════════════════════════════════════════════════ -->
+<div class="nt-modal-overlay" id="nt-modal-detail-overlay" onclick="ntDongModalDetail(event)">
+    <div class="nt-modal-box nt-modal-detail" id="nt-modal-detail-box">
+
+        <div class="nt-modal-header">
+            <div class="nt-modal-title">
+                <div class="nt-modal-icon nt-icon-view"><i class="fas fa-eye"></i></div>
+                <div>
+                    <h3>Chi tiết người thuê</h3>
+                    <p id="nt-detail-mo-ta">Thông tin đầy đủ hồ sơ khách thuê</p>
+                </div>
+            </div>
+            <button class="nt-modal-close" onclick="ntDongModalDetail()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="nt-modal-body" id="nt-detail-body">
+            <!-- Render bằng JS -->
+        </div>
+
+        <div class="nt-modal-footer">
+            <div></div>
+            <div class="nt-footer-btns">
+                <button class="nt-btn-cancel" onclick="ntDongModalDetail()">Đóng</button>
+                <button class="nt-btn-sua" id="nt-detail-btn-sua" onclick="">
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: XÁC NHẬN XÓA / TRẢ PHÒNG
+════════════════════════════════════════════════════════════ -->
+<div class="nt-modal-overlay" id="nt-modal-xoa-overlay" onclick="ntDongModalXoa(event)">
+    <div class="nt-modal-box nt-modal-xoa" id="nt-modal-xoa-box">
+        <div class="nt-modal-header">
+            <div class="nt-modal-title">
+                <div class="nt-modal-icon nt-icon-delete"><i class="fas fa-user-minus"></i></div>
+                <div>
+                    <h3 id="nt-xoa-tieu-de">Xác nhận trả phòng</h3>
+                    <p>Hành động này không thể hoàn tác</p>
+                </div>
+            </div>
+        </div>
+        <div class="nt-modal-body">
+            <p id="nt-xoa-noi-dung" style="text-align:center; padding:8px 0; color:var(--mau-chu-phu); font-size:14px;"></p>
+            <div class="nt-field" style="margin-top:12px;">
+                <label class="nt-label">Lý do (tùy chọn)</label>
+                <textarea class="nt-inp" id="inp-ly-do-xoa" rows="2"
+                          placeholder="VD: Hết hợp đồng, chuyển nơi khác..."></textarea>
+            </div>
+        </div>
+        <div class="nt-modal-footer">
+            <div></div>
+            <div class="nt-footer-btns">
+                <button class="nt-btn-cancel" onclick="ntDongModalXoa()">Hủy</button>
+                <button class="nt-btn-xoa" id="nt-btn-confirm-xoa" onclick="ntXacNhanXoa()">
+                    <i class="fas fa-check"></i> Xác nhận trả phòng
+                </button>
+            </div>
+        </div>
+        <input type="hidden" id="inp-xoa-id-khach-thue" value="" />
+    </div>
+</div>
+</body>
+</html>

@@ -252,6 +252,15 @@ namespace QuanLyNhaTro.Controllers
                 TyleDT = tong
             });
         }
+        [HttpGet("Profile")]
+        public async Task<IActionResult> ProfileChuTro()
+        {
+            var data = await _context.ACCOUNT
+                .Where(x => x.Roles == "admin")
+                .FirstOrDefaultAsync();
+
+            return Ok(data);
+        }
     }   
 
 }

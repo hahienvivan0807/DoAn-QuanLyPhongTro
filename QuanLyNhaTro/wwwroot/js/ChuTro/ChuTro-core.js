@@ -119,8 +119,26 @@ async function TyLeDoanhThu() {
         console.error("Lỗi khi load dữ liệu doanh thu:", error);
     }
 }
+async function HienThiProfile() {
+    try {
+    const respone = await fetch('/api/ChuTro/Profile');
+        const dulieu = await respone.json();
+         console.log(dulieu);
+        const adminHeader = document.querySelector('.ten-admin-header');
+        if (adminHeader) adminHeader.textContent = dulieu.fullName;
 
+        const tenChuTro = document.querySelector('.ten-chu strong');
+        if (tenChuTro) tenChuTro.textContent = dulieu.fullName;
 
+        const theChaoHoi = document.querySelector('.dong-tieu-de-trang h2');
+        if (theChaoHoi) theChaoHoi.textContent = `Xin chào, ${dulieu.fullName}! 👑`;
+    } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu profile:", error);
+    }
+}
+document.addEventListener('DOMContentLoaded', () => {
+    HienThiProfile();
+})
 document.addEventListener('DOMContentLoaded', () => {
     HienThiTyLeLapDay();
 });
