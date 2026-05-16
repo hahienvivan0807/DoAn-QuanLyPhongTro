@@ -301,7 +301,7 @@ async function openDetail(id) {
             Không thể tải thông tin phòng
         </div>`;
     }
-    //////////////////Chỗ chưa sửa///////////////////////
+    //////////////////Chỗ chưa sửa////////////////////////
 } function mgrToggleMenu() {
     const dd = document.getElementById('mgrDropdown');
     const ch = document.getElementById('mgrChevron');

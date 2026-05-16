@@ -25,3 +25,4 @@ function ktXacNhanDangXuat() {
         window.location.href = '/logout'; // đổi route khi làm BE
     }
 }
+//

@@ -13,7 +13,7 @@
     setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = 'all 0.3s'; }, 2700);
     setTimeout(() => toast.remove(), 3100);
 }
-// ===== HÀM ĐIỀU HƯỚNG MENU SIDEBAR =====
+// ===== HÀM ĐIỀU HƯỚNG MENU SIDEBAR ======
 function chuyenMenu(tenTrang, phanTu) {
     document.querySelectorAll('.muc-menu').forEach(m => m.classList.remove('dang-chon'));
     if (phanTu) phanTu.classList.add('dang-chon');
@@ -138,7 +138,7 @@ async function HienThiProfile() {
         console.error("Lỗi khi lấy dữ liệu profile:", error);
     }
 }
-///////////////////Chỗ chưa sửa ///////////
+///////////////////Chỗ chưa sửa ////////////
 function toggleAdminMenu() {
     const dd = document.getElementById('adminDropdown');
     const ch = document.getElementById('adminChevron');
