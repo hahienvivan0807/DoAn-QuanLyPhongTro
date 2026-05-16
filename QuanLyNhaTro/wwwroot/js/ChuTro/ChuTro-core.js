@@ -13,7 +13,7 @@
     setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = 'all 0.3s'; }, 2700);
     setTimeout(() => toast.remove(), 3100);
 }
-// ===== HÀM ĐIỀU HƯỚNG MENU SIDEBAR =====
+// ===== HÀM ĐIỀU HƯỚNG MENU SIDEBAR ======
 function chuyenMenu(tenTrang, phanTu) {
     document.querySelectorAll('.muc-menu').forEach(m => m.classList.remove('dang-chon'));
     if (phanTu) phanTu.classList.add('dang-chon');
@@ -130,10 +130,41 @@ async function HienThiProfile() {
         const tenChuTro = document.querySelector('.ten-chu strong');
         if (tenChuTro) tenChuTro.textContent = dulieu.fullName;
 
+        document.getElementById('dd-email').textContent = dulieu.email ?? 'Chưa cập nhật';
+
         const theChaoHoi = document.querySelector('.dong-tieu-de-trang h2');
         if (theChaoHoi) theChaoHoi.textContent = `Xin chào, ${dulieu.fullName}! 👑`;
     } catch (error) {
         console.error("Lỗi khi lấy dữ liệu profile:", error);
+    }
+}
+///////////////////Chỗ chưa sửa ////////////
+function toggleAdminMenu() {
+    const dd = document.getElementById('adminDropdown');
+    const ch = document.getElementById('adminChevron');
+    const open = dd.classList.toggle('show');
+    ch.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+// Đóng khi click ra ngoài
+document.addEventListener('click', function (e) {
+    const wrap = document.getElementById('adminHeaderWrap');
+    if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('adminDropdown')?.classList.remove('show');
+        const ch = document.getElementById('adminChevron');
+        if (ch) ch.style.transform = '';
+    }
+});
+
+function moDoiMatKhau() {
+    toggleAdminMenu();
+    moModal('modal-doi-mat-khau'); // gắn vào modal sau khi làm BE
+}
+
+function xacNhanDangXuat() {
+    toggleAdminMenu();
+    if (confirm('Bạn có chắc muốn đăng xuất?')) {
+        window.location.href = '/logout'; // đổi route khi làm BE
     }
 }
 document.addEventListener('DOMContentLoaded', () => {

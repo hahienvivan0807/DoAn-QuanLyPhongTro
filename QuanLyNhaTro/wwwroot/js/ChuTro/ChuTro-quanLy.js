@@ -182,5 +182,5 @@ async function moModalDanhSachQuanLy() {
     }
 }
 
-// ---- Tự động render khi trang load ----
+// ---- Tự động render khi trang load -----
 document.addEventListener('DOMContentLoaded', taiDanhSachQuanLy);

@@ -301,7 +301,45 @@ async function openDetail(id) {
             Không thể tải thông tin phòng
         </div>`;
     }
+    //////////////////Chỗ chưa sửa////////////////////////
+} function mgrToggleMenu() {
+    const dd = document.getElementById('mgrDropdown');
+    const ch = document.getElementById('mgrChevron');
+    const open = dd.classList.toggle('show');
+    ch.style.transform = open ? 'rotate(180deg)' : '';
 }
+
+document.addEventListener('click', function (e) {
+    const wrap = document.getElementById('mgrHeaderWrap');
+    if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('mgrDropdown')?.classList.remove('show');
+        const ch = document.getElementById('mgrChevron');
+        if (ch) ch.style.transform = '';
+    }
+});
+
+function mgrMoDoiMatKhau() {
+    mgrToggleMenu();
+    moModal('modal-doi-mat-khau'); // nối vào modal khi làm BE
+}
+
+function mgrXacNhanDangXuat() {
+    mgrToggleMenu();
+    if (confirm('Bạn có chắc muốn đăng xuất?')) {
+        window.location.href = '/logout'; // đổi route khi làm BE
+    }
+}
+
+// Load email vào dropdown (nếu có API profile riêng cho Manager)
+async function mgrLoadEmail() {
+    try {
+        const res = await fetch('/api/Manager/Profile'); // đổi route theo BE
+        const data = await res.json();
+        const el = document.getElementById('mgr-dd-email');
+        if (el) el.textContent = data.email ?? 'Chưa cập nhật';
+    } catch { }
+}
+document.addEventListener('DOMContentLoaded', mgrLoadEmail);
 
 function showList() {
     document.getElementById("listView").style.display = "";
