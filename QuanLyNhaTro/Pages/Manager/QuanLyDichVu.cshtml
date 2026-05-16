@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
-            /* ===== BIẾN MÀU – khớp Manager.cshtml ===== */
+        /* ===== BIẾN MÀU – khớp ChiTietPhong.cshtml ===== */
             :root {
                 --mau-sidebar: #0d1b3e;
                 --mau-sidebar-dam: #091429;
@@ -24,8 +24,11 @@
                 --mau-vien: #e2e8f0;
                 --mau-xanh-nhat: #eff6ff;
                 --mau-xanh-trung: #dbeafe;
-                --bong-card: 0 4px 24px rgba(26,86,219,.10);
-                --bong-card-hover: 0 8px 32px rgba(26,86,219,.18);
+                --bong-card: 0 4px 24px rgba(26,86,219,0.10);
+                --bong-card-hover: 0 8px 32px rgba(26,86,219,0.18);
+                --mau-xanh-la: #059669;
+                --mau-cam: #d97706;
+                --mau-do: #dc2626;
             }
 
             * {
@@ -35,7 +38,7 @@
             }
 
             body {
-                font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+                font-family: 'Segoe UI', 'SVN-Gilroy', sans-serif;
                 background: var(--mau-nen);
                 color: var(--mau-chu);
                 display: flex;
@@ -43,32 +46,22 @@
                 overflow: hidden;
             }
 
-            /* ===== SIDEBAR ===== */
+            /* ============================================================
+                                                                   SIDEBAR
+                                                   ============================================================ */
             #thanh-sidebar {
-                width: 248px;
-                min-width: 248px;
-                background: #0f1c3a;
+                width: 220px;
+                min-width: 220px;
+                background: linear-gradient(180deg, #0d1b3e 0%, #091429 100%);
                 display: flex;
                 flex-direction: column;
                 height: 100vh;
                 position: relative;
                 z-index: 100;
-                box-shadow: 4px 0 32px rgba(0,0,0,.25);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.18);
                 overflow-y: auto;
-                overflow-x: hidden;
-                transition: width .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1);
-                scrollbar-width: thin;
-                scrollbar-color: rgba(255,255,255,.08) transparent;
+                transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
             }
-
-                #thanh-sidebar::-webkit-scrollbar {
-                    width: 4px;
-                }
-
-                #thanh-sidebar::-webkit-scrollbar-thumb {
-                    background: rgba(255,255,255,.1);
-                    border-radius: 4px;
-                }
 
                 #thanh-sidebar.an-sidebar {
                     width: 0;
@@ -76,125 +69,146 @@
                     overflow: hidden;
                 }
 
-            /* ── Logo ── */
+            /* Ẩn nhãn nhóm khi thu gọn */
+            .nhan-nhom {
+                transition: opacity 0.2s ease, max-height 0.3s ease;
+                max-height: 40px;
+                overflow: hidden;
+            }
+
+            #thanh-sidebar.thu-gon .nhan-nhom {
+                opacity: 0;
+                max-height: 0;
+                padding: 0;
+            }
+
+            /* Ẩn text trong menu item khi thu gọn */
+            .menu-item span:not(.huy-hieu-menu) {
+                transition: opacity 0.2s ease, max-width 0.35s ease;
+                max-width: 160px;
+                overflow: hidden;
+                display: inline-block;
+            }
+
+            #thanh-sidebar.thu-gon .menu-item span:not(.huy-hieu-menu) {
+                opacity: 0;
+                max-width: 0;
+            }
+
+            #thanh-sidebar.thu-gon .huy-hieu-menu {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+                padding: 0;
+            }
+
+            /* Căn giữa icon khi thu gọn */
+            #thanh-sidebar.thu-gon .menu-item {
+                padding: 10px 0;
+                justify-content: center;
+                border-radius: 10px;
+                margin: 2px 8px;
+            }
+
+            #thanh-sidebar.thu-gon .admin-sidebar {
+                justify-content: center;
+            }
+
             .logo-sidebar {
                 display: flex;
                 align-items: center;
-                gap: 14px;
-                padding: 26px 20px 22px;
-                border-bottom: 1px solid rgba(255,255,255,.06);
+                gap: 12px;
+                padding: 28px 20px 24px 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
             }
 
                 .logo-sidebar .bieu-tuong {
-                    width: 46px;
-                    height: 46px;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    flex-shrink: 0;
-                    background: linear-gradient(135deg,#1a56db,#60a5fa);
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 10px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 4px 12px rgba(26,86,219,.45);
+                    overflow: hidden;
+                    background: transparent;
                 }
 
                     .logo-sidebar .bieu-tuong img {
                         width: 100%;
                         height: 100%;
-                        object-fit: cover;
-                        border-radius: 12px;
+                        object-fit: contain;
+                        border-radius: 10px;
                     }
 
-                    .logo-sidebar .bieu-tuong i {
-                        color: #fff;
-                        font-size: 22px;
-                    }
-
-                .logo-sidebar .ten-logo strong {
-                    display: block;
-                    font-size: 14px;
-                    font-weight: 700;
+                .logo-sidebar .ten-logo {
                     color: #fff;
-                    letter-spacing: .2px;
-                    white-space: nowrap;
                 }
 
-                .logo-sidebar .ten-logo span {
-                    font-size: 11px;
-                    color: rgba(255,255,255,.38);
-                    font-weight: 400;
-                }
+                    .logo-sidebar .ten-logo strong {
+                        display: block;
+                        font-size: 13px;
+                        letter-spacing: 0.5px;
+                        line-height: 1;
+                        margin-bottom: -1px;
+                    }
 
-            /* ── Nhãn nhóm ── */
+                    .logo-sidebar .ten-logo span {
+                        font-size: 11px;
+                        color: rgba(255,255,255,0.45);
+                    }
+
             .nhan-nhom {
                 font-size: 10px;
                 font-weight: 700;
-                letter-spacing: 1.6px;
-                color: rgba(255,255,255,.28);
+                letter-spacing: 1.5px;
+                color: rgba(255,255,255,0.3);
                 text-transform: uppercase;
-                padding: 20px 20px 6px 20px;
-                overflow: hidden;
-            }
-
-            /* ── Menu item ── */
-            .menu-item span:not(.huy-hieu-menu) {
-                transition: opacity .2s, max-width .35s;
-                max-width: 160px;
-                overflow: hidden;
-                display: inline-block;
-                white-space: nowrap;
+                padding: 18px 20px 6px;
             }
 
             .menu-item {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                padding: 10px 16px 10px 18px;
-                color: rgba(255,255,255,.58);
+                gap: 13px;
+                padding: 10px 20px;
+                color: rgba(255,255,255,0.65);
                 cursor: pointer;
-                border-radius: 10px;
-                margin: 2px 10px;
-                transition: all .18s ease;
-                font-size: 13.5px;
-                font-weight: 500;
+                border-radius: 0 30px 30px 0;
+                margin: 2px 10px 2px 0;
+                transition: all 0.2s;
+                font-size: 14px;
                 text-decoration: none;
                 position: relative;
-                letter-spacing: .1px;
             }
 
-                .menu-item .icon-wrap {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-shrink: 0;
+                .menu-item i {
+                    width: 20px;
+                    text-align: center;
                     font-size: 15px;
-                    background: rgba(255,255,255,.04);
-                    transition: background .18s, color .18s;
                 }
 
                 .menu-item:hover {
-                    background: rgba(59,130,246,.12);
-                    color: rgba(255,255,255,.9);
+                    background: rgba(59,130,246,0.15);
+                    color: #fff;
                 }
-
-                    .menu-item:hover .icon-wrap {
-                        background: rgba(59,130,246,.2);
-                        color: #93c5fd;
-                    }
 
                 .menu-item.dang-chon {
-                    background: linear-gradient(90deg, rgba(26,86,219,.9) 0%, rgba(37,99,235,.75) 100%);
+                    background: linear-gradient(90deg, rgba(26,86,219,0.85), rgba(59,130,246,0.6));
                     color: #fff;
                     font-weight: 600;
-                    box-shadow: 0 4px 18px rgba(26,86,219,.35);
+                    box-shadow: 0 4px 16px rgba(26,86,219,0.3);
                 }
 
-                    .menu-item.dang-chon .icon-wrap {
-                        background: rgba(255,255,255,.18);
-                        color: #fff;
+                    .menu-item.dang-chon::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 70%;
+                        width: 4px;
+                        background: #60a5fa;
+                        border-radius: 0 4px 4px 0;
                     }
 
             .huy-hieu-menu {
@@ -204,1894 +218,1637 @@
                 font-size: 10px;
                 font-weight: 700;
                 border-radius: 20px;
-                padding: 2px 7px;
+                padding: 1px 7px;
                 min-width: 20px;
                 text-align: center;
-                line-height: 1.4;
-                flex-shrink: 0;
             }
 
-            /* ── Account bottom ── */
             .admin-sidebar {
                 margin-top: auto;
-                padding: 14px 16px;
-                border-top: 1px solid rgba(255,255,255,.06);
+                padding: 18px 16px;
+                border-top: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 align-items: center;
-                gap: 11px;
+                gap: 10px;
                 cursor: pointer;
-                transition: background .18s;
-                border-radius: 0;
             }
 
-                .admin-sidebar:hover {
-                    background: rgba(255,255,255,.04);
-                }
-
                 .admin-sidebar .anh-admin {
-                    width: 40px;
-                    height: 40px;
+                    width: 38px;
+                    height: 38px;
                     border-radius: 50%;
                     background: linear-gradient(135deg, #1a56db, #60a5fa);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: #fff;
-                    font-size: 15px;
-                    font-weight: 700;
-                    border: 2px solid rgba(255,255,255,.18);
-                    flex-shrink: 0;
-                    letter-spacing: 0;
+                    font-size: 16px;
+                    border: 2px solid rgba(255,255,255,0.2);
                 }
 
-                .admin-sidebar .ten-admin {
-                    flex: 1;
-                    min-width: 0;
-                }
-
-                    .admin-sidebar .ten-admin strong {
-                        display: block;
-                        color: #fff;
-                        font-size: 13px;
-                        font-weight: 600;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                    }
-
-                    .admin-sidebar .ten-admin span {
-                        color: rgba(255,255,255,.4);
-                        font-size: 11px;
-                        font-weight: 400;
-                    }
-
-            /* ===== KHU VỰC CHÍNH ===== */
-            #khu-vuc-chinh {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-
-            /* ===== HEADER ===== */
-            #thanh-header {
-                background: var(--mau-trang);
-                padding: 0 28px;
-                height: 64px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                border-bottom: 1px solid var(--mau-vien);
-                box-shadow: 0 2px 8px rgba(0,0,0,.05);
-                flex-shrink: 0;
-            }
-
-            .header-trai {
-                display: flex;
-                align-items: center;
-                gap: 16px;
-            }
-
-            .nut-ham-menu {
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 20px;
-                color: var(--mau-chu-phu);
-                padding: 6px;
-                border-radius: 8px;
-                transition: background .2s;
-            }
-
-                .nut-ham-menu:hover {
-                    background: var(--mau-xanh-nhat);
-                    color: var(--mau-chu-de);
-                }
-
-            .tieu-de-trang {
-                font-size: 16px;
-                font-weight: 700;
-                color: var(--mau-chu);
-            }
-
-            .duong-dan {
-                font-size: 12px;
-                color: var(--mau-chu-phu);
-            }
-
-            .header-phai {
-                display: flex;
-                align-items: center;
-                gap: 16px;
-            }
-
-            .nut-thong-bao {
-                position: relative;
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 18px;
-                color: var(--mau-chu-phu);
-                padding: 8px;
-                border-radius: 50%;
-                transition: all .2s;
-            }
-
-                .nut-thong-bao:hover {
-                    background: var(--mau-xanh-nhat);
-                    color: var(--mau-chu-de);
-                }
-
-            .so-thong-bao {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                background: #ef4444;
-                color: #fff;
-                font-size: 9px;
-                font-weight: 700;
-                border-radius: 50%;
-                width: 16px;
-                height: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 2px solid #fff;
-            }
-
-            .thong-tin-admin {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                cursor: pointer;
-                padding: 6px 12px;
-                border-radius: 24px;
-                transition: background .2s;
-            }
-
-                .thong-tin-admin:hover {
-                    background: var(--mau-xanh-nhat);
-                }
-
-                .thong-tin-admin .anh-dai-dien {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    background: linear-gradient(135deg,#1a56db,#60a5fa);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                .admin-sidebar .ten-admin strong {
+                    display: block;
                     color: #fff;
-                    font-size: 14px;
-                    font-weight: 700;
-                }
-
-                .thong-tin-admin .ten {
-                    font-size: 13px;
-                    font-weight: 600;
-                }
-
-                .thong-tin-admin .chuc-vu {
-                    font-size: 11px;
-                    color: var(--mau-chu-phu);
-                }
-
-            /* ===== NỘI DUNG CHÍNH ===== */
-            #noi-dung {
-                flex: 1;
-                overflow-y: auto;
-                padding: 24px 28px;
-            }
-
-            /* ===== PAGE HEADER ROW ===== */
-            .hang-chao-mung {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 22px;
-            }
-
-                .hang-chao-mung h2 {
-                    font-size: 20px;
-                    font-weight: 800;
-                }
-
-                .hang-chao-mung p {
-                    font-size: 13px;
-                    color: var(--mau-chu-phu);
-                    margin-top: 2px;
-                }
-
-            .nut-them-moi {
-                background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
-                color: #fff;
-                border: none;
-                border-radius: 10px;
-                padding: 10px 20px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                box-shadow: 0 4px 12px rgba(26,86,219,.3);
-                transition: all .2s;
-                text-decoration: none;
-            }
-
-                .nut-them-moi:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(26,86,219,.4);
-                }
-
-            /* ===== STAT CARDS HÀNG ĐẦU ===== */
-            .hang-thong-ke {
-                display: grid;
-                grid-template-columns: repeat(4,1fr);
-                gap: 18px;
-                margin-bottom: 22px;
-            }
-
-            .card-thong-ke {
-                background: var(--mau-trang);
-                border-radius: 16px;
-                padding: 20px;
-                box-shadow: var(--bong-card);
-                position: relative;
-                overflow: hidden;
-                cursor: pointer;
-                transition: all .25s;
-                border: 1px solid transparent;
-            }
-
-                .card-thong-ke:hover {
-                    transform: translateY(-4px);
-                    box-shadow: var(--bong-card-hover);
-                }
-
-                .card-thong-ke::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 4px;
-                    border-radius: 16px 16px 0 0;
-                }
-
-                .card-thong-ke.mau-xanh::before {
-                    background: linear-gradient(90deg,#1a56db,#60a5fa);
-                }
-
-                .card-thong-ke.mau-xanh {
-                    border-color: #dbeafe;
-                }
-
-                    .card-thong-ke.mau-xanh .bieu-tuong-card {
-                        background: #eff6ff;
-                        color: #1a56db;
-                    }
-
-                .card-thong-ke.mau-xanh-la::before {
-                    background: linear-gradient(90deg,#059669,#34d399);
-                }
-
-                .card-thong-ke.mau-xanh-la {
-                    border-color: #d1fae5;
-                }
-
-                    .card-thong-ke.mau-xanh-la .bieu-tuong-card {
-                        background: #ecfdf5;
-                        color: #059669;
-                    }
-
-                .card-thong-ke.mau-cam::before {
-                    background: linear-gradient(90deg,#f59e0b,#fbbf24);
-                }
-
-                .card-thong-ke.mau-cam {
-                    border-color: #fef3c7;
-                }
-
-                    .card-thong-ke.mau-cam .bieu-tuong-card {
-                        background: #fffbeb;
-                        color: #d97706;
-                    }
-
-                .card-thong-ke.mau-do::before {
-                    background: linear-gradient(90deg,#ef4444,#f87171);
-                }
-
-                .card-thong-ke.mau-do {
-                    border-color: #fee2e2;
-                }
-
-                    .card-thong-ke.mau-do .bieu-tuong-card {
-                        background: #fef2f2;
-                        color: #dc2626;
-                    }
-
-            .card-noi-dung {
-                display: flex;
-                align-items: center;
-                gap: 16px;
-                margin-top: 10px;
-            }
-
-            .bieu-tuong-card {
-                width: 52px;
-                height: 52px;
-                border-radius: 14px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 22px;
-                flex-shrink: 0;
-            }
-
-            .so-lieu .con-so {
-                font-size: 28px;
-                font-weight: 800;
-                line-height: 1;
-            }
-
-            .so-lieu .ten-thong-ke {
-                font-size: 12px;
-                color: var(--mau-chu-phu);
-                margin-top: 4px;
-            }
-
-            .nhan-trang-thai {
-                font-size: 11px;
-                font-weight: 600;
-                padding: 3px 8px;
-                border-radius: 20px;
-                margin-top: 6px;
-                display: inline-block;
-            }
-
-                .nhan-trang-thai.cho {
-                    background: #fef3c7;
-                    color: #d97706;
-                }
-
-                .nhan-trang-thai.ok {
-                    background: #dcfce7;
-                    color: #16a34a;
-                }
-
-            /* ===== TABS ===== */
-            .tab-bar {
-                display: flex;
-                gap: 6px;
-                margin-bottom: 20px;
-                background: var(--mau-trang);
-                padding: 6px;
-                border-radius: 14px;
-                box-shadow: var(--bong-card);
-                border: 1px solid var(--mau-vien);
-                width: fit-content;
-            }
-
-            .tab-btn {
-                padding: 8px 18px;
-                border: none;
-                border-radius: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                color: var(--mau-chu-phu);
-                background: none;
-                transition: all .2s;
-                display: flex;
-                align-items: center;
-                gap: 7px;
-            }
-
-                .tab-btn .badge-tab {
-                    background: var(--mau-vien);
-                    color: var(--mau-chu-phu);
-                    border-radius: 20px;
-                    padding: 1px 7px;
                     font-size: 10px;
-                    font-weight: 700;
+                    line-height: 1.3;
+                    margin: 0;
                 }
 
-                .tab-btn.active {
-                    background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
-                    color: #fff;
-                    box-shadow: 0 4px 12px rgba(26,86,219,.3);
-                }
-
-                    .tab-btn.active .badge-tab {
-                        background: rgba(255,255,255,.25);
-                        color: #fff;
-                    }
-
-            /* ===== PANEL (tab content) ===== */
-            .tab-panel {
-                display: none;
-            }
-
-                .tab-panel.active {
+                .admin-sidebar .ten-admin span {
+                    color: rgba(255,255,255,0.45);
+                    font-size: 11px;
+                    line-height: 1.2;
                     display: block;
                 }
 
-            /* ===== CARD CONTAINER ===== */
-            .card {
-                background: var(--mau-trang);
-                border-radius: 16px;
-                box-shadow: var(--bong-card);
-                border: 1px solid var(--mau-vien);
-                overflow: hidden;
-                margin-bottom: 20px;
-            }
-
-            .card-header {
-                padding: 16px 22px;
-                border-bottom: 1px solid var(--mau-vien);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-                .card-header h3 {
-                    font-size: 15px;
-                    font-weight: 700;
-                }
-
-                .card-header .sub {
-                    font-size: 12px;
-                    color: var(--mau-chu-phu);
-                    margin-top: 2px;
-                }
-
-            /* ===== TOOLBAR / FILTER ===== */
-            .toolbar {
-                padding: 14px 22px;
-                border-bottom: 1px solid var(--mau-vien);
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                flex-wrap: wrap;
-            }
-
-            .o-tim-kiem {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                background: var(--mau-nen);
-                border: 1px solid var(--mau-vien);
-                border-radius: 24px;
-                padding: 7px 16px;
-                transition: all .2s;
-                margin-left: auto;
-            }
-
-                .o-tim-kiem:focus-within {
-                    border-color: var(--mau-chu-de-sang);
-                    background: #fff;
-                }
-
-                .o-tim-kiem input {
-                    border: none;
-                    background: none;
-                    outline: none;
-                    font-size: 13px;
-                    width: 180px;
-                    color: var(--mau-chu);
-                }
-
-                .o-tim-kiem i {
-                    color: var(--mau-chu-phu);
-                    font-size: 13px;
-                }
-
-            .filter-pill {
-                padding: 6px 14px;
-                border-radius: 20px;
-                border: 1.5px solid var(--mau-vien);
-                font-size: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                background: none;
-                color: var(--mau-chu-phu);
-                transition: all .2s;
-            }
-
-                .filter-pill.on {
-                    background: var(--mau-xanh-trung);
-                    border-color: var(--mau-chu-de-sang);
-                    color: var(--mau-chu-de);
-                }
-
-            /* ===== TABLE ===== */
-            .table-wrap {
-                overflow-x: auto;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 13.5px;
-            }
-
-            thead th {
-                background: #f8fafc;
-                padding: 11px 16px;
-                text-align: left;
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--mau-chu-phu);
-                text-transform: uppercase;
-                letter-spacing: .7px;
-                border-bottom: 1px solid var(--mau-vien);
-            }
-
-            tbody tr {
-                transition: background .15s;
-            }
-
-                tbody tr:hover {
-                    background: #f8faff;
-                }
-
-            tbody td {
-                padding: 13px 16px;
-                border-bottom: 1px solid var(--mau-vien);
-                vertical-align: middle;
-            }
-
-            tbody tr:last-child td {
-                border-bottom: none;
-            }
-
-            /* ===== BADGES ===== */
-            .badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                padding: 3px 10px;
-                border-radius: 20px;
-                font-size: 11px;
-                font-weight: 700;
-            }
-
-                .badge.cho-xu-ly {
-                    background: #fef3c7;
-                    color: #b45309;
-                }
-
-                .badge.dang-xu-ly {
-                    background: #dbeafe;
-                    color: #1d4ed8;
-                }
-
-                .badge.cho-tt {
-                    background: #ede9fe;
-                    color: #6d28d9;
-                }
-
-                .badge.xong {
-                    background: #dcfce7;
-                    color: #15803d;
-                }
-
-                .badge.huy {
-                    background: #fee2e2;
-                    color: #b91c1c;
-                }
-
-                .badge.cho-duyet {
-                    background: #fef9c3;
-                    color: #a16207;
-                }
-
-                .badge.da-duyet {
-                    background: #d1fae5;
-                    color: #065f46;
-                }
-
-                .badge.tu-choi {
-                    background: #fee2e2;
-                    color: #b91c1c;
-                }
-
-                .badge.chua-dong {
-                    background: #fef3c7;
-                    color: #b45309;
-                }
-
-                .badge.qua-han {
-                    background: #fee2e2;
-                    color: #b91c1c;
-                }
-
-                .badge.da-dong {
-                    background: #dcfce7;
-                    color: #15803d;
-                }
-
-            /* ===== ACTION BUTTONS ===== */
-            .btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 7px 14px;
-                border-radius: 8px;
-                font-size: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                border: none;
-                transition: all .2s;
-                text-decoration: none;
-            }
-
-            .btn-primary {
-                background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
-                color: #fff;
-                box-shadow: 0 3px 8px rgba(26,86,219,.3);
-            }
-
-                .btn-primary:hover {
-                    transform: translateY(-1px);
-                    box-shadow: 0 5px 14px rgba(26,86,219,.4);
-                }
-
-            .btn-success {
-                background: #dcfce7;
-                color: #15803d;
-            }
-
-                .btn-success:hover {
-                    background: #bbf7d0;
-                }
-
-            .btn-warning {
-                background: #fef3c7;
-                color: #b45309;
-            }
-
-                .btn-warning:hover {
-                    background: #fde68a;
-                }
-
-            .btn-danger {
-                background: #fee2e2;
-                color: #b91c1c;
-            }
-
-                .btn-danger:hover {
-                    background: #fecaca;
-                }
-
-            .btn-ghost {
-                background: var(--mau-nen);
-                color: var(--mau-chu-phu);
-                border: 1px solid var(--mau-vien);
-            }
-
-                .btn-ghost:hover {
-                    background: var(--mau-xanh-nhat);
-                    color: var(--mau-chu-de);
-                }
-
-            .btn-sm {
-                padding: 5px 10px;
-                font-size: 11px;
-                border-radius: 7px;
-            }
-
-            /* ===== FORM INLINE / NHẬP GIÁ ===== */
-            .form-inline {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .inp {
-                border: 1.5px solid var(--mau-vien);
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-size: 13px;
-                color: var(--mau-chu);
-                background: #fff;
-                outline: none;
-                transition: border .2s;
-                font-family: inherit;
-            }
-
-                .inp:focus {
-                    border-color: var(--mau-chu-de-sang);
-                }
-
-            .inp-sm {
-                width: 120px;
-                padding: 5px 10px;
-                font-size: 12px;
-            }
-
-            /* ===== MODAL ===== */
-            .modal-overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(15,23,42,.45);
-                backdrop-filter: blur(4px);
-                z-index: 1000;
-                align-items: center;
-                justify-content: center;
-            }
-
-                .modal-overlay.hien {
-                    display: flex;
-                }
-
-            .modal {
-                background: #fff;
-                border-radius: 20px;
-                padding: 30px;
-                width: 520px;
-                max-width: 95vw;
-                box-shadow: 0 24px 64px rgba(0,0,0,.18);
-                animation: slideUp .25s ease;
-            }
-
-            .modal-lg {
-                width: 680px;
-            }
-
-            @@keyframes slideUp {
-                from {
-                    transform: translateY(24px);
-                    opacity: 0;
-                }
-
-                to {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-            }
-
-            .modal-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 22px;
-            }
-
-                .modal-header h3 {
-                    font-size: 17px;
-                    font-weight: 800;
-                }
-
-                .modal-header .sub {
-                    font-size: 12px;
-                    color: var(--mau-chu-phu);
-                    margin-top: 2px;
-                }
-
-            .btn-dong-modal {
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 18px;
-                color: var(--mau-chu-phu);
-                padding: 4px;
-                border-radius: 6px;
-                transition: all .2s;
-            }
-
-                .btn-dong-modal:hover {
-                    background: var(--mau-nen);
-                    color: var(--mau-chu);
-                }
-
-            .form-group {
-                margin-bottom: 16px;
-            }
-
-                .form-group label {
-                    display: block;
-                    font-size: 12px;
-                    font-weight: 700;
-                    margin-bottom: 6px;
-                    color: var(--mau-chu-phu);
-                    text-transform: uppercase;
-                    letter-spacing: .5px;
-                }
-
-                .form-group .inp {
-                    width: 100%;
-                }
-
-            .form-row {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 14px;
-            }
-
-            .modal-footer {
-                display: flex;
-                justify-content: flex-end;
-                gap: 10px;
-                margin-top: 24px;
-                padding-top: 18px;
-                border-top: 1px solid var(--mau-vien);
-            }
-
-            /* ===== ẢNH XEM TRƯỚC ===== */
-            .anh-xem-truoc {
-                width: 100%;
-                max-height: 280px;
-                object-fit: contain;
-                border-radius: 10px;
-                border: 1px solid var(--mau-vien);
-                background: #f8fafc;
-                display: block;
-                margin-top: 10px;
-            }
-
-                .anh-xem-truoc.an {
-                    display: none;
-                }
-
-            /* ===== THÔNG BÁO TOAST ===== */
-            .toast-wrap {
-                position: fixed;
-                top: 18px;
-                right: 24px;
-                z-index: 9999;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .toast {
-                background: #fff;
-                border-radius: 12px;
-                padding: 14px 20px;
-                box-shadow: 0 8px 28px rgba(0,0,0,.14);
-                border-left: 4px solid;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                font-size: 13px;
-                font-weight: 600;
-                min-width: 280px;
-                animation: toastIn .3s ease;
-            }
-
-            @@keyframes toastIn {
-                from {
-                    transform: translateX(40px);
-                    opacity: 0
-                }
-
-                to {
-                    transform: none;
-                    opacity: 1
-                }
-            }
-
-            .toast.success {
-                border-color: #22c55e;
-                color: #15803d;
-            }
-
-            .toast.danger {
-                border-color: #ef4444;
-                color: #b91c1c;
-            }
-
-            .toast.warning {
-                border-color: #f59e0b;
-                color: #b45309;
-            }
-
-            .toast i {
-                font-size: 16px;
-            }
-
-            /* ===== THÔNG BÁO RỖNG ===== */
-            .empty-state {
-                text-align: center;
-                padding: 48px 0;
-                color: var(--mau-chu-phu);
-            }
-
-                .empty-state i {
-                    font-size: 40px;
-                    margin-bottom: 12px;
-                    opacity: .35;
-                }
-
-                .empty-state p {
-                    font-size: 14px;
-                }
-
-            /* ===== NỢ DV – chip nổi bật ===== */
-            .no-chip {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                background: #fee2e2;
-                color: #b91c1c;
-                border-radius: 8px;
-                padding: 3px 9px;
-                font-size: 12px;
-                font-weight: 700;
-            }
-
-            /* ===== RESPONSIVE ===== */
-            @@media (max-width:900px) {
-                .hang-thong-ke {
-                    grid-template-columns: repeat(2,1fr);
-                }
-
-                #thanh-sidebar {
-                    width: 0;
-                    min-width: 0;
-                    overflow: hidden;
-                }
-
-                #noi-dung {
-                    padding: 16px;
-                }
-            }
+        /* ===== KHU VỰC CHÍNH ===== */
+        #khu-vuc-chinh {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        #thanh-header {
+            background: var(--mau-trang);
+            padding: 0 28px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--mau-vien);
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+            flex-shrink: 0;
+        }
+
+        .header-trai {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nut-ham-menu {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--mau-chu-phu);
+            padding: 6px;
+            border-radius: 8px;
+            transition: background .2s;
+        }
+
+        .nut-ham-menu:hover {
+            background: var(--mau-xanh-nhat);
+            color: var(--mau-chu-de);
+        }
+
+        .tieu-de-trang {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--mau-chu);
+        }
+
+        .duong-dan {
+            font-size: 12px;
+            color: var(--mau-chu-phu);
+        }
+
+        .header-phai {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nut-thong-bao {
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--mau-chu-phu);
+            padding: 8px;
+            border-radius: 50%;
+            transition: all .2s;
+        }
+
+        .nut-thong-bao:hover {
+            background: var(--mau-xanh-nhat);
+            color: var(--mau-chu-de);
+        }
+
+        .so-thong-bao {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+        }
+
+        .thong-tin-admin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 24px;
+            transition: background .2s;
+        }
+
+        .thong-tin-admin:hover {
+            background: var(--mau-xanh-nhat);
+        }
+
+        .thong-tin-admin .anh-dai-dien {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#1a56db,#60a5fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .thong-tin-admin .ten {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .thong-tin-admin .chuc-vu {
+            font-size: 11px;
+            color: var(--mau-chu-phu);
+        }
+
+        /* ===== NỘI DUNG CHÍNH ===== */
+        #noi-dung {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+        }
+
+        /* ===== PAGE HEADER ROW ===== */
+        .hang-chao-mung {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .hang-chao-mung h2 {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .hang-chao-mung p {
+            font-size: 13px;
+            color: var(--mau-chu-phu);
+            margin-top: 2px;
+        }
+
+        .nut-them-moi {
+            background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(26,86,219,.3);
+            transition: all .2s;
+            text-decoration: none;
+        }
+
+        .nut-them-moi:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26,86,219,.4);
+        }
+
+        /* ===== STAT CARDS ===== */
+        .hang-thong-ke {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .card-thong-ke {
+            background: var(--mau-trang);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--bong-card);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all .25s;
+            border: 1px solid transparent;
+        }
+
+        .card-thong-ke:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--bong-card-hover);
+        }
+
+        .card-thong-ke::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .card-thong-ke.mau-xanh::before { background: linear-gradient(90deg,#1a56db,#60a5fa); }
+        .card-thong-ke.mau-xanh { border-color: #dbeafe; }
+        .card-thong-ke.mau-xanh .bieu-tuong-card { background: #eff6ff; color: #1a56db; }
+
+        .card-thong-ke.mau-xanh-la::before { background: linear-gradient(90deg,#059669,#34d399); }
+        .card-thong-ke.mau-xanh-la { border-color: #d1fae5; }
+        .card-thong-ke.mau-xanh-la .bieu-tuong-card { background: #ecfdf5; color: #059669; }
+
+        .card-thong-ke.mau-cam::before { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+        .card-thong-ke.mau-cam { border-color: #fef3c7; }
+        .card-thong-ke.mau-cam .bieu-tuong-card { background: #fffbeb; color: #d97706; }
+
+        .card-thong-ke.mau-do::before { background: linear-gradient(90deg,#ef4444,#f87171); }
+        .card-thong-ke.mau-do { border-color: #fee2e2; }
+        .card-thong-ke.mau-do .bieu-tuong-card { background: #fef2f2; color: #dc2626; }
+
+        .card-noi-dung {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .bieu-tuong-card {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .so-lieu .con-so {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .so-lieu .ten-thong-ke {
+            font-size: 12px;
+            color: var(--mau-chu-phu);
+            margin-top: 4px;
+        }
+
+        .nhan-trang-thai {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-top: 6px;
+            display: inline-block;
+        }
+
+        .nhan-trang-thai.cho { background: #fef3c7; color: #d97706; }
+        .nhan-trang-thai.ok  { background: #dcfce7; color: #16a34a; }
+
+        /* ===== TABS ===== */
+        .tab-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            background: var(--mau-trang);
+            padding: 6px;
+            border-radius: 14px;
+            box-shadow: var(--bong-card);
+            border: 1px solid var(--mau-vien);
+            width: fit-content;
+        }
+
+        .tab-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--mau-chu-phu);
+            background: none;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .tab-btn .badge-tab {
+            background: var(--mau-vien);
+            color: var(--mau-chu-phu);
+            border-radius: 20px;
+            padding: 1px 7px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(26,86,219,.3);
+        }
+
+        .tab-btn.active .badge-tab {
+            background: rgba(255,255,255,.25);
+            color: #fff;
+        }
+
+        /* ===== PANEL ===== */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ===== CARD CONTAINER ===== */
+        .card {
+            background: var(--mau-trang);
+            border-radius: 16px;
+            box-shadow: var(--bong-card);
+            border: 1px solid var(--mau-vien);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--mau-vien);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 { font-size: 15px; font-weight: 700; }
+        .card-header .sub { font-size: 12px; color: var(--mau-chu-phu); margin-top: 2px; }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            padding: 14px 22px;
+            border-bottom: 1px solid var(--mau-vien);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .o-tim-kiem {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--mau-nen);
+            border: 1px solid var(--mau-vien);
+            border-radius: 24px;
+            padding: 7px 16px;
+            transition: all .2s;
+            margin-left: auto;
+        }
+
+        .o-tim-kiem:focus-within {
+            border-color: var(--mau-chu-de-sang);
+            background: #fff;
+        }
+
+        .o-tim-kiem input {
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 13px;
+            width: 180px;
+            color: var(--mau-chu);
+        }
+
+        .o-tim-kiem i { color: var(--mau-chu-phu); font-size: 13px; }
+
+        .filter-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1.5px solid var(--mau-vien);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            color: var(--mau-chu-phu);
+            transition: all .2s;
+        }
+
+        .filter-pill.on {
+            background: var(--mau-xanh-trung);
+            border-color: var(--mau-chu-de-sang);
+            color: var(--mau-chu-de);
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+
+        thead th {
+            background: #f8fafc;
+            padding: 11px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--mau-chu-phu);
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            border-bottom: 1px solid var(--mau-vien);
+        }
+
+        tbody tr { transition: background .15s; }
+        tbody tr:hover { background: #f8faff; }
+
+        tbody td {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--mau-vien);
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge.cho-xu-ly   { background: #fef3c7; color: #b45309; }
+        .badge.dang-xu-ly  { background: #dbeafe; color: #1d4ed8; }
+        .badge.cho-tt      { background: #ede9fe; color: #6d28d9; }
+        .badge.xong        { background: #dcfce7; color: #15803d; }
+        .badge.huy         { background: #fee2e2; color: #b91c1c; }
+        .badge.cho-duyet   { background: #fef9c3; color: #a16207; }
+        .badge.da-duyet    { background: #d1fae5; color: #065f46; }
+        .badge.tu-choi     { background: #fee2e2; color: #b91c1c; }
+        .badge.chua-dong   { background: #fef3c7; color: #b45309; }
+        .badge.qua-han     { background: #fee2e2; color: #b91c1c; }
+        .badge.da-dong     { background: #dcfce7; color: #15803d; }
+
+        /* ===== ACTION BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+            text-decoration: none;
+        }
+
+        .btn-primary { background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang)); color: #fff; box-shadow: 0 3px 8px rgba(26,86,219,.3); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(26,86,219,.4); }
+
+        .btn-success { background: #dcfce7; color: #15803d; }
+        .btn-success:hover { background: #bbf7d0; }
+
+        .btn-warning { background: #fef3c7; color: #b45309; }
+        .btn-warning:hover { background: #fde68a; }
+
+        .btn-danger { background: #fee2e2; color: #b91c1c; }
+        .btn-danger:hover { background: #fecaca; }
+
+        .btn-ghost { background: var(--mau-nen); color: var(--mau-chu-phu); border: 1px solid var(--mau-vien); }
+        .btn-ghost:hover { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+
+        .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 7px; }
+
+        /* ===== FORM INLINE ===== */
+        .form-inline { display: flex; align-items: center; gap: 8px; }
+
+        .inp {
+            border: 1.5px solid var(--mau-vien);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: var(--mau-chu);
+            background: #fff;
+            outline: none;
+            transition: border .2s;
+            font-family: inherit;
+        }
+
+        .inp:focus { border-color: var(--mau-chu-de-sang); }
+        .inp-sm { width: 120px; padding: 5px 10px; font-size: 12px; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,.45);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.hien { display: flex; }
+
+        .modal {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            width: 520px;
+            max-width: 95vw;
+            box-shadow: 0 24px 64px rgba(0,0,0,.18);
+            animation: slideUp .25s ease;
+        }
+
+        .modal-lg { width: 680px; }
+
+        @@keyframes slideUp {
+            from { transform: translateY(24px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .modal-header h3 { font-size: 17px; font-weight: 800; }
+        .modal-header .sub { font-size: 12px; color: var(--mau-chu-phu); margin-top: 2px; }
+
+        .btn-dong-modal {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--mau-chu-phu);
+            padding: 4px;
+            border-radius: 6px;
+            transition: all .2s;
+        }
+
+        .btn-dong-modal:hover { background: var(--mau-nen); color: var(--mau-chu); }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--mau-chu-phu);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .form-group .inp { width: 100%; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid var(--mau-vien);
+        }
+
+        /* ===== ẢNH XEM TRƯỚC ===== */
+        .anh-xem-truoc {
+            width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid var(--mau-vien);
+            background: #f8fafc;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .anh-xem-truoc.an { display: none; }
+
+        /* ===== TOAST ===== */
+        .toast-wrap {
+            position: fixed;
+            top: 18px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: #fff;
+            border-radius: 12px;
+            padding: 14px 20px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.14);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 280px;
+            animation: toastIn .3s ease;
+        }
+
+        @@keyframes toastIn {
+            from { transform: translateX(40px); opacity: 0; }
+            to   { transform: none;             opacity: 1; }
+        }
+
+        .toast.success { border-color: #22c55e; color: #15803d; }
+        .toast.danger  { border-color: #ef4444; color: #b91c1c; }
+        .toast.warning { border-color: #f59e0b; color: #b45309; }
+        .toast i { font-size: 16px; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state { text-align: center; padding: 48px 0; color: var(--mau-chu-phu); }
+        .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: .35; }
+        .empty-state p { font-size: 14px; }
+
+        /* ===== NỢ DV ===== */
+        .no-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #fee2e2;
+            color: #b91c1c;
+            border-radius: 8px;
+            padding: 3px 9px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @@media (max-width:900px) {
+            .hang-thong-ke { grid-template-columns: repeat(2,1fr); }
+            #thanh-sidebar { width: 0; min-width: 0; overflow: hidden; }
+            #noi-dung { padding: 16px; }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body>
 
-    <!-- ===================================================================
-     SIDEBAR
+<!-- ===================================================================
+     SIDEBAR – đồng bộ ChiTietPhong.cshtml
 =================================================================== -->
-    <aside id="thanh-sidebar">
+<aside id="thanh-sidebar">
 
-        <!-- Logo -->
-        <div class="logo-sidebar">
-            <div class="bieu-tuong">
-                <i class="fas fa-home"></i>
-            </div>
-            <div class="ten-logo">
-                <strong>Nhà Trọ Bà Năm</strong>
-                <span>Quản lý hệ thống</span>
-            </div>
+    <!-- Logo – dùng ảnh như ChiTietPhong, fallback icon -->
+    <div class="logo-sidebar">
+        <div class="bieu-tuong">
+            <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ Bà Năm"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+            <i class="fas fa-home" style="display:none;"></i>
         </div>
+        <div class="ten-logo">
+            <strong>Nhà Trọ Bà Năm</strong>
+            <span>Quản lý hệ thống</span>
+        </div>
+    </div>
 
-        <!-- TỔNG QUAN -->
-        <div class="nhan-nhom">Tổng quan</div>
-        <a class="menu-item" onclick="chuyenTrang('trang-chu',this)">
-            <div class="icon-wrap"><i class="fas fa-house-chimney"></i></div>
-            <span>Trang chủ</span>
-        </a>
+    <!-- TỔNG QUAN -->
+    <div class="nhan-nhom">Tổng quan</div>
+    <a class="menu-item" onclick="chuyenTrang('trang-chu',this)">
+        <i class="fas fa-home"></i>
+        <span>Trang chủ</span>
+    </a>
 
-        <!-- QUẢN LÝ -->
-        <div class="nhan-nhom">Quản lý</div>
-        <a class="menu-item" onclick="chuyenTrang('quan-ly-phong',this)">
-            <div class="icon-wrap"><i class="fas fa-building-user"></i></div>
-            <span>Quản lý phòng trọ</span>
-        </a>
-        <a class="menu-item dang-chon" onclick="chuyenTrang('quan-ly-dich-vu',this)">
-            <div class="icon-wrap"><i class="fas fa-screwdriver-wrench"></i></div>
-            <span>Quản lý dịch vụ và tiện ích</span>
-            @if (Model.SoDonChoXuLy > 0)
+    <!-- QUẢN LÝ -->
+    <div class="nhan-nhom">Quản lý</div>
+    <a class="menu-item" onclick="chuyenTrang('quan-ly-phong',this)">
+        <i class="fas fa-door-open"></i>
+        <span>Quản lý phòng trọ</span>
+    </a>
+    <a class="menu-item dang-chon" onclick="chuyenTrang('quan-ly-dich-vu',this)">
+        <i class="fas fa-screwdriver-wrench"></i>
+        <span>Quản lý dịch vụ và tiện ích</span>
+        @if (Model.SoDonChoXuLy > 0)
+        {
+            <span class="huy-hieu-menu">@Model.SoDonChoXuLy</span>
+        }
+    </a>
+    <a class="menu-item" onclick="chuyenTrang('hoa-don',this)">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <span>Hóa đơn &amp; Thu tiền</span>
+    </a>
+
+    <!-- HỖ TRỢ -->
+    <div class="nhan-nhom">Hỗ trợ</div>
+    <a class="menu-item" onclick="chuyenTrang('su-co',this)">
+        <i class="fas fa-tools"></i>
+        <span>Sự cố / Bảo trì</span>
+    </a>
+    <a class="menu-item" onclick="chuyenTrang('bao-cao',this)">
+        <i class="fas fa-chart-bar"></i>
+        <span>Thống kê &amp; Báo cáo</span>
+    </a>
+    <a class="menu-item" onclick="chuyenTrang('cai-dat',this)">
+        <i class="fas fa-cog"></i>
+        <span>Cài đặt hệ thống</span>
+    </a>
+
+    <!-- User Profile – khớp ChiTietPhong -->
+    <div class="admin-sidebar">
+        @{
+            var fullName = User.FindFirst("FullName")?.Value
+                           ?? User.Identity?.Name
+                           ?? Model.TenNguoiDung
+                           ?? "Người dùng";
+            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Manager";
+            var chu  = fullName.Length > 0 ? fullName[0].ToString().ToUpper() : "N";
+            var roleName = role switch
             {
-                <span class="huy-hieu-menu">@Model.SoDonChoXuLy</span>
-            }
-        </a>
-        <a class="menu-item" onclick="chuyenTrang('hoa-don',this)">
-            <div class="icon-wrap"><i class="fas fa-file-invoice-dollar"></i></div>
-            <span>Hóa đơn &amp; Thu tiền</span>
-        </a>
-
-        <!-- HỖ TRỢ -->
-        <div class="nhan-nhom">Hỗ trợ</div>
-        <a class="menu-item" onclick="chuyenTrang('su-co',this)">
-            <div class="icon-wrap"><i class="fas fa-triangle-exclamation"></i></div>
-            <span>Sự cố / Bảo trì</span>
-            @{
-                /* Badge sự cố – nếu có model tương ứng thì truyền vào */
-            }
-        </a>
-        <a class="menu-item" onclick="chuyenTrang('bao-cao',this)">
-            <div class="icon-wrap"><i class="fas fa-chart-column"></i></div>
-            <span>Thống kê &amp; Báo cáo</span>
-        </a>
-        <a class="menu-item" onclick="chuyenTrang('cai-dat',this)">
-            <div class="icon-wrap"><i class="fas fa-gear"></i></div>
-            <span>Cài đặt hệ thống</span>
-        </a>
-
-        <!-- Account – lấy từ SQL qua Claims (FullName + Roles) -->
-        <div class="admin-sidebar">
-            @{
-                /* FullName và Roles được đọc từ ACCOUNT qua cookie claim khi đăng nhập (XuLyDangNhap.cs) */
-                var fullName = User.FindFirst("FullName")?.Value
-                               ?? User.Identity?.Name
-                               ?? Model.TenNguoiDung
-                               ?? "Người dùng";
-                var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Manager";
-                var chu = fullName.Length > 0 ? fullName[0].ToString().ToUpper() : "N";
-                /* Hiển thị tên vai trò thân thiện */
-                var roleName = role switch
-                {
-                    "Admin" => "Quản trị viên",
-                    "Manager" => "Manager",
-                    "Staff" => "Nhân viên",
-                    _ => role
-                };
-            }
-            <div class="anh-admin">@chu</div>
-            <div class="ten-admin">
-                <strong>@fullName</strong>
-                <span>@roleName</span>
-            </div>
+                "Admin"   => "Quản trị viên",
+                "Manager" => "Manager",
+                "Staff"   => "Nhân viên",
+                _         => role
+            };
+        }
+        <div class="anh-admin">@chu</div>
+        <div class="ten-admin">
+            <strong>@fullName</strong>
+            <span>@roleName</span>
         </div>
+    </div>
 
-    </aside>
+</aside>
 
-    <!-- ===================================================================
+<!-- ===================================================================
      KHU VỰC CHÍNH
 =================================================================== -->
-    <div id="khu-vuc-chinh">
+<div id="khu-vuc-chinh">
 
-        <!-- HEADER -->
-        <header id="thanh-header">
-            <div class="header-trai">
-                <button class="nut-ham-menu" onclick="dongMoSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
+    <!-- HEADER -->
+    <header id="thanh-header">
+        <div class="header-trai">
+            <button class="nut-ham-menu" onclick="dongMoSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div>
+                <div class="tieu-de-trang">Quản lý dịch vụ</div>
+                <div class="duong-dan">Dashboard / Dịch vụ</div>
+            </div>
+        </div>
+        <div class="header-phai">
+            <button class="nut-thong-bao">
+                <i class="fas fa-bell"></i>
+                <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
+            </button>
+            <div class="thong-tin-admin">
+                <div class="anh-dai-dien">@(Model.TenNguoiDung?.Length > 0 ? Model.TenNguoiDung[0].ToString().ToUpper() : "A")</div>
                 <div>
-                    <div class="tieu-de-trang">Quản lý dịch vụ</div>
-                    <div class="duong-dan">Dashboard / Dịch vụ</div>
+                    <div class="ten">@Model.TenNguoiDung</div>
+                    <div class="chuc-vu">Quản lý</div>
                 </div>
             </div>
-            <div class="header-phai">
-                <button class="nut-thong-bao">
-                    <i class="fas fa-bell"></i>
-                    <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
-                </button>
-                <div class="thong-tin-admin">
-                    <div class="anh-dai-dien">@(Model.TenNguoiDung?.Length > 0 ? Model.TenNguoiDung[0].ToString().ToUpper() : "A")</div>
+        </div>
+    </header>
+
+    <!-- NỘI DUNG -->
+    <div id="noi-dung">
+
+        <!-- TOAST -->
+        <div class="toast-wrap" id="toastWrap"></div>
+
+        @if (!string.IsNullOrEmpty(Model.ThongBao))
+        {
+            <script>
+                document.addEventListener('DOMContentLoaded', () =>
+                    hienToast('@Model.ThongBao', '@(Model.LoaiThongBao ?? "success")'));
+            </script>
+        }
+
+        <!-- PAGE TITLE ROW -->
+        <div class="hang-chao-mung">
+            <div>
+                <h2>Quản lý dịch vụ <i class="fas fa-concierge-bell" style="color:var(--mau-chu-de);font-size:18px;"></i></h2>
+                <p>Theo dõi đơn nước, giặt sấy, xác nhận điện nước và nợ dịch vụ</p>
+            </div>
+            <button class="nut-them-moi" onclick="moModalCauHinhGia()">
+                <i class="fas fa-sliders-h"></i> Cấu hình đơn giá
+            </button>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="hang-thong-ke">
+            <div class="card-thong-ke mau-cam" onclick="chonTab('don-nuoc')">
+                <div class="card-noi-dung">
+                    <div class="bieu-tuong-card"><i class="fas fa-tint"></i></div>
+                    <div class="so-lieu">
+                        <div class="con-so">@Model.SoDonNuocChoBinhChoXuLy</div>
+                        <div class="ten-thong-ke">Đơn nước chờ xử lý</div>
+                        <span class="nhan-trang-thai cho">Cần xử lý</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-thong-ke mau-xanh" onclick="chonTab('giat-say')">
+                <div class="card-noi-dung">
+                    <div class="bieu-tuong-card"><i class="fas fa-wind"></i></div>
+                    <div class="so-lieu">
+                        <div class="con-so">@Model.SoDonGiatSayChoXuLy</div>
+                        <div class="ten-thong-ke">Giặt sấy chờ nhập giá</div>
+                        <span class="nhan-trang-thai cho">Chờ báo giá</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-thong-ke mau-xanh-la" onclick="chonTab('dien-nuoc')">
+                <div class="card-noi-dung">
+                    <div class="bieu-tuong-card"><i class="fas fa-bolt"></i></div>
+                    <div class="so-lieu">
+                        <div class="con-so">@Model.SoDienNuocChoDuyet</div>
+                        <div class="ten-thong-ke">Chỉ số điện nước chờ duyệt</div>
+                        <span class="nhan-trang-thai @(Model.SoDienNuocChoDuyet > 0 ? "cho" : "ok")">@(Model.SoDienNuocChoDuyet > 0 ? "Cần xác nhận" : "Đã cập nhật")</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-thong-ke mau-do" onclick="chonTab('no-dv')">
+                <div class="card-noi-dung">
+                    <div class="bieu-tuong-card"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="so-lieu">
+                        <div class="con-so">@Model.SoPhongNoDV</div>
+                        <div class="ten-thong-ke">Phòng còn nợ dịch vụ</div>
+                        <span class="nhan-trang-thai @(Model.SoPhongNoDV > 0 ? "cho" : "ok")">@(Model.SoPhongNoDV > 0 ? "Sẽ cộng vào HD tháng" : "Không có nợ")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB BAR -->
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="don-nuoc" onclick="chonTab('don-nuoc',this)">
+                <i class="fas fa-tint"></i> Đơn nước bình
+                <span class="badge-tab">@Model.SoDonNuocChoBinhChoXuLy</span>
+            </button>
+            <button class="tab-btn" data-tab="giat-say" onclick="chonTab('giat-say',this)">
+                <i class="fas fa-wind"></i> Giặt sấy
+                <span class="badge-tab">@Model.SoDonGiatSayChoXuLy</span>
+            </button>
+            <button class="tab-btn" data-tab="dien-nuoc" onclick="chonTab('dien-nuoc',this)">
+                <i class="fas fa-bolt"></i> Điện nước
+                <span class="badge-tab">@Model.SoDienNuocChoDuyet</span>
+            </button>
+            <button class="tab-btn" data-tab="no-dv" onclick="chonTab('no-dv',this)">
+                <i class="fas fa-exclamation-circle"></i> Nợ dịch vụ
+                <span class="badge-tab">@Model.SoPhongNoDV</span>
+            </button>
+        </div>
+
+        <!-- ==================== TAB 1: ĐƠN NƯỚC BÌNH ==================== -->
+        <div class="tab-panel active" id="panel-don-nuoc">
+            <div class="card">
+                <div class="card-header">
                     <div>
-                        <div class="ten">@Model.TenNguoiDung</div>
-                        <div class="chuc-vu">Quản lý</div>
+                        <h3><i class="fas fa-tint" style="color:#f59e0b;margin-right:8px;"></i>Đơn đặt nước bình</h3>
+                        <div class="sub">Khách đặt nước → Quản lý xác nhận đã giao → Khách thanh toán</div>
                     </div>
                 </div>
-            </div>
-        </header>
-
-        <!-- NỘI DUNG -->
-        <div id="noi-dung">
-
-            <!-- TOAST -->
-            <div class="toast-wrap" id="toastWrap"></div>
-
-            @if (!string.IsNullOrEmpty(Model.ThongBao))
-            {
-                <script>
-                                document.addEventListener('DOMContentLoaded', () =>
-                                    hienToast('@Model.ThongBao', '@(Model.LoaiThongBao ?? "success")'));
-                </script>
-            }
-
-            <!-- PAGE TITLE ROW -->
-            <div class="hang-chao-mung">
-                <div>
-                    <h2>Quản lý dịch vụ <i class="fas fa-concierge-bell" style="color:var(--mau-chu-de);font-size:18px;"></i></h2>
-                    <p>Theo dõi đơn nước, giặt sấy, xác nhận điện nước và nợ dịch vụ</p>
-                </div>
-                <button class="nut-them-moi" onclick="moModalCauHinhGia()">
-                    <i class="fas fa-sliders-h"></i> Cấu hình đơn giá
-                </button>
-            </div>
-
-            <!-- STAT CARDS -->
-            <div class="hang-thong-ke">
-                <div class="card-thong-ke mau-cam" onclick="chonTab('don-nuoc')">
-                    <div class="card-noi-dung">
-                        <div class="bieu-tuong-card"><i class="fas fa-tint"></i></div>
-                        <div class="so-lieu">
-                            <div class="con-so">@Model.SoDonNuocChoBinhChoXuLy</div>
-                            <div class="ten-thong-ke">Đơn nước chờ xử lý</div>
-                            <span class="nhan-trang-thai cho">Cần xử lý</span>
-                        </div>
+                <div class="toolbar">
+                    <button class="filter-pill on" onclick="locDonNuoc('', this)">Tất cả</button>
+                    <button class="filter-pill" onclick="locDonNuoc('Chờ xử lý', this)">Chờ xử lý</button>
+                    <button class="filter-pill" onclick="locDonNuoc('Chờ thanh toán', this)">Chờ thanh toán</button>
+                    <button class="filter-pill" onclick="locDonNuoc('Thành công', this)">Thành công</button>
+                    <div class="o-tim-kiem">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchNuoc" placeholder="Tìm phòng, khách..." oninput="timKiemDon('nuoc')" />
                     </div>
                 </div>
-                <div class="card-thong-ke mau-xanh" onclick="chonTab('giat-say')">
-                    <div class="card-noi-dung">
-                        <div class="bieu-tuong-card"><i class="fas fa-wind"></i></div>
-                        <div class="so-lieu">
-                            <div class="con-so">@Model.SoDonGiatSayChoXuLy</div>
-                            <div class="ten-thong-ke">Giặt sấy chờ nhập giá</div>
-                            <span class="nhan-trang-thai cho">Chờ báo giá</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-thong-ke mau-xanh-la" onclick="chonTab('dien-nuoc')">
-                    <div class="card-noi-dung">
-                        <div class="bieu-tuong-card"><i class="fas fa-bolt"></i></div>
-                        <div class="so-lieu">
-                            <div class="con-so">@Model.SoDienNuocChoDuyet</div>
-                            <div class="ten-thong-ke">Chỉ số điện nước chờ duyệt</div>
-                            <span class="nhan-trang-thai @(Model.SoDienNuocChoDuyet > 0 ? "cho" : "ok")">@(Model.SoDienNuocChoDuyet > 0 ? "Cần xác nhận" : "Đã cập nhật")</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-thong-ke mau-do" onclick="chonTab('no-dv')">
-                    <div class="card-noi-dung">
-                        <div class="bieu-tuong-card"><i class="fas fa-exclamation-circle"></i></div>
-                        <div class="so-lieu">
-                            <div class="con-so">@Model.SoPhongNoDV</div>
-                            <div class="ten-thong-ke">Phòng còn nợ dịch vụ</div>
-                            <span class="nhan-trang-thai @(Model.SoPhongNoDV > 0 ? "cho" : "ok")">@(Model.SoPhongNoDV > 0 ? "Sẽ cộng vào HD tháng" : "Không có nợ")</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB BAR -->
-            <div class="tab-bar">
-                <button class="tab-btn active" data-tab="don-nuoc" onclick="chonTab('don-nuoc',this)">
-                    <i class="fas fa-tint"></i> Đơn nước bình
-                    <span class="badge-tab">@Model.SoDonNuocChoBinhChoXuLy</span>
-                </button>
-                <button class="tab-btn" data-tab="giat-say" onclick="chonTab('giat-say',this)">
-                    <i class="fas fa-wind"></i> Giặt sấy
-                    <span class="badge-tab">@Model.SoDonGiatSayChoXuLy</span>
-                </button>
-                <button class="tab-btn" data-tab="dien-nuoc" onclick="chonTab('dien-nuoc',this)">
-                    <i class="fas fa-bolt"></i> Điện nước
-                    <span class="badge-tab">@Model.SoDienNuocChoDuyet</span>
-                </button>
-                <button class="tab-btn" data-tab="no-dv" onclick="chonTab('no-dv',this)">
-                    <i class="fas fa-exclamation-circle"></i> Nợ dịch vụ
-                    <span class="badge-tab">@Model.SoPhongNoDV</span>
-                </button>
-            </div>
-
-            <!-- ==================== TAB 1: ĐƠN NƯỚC BÌNH ==================== -->
-            <div class="tab-panel active" id="panel-don-nuoc">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h3><i class="fas fa-tint" style="color:#f59e0b;margin-right:8px;"></i>Đơn đặt nước bình</h3>
-                            <div class="sub">Khách đặt nước → Quản lý xác nhận đã giao → Khách thanh toán</div>
-                        </div>
-                    </div>
-                    <div class="toolbar">
-                        <button class="filter-pill on" onclick="locDonNuoc('', this)">Tất cả</button>
-                        <button class="filter-pill" onclick="locDonNuoc('Chờ xử lý', this)">Chờ xử lý</button>
-                        <button class="filter-pill" onclick="locDonNuoc('Chờ thanh toán', this)">Chờ thanh toán</button>
-                        <button class="filter-pill" onclick="locDonNuoc('Thành công', this)">Thành công</button>
-                        <div class="o-tim-kiem">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchNuoc" placeholder="Tìm phòng, khách..." oninput="timKiemDon('nuoc')" />
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Phòng</th>
-                                    <th>Khách thuê</th>
-                                    <th>Nội dung</th>
-                                    <th>Ngày đặt</th>
-                                    <th>Tiền</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyNuoc">
-                                @foreach (var don in Model.DanhSachDonNuoc)
-                                {
-                                    <tr data-trangthai="@don.TrangThai_DV" data-search="@don.SoPhong @don.TenKhach">
-                                        <td><strong>P.@don.SoPhong</strong></td>
-                                        <td>@don.TenKhach</td>
-                                        <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@don.NoiDung">@don.NoiDung</td>
-                                        <td style="color:var(--mau-chu-phu);font-size:12px;">@don.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>
-                                            @if (don.TongTien > 0)
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phòng</th>
+                                <th>Khách thuê</th>
+                                <th>Nội dung</th>
+                                <th>Ngày đặt</th>
+                                <th>Tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyNuoc">
+                            @foreach (var don in Model.DanhSachDonNuoc)
+                            {
+                                <tr data-trangthai="@don.TrangThai_DV" data-search="@don.SoPhong @don.TenKhach">
+                                    <td><strong>P.@don.SoPhong</strong></td>
+                                    <td>@don.TenKhach</td>
+                                    <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@don.NoiDung">@don.NoiDung</td>
+                                    <td style="color:var(--mau-chu-phu);font-size:12px;">@don.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (don.TongTien > 0)
+                                        {
+                                            <strong>@don.TongTien.ToString("N0") đ</strong>
+                                        }
+                                        else
+                                        {
+                                            <span style="color:var(--mau-chu-phu);font-style:italic;">Chưa nhập</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var cls = don.TrangThai_DV switch
                                             {
-                                                <strong>@don.TongTien.ToString("N0") đ</strong>
-                                            }
-                                            else
+                                                "Chờ xử lý"     => "cho-xu-ly",
+                                                "Đang xử lý"    => "dang-xu-ly",
+                                                "Chờ thanh toán" => "cho-tt",
+                                                "Thành công"    => "xong",
+                                                "Đã hủy"        => "huy",
+                                                _               => "cho-xu-ly"
+                                            };
+                                        }
+                                        <span class="badge @cls">@don.TrangThai_DV</span>
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                            @if (don.TrangThai_DV == "Chờ xử lý")
                                             {
-                                                <span style="color:var(--mau-chu-phu);font-style:italic;">Chưa nhập</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @{
-                                                var cls = don.TrangThai_DV switch
-                                                {
-                                                    "Chờ xử lý" => "cho-xu-ly",
-                                                    "Đang xử lý" => "dang-xu-ly",
-                                                    "Chờ thanh toán" => "cho-tt",
-                                                    "Thành công" => "xong",
-                                                    "Đã hủy" => "huy",
-                                                    _ => "cho-xu-ly"
-                                                };
-                                            }
-                                            <span class="badge @cls">@don.TrangThai_DV</span>
-                                        </td>
-                                        <td>
-                                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                                                @if (don.TrangThai_DV == "Chờ xử lý")
-                                                {
-                                                    <!-- Nhập giá + Xác nhận giao -->
-                                                    <button class="btn btn-warning btn-sm"
-                                                            onclick="moModalNhapGiaNuoc(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung', @don.TongTien)">
-                                                        <i class="fas fa-pen"></i> Nhập giá & Giao
-                                                    </button>
-                                                }
-                                                @if (don.TrangThai_DV == "Chờ thanh toán")
-                                                {
-                                                    <span style="font-size:11px;color:var(--mau-chu-phu);">Chờ khách TT</span>
-                                                }
-                                                @if (don.TrangThai_DV == "Thành công" || don.TrangThai_DV == "Đã hủy")
-                                                {
-                                                    <span style="font-size:11px;color:var(--mau-chu-phu);">Hoàn tất</span>
-                                                }
-                                                @if (don.TrangThai_DV == "Chờ xử lý")
-                                                {
-                                                    <form method="post" asp-page-handler="HuyDon" style="display:inline;">
-                                                        <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
-                                                        <button type="submit" class="btn btn-danger btn-sm"
-                                                                onclick="return confirm('Hủy đơn này?')">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    </form>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        @if (!Model.DanhSachDonNuoc.Any())
-                        {
-                            <div class="empty-state">
-                                <i class="fas fa-tint"></i>
-                                <p>Chưa có đơn nước bình nào</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== TAB 2: GIẶT SẤY ==================== -->
-            <div class="tab-panel" id="panel-giat-say">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đơn giặt sấy</h3>
-                            <div class="sub">Khách đặt → Quản lý nhập số tiền → Khách thanh toán</div>
-                        </div>
-                    </div>
-                    <div class="toolbar">
-                        <button class="filter-pill on" onclick="locDonGS('', this)">Tất cả</button>
-                        <button class="filter-pill" onclick="locDonGS('Chờ xử lý', this)">Chờ nhập giá</button>
-                        <button class="filter-pill" onclick="locDonGS('Chờ thanh toán', this)">Chờ thanh toán</button>
-                        <button class="filter-pill" onclick="locDonGS('Thành công', this)">Thành công</button>
-                        <div class="o-tim-kiem">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchGS" placeholder="Tìm phòng, khách..." oninput="timKiemDon('gs')" />
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Phòng</th>
-                                    <th>Khách thuê</th>
-                                    <th>Nội dung</th>
-                                    <th>Ngày đặt</th>
-                                    <th>Tiền</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyGS">
-                                @foreach (var don in Model.DanhSachDonGiatSay)
-                                {
-                                    <tr data-trangthai="@don.TrangThai_DV" data-search="@don.SoPhong @don.TenKhach">
-                                        <td><strong>P.@don.SoPhong</strong></td>
-                                        <td>@don.TenKhach</td>
-                                        <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@don.NoiDung">@don.NoiDung</td>
-                                        <td style="color:var(--mau-chu-phu);font-size:12px;">@don.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>
-                                            @if (don.TongTien > 0)
-                                            {
-                                                <strong>@don.TongTien.ToString("N0") đ</strong>
-                                            }
-                                            else
-                                            {
-                                                <span style="color:var(--mau-chu-phu);font-style:italic;">Chưa nhập</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @{
-                                                var clsGs = don.TrangThai_DV switch
-                                                {
-                                                    "Chờ xử lý" => "cho-xu-ly",
-                                                    "Chờ thanh toán" => "cho-tt",
-                                                    "Thành công" => "xong",
-                                                    "Đã hủy" => "huy",
-                                                    _ => "cho-xu-ly"
-                                                };
-                                            }
-                                            <span class="badge @clsGs">@don.TrangThai_DV</span>
-                                        </td>
-                                        <td>
-                                            <div style="display:flex;gap:6px;">
-                                                @if (don.TrangThai_DV == "Chờ xử lý")
-                                                {
-                                                    <button class="btn btn-primary btn-sm"
-                                                            onclick="moModalNhapGiaGS(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung')">
-                                                        <i class="fas fa-dollar-sign"></i> Nhập tiền
-                                                    </button>
-                                                    <form method="post" asp-page-handler="HuyDon" style="display:inline;">
-                                                        <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
-                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hủy đơn?')">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    </form>
-                                                }
-                                                @if (don.TrangThai_DV == "Chờ thanh toán")
-                                                {
-                                                    <span style="font-size:11px;color:var(--mau-chu-phu);">Đợi khách TT</span>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        @if (!Model.DanhSachDonGiatSay.Any())
-                        {
-                            <div class="empty-state">
-                                <i class="fas fa-wind"></i>
-                                <p>Chưa có đơn giặt sấy nào</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== TAB 3: ĐIỆN NƯỚC ==================== -->
-            <div class="tab-panel" id="panel-dien-nuoc">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Chỉ số điện – nước theo kỳ</h3>
-                            <div class="sub">Khách nhập chỉ số + gửi ảnh → Quản lý xác nhận ảnh</div>
-                        </div>
-                    </div>
-                    <div class="toolbar">
-                        <button class="filter-pill on" onclick="locDienNuoc(255, this)">Tất cả</button>
-                        <button class="filter-pill" onclick="locDienNuoc(0, this)">Chờ duyệt</button>
-                        <button class="filter-pill" onclick="locDienNuoc(1, this)">Đã duyệt</button>
-                        <button class="filter-pill" onclick="locDienNuoc(2, this)">Từ chối</button>
-                        <div class="o-tim-kiem">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchDN" placeholder="Tìm phòng, kỳ..." oninput="timKiemDienNuoc()" />
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Phòng</th>
-                                    <th>Kỳ ghi nhận</th>
-                                    <th>Điện cũ → mới</th>
-                                    <th>Nước cũ → mới</th>
-                                    <th>Ảnh đồng hồ</th>
-                                    <th>Ngày ghi</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyDN">
-                                @foreach (var dn in Model.DanhSachDienNuoc)
-                                {
-                                    <tr data-tt="@dn.TrangThaiDuyet" data-search="@dn.SoPhong @dn.KyGhiNhan">
-                                        <td><strong>P.@dn.SoPhong</strong></td>
-                                        <td>@dn.KyGhiNhan</td>
-                                        <td>@dn.SoDienCu → <strong>@dn.SoDienMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoDienMoi - dn.SoDienCu))</small></td>
-                                        <td>@dn.SoNuocCu → <strong>@dn.SoNuocMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoNuocMoi - dn.SoNuocCu))</small></td>
-                                        <td>
-                                            @if (!string.IsNullOrEmpty(dn.AnhChupDongHo))
-                                            {
-                                                <button class="btn btn-ghost btn-sm"
-                                                        onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', @dn.IDGhiNhan, '@dn.SoPhong')">
-                                                    <i class="fas fa-image"></i> Xem ảnh
+                                                <button class="btn btn-warning btn-sm"
+                                                        onclick="moModalNhapGiaNuoc(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung', @don.TongTien)">
+                                                    <i class="fas fa-pen"></i> Nhập giá & Giao
                                                 </button>
                                             }
-                                            else
+                                            @if (don.TrangThai_DV == "Chờ thanh toán")
                                             {
-                                                <span style="color:var(--mau-chu-phu);font-size:12px;">Chưa có ảnh</span>
+                                                <span style="font-size:11px;color:var(--mau-chu-phu);">Chờ khách TT</span>
                                             }
-                                        </td>
-                                        <td style="color:var(--mau-chu-phu);font-size:12px;">@dn.NgayGhi.ToString("dd/MM/yyyy")</td>
-                                        <td>
-                                            @{
-                                                var clsDN = dn.TrangThaiDuyet switch { 0 => "cho-duyet", 1 => "da-duyet", 2 => "tu-choi", _ => "cho-duyet" };
-                                                var lblDN = dn.TrangThaiDuyet switch { 0 => "Chờ duyệt", 1 => "Đã duyệt", 2 => "Từ chối", _ => "Chờ duyệt" };
-                                            }
-                                            <span class="badge @clsDN">@lblDN</span>
-                                        </td>
-                                        <td>
-                                            @if (dn.TrangThaiDuyet == 0)
+                                            @if (don.TrangThai_DV == "Thành công" || don.TrangThai_DV == "Đã hủy")
                                             {
-                                                <div style="display:flex;gap:6px;">
-                                                    <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
-                                                        <input type="hidden" name="idGhiNhan" value="@dn.IDGhiNhan" />
-                                                        <input type="hidden" name="chapNhan" value="true" />
-                                                        <button type="submit" class="btn btn-success btn-sm">
-                                                            <i class="fas fa-check"></i> Duyệt
-                                                        </button>
-                                                    </form>
-                                                    <button class="btn btn-danger btn-sm"
-                                                            onclick="moModalTuChoiDN(@dn.IDGhiNhan, '@dn.SoPhong')">
-                                                        <i class="fas fa-times"></i> Từ chối
+                                                <span style="font-size:11px;color:var(--mau-chu-phu);">Hoàn tất</span>
+                                            }
+                                            @if (don.TrangThai_DV == "Chờ xử lý")
+                                            {
+                                                <form method="post" asp-page-handler="HuyDon" style="display:inline;">
+                                                    <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Hủy đơn này?')">
+                                                        <i class="fas fa-times"></i>
                                                     </button>
-                                                </div>
+                                                </form>
                                             }
-                                            else
-                                            {
-                                                <span style="font-size:11px;color:var(--mau-chu-phu);">@(dn.TrangThaiDuyet == 1 ? "Đã xác nhận" : "Đã từ chối")</span>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        @if (!Model.DanhSachDienNuoc.Any())
-                        {
-                            <div class="empty-state">
-                                <i class="fas fa-bolt"></i>
-                                <p>Chưa có chỉ số điện nước nào được gửi</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== TAB 4: NỢ DỊCH VỤ ==================== -->
-            <div class="tab-panel" id="panel-no-dv">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;margin-right:8px;"></i>Nợ dịch vụ chưa thanh toán</h3>
-                            <div class="sub">Các khoản dịch vụ quá hạn sẽ tự động cộng vào hóa đơn tháng tiếp theo</div>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:12px;color:var(--mau-chu-phu);">
-                                Tổng nợ: <strong style="color:#ef4444;">@Model.TongTienNoDV.ToString("N0") đ</strong>
-                            </span>
-                            <form method="post" asp-page-handler="ChuyenNoDVVaoHD">
-                                <button type="submit" class="nut-them-moi"
-                                        onclick="return confirm('Cộng tất cả nợ DV vào hóa đơn tháng này?')"
-                                        style="font-size:12px;padding:8px 14px;">
-                                    <i class="fas fa-arrow-right"></i> Cộng vào HD tháng
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Phòng</th>
-                                    <th>Khách thuê</th>
-                                    <th>Loại DV</th>
-                                    <th>Số tiền nợ</th>
-                                    <th>Ngày tạo đơn</th>
-                                    <th>Ghi chú</th>
-                                    <th>Trạng thái</th>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var no in Model.DanhSachNoDV)
-                                {
-                                    <tr>
-                                        <td><strong>P.@no.SoPhong</strong></td>
-                                        <td>@no.TenKhach</td>
-                                        <td>
-                                            <span class="badge dang-xu-ly">@no.LoaiDV</span>
-                                        </td>
-                                        <td><span class="no-chip"><i class="fas fa-exclamation-triangle"></i> @no.TongTien.ToString("N0") đ</span></td>
-                                        <td style="color:var(--mau-chu-phu);font-size:12px;">@no.NgayTao.ToString("dd/MM/yyyy")</td>
-                                        <td style="font-size:12px;color:var(--mau-chu-phu);">@(no.GhiChuXuLy ?? "—")</td>
-                                        <td><span class="badge qua-han">Chờ thanh toán</span></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        @if (!Model.DanhSachNoDV.Any())
-                        {
-                            <div class="empty-state">
-                                <i class="fas fa-check-circle" style="color:#22c55e;"></i>
-                                <p>Không có khoản nợ dịch vụ nào</p>
-                            </div>
-                        }
-                    </div>
+                            }
+                        </tbody>
+                    </table>
+                    @if (!Model.DanhSachDonNuoc.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-tint"></i>
+                            <p>Chưa có đơn nước bình nào</p>
+                        </div>
+                    }
                 </div>
             </div>
+        </div>
 
-        </div><!-- /#noi-dung -->
-    </div><!-- /#khu-vuc-chinh -->
-    <!-- ===================================================================
+        <!-- ==================== TAB 2: GIẶT SẤY ==================== -->
+        <div class="tab-panel" id="panel-giat-say">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đơn giặt sấy</h3>
+                        <div class="sub">Khách đặt → Quản lý nhập số tiền → Khách thanh toán</div>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button class="filter-pill on" onclick="locDonGS('', this)">Tất cả</button>
+                    <button class="filter-pill" onclick="locDonGS('Chờ xử lý', this)">Chờ nhập giá</button>
+                    <button class="filter-pill" onclick="locDonGS('Chờ thanh toán', this)">Chờ thanh toán</button>
+                    <button class="filter-pill" onclick="locDonGS('Thành công', this)">Thành công</button>
+                    <div class="o-tim-kiem">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchGS" placeholder="Tìm phòng, khách..." oninput="timKiemDon('gs')" />
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phòng</th>
+                                <th>Khách thuê</th>
+                                <th>Nội dung</th>
+                                <th>Ngày đặt</th>
+                                <th>Tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyGS">
+                            @foreach (var don in Model.DanhSachDonGiatSay)
+                            {
+                                <tr data-trangthai="@don.TrangThai_DV" data-search="@don.SoPhong @don.TenKhach">
+                                    <td><strong>P.@don.SoPhong</strong></td>
+                                    <td>@don.TenKhach</td>
+                                    <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@don.NoiDung">@don.NoiDung</td>
+                                    <td style="color:var(--mau-chu-phu);font-size:12px;">@don.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (don.TongTien > 0)
+                                        {
+                                            <strong>@don.TongTien.ToString("N0") đ</strong>
+                                        }
+                                        else
+                                        {
+                                            <span style="color:var(--mau-chu-phu);font-style:italic;">Chưa nhập</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var clsGs = don.TrangThai_DV switch
+                                            {
+                                                "Chờ xử lý"     => "cho-xu-ly",
+                                                "Chờ thanh toán" => "cho-tt",
+                                                "Thành công"    => "xong",
+                                                "Đã hủy"        => "huy",
+                                                _               => "cho-xu-ly"
+                                            };
+                                        }
+                                        <span class="badge @clsGs">@don.TrangThai_DV</span>
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;gap:6px;">
+                                            @if (don.TrangThai_DV == "Chờ xử lý")
+                                            {
+                                                <button class="btn btn-primary btn-sm"
+                                                        onclick="moModalNhapGiaGS(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung')">
+                                                    <i class="fas fa-dollar-sign"></i> Nhập tiền
+                                                </button>
+                                                <form method="post" asp-page-handler="HuyDon" style="display:inline;">
+                                                    <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hủy đơn?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            @if (don.TrangThai_DV == "Chờ thanh toán")
+                                            {
+                                                <span style="font-size:11px;color:var(--mau-chu-phu);">Đợi khách TT</span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    @if (!Model.DanhSachDonGiatSay.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-wind"></i>
+                            <p>Chưa có đơn giặt sấy nào</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 3: ĐIỆN NƯỚC ==================== -->
+        <div class="tab-panel" id="panel-dien-nuoc">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Chỉ số điện – nước theo kỳ</h3>
+                        <div class="sub">Khách nhập chỉ số + gửi ảnh → Quản lý xác nhận ảnh</div>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button class="filter-pill on" onclick="locDienNuoc(255, this)">Tất cả</button>
+                    <button class="filter-pill" onclick="locDienNuoc(0, this)">Chờ duyệt</button>
+                    <button class="filter-pill" onclick="locDienNuoc(1, this)">Đã duyệt</button>
+                    <button class="filter-pill" onclick="locDienNuoc(2, this)">Từ chối</button>
+                    <div class="o-tim-kiem">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchDN" placeholder="Tìm phòng, kỳ..." oninput="timKiemDienNuoc()" />
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phòng</th>
+                                <th>Kỳ ghi nhận</th>
+                                <th>Điện cũ → mới</th>
+                                <th>Nước cũ → mới</th>
+                                <th>Ảnh đồng hồ</th>
+                                <th>Ngày ghi</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyDN">
+                            @foreach (var dn in Model.DanhSachDienNuoc)
+                            {
+                                <tr data-tt="@dn.TrangThaiDuyet" data-search="@dn.SoPhong @dn.KyGhiNhan">
+                                    <td><strong>P.@dn.SoPhong</strong></td>
+                                    <td>@dn.KyGhiNhan</td>
+                                    <td>@dn.SoDienCu → <strong>@dn.SoDienMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoDienMoi - dn.SoDienCu))</small></td>
+                                    <td>@dn.SoNuocCu → <strong>@dn.SoNuocMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoNuocMoi - dn.SoNuocCu))</small></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(dn.AnhChupDongHo))
+                                        {
+                                            <button class="btn btn-ghost btn-sm"
+                                                    onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', @dn.IDGhiNhan, '@dn.SoPhong')">
+                                                <i class="fas fa-image"></i> Xem ảnh
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span style="color:var(--mau-chu-phu);font-size:12px;">Chưa có ảnh</span>
+                                        }
+                                    </td>
+                                    <td style="color:var(--mau-chu-phu);font-size:12px;">@dn.NgayGhi.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @{
+                                            var clsDN = dn.TrangThaiDuyet switch { 0 => "cho-duyet", 1 => "da-duyet", 2 => "tu-choi", _ => "cho-duyet" };
+                                            var lblDN = dn.TrangThaiDuyet switch { 0 => "Chờ duyệt", 1 => "Đã duyệt",  2 => "Từ chối",  _ => "Chờ duyệt" };
+                                        }
+                                        <span class="badge @clsDN">@lblDN</span>
+                                    </td>
+                                    <td>
+                                        @if (dn.TrangThaiDuyet == 0)
+                                        {
+                                            <div style="display:flex;gap:6px;">
+                                                <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
+                                                    <input type="hidden" name="idGhiNhan" value="@dn.IDGhiNhan" />
+                                                    <input type="hidden" name="chapNhan" value="true" />
+                                                    <button type="submit" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-check"></i> Duyệt
+                                                    </button>
+                                                </form>
+                                                <button class="btn btn-danger btn-sm"
+                                                        onclick="moModalTuChoiDN(@dn.IDGhiNhan, '@dn.SoPhong')">
+                                                    <i class="fas fa-times"></i> Từ chối
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:11px;color:var(--mau-chu-phu);">@(dn.TrangThaiDuyet == 1 ? "Đã xác nhận" : "Đã từ chối")</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    @if (!Model.DanhSachDienNuoc.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-bolt"></i>
+                            <p>Chưa có chỉ số điện nước nào được gửi</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 4: NỢ DỊCH VỤ ==================== -->
+        <div class="tab-panel" id="panel-no-dv">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;margin-right:8px;"></i>Nợ dịch vụ chưa thanh toán</h3>
+                        <div class="sub">Các khoản dịch vụ quá hạn sẽ tự động cộng vào hóa đơn tháng tiếp theo</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:12px;color:var(--mau-chu-phu);">
+                            Tổng nợ: <strong style="color:#ef4444;">@Model.TongTienNoDV.ToString("N0") đ</strong>
+                        </span>
+                        <form method="post" asp-page-handler="ChuyenNoDVVaoHD">
+                            <button type="submit" class="nut-them-moi"
+                                    onclick="return confirm('Cộng tất cả nợ DV vào hóa đơn tháng này?')"
+                                    style="font-size:12px;padding:8px 14px;">
+                                <i class="fas fa-arrow-right"></i> Cộng vào HD tháng
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phòng</th>
+                                <th>Khách thuê</th>
+                                <th>Loại DV</th>
+                                <th>Số tiền nợ</th>
+                                <th>Ngày tạo đơn</th>
+                                <th>Ghi chú</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var no in Model.DanhSachNoDV)
+                            {
+                                <tr>
+                                    <td><strong>P.@no.SoPhong</strong></td>
+                                    <td>@no.TenKhach</td>
+                                    <td><span class="badge dang-xu-ly">@no.LoaiDV</span></td>
+                                    <td><span class="no-chip"><i class="fas fa-exclamation-triangle"></i> @no.TongTien.ToString("N0") đ</span></td>
+                                    <td style="color:var(--mau-chu-phu);font-size:12px;">@no.NgayTao.ToString("dd/MM/yyyy")</td>
+                                    <td style="font-size:12px;color:var(--mau-chu-phu);">@(no.GhiChuXuLy ?? "—")</td>
+                                    <td><span class="badge qua-han">Chờ thanh toán</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    @if (!Model.DanhSachNoDV.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle" style="color:#22c55e;"></i>
+                            <p>Không có khoản nợ dịch vụ nào</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /#noi-dung -->
+</div><!-- /#khu-vuc-chinh -->
+
+<!-- ===================================================================
      MODAL: NHẬP GIÁ & XÁC NHẬN GIAO NƯỚC BÌNH
 =================================================================== -->
-    <div class="modal-overlay" id="modal-nhap-gia-nuoc" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-nuoc')">
-        <div class="modal">
-            <div class="modal-header">
-                <div>
-                    <h3><i class="fas fa-tint" style="color:#f59e0b;margin-right:8px;"></i>Nhập giá & Xác nhận giao nước</h3>
-                    <div class="sub" id="subNuoc">Phòng — | Khách: —</div>
-                </div>
-                <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-nuoc')"><i class="fas fa-times"></i></button>
+<div class="modal-overlay" id="modal-nhap-gia-nuoc" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-nuoc')">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h3><i class="fas fa-tint" style="color:#f59e0b;margin-right:8px;"></i>Nhập giá & Xác nhận giao nước</h3>
+                <div class="sub" id="subNuoc">Phòng — | Khách: —</div>
             </div>
-            <form method="post" asp-page-handler="NhapGiaNuocVaGiao">
-                <input type="hidden" name="idDonDV" id="nuoc_idDonDV" />
-                <div class="form-group">
-                    <label>Nội dung đơn</label>
-                    <input class="inp" type="text" id="nuoc_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Số tiền (đồng) <span style="color:#ef4444;">*</span></label>
-                        <input class="inp" type="number" name="tongTien" id="nuoc_tongTien" min="0" placeholder="VD: 25000" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Ghi chú xử lý</label>
-                        <input class="inp" type="text" name="ghiChuXuLy" placeholder="Giao thành công..." />
-                    </div>
-                </div>
-                <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:4px;">
-                    <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-                    Sau khi xác nhận, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong> và khách thuê sẽ nhận thông báo để thanh toán.
-                    Nếu quá hạn, số tiền sẽ được cộng vào hóa đơn tháng.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-nuoc')">Hủy</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Xác nhận đã giao</button>
-                </div>
-            </form>
+            <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-nuoc')"><i class="fas fa-times"></i></button>
         </div>
+        <form method="post" asp-page-handler="NhapGiaNuocVaGiao">
+            <input type="hidden" name="idDonDV" id="nuoc_idDonDV" />
+            <div class="form-group">
+                <label>Nội dung đơn</label>
+                <input class="inp" type="text" id="nuoc_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Số tiền (đồng) <span style="color:#ef4444;">*</span></label>
+                    <input class="inp" type="number" name="tongTien" id="nuoc_tongTien" min="0" placeholder="VD: 25000" required />
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú xử lý</label>
+                    <input class="inp" type="text" name="ghiChuXuLy" placeholder="Giao thành công..." />
+                </div>
+            </div>
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:4px;">
+                <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                Sau khi xác nhận, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong> và khách thuê sẽ nhận thông báo để thanh toán.
+                Nếu quá hạn, số tiền sẽ được cộng vào hóa đơn tháng.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-nuoc')">Hủy</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Xác nhận đã giao</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <!-- ===================================================================
+<!-- ===================================================================
      MODAL: NHẬP TIỀN GIẶT SẤY
 =================================================================== -->
-    <div class="modal-overlay" id="modal-nhap-gia-gs" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-gs')">
-        <div class="modal">
-            <div class="modal-header">
-                <div>
-                    <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Nhập tiền giặt sấy</h3>
-                    <div class="sub" id="subGS">Phòng — | Khách: —</div>
-                </div>
-                <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-gs')"><i class="fas fa-times"></i></button>
+<div class="modal-overlay" id="modal-nhap-gia-gs" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-gs')">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Nhập tiền giặt sấy</h3>
+                <div class="sub" id="subGS">Phòng — | Khách: —</div>
             </div>
-            <form method="post" asp-page-handler="NhapGiaGiatSay">
-                <input type="hidden" name="idDonDV" id="gs_idDonDV" />
+            <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-gs')"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="post" asp-page-handler="NhapGiaGiatSay">
+            <input type="hidden" name="idDonDV" id="gs_idDonDV" />
+            <div class="form-group">
+                <label>Nội dung đơn</label>
+                <input class="inp" type="text" id="gs_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
+            </div>
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Nội dung đơn</label>
-                    <input class="inp" type="text" id="gs_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
+                    <label>Số tiền (đồng) <span style="color:#ef4444;">*</span></label>
+                    <input class="inp" type="number" name="tongTien" min="0" placeholder="VD: 50000" required />
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú</label>
+                    <input class="inp" type="text" name="ghiChuXuLy" placeholder="3 kg, đã sấy khô..." />
+                </div>
+            </div>
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;color:#1e40af;margin-bottom:4px;">
+                <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                Sau khi nhập giá, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong>.
+                Nếu khách không thanh toán đúng hạn, khoản tiền sẽ được cộng vào hóa đơn cuối tháng.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-gs')">Hủy</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gửi báo giá</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODAL: XEM ẢNH ĐIỆN NƯỚC
+=================================================================== -->
+<div class="modal-overlay" id="modal-xem-anh-dn" onclick="dongModalNeuNhanNgoai(event,'modal-xem-anh-dn')">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div>
+                <h3><i class="fas fa-image" style="color:#059669;margin-right:8px;"></i>Ảnh đồng hồ điện – nước</h3>
+                <div class="sub" id="subAnhDN">Phòng —</div>
+            </div>
+            <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-dn')"><i class="fas fa-times"></i></button>
+        </div>
+        <img id="anhDienNuocPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ" />
+        <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-dn')">Đóng</button>
+            <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
+                <input type="hidden" name="idGhiNhan" id="anhDN_idGhiNhan" />
+                <input type="hidden" name="chapNhan" value="true" />
+                <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Xác nhận ảnh & Duyệt</button>
+            </form>
+            <button class="btn btn-danger" onclick="dongModal('modal-xem-anh-dn');moModalTuChoiDN(document.getElementById('anhDN_idGhiNhan').value, '')">
+                <i class="fas fa-times"></i> Từ chối
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODAL: TỪ CHỐI ĐIỆN NƯỚC
+=================================================================== -->
+<div class="modal-overlay" id="modal-tu-choi-dn" onclick="dongModalNeuNhanNgoai(event,'modal-tu-choi-dn')">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h3><i class="fas fa-times-circle" style="color:#ef4444;margin-right:8px;"></i>Từ chối chỉ số điện nước</h3>
+                <div class="sub" id="subTuChoiDN">Phòng —</div>
+            </div>
+            <button class="btn-dong-modal" onclick="dongModal('modal-tu-choi-dn')"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="post" asp-page-handler="DuyetDienNuoc">
+            <input type="hidden" name="idGhiNhan" id="tcDN_idGhiNhan" />
+            <input type="hidden" name="chapNhan" value="false" />
+            <div class="form-group">
+                <label>Lý do từ chối <span style="color:#ef4444;">*</span></label>
+                <input class="inp" type="text" name="ghiChuDuyet" placeholder="Ảnh mờ, số không khớp..." required />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="dongModal('modal-tu-choi-dn')">Hủy</button>
+                <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Từ chối</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODAL: CẤU HÌNH ĐƠN GIÁ DỊCH VỤ
+=================================================================== -->
+<div class="modal-overlay" id="modal-cau-hinh-gia" onclick="dongModalNeuNhanNgoai(event,'modal-cau-hinh-gia')">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div>
+                <h3><i class="fas fa-sliders-h" style="color:var(--mau-chu-de);margin-right:8px;"></i>Cấu hình đơn giá dịch vụ</h3>
+                <div class="sub">CONFIG_GIA — Dùng để tham khảo khi tính giá</div>
+            </div>
+            <button class="btn-dong-modal" onclick="dongModal('modal-cau-hinh-gia')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="table-wrap" style="margin-bottom:16px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên dịch vụ</th>
+                        <th>Mã</th>
+                        <th>Đơn giá</th>
+                        <th>Đơn vị</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cf in Model.DanhSachConfig)
+                    {
+                        <tr>
+                            <td><strong>@cf.TenDichVu</strong></td>
+                            <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:11px;">@cf.MaDichVu</code></td>
+                            <td><strong>@cf.DonGia.ToString("N0") đ</strong></td>
+                            <td>@cf.DonVi</td>
+                            <td>
+                                @if (cf.IsActive)
+                                {
+                                    <span class="badge da-duyet">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge tu-choi">Vô hiệu</span>
+                                }
+                            </td>
+                            <td>
+                                <form method="post" asp-page-handler="DoiTrangThaiConfig" style="display:inline;">
+                                    <input type="hidden" name="idConfig" value="@cf.IDConfig" />
+                                    <input type="hidden" name="isActive" value="@cf.IsActive" />
+                                    <button type="submit" class="btn @(cf.IsActive ? "btn-warning" : "btn-success") btn-sm">
+                                        @(cf.IsActive ? "Vô hiệu" : "Kích hoạt")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!-- Form thêm cấu hình mới -->
+        <div style="border-top:1px solid var(--mau-vien);padding-top:16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--mau-chu-phu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Thêm đơn giá mới</div>
+            <form method="post" asp-page-handler="ThemConfig">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tên dịch vụ</label>
+                        <input class="inp" type="text" name="tenDichVu" placeholder="Nước bình..." required />
+                    </div>
+                    <div class="form-group">
+                        <label>Mã dịch vụ</label>
+                        <input class="inp" type="text" name="maDichVu" placeholder="NUOC_BINH" required />
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Số tiền (đồng) <span style="color:#ef4444;">*</span></label>
-                        <input class="inp" type="number" name="tongTien" min="0" placeholder="VD: 50000" required />
+                        <label>Đơn giá (đ)</label>
+                        <input class="inp" type="number" name="donGia" min="0" placeholder="25000" required />
                     </div>
                     <div class="form-group">
-                        <label>Ghi chú</label>
-                        <input class="inp" type="text" name="ghiChuXuLy" placeholder="3 kg, đã sấy khô..." />
+                        <label>Đơn vị</label>
+                        <input class="inp" type="text" name="donVi" placeholder="bình / kg / lần" required />
                     </div>
                 </div>
-                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;color:#1e40af;margin-bottom:4px;">
-                    <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-                    Sau khi nhập giá, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong>.
-                    Nếu khách không thanh toán đúng hạn, khoản tiền sẽ được cộng vào hóa đơn cuối tháng.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-gs')">Hủy</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gửi báo giá</button>
+                <div class="modal-footer" style="padding-top:0;border-top:none;">
+                    <button type="button" class="btn btn-ghost" onclick="dongModal('modal-cau-hinh-gia')">Đóng</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm đơn giá</button>
                 </div>
             </form>
         </div>
     </div>
+</div>
 
-    <!-- ===================================================================
-     MODAL: XEM ẢNH ĐIỆN NƯỚC
-=================================================================== -->
-    <div class="modal-overlay" id="modal-xem-anh-dn" onclick="dongModalNeuNhanNgoai(event,'modal-xem-anh-dn')">
-        <div class="modal modal-lg">
-            <div class="modal-header">
-                <div>
-                    <h3><i class="fas fa-image" style="color:#059669;margin-right:8px;"></i>Ảnh đồng hồ điện – nước</h3>
-                    <div class="sub" id="subAnhDN">Phòng —</div>
-                </div>
-                <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-dn')"><i class="fas fa-times"></i></button>
-            </div>
-            <img id="anhDienNuocPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ" />
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-dn')">Đóng</button>
-                <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
-                    <input type="hidden" name="idGhiNhan" id="anhDN_idGhiNhan" />
-                    <input type="hidden" name="chapNhan" value="true" />
-                    <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Xác nhận ảnh & Duyệt</button>
-                </form>
-                <button class="btn btn-danger" onclick="dongModal('modal-xem-anh-dn');moModalTuChoiDN(document.getElementById('anhDN_idGhiNhan').value, '')">
-                    <i class="fas fa-times"></i> Từ chối
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================================================================
-     MODAL: TỪ CHỐI ĐIỆN NƯỚC
-=================================================================== -->
-    <div class="modal-overlay" id="modal-tu-choi-dn" onclick="dongModalNeuNhanNgoai(event,'modal-tu-choi-dn')">
-        <div class="modal">
-            <div class="modal-header">
-                <div>
-                    <h3><i class="fas fa-times-circle" style="color:#ef4444;margin-right:8px;"></i>Từ chối chỉ số điện nước</h3>
-                    <div class="sub" id="subTuChoiDN">Phòng —</div>
-                </div>
-                <button class="btn-dong-modal" onclick="dongModal('modal-tu-choi-dn')"><i class="fas fa-times"></i></button>
-            </div>
-            <form method="post" asp-page-handler="DuyetDienNuoc">
-                <input type="hidden" name="idGhiNhan" id="tcDN_idGhiNhan" />
-                <input type="hidden" name="chapNhan" value="false" />
-                <div class="form-group">
-                    <label>Lý do từ chối <span style="color:#ef4444;">*</span></label>
-                    <input class="inp" type="text" name="ghiChuDuyet" placeholder="Ảnh mờ, số không khớp..." required />
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" onclick="dongModal('modal-tu-choi-dn')">Hủy</button>
-                    <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Từ chối</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ===================================================================
-     MODAL: CẤU HÌNH ĐƠN GIÁ DỊCH VỤ
-=================================================================== -->
-    <div class="modal-overlay" id="modal-cau-hinh-gia" onclick="dongModalNeuNhanNgoai(event,'modal-cau-hinh-gia')">
-        <div class="modal modal-lg">
-            <div class="modal-header">
-                <div>
-                    <h3><i class="fas fa-sliders-h" style="color:var(--mau-chu-de);margin-right:8px;"></i>Cấu hình đơn giá dịch vụ</h3>
-                    <div class="sub">CONFIG_GIA — Dùng để tham khảo khi tính giá</div>
-                </div>
-                <button class="btn-dong-modal" onclick="dongModal('modal-cau-hinh-gia')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="table-wrap" style="margin-bottom:16px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tên dịch vụ</th>
-                            <th>Mã</th>
-                            <th>Đơn giá</th>
-                            <th>Đơn vị</th>
-                            <th>Trạng thái</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var cf in Model.DanhSachConfig)
-                        {
-                            <tr>
-                                <td><strong>@cf.TenDichVu</strong></td>
-                                <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:11px;">@cf.MaDichVu</code></td>
-                                <td><strong>@cf.DonGia.ToString("N0") đ</strong></td>
-                                <td>@cf.DonVi</td>
-                                <td>
-                                    @if (cf.IsActive)
-                                    {
-                                        <span class="badge da-duyet">Hoạt động</span>
-                                    }
-                                    else
-                                    {
-
-                                        <span class="badge tu-choi">Vô hiệu</span>
-                                    }
-                                </td>
-                                <td>
-                                    <form method="post" asp-page-handler="DoiTrangThaiConfig" style="display:inline;">
-                                        <input type="hidden" name="idConfig" value="@cf.IDConfig" />
-                                        <input type="hidden" name="isActive" value="@cf.IsActive" />
-                                        <button type="submit" class="btn @(cf.IsActive ? "btn-warning" : "btn-success") btn-sm">
-                                            @(cf.IsActive ? "Vô hiệu" : "Kích hoạt")
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <!-- Form thêm cấu hình mới -->
-            <div style="border-top:1px solid var(--mau-vien);padding-top:16px;">
-                <div style="font-size:12px;font-weight:700;color:var(--mau-chu-phu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Thêm đơn giá mới</div>
-                <form method="post" asp-page-handler="ThemConfig">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tên dịch vụ</label>
-                            <input class="inp" type="text" name="tenDichVu" placeholder="Nước bình..." required />
-                        </div>
-                        <div class="form-group">
-                            <label>Mã dịch vụ</label>
-                            <input class="inp" type="text" name="maDichVu" placeholder="NUOC_BINH" required />
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Đơn giá (đ)</label>
-                            <input class="inp" type="number" name="donGia" min="0" placeholder="25000" required />
-                        </div>
-                        <div class="form-group">
-                            <label>Đơn vị</label>
-                            <input class="inp" type="text" name="donVi" placeholder="bình / kg / lần" required />
-                        </div>
-                    </div>
-                    <div class="modal-footer" style="padding-top:0;border-top:none;">
-                        <button type="button" class="btn btn-ghost" onclick="dongModal('modal-cau-hinh-gia')">Đóng</button>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm đơn giá</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================================================================
+<!-- ===================================================================
      JAVASCRIPT
 =================================================================== -->
-    <script>
-            // ===== SIDEBAR =====
-            function dongMoSidebar() {
-                document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
-            }
-            function chuyenTrang(ten, el) {
-                const map = {
-                    'trang-chu': '/Manager/Manager',
-                    'quan-ly-phong': '/Manager/ChiTietPhong',
-                    'quan-ly-dich-vu': '/Manager/QuanLyDichVu',
-                    'hoa-don': '/Manager/HoaDon',
-                    'su-co': '/Manager/SuCo',
-                    'bao-cao': '/BaoCao',
-                    'cai-dat': '/CaiDat',
-                };
-                if (map[ten]) window.location.href = map[ten];
-            }
+<script>
+    // ===== SIDEBAR =====
+    function dongMoSidebar() {
+        document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
+    }
 
-            // ===== TABS =====
-            function chonTab(tabId, btnEl) {
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('panel-' + tabId).classList.add('active');
-                (btnEl || document.querySelector(`[data-tab="${tabId}"]`)).classList.add('active');
-            }
+    function chuyenTrang(ten, el) {
+        const map = {
+            'trang-chu':      '/Manager/Manager',
+            'quan-ly-phong':  '/Manager/ChiTietPhong',
+            'quan-ly-dich-vu':'/Manager/QuanLyDichVu',
+            'hoa-don':        '/Manager/HoaDon',
+            'su-co':          '/Manager/SuCo',
+            'bao-cao':        '/BaoCao',
+            'cai-dat':        '/CaiDat',
+        };
+        if (map[ten]) window.location.href = map[ten];
+    }
 
-            // ===== MODAL =====
-            function dongModal(id) { document.getElementById(id).classList.remove('hien'); }
-            function dongModalNeuNhanNgoai(e, id) { if (e.target.id === id) dongModal(id); }
+    // ===== TABS =====
+    function chonTab(tabId, btnEl) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('panel-' + tabId).classList.add('active');
+        (btnEl || document.querySelector(`[data-tab="${tabId}"]`)).classList.add('active');
+    }
 
-            function moModalNhapGiaNuoc(id, phong, khach, noiDung, tienHienTai) {
-                document.getElementById('nuoc_idDonDV').value = id;
-                document.getElementById('nuoc_noiDung').value = noiDung;
-                document.getElementById('nuoc_tongTien').value = tienHienTai > 0 ? tienHienTai : '';
-                document.getElementById('subNuoc').textContent = `Phòng ${phong} | Khách: ${khach}`;
-                document.getElementById('modal-nhap-gia-nuoc').classList.add('hien');
-            }
+    // ===== MODAL =====
+    function dongModal(id) { document.getElementById(id).classList.remove('hien'); }
+    function dongModalNeuNhanNgoai(e, id) { if (e.target.id === id) dongModal(id); }
 
-            function moModalNhapGiaGS(id, phong, khach, noiDung) {
-                document.getElementById('gs_idDonDV').value = id;
-                document.getElementById('gs_noiDung').value = noiDung;
-                document.getElementById('subGS').textContent = `Phòng ${phong} | Khách: ${khach}`;
-                document.getElementById('modal-nhap-gia-gs').classList.add('hien');
-            }
+    function moModalNhapGiaNuoc(id, phong, khach, noiDung, tienHienTai) {
+        document.getElementById('nuoc_idDonDV').value  = id;
+        document.getElementById('nuoc_noiDung').value  = noiDung;
+        document.getElementById('nuoc_tongTien').value = tienHienTai > 0 ? tienHienTai : '';
+        document.getElementById('subNuoc').textContent = `Phòng ${phong} | Khách: ${khach}`;
+        document.getElementById('modal-nhap-gia-nuoc').classList.add('hien');
+    }
 
-            function xemAnhDienNuoc(url, id, phong) {
-                document.getElementById('anhDienNuocPreview').src = url;
-                document.getElementById('anhDN_idGhiNhan').value = id;
-                document.getElementById('subAnhDN').textContent = `Phòng ${phong}`;
-                document.getElementById('modal-xem-anh-dn').classList.add('hien');
-            }
+    function moModalNhapGiaGS(id, phong, khach, noiDung) {
+        document.getElementById('gs_idDonDV').value  = id;
+        document.getElementById('gs_noiDung').value  = noiDung;
+        document.getElementById('subGS').textContent = `Phòng ${phong} | Khách: ${khach}`;
+        document.getElementById('modal-nhap-gia-gs').classList.add('hien');
+    }
 
-            function moModalTuChoiDN(id, phong) {
-                document.getElementById('tcDN_idGhiNhan').value = id;
-                document.getElementById('subTuChoiDN').textContent = phong ? `Phòng ${phong}` : '';
-                document.getElementById('modal-tu-choi-dn').classList.add('hien');
-            }
+    function xemAnhDienNuoc(url, id, phong) {
+        document.getElementById('anhDienNuocPreview').src   = url;
+        document.getElementById('anhDN_idGhiNhan').value    = id;
+        document.getElementById('subAnhDN').textContent     = `Phòng ${phong}`;
+        document.getElementById('modal-xem-anh-dn').classList.add('hien');
+    }
 
-            function moModalCauHinhGia() {
-                document.getElementById('modal-cau-hinh-gia').classList.add('hien');
-            }
+    function moModalTuChoiDN(id, phong) {
+        document.getElementById('tcDN_idGhiNhan').value     = id;
+        document.getElementById('subTuChoiDN').textContent  = phong ? `Phòng ${phong}` : '';
+        document.getElementById('modal-tu-choi-dn').classList.add('hien');
+    }
 
-            // ===== FILTER: ĐƠN NƯỚC =====
-            let filterNuoc = '';
-            function locDonNuoc(tt, btn) {
-                filterNuoc = tt;
-                document.querySelectorAll('#panel-don-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
-                btn.classList.add('on');
-                apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
-            }
+    function moModalCauHinhGia() {
+        document.getElementById('modal-cau-hinh-gia').classList.add('hien');
+    }
 
-            // ===== FILTER: GIẶT SẤY =====
-            let filterGS = '';
-            function locDonGS(tt, btn) {
-                filterGS = tt;
-                document.querySelectorAll('#panel-giat-say .filter-pill').forEach(b => b.classList.remove('on'));
-                btn.classList.add('on');
-                apDungFilter('tbodyGS', filterGS, document.getElementById('searchGS').value);
-            }
+    // ===== FILTER: ĐƠN NƯỚC =====
+    let filterNuoc = '';
+    function locDonNuoc(tt, btn) {
+        filterNuoc = tt;
+        document.querySelectorAll('#panel-don-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
+    }
 
-            function apDungFilter(tbodyId, tt, kw) {
-                const rows = document.querySelectorAll(`#${tbodyId} tr`);
-                rows.forEach(r => {
-                    const matchTT = !tt || r.dataset.trangthai === tt;
-                    const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw.toLowerCase());
-                    r.style.display = matchTT && matchKW ? '' : 'none';
-                });
-            }
+    // ===== FILTER: GIẶT SẤY =====
+    let filterGS = '';
+    function locDonGS(tt, btn) {
+        filterGS = tt;
+        document.querySelectorAll('#panel-giat-say .filter-pill').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        apDungFilter('tbodyGS', filterGS, document.getElementById('searchGS').value);
+    }
 
-            function timKiemDon(loai) {
-                if (loai === 'nuoc') apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
-                else apDungFilter('tbodyGS', filterGS, document.getElementById('searchGS').value);
-            }
+    function apDungFilter(tbodyId, tt, kw) {
+        const rows = document.querySelectorAll(`#${tbodyId} tr`);
+        rows.forEach(r => {
+            const matchTT = !tt || r.dataset.trangthai === tt;
+            const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw.toLowerCase());
+            r.style.display = matchTT && matchKW ? '' : 'none';
+        });
+    }
 
-            // ===== FILTER: ĐIỆN NƯỚC =====
-            let filterDN = 255;
-            function locDienNuoc(tt, btn) {
-                filterDN = tt;
-                document.querySelectorAll('#panel-dien-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
-                btn.classList.add('on');
-                timKiemDienNuoc();
-            }
-            function timKiemDienNuoc() {
-                const kw = document.getElementById('searchDN').value.toLowerCase();
-                document.querySelectorAll('#tbodyDN tr').forEach(r => {
-                    const matchTT = filterDN === 255 || parseInt(r.dataset.tt) === filterDN;
-                    const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw);
-                    r.style.display = matchTT && matchKW ? '' : 'none';
-                });
-            }
+    function timKiemDon(loai) {
+        if (loai === 'nuoc') apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
+        else                 apDungFilter('tbodyGS',   filterGS,   document.getElementById('searchGS').value);
+    }
 
-            // ===== TOAST =====
-            function hienToast(msg, loai) {
-                const icons = { success: 'fa-check-circle', danger: 'fa-times-circle', warning: 'fa-exclamation-triangle' };
-                const wrap = document.getElementById('toastWrap');
-                const t = document.createElement('div');
-                t.className = `toast ${loai}`;
-                t.innerHTML = `<i class="fas ${icons[loai] || icons.success}"></i>${msg}`;
-                wrap.appendChild(t);
-                setTimeout(() => t.remove(), 4000);
-            }
-    </script>
+    // ===== FILTER: ĐIỆN NƯỚC =====
+    let filterDN = 255;
+    function locDienNuoc(tt, btn) {
+        filterDN = tt;
+        document.querySelectorAll('#panel-dien-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        timKiemDienNuoc();
+    }
+
+    function timKiemDienNuoc() {
+        const kw = document.getElementById('searchDN').value.toLowerCase();
+        document.querySelectorAll('#tbodyDN tr').forEach(r => {
+            const matchTT = filterDN === 255 || parseInt(r.dataset.tt) === filterDN;
+            const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw);
+            r.style.display = matchTT && matchKW ? '' : 'none';
+        });
+    }
+
+    // ===== TOAST =====
+    function hienToast(msg, loai) {
+        const icons = { success: 'fa-check-circle', danger: 'fa-times-circle', warning: 'fa-exclamation-triangle' };
+        const wrap  = document.getElementById('toastWrap');
+        const t     = document.createElement('div');
+        t.className = `toast ${loai}`;
+        t.innerHTML = `<i class="fas ${icons[loai] || icons.success}"></i>${msg}`;
+        wrap.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+    }
+</script>
 </body>
 </html>
