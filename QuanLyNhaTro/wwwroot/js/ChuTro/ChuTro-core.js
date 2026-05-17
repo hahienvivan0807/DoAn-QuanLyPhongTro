@@ -24,10 +24,10 @@ function chuyenMenu(tenTrang, phanTu) {
         'nguoi-thue': '/Admin/QuanLyNguoiThue',
         'hop-dong': '/Admin/QuanLyHopDong',
         'Tai-Khoan':'/Admin/Taikhoanquanly',
-        'hoa-don': '/HoaDon',
-        'sua-chua': '/SuCoBaoTri',
-        'bao-cao': '/BaoCao',
-        'cai-dat': '/CaiDat',
+        'hoa-don': '/Admin/HoaDon',
+        'sua-chua': '/Admin/SuCoBaoTri',
+        'bao-cao': '/Admin/BaoCao',
+        'cai-dat': '/Admin/CaiDat',
     };
     const url = bangDuongDan[tenTrang];
     if (url) window.location.href = url;

@@ -839,9 +839,9 @@ namespace QuanLyNhaTro.Models
             // ── THONGKE_TONG ─────────────────────────────────────────
             modelBuilder.Entity<THONGKE_TONG>(entity =>
             {
-                entity.HasCheckConstraint("CHK_ID_1", "[ID] = 1");
+                entity.ToTable("THONGKE_TONG", t =>
+                    t.HasCheckConstraint("CHK_ID_1", "[ID] = 1"));
                 entity.Property(e => e.NgayCapNhat).HasDefaultValueSql("GETUTCDATE()");
-                entity.HasData(new THONGKE_TONG { ID = 1 });
             });
 
             // ── THONGKE_DOANHTHU_THANG ───────────────────────────────
