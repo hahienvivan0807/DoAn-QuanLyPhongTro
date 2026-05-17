@@ -145,37 +145,72 @@ function ntKhoiTao() {
 async function ntTaiDuLieu() {
     ntHienThiLoading(true);
     try {
-        // ── THAY BẰNG FETCH THẬT ──
-        // const res = await fetch('/api/nguoithue', {
-        //   headers: { 'Authorization': `Bearer ${layToken()}` }
-        // });
-        // if (!res.ok) throw new Error('Lỗi tải dữ liệu');
-        // NT.duLieu = await res.json();
+        const res = await fetch('/api/ChuTroQuanLyNguoiThue/ds-phong');
+        if (!res.ok) throw new Error('Lỗi mạng hoặc server');
 
-        // Mock delay
-        await new Promise(r => setTimeout(r, 600));
-        NT.duLieu = [...NT_MOCK_DATA];
+        const result = await res.json();
 
-        ntCapNhatThongKe();
-        ntLocDuLieu();
+        if (result.success) {
+            NT.duLieu = result.danhSach
+                .filter(p => p.hopDong !== null && p.hopDong !== undefined)
+                .map(p => ({
+                    IDKhachThue: p.hopDong.idHopDong,
+                    IDUser: p.hopDong.idUser,
+                    HoTen: p.hopDong.tenKhachThue || '—',
+                    SoDienThoai: p.hopDong.soDienThoai || '',
+                    Email: '',
+                    SoCCCD: '',
+                    NgaySinh: null,
+                    GioiTinh: '',
+                    QueQuan: '',
+                    DiaChiThuongTru: '',
+                    AnhChanDung: null,
+                    GhiChu: p.moTa || '',
+                    NgayVaoO: p.hopDong.ngayBatDau,
+                    NgayKetThuc: p.hopDong.ngayKetThuc,
+                    TienCoc: p.hopDong.tienCocBanDau,
+                    SoNgayConLai: p.hopDong.soNgayConLai,
+                    SoPhong: p.soPhong,
+                    IDPhong: p.idPhong,
+
+                    TrangThai: p.hopDong.isActive ? 'dang-o' : 'da-roi',
+
+                    Username: '',
+                }));
+
+            ntCapNhatThongKe();
+            ntLocDuLieu();
+        } else {
+            throw new Error('API trả về lỗi');
+        }
     } catch (e) {
         console.error('ntTaiDuLieu:', e);
+        hienToast('Lỗi tải danh sách người thuê: ' + e.message, 'error');
+    } finally {
         ntHienThiLoading(false);
-        hienToast('Lỗi tải danh sách người thuê', 'error');
     }
 }
-
 /**
  * Tải danh sách phòng trống
  * API endpoint: GET /api/phong?trangThai=Trống
  */
 async function ntTaiDanhSachPhong() {
     try {
-        // const res = await fetch('/api/phong?trangThai=Trống');
-        // NT.danhSachPhong = await res.json();
-        NT.danhSachPhong = [...NT_MOCK_ROOMS];
-        ntRenderSelectPhong();
-        ntRenderFilterPhong();
+        // Gọi API và lọc ra những phòng có trạng thái 'Trống'
+        const res = await fetch('/api/ChuTroQuanLyNguoiThue/ds-phong?trangThai=Trống');
+        const result = await res.json();
+
+        if (result.success) {
+            NT.danhSachPhong = result.danhSach.map(p => ({
+                IDPhong: p.idPhong,
+                SoPhong: p.soPhong,
+                TrangThai: p.trangThai,
+                GiaPhongFix: p.giaPhongFix,
+                DienTich: p.dienTich
+            }));
+            ntRenderSelectPhong();
+            ntRenderFilterPhong();
+        }
     } catch (e) {
         console.error('ntTaiDanhSachPhong:', e);
     }
@@ -191,41 +226,65 @@ async function ntLuuNguoiThue() {
 
     const mode = document.getElementById('nt-modal-mode').value;
     const id = document.getElementById('inp-id-khach-thue').value;
-
+    const idUser = document.getElementById('inp-id-user').value;
     const payload = ntLayPayload();
+
     const btnSubmit = document.getElementById('nt-btn-submit');
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
 
     try {
-        // ── THAY BẰNG FETCH THẬT ──
-        // const url    = mode === 'them' ? '/api/nguoithue' : `/api/nguoithue/${id}`;
-        // const method = mode === 'them' ? 'POST' : 'PUT';
-        // const res = await fetch(url, {
-        //   method,
-        //   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${layToken()}` },
-        //   body: JSON.stringify(payload)
-        // });
-        // if (!res.ok) { const err = await res.json(); throw new Error(err.message || 'Lỗi lưu dữ liệu'); }
-
-        await new Promise(r => setTimeout(r, 800)); // Mock
-
         if (mode === 'them') {
+            // ── Thêm mới (giữ nguyên mock hoặc fetch thật) ──
+            // const res = await fetch('/api/nguoithue', { method:'POST', ... });
+            await new Promise(r => setTimeout(r, 800));
             const mock = { ...payload, IDKhachThue: Date.now(), TrangThai: 'dang-o' };
             NT.duLieu.unshift(mock);
-            hienToast(`Đã thêm người thuê "${payload.HoTen}" thành công!`, 'success');
+            hienToast(`Đã thêm người thuê "${payload.HoTen}"!`, 'success');
+
         } else {
+            // ── Cập nhật ──
+            const trangThaiMoi = document.getElementById('inp-trang-thai').value;
+            const trangThaiCu = NT.duLieu.find(x => x.IDKhachThue == id)?.TrangThai;
+            const doiTrangThai = trangThaiMoi !== trangThaiCu;
+
+            // Nếu đổi sang "Rời đi" → gọi API cập nhật IsActive + PHONG + HOPDONG
+            if (doiTrangThai && trangThaiMoi === 'da-roi') {
+                const resTraPhong = await fetch(
+                    `/api/ChuTroQuanLyNguoiThue/tra-phong/${idUser}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ GhiChu: payload.GhiChu })
+                });
+                if (!resTraPhong.ok) throw new Error('Lỗi khi cập nhật trạng thái rời đi');
+            }
+
+            // Nếu đổi lại sang "Đang ở" → bật lại IsActive
+            if (doiTrangThai && trangThaiMoi === 'dang-o') {
+                const resKhoiPhuc = await fetch(
+                    `/api/ChuTroQuanLyNguoiThue/khoi-phuc/${idUser}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!resKhoiPhuc.ok) throw new Error('Lỗi khi khôi phục trạng thái');
+            }
+
+            // Cập nhật thông tin cơ bản
+            // const res = await fetch(`/api/nguoithue/${id}`, { method:'PUT', ... });
+            await new Promise(r => setTimeout(r, 600));
+
             const idx = NT.duLieu.findIndex(x => x.IDKhachThue == id);
-            if (idx > -1) Object.assign(NT.duLieu[idx], payload);
+            if (idx > -1) Object.assign(NT.duLieu[idx], { ...payload, TrangThai: trangThaiMoi });
             hienToast(`Đã cập nhật thông tin "${payload.HoTen}"!`, 'success');
         }
 
         ntDongModal();
         ntCapNhatThongKe();
         ntLocDuLieu();
+
     } catch (e) {
         console.error('ntLuuNguoiThue:', e);
-        hienToast(e.message || 'Lỗi lưu dữ liệu, vui lòng thử lại!', 'error');
+        hienToast(e.message || 'Lỗi lưu dữ liệu!', 'error');
     } finally {
         btnSubmit.disabled = false;
         const label = mode === 'them' ? 'Thêm người thuê' : 'Lưu thay đổi';
@@ -377,73 +436,84 @@ function ntRenderBang() {
 
     const start = (NT.trangHienTai - 1) * NT.soTrangMoiTrang;
 
-    tbody.innerHTML = trang.map((x, i) => `
-    <tr>
-      <td class="col-stt" style="text-align:center; color:var(--mau-chu-phu); font-size:12px; font-weight:600;">
-        ${start + i + 1}
-      </td>
+    tbody.innerHTML = trang.map((x, i) => {
+        const soNgay = x.SoNgayConLai;
+        let hdHtml = '<span class="nt-hd-unlimited">Không thời hạn</span>';
+        if (x.NgayKetThuc) {
+            if (soNgay !== null && soNgay <= 30 && soNgay >= 0) {
+                hdHtml = `<div class="nt-hd-cell nt-hd-warning">${ntDinhDangNgay(x.NgayKetThuc)}</div>
+                      <div class="nt-date-diff">Còn ${soNgay} ngày</div>`;
+            } else if (soNgay !== null && soNgay < 0) {
+                hdHtml = `<div class="nt-hd-cell nt-hd-expired">${ntDinhDangNgay(x.NgayKetThuc)}</div>
+                      <div class="nt-date-diff">Đã hết hạn</div>`;
+            } else {
+                hdHtml = `<div class="nt-hd-cell nt-hd-normal">${ntDinhDangNgay(x.NgayKetThuc)}</div>`;
+            }
+        }
 
-      <td class="col-khach">
+        return `
+    <tr>
+      <td class="nt-col-stt">
+        <span class="nt-stt-num">${start + i + 1}</span>
+      </td>
+      <td class="nt-col-khach">
         <div class="nt-khach-cell">
           <div class="nt-avatar">
             ${x.AnhChanDung
-            ? `<img src="${x.AnhChanDung}" alt="${ntEscape(x.HoTen)}">`
-            : ntLayChuCai(x.HoTen)}
+                ? `<img src="${ntEscape(x.AnhChanDung)}" alt="${ntEscape(x.HoTen)}">`
+                : ntLayChuCai(x.HoTen)}
           </div>
           <div>
             <div class="nt-khach-name">${ntEscape(x.HoTen)}</div>
-            <div class="nt-khach-phone">
-              <i class="fas fa-phone" style="font-size:9px;"></i>
-              ${ntEscape(x.SoDienThoai || '—')}
+            <div class="nt-khach-cccd">
+              <i class="fas fa-id-card" style="font-size:9px;"></i>
+              ${ntEscape(x.SoCCCD || '—')}
             </div>
           </div>
         </div>
       </td>
-
-      <td class="col-phong">
-        <span class="nt-phong-badge">
+      <td class="nt-col-phong">
+        <span class="nt-phong-tag">
           <i class="fas fa-door-open" style="font-size:10px;"></i>
           ${ntEscape(x.SoPhong || '—')}
         </span>
       </td>
-
-      <td class="col-ngaysinh">
-        <div style="font-size:12.5px; color:var(--mau-chu);">
-          ${ntDinhDangNgay(x.NgaySinh) || '—'}
+      <td class="nt-col-lienhe">
+        <div class="nt-lienhe-row">
+          <div class="nt-lienhe-phone">
+            <i class="fas fa-phone"></i>
+            ${ntEscape(x.SoDienThoai || '—')}
+          </div>
+          <div class="nt-lienhe-email">${ntEscape(x.Email || '')}</div>
         </div>
-        <div style="font-size:11px; color:var(--mau-chu-phu); margin-top:2px;">
-          <i class="fas fa-id-card" style="font-size:9px;"></i>
-          ${ntEscape(x.SoCCCD || '—')}
-        </div>
       </td>
-
-      <td class="col-ngayvao" style="font-size:12.5px; color:var(--mau-chu);">
-        ${ntDinhDangNgay(x.NgayVaoO)}
+      <td class="nt-col-ngayvao">
+        <div class="nt-date-cell">${ntDinhDangNgay(x.NgayVaoO)}</div>
       </td>
-
-      <td class="col-trangthai">
-        ${ntBadgeTrangThai(x.TrangThai)}
+      <td class="nt-col-coc">
+        <span class="nt-coc-val">${x.TienCoc ? ntDinhDangTien(x.TienCoc) : '—'}</span>
       </td>
-
-      <td class="col-hanh-dong">
-        <div class="nt-action-btns">
-          <button class="nt-act-btn nt-act-view" title="Xem chi tiết"
+      <td class="nt-col-hd">${hdHtml}</td>
+      <td class="nt-col-trangthai">${ntBadgeTrangThai(x.TrangThai)}</td>
+      <td class="nt-col-action">
+        <div class="nt-action-row">
+          <button class="nt-act nt-act-view" title="Xem chi tiết"
                   onclick="ntXemChiTiet(${x.IDKhachThue})">
             <i class="fas fa-eye"></i>
           </button>
-          <button class="nt-act-btn nt-act-edit" title="Chỉnh sửa"
+          <button class="nt-act nt-act-edit" title="Chỉnh sửa"
                   onclick="ntMoModalSua(${x.IDKhachThue})">
             <i class="fas fa-pen"></i>
           </button>
           ${x.TrangThai === 'dang-o' ? `
-          <button class="nt-act-btn nt-act-del" title="Trả phòng"
+          <button class="nt-act nt-act-del" title="Trả phòng"
                   onclick="ntMoModalXoa(${x.IDKhachThue})">
             <i class="fas fa-sign-out-alt"></i>
           </button>` : ''}
         </div>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+    }).join('');
 }
 
 /** Render lưới */
@@ -638,12 +708,13 @@ function ntMoModalThem() {
     document.getElementById('nt-modal-icon').innerHTML = '<i class="fas fa-user-plus"></i>';
     document.getElementById('field-password').style.display = '';
 
-    // Ngày vào ở mặc định
+    document.getElementById('field-trang-thai').style.display = 'none';
+
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('inp-ngay-vao-o').value = today;
 
     ntMoOverlay('nt-modal-overlay');
-    ntChuyenTabById('thong-tin-co-ban');
+    ntChuyenTabById('tab-co-ban');
 }
 
 function ntMoModalSua(id) {
@@ -658,10 +729,16 @@ function ntMoModalSua(id) {
     document.getElementById('nt-modal-mo-ta').textContent = `Cập nhật hồ sơ: ${item.HoTen}`;
     document.getElementById('nt-btn-submit-label').textContent = 'Lưu thay đổi';
     document.getElementById('nt-modal-icon').innerHTML = '<i class="fas fa-user-edit"></i>';
-    document.getElementById('field-password').style.display = 'none'; // Không đổi PW khi sửa
+    document.getElementById('field-password').style.display = 'none';
+    document.getElementById('field-trang-thai').style.display = '';
+    document.getElementById('inp-trang-thai').value = item.TrangThai;
+    document.getElementById('canh-bao-trang-thai').style.display = 'none';
 
-    // Điền dữ liệu
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    const set = (elId, val) => {
+        const el = document.getElementById(elId);
+        if (el) el.value = val || '';
+    };
+
     set('inp-ho-ten', item.HoTen);
     set('inp-so-dien-thoai', item.SoDienThoai);
     set('inp-email', item.Email);
@@ -671,17 +748,42 @@ function ntMoModalSua(id) {
     set('inp-que-quan', item.QueQuan);
     set('inp-dia-chi-thuong-tru', item.DiaChiThuongTru);
     set('inp-ghi-chu', item.GhiChu);
-    set('inp-username', item.Username);
-    set('inp-ngay-vao-o', item.NgayVaoO ? item.NgayVaoO.split('T')[0] : '');
 
-    // Avatar
+    // ✅ Username lấy từ item — nếu API chưa trả về thì gọi thêm API
+    set('inp-username', item.Username);
+
+    // Nếu Username rỗng → tự động lấy từ API Account
+    if (!item.Username && item.IDUser) {
+        ntLayUsername(item.IDUser);
+    }
+
+    // Tab Phòng & Hợp đồng
+    ntChuyenCheDoPHong('sua', item);
+
     if (item.AnhChanDung) {
         document.getElementById('nt-avatar-preview').innerHTML =
             `<img src="${item.AnhChanDung}" alt="">`;
     }
 
     ntMoOverlay('nt-modal-overlay');
-    ntChuyenTabById('thong-tin-co-ban');
+    ntChuyenTabById('tab-co-ban');
+}
+async function ntLayUsername(idUser) {
+    try {
+        const res = await fetch(`/api/ChuTroQuanLyNguoiThue/account/${idUser}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.username) {
+            const el = document.getElementById('inp-username');
+            if (el && !el.value) el.value = data.username;
+
+            // Cập nhật lại trong NT.duLieu để lần sau không cần gọi lại
+            const item = NT.duLieu.find(x => x.IDUser === idUser);
+            if (item) item.Username = data.username;
+        }
+    } catch (e) {
+        console.warn('Không lấy được username:', e);
+    }
 }
 
 function ntDongModal(e) {
@@ -769,10 +871,6 @@ function ntXemChiTiet(id) {
   `;
 
     // Gán sự kiện nút Sửa trong modal detail
-    document.getElementById('nt-detail-btn-sua').onclick = () => {
-        ntDongModalDetail();
-        ntMoModalSua(id);
-    };
 
     ntMoOverlay('nt-modal-detail-overlay');
 }
@@ -795,12 +893,12 @@ function ntMoModalXoa(id) {
         `Bạn có chắc muốn trả phòng cho <strong>${ntEscape(item.HoTen)}</strong> (Phòng ${ntEscape(item.SoPhong)})?
      Thao tác này sẽ kết thúc hợp đồng và đánh dấu phòng là trống.`;
 
-    ntMoOverlay('nt-modal-xoa-overlay');
+    ntMoOverlay('nt-confirm-overlay');
 }
 
 function ntDongModalXoa(e) {
-    if (e && e.target !== document.getElementById('nt-modal-xoa-overlay')) return;
-    ntDongOverlay('nt-modal-xoa-overlay');
+    if (e && e.target !== document.getElementById('nt-confirm-overlay')) return;
+    ntDongOverlay('nt-confirm-overlay');
 }
 
 /* ================================================================
@@ -810,53 +908,84 @@ function ntValidate() {
     let ok = true;
     const setErr = (id, msg) => {
         const el = document.getElementById(id);
-        if (el) { el.textContent = msg; }
+        if (el) el.textContent = msg;
     };
     const getVal = id => (document.getElementById(id)?.value || '').trim();
 
-    // Reset lỗi
-    ['err-ho-ten', 'err-so-dien-thoai', 'err-username', 'err-password', 'err-ngay-vao-o', 'err-id-phong']
+    // Reset tất cả lỗi trước
+    ['err-ho-ten', 'err-so-dien-thoai', 'err-username',
+        'err-password', 'err-ngay-vao-o', 'err-id-phong']
         .forEach(id => setErr(id, ''));
 
     const mode = document.getElementById('nt-modal-mode').value;
 
+    // ══════════════════════════════════════════════════
+    // VALIDATE CHUNG (cả thêm mới lẫn chỉnh sửa)
+    // Chỉ báo lỗi nếu FIELD RỖNG — không ép nhập thêm
+    // ══════════════════════════════════════════════════
+
+    // Họ tên: bắt buộc trong mọi trường hợp
     if (!getVal('inp-ho-ten')) {
-        setErr('err-ho-ten', 'Vui lòng nhập họ tên');
-        ntChuyenTabById('thong-tin-co-ban'); ok = false;
+        setErr('err-ho-ten', 'Họ tên không được để trống');
+        ntChuyenTabById('tab-co-ban');
+        ok = false;
     }
+
+    // SĐT: chỉ validate nếu có nhập (không ép format khi để trống lúc sửa)
     const sdt = getVal('inp-so-dien-thoai').replace(/\s/g, '');
     if (!sdt) {
-        setErr('err-so-dien-thoai', 'Vui lòng nhập số điện thoại');
-        ntChuyenTabById('thong-tin-co-ban'); ok = false;
+        setErr('err-so-dien-thoai', 'Số điện thoại không được để trống');
+        ntChuyenTabById('tab-co-ban');
+        ok = false;
     } else if (!/^0\d{9}$/.test(sdt)) {
         setErr('err-so-dien-thoai', 'Số điện thoại không hợp lệ (VD: 0912345678)');
-        ntChuyenTabById('thong-tin-co-ban'); ok = false;
+        ntChuyenTabById('tab-co-ban');
+        ok = false;
     }
 
+    // Username: chỉ báo lỗi nếu bị XÓA TRẮNG (không bắt buộc điền khi sửa)
     if (!getVal('inp-username')) {
-        setErr('err-username', 'Vui lòng nhập tên đăng nhập');
-        ntChuyenTabById('thong-tin-cu-tru'); ok = false;
-    }
-    if (mode === 'them' && !getVal('inp-password')) {
-        setErr('err-password', 'Vui lòng nhập mật khẩu');
-        ntChuyenTabById('thong-tin-cu-tru'); ok = false;
-    }
-    if (mode === 'them' && getVal('inp-password') && getVal('inp-password').length < 6) {
-        setErr('err-password', 'Mật khẩu tối thiểu 6 ký tự');
-        ntChuyenTabById('thong-tin-cu-tru'); ok = false;
+        setErr('err-username', 'Tên đăng nhập không được để trống');
+        ntChuyenTabById('tab-cu-tru');
+        ok = false;
     }
 
-    if (!getVal('inp-ngay-vao-o')) {
-        setErr('err-ngay-vao-o', 'Vui lòng chọn ngày vào ở');
-        ntChuyenTabById('thong-tin-phong'); ok = false;
+    // ══════════════════════════════════════════════════
+    // VALIDATE CHỈ KHI THÊM MỚI
+    // ══════════════════════════════════════════════════
+    if (mode === 'them') {
+
+        // Mật khẩu bắt buộc khi thêm mới
+        if (!getVal('inp-password')) {
+            setErr('err-password', 'Vui lòng nhập mật khẩu');
+            ntChuyenTabById('tab-cu-tru');
+            ok = false;
+        } else if (getVal('inp-password').length < 6) {
+            setErr('err-password', 'Mật khẩu tối thiểu 6 ký tự');
+            ntChuyenTabById('tab-cu-tru');
+            ok = false;
+        }
+
+        // Ngày vào ở bắt buộc khi thêm mới
+        if (!getVal('inp-ngay-vao-o')) {
+            setErr('err-ngay-vao-o', 'Vui lòng chọn ngày vào ở');
+            ntChuyenTabById('tab-phong');
+            ok = false;
+        }
+
+        // Phòng bắt buộc khi thêm mới
+        if (!getVal('inp-id-phong')) {
+            setErr('err-id-phong', 'Vui lòng chọn phòng');
+            ntChuyenTabById('tab-phong');
+            ok = false;
+        }
     }
-    if (mode === 'them' && !getVal('inp-id-phong')) {
-        setErr('err-id-phong', 'Vui lòng chọn phòng');
-        ntChuyenTabById('thong-tin-phong'); ok = false;
-    }
+
+    // Khi SỬA: không validate phòng, ngày vào ở, mật khẩu
+    // → chỉ cần họ tên, SĐT, username không rỗng là được lưu
 
     return ok;
-}
+}   
 
 /* ================================================================
    LẤY PAYLOAD
@@ -922,14 +1051,23 @@ function ntResetForm() {
    TAB HANDLING
 ================================================================ */
 function ntChuyenTab(btn) {
-    document.querySelectorAll('.nt-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nt-tab').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.nt-tab-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab)?.classList.add('active');
+    const tabId = btn.dataset.tab;
+    document.getElementById(tabId)?.classList.add('active');
 }
 
 function ntChuyenTabById(tabId) {
-    const btn = document.querySelector(`.nt-tab-btn[data-tab="${tabId}"]`);
+    // Map tên gọi → id thực trong HTML
+    const tabMap = {
+        'thong-tin-co-ban': 'tab-co-ban',
+        'thong-tin-cu-tru': 'tab-cu-tru',
+        'thong-tin-phong': 'tab-phong',
+        // fallback: dùng thẳng id
+    };
+    const realId = tabMap[tabId] || tabId;
+    const btn = document.querySelector(`.nt-tab[data-tab="${realId}"]`);
     if (btn) ntChuyenTab(btn);
 }
 
@@ -1079,6 +1217,9 @@ function hienToast(msg, type = 'info') {
     container.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3500);
 }
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof ntKhoiTao === 'function') ntKhoiTao();
+});
 
 /* ================================================================
    ENTRY POINT — Gọi khi sidebar chuyển sang tab "Người thuê"
@@ -1089,6 +1230,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // gọi từ ChuTro-core.js khi tab 'nguoi-thue' được chọn
     // VD: case 'nguoi-thue': ntKhoiTao(); break;
 });
+function ntThayDoiTrangThai(val) {
+    const canhBao = document.getElementById('canh-bao-trang-thai');
+    if (canhBao) canhBao.style.display = val === 'da-roi' ? 'block' : 'none';
+}
 
 // Export để ChuTro-core.js có thể gọi
 window.ntKhoiTao = ntKhoiTao;

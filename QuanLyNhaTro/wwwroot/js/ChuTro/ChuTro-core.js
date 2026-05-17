@@ -90,6 +90,13 @@ async function HienThiTyLeLapDay() {
 }
 async function TyLeDoanhThu() {
     try {
+        // Kiểm tra trước — nếu không có element thì không cần gọi API
+        const tyLeElement = document.getElementById('hien-thi-ty-le');
+        const doanhThuElement = document.getElementById('hien-thi-doanh-thu');
+        const thangElement = document.getElementById('hien-thi-thang');
+
+        if (!tyLeElement || !doanhThuElement || !thangElement) return; // ← thoát sớm
+
         const response = await fetch('/api/ChuTro/TyLeDoanhThu');
         const data = await response.json();
 
@@ -99,21 +106,19 @@ async function TyLeDoanhThu() {
 
         const doanhThuFormat = (doanhThu / 1000000).toFixed(1) + 'M';
 
-        const tyLeElement = document.getElementById('hien-thi-ty-le');
-
         if (tyLe > 0) {
             tyLeElement.innerText = `↑ +${tyLe.toFixed(1)}% tháng trước`;
-            tyLeElement.className = "the-ty-le tang"; 
+            tyLeElement.className = "the-ty-le tang";
         } else if (tyLe < 0) {
             tyLeElement.innerText = `↓ ${tyLe.toFixed(1)}% tháng trước`;
-            tyLeElement.className = "the-ty-le giam"; // Tự thêm class .giam màu đỏ trong CSS nhé
+            tyLeElement.className = "the-ty-le giam";
         } else {
             tyLeElement.innerText = `- 0% tháng trước`;
-            tyLeElement.className = "the-ty-le"; // Màu xám bình thường
+            tyLeElement.className = "the-ty-le";
         }
 
-        document.getElementById('hien-thi-doanh-thu').innerText = doanhThuFormat;
-        document.getElementById('hien-thi-thang').innerText = `Doanh thu tháng ${thang}`;
+        doanhThuElement.innerText = doanhThuFormat;
+        thangElement.innerText = `Doanh thu tháng ${thang}`;
 
     } catch (error) {
         console.error("Lỗi khi load dữ liệu doanh thu:", error);
