@@ -8,14 +8,14 @@
 
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-        // API trả về array các object:
-        // { idUser, ngayBatDau, ngayKetThuc, tienCocBanDau,
-        //   phong: { idUser, soPhong },
-        //   nguoiThue: { idUser, fullName, phone } }
+        // HopDongController trả về flat object đã đúng shape:
+        // { contractId, contractCode, tenantName, tenantPhone, tenantEmail,
+        //   roomName, roomId, tenantId, startDate, endDate,
+        //   monthlyRent, deposit, note, status }
         const data = await resp.json();
 
-        // Normalize sang shape mà UI dùng
-        allContracts = data.map(hd => normalizeHopDong(hd));
+        // Dùng thẳng – không cần normalize thêm
+        allContracts = data;
 
         handleSearch();
         updateStats(allContracts);
@@ -25,55 +25,6 @@
         console.error('fetchContracts error:', err);
         showTableError('Không thể tải dữ liệu. Vui lòng thử lại.');
     }
-}
-function normalizeHopDong(hd) {
-    const today = new Date();
-    const endDate = hd.ngayKetThuc ? new Date(hd.ngayKetThuc) : null;
-
-    // Tính trạng thái từ ngày (vì API chưa trả về status)
-    let status = 'active';
-    if (endDate) {
-        const daysLeft = Math.ceil((endDate - today) / 864e5);
-        if (daysLeft < 0) status = 'expired';
-        else if (daysLeft <= 30) status = 'expiring';
-        else status = 'active';
-    }
-
-    return {
-        // ID dùng để gọi chi tiết / sửa / xóa
-        contractId: hd.idHopDong ?? hd.idUser,           // dùng tạm idUser nếu chưa có idHopDong
-
-        // Mã hợp đồng – API chưa trả về, tự sinh hiển thị
-        contractCode: hd.maHopDong ?? `HD-${String(hd.idUser).padStart(4, '0')}`,
-
-        // Thông tin khách thuê
-        tenantName: hd.nguoiThue?.fullName ?? '—',
-        tenantPhone: hd.nguoiThue?.phone ?? '',
-
-        // Phòng
-        roomName: hd.phong?.soPhong ?? '—',
-
-        // Thời gian
-        startDate: hd.ngayBatDau ?? null,
-        endDate: hd.ngayKetThuc ?? null,
-
-        // Tài chính – API chưa trả về monthlyRent, dùng tienCocBanDau tạm
-        monthlyRent: hd.giaPhongFix ?? null,   // bổ sung field này ở API
-        deposit: hd.tienCocBanDau ?? 0,
-
-        // Trạng thái tính từ ngày
-        status: hd.trangThaiHD ? mapTrangThai(hd.trangThaiHD) : status,
-
-        note: hd.ghiChu ?? '',
-    };
-}
-function mapTrangThai(trangThai) {
-    const map = {
-        'Đang hiệu lực': 'active',
-        'Đã kết thúc': 'expired',
-        'Đã hủy': 'settled',
-    };
-    return map[trangThai] ?? 'active';
 }
 function populateRoomFilter(contracts) {
     const roomSel = document.getElementById('roomFilter');
@@ -90,9 +41,9 @@ function populateRoomFilter(contracts) {
         });
 }
 // ================================================================
-// CONFIG – Thay URL API thực tế của bạn vào đây
+// API BASE – Endpoint thực tế khớp với HopDongController
 // ================================================================
-const API_BASE = '/api/contracts';   // hoặc '/Admin/HopDong?handler='
+const API_BASE = '/api/HopDong';
 
 // ================================================================
 // STATE
@@ -105,6 +56,7 @@ let sortKey = 'startDate';
 let sortAsc = false;
 let currentView = 'table';
 let deleteTarget = null;
+let toastTimer;
 
 // ================================================================
 // INIT
@@ -122,14 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ================================================================
 // API – LẤY CHI TIẾT HỢP ĐỒNG
-// GET /api/contracts/{id}
+// Ưu tiên lấy từ allContracts (đã normalize sẵn).
+// Nếu không tìm thấy (trường hợp hiếm), thử gọi API thực tế.
 // ================================================================
 async function fetchContractDetail(id) {
+    // 1. Tìm trong cache local trước – không cần network
+    const local = allContracts.find(c => String(c.contractId) === String(id));
+    if (local) return local;
+
+    // 2. Fallback: gọi API thực nếu cache chưa có
     try {
-        const resp = await fetch(`${API_BASE}/${id}`, {
+        const resp = await fetch(`/api/HopDong/chi-tiet/${id}`, {
             headers: { 'Content-Type': 'application/json' }
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        // API trả về đúng shape rồi, dùng thẳng
         return await resp.json();
     } catch (err) {
         showToast('Không thể tải chi tiết hợp đồng', 'error');
@@ -142,7 +101,7 @@ async function fetchContractDetail(id) {
 // POST /api/contracts
 // ================================================================
 async function createContract(formData) {
-    const resp = await fetch(`${API_BASE}`, {
+    const resp = await fetch(`/api/HopDong/them-hop-dong`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -151,7 +110,7 @@ async function createContract(formData) {
         body: JSON.stringify(formData)
     });
     if (!resp.ok) {
-        const err = await resp.json();
+        const err = await resp.json().catch(() => ({}));
         throw new Error(err.message || 'Lỗi tạo hợp đồng');
     }
     return await resp.json();
@@ -162,7 +121,7 @@ async function createContract(formData) {
 // PUT /api/contracts/{id}
 // ================================================================
 async function updateContract(id, formData) {
-    const resp = await fetch(`${API_BASE}/${id}`, {
+    const resp = await fetch(`/api/HopDong/cap-nhat/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -171,7 +130,7 @@ async function updateContract(id, formData) {
         body: JSON.stringify(formData)
     });
     if (!resp.ok) {
-        const err = await resp.json();
+        const err = await resp.json().catch(() => ({}));
         throw new Error(err.message || 'Lỗi cập nhật hợp đồng');
     }
     return await resp.json();
@@ -182,7 +141,7 @@ async function updateContract(id, formData) {
 // DELETE /api/contracts/{id}
 // ================================================================
 async function deleteContract(id) {
-    const resp = await fetch(`${API_BASE}/${id}`, {
+    const resp = await fetch(`/api/HopDong/xoa/${id}`, {
         method: 'DELETE',
         headers: { 'RequestVerificationToken': getAntiForgeryToken() }
     });
@@ -637,7 +596,7 @@ function showTableError(msg) {
 // ================================================================
 // TOAST
 // ================================================================
-let toastTimer;
+
 function showToast(msg, type = '') {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -691,28 +650,3 @@ function getAntiForgeryToken() {
     return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
 }
 
-// ================================================================
-// DEMO DATA – Xóa khi kết nối API thực
-// ================================================================
-function loadDemoData() {
-    const demo = [
-        { contractId: '1', contractCode: 'HD-2025-001', tenantName: 'Nguyễn Văn An', tenantPhone: '0901234567', roomName: 'P101', startDate: '2025-01-01', endDate: '2026-01-01', monthlyRent: 3500000, deposit: 7000000, status: 'active', note: '' },
-        { contractId: '2', contractCode: 'HD-2025-002', tenantName: 'Trần Thị Bình', tenantPhone: '0912345678', roomName: 'P102', startDate: '2025-03-01', endDate: '2025-06-30', monthlyRent: 4000000, deposit: 8000000, status: 'expiring', note: 'Dự kiến gia hạn' },
-        { contractId: '3', contractCode: 'HD-2025-003', tenantName: 'Lê Hoàng Cường', tenantPhone: '0923456789', roomName: 'P201', startDate: '2024-06-01', endDate: '2025-05-31', monthlyRent: 3200000, deposit: 6400000, status: 'expired', note: '' },
-        { contractId: '4', contractCode: 'HD-2025-004', tenantName: 'Phạm Minh Dũng', tenantPhone: '0934567890', roomName: 'P202', startDate: '2024-01-01', endDate: '2024-12-31', monthlyRent: 2800000, deposit: 5600000, status: 'settled', note: 'Đã thanh lý 1/1/2025' },
-        { contractId: '5', contractCode: 'HD-2025-005', tenantName: 'Hoàng Thị Lan', tenantPhone: '0945678901', roomName: 'P301', startDate: '2025-02-15', endDate: '2026-02-15', monthlyRent: 4500000, deposit: 9000000, status: 'active', note: '' },
-        { contractId: '6', contractCode: 'HD-2025-006', tenantName: 'Vũ Đức Mạnh', tenantPhone: '0956789012', roomName: 'P302', startDate: '2025-04-01', endDate: '2025-06-25', monthlyRent: 3800000, deposit: 7600000, status: 'expiring', note: '' },
-        { contractId: '7', contractCode: 'HD-2025-007', tenantName: 'Đặng Thị Ngọc', tenantPhone: '0967890123', roomName: 'P401', startDate: '2025-01-10', endDate: '2026-01-10', monthlyRent: 5000000, deposit: 10000000, status: 'active', note: '' },
-        { contractId: '8', contractCode: 'HD-2025-008', tenantName: 'Bùi Văn Phúc', tenantPhone: '0978901234', roomName: 'P402', startDate: '2025-05-01', endDate: '2026-05-01', monthlyRent: 3600000, deposit: 7200000, status: 'active', note: '' },
-    ];
-    allContracts = demo;
-    handleSearch();
-    updateStats(demo);
-    // Populate room filter
-    const roomSel = document.getElementById('roomFilter');
-    [...new Set(demo.map(c => c.roomName))].sort().forEach(r => {
-        const opt = document.createElement('option');
-        opt.value = r; opt.textContent = r;
-        roomSel.appendChild(opt);
-    });
-}

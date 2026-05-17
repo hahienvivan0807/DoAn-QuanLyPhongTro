@@ -10,1510 +10,1511 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hệ Thống Quản Lý – Quản Lý Phòng</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="/js/ChuTro/ChuTro-core.js"></script>
     <style>
-            /* ==========================================================
-                                           IMPORT FONT – đồng bộ ChuTro.cshtml
-                                        ========================================================== */
-            @@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
-
-            /* ==========================================================
-                                           BIẾN MÀU & THIẾT KẾ TOÀN CỤC – copy 1:1 từ ChuTro.cshtml
-                                        ========================================================== */
-            :root {
-                --mau-chu-de: #b8720a;
-                --mau-chu-de-sang: #e8971c;
-                --mau-chu-de-nhat: #fdf6e3;
-                --mau-chu-de-vien: rgba(184,114,10,0.15);
-                --mau-sidebar: #0d1b2e;
-                --mau-sidebar-dam: #081020;
-                --mau-sidebar-vien: rgba(255,255,255,0.06);
-                --mau-sidebar-hover: rgba(232,151,28,0.12);
-                --mau-sidebar-active: rgba(232,151,28,0.18);
-                --mau-nen: #f0f2f8;
-                --mau-nen-card: #f8f9fd;
-                --mau-trang: #ffffff;
-                --mau-chu: #111827;
-                --mau-chu-phu: #6b7a99;
-                --mau-vien: #e5e9f5;
-                --mau-xanh: #0ea271;
-                --mau-xanh-nhat: #ecfdf5;
-                --mau-do: #e53e3e;
-                --mau-do-nhat: #fff5f5;
-                --mau-xanh-bien: #2563eb;
-                --mau-xanh-bien-nhat: #eff6ff;
-                --bong-card: 0 2px 12px rgba(13,27,46,0.06), 0 1px 3px rgba(13,27,46,0.04);
-                --bong-card-hover: 0 8px 28px rgba(184,114,10,0.14), 0 2px 8px rgba(13,27,46,0.08);
-                --bong-sidebar: 6px 0 32px rgba(0,0,0,0.3);
-                --bong-header: 0 1px 0 var(--mau-vien), 0 2px 16px rgba(13,27,46,0.04);
-                --radius-sm: 8px;
-                --radius-md: 12px;
-                --radius-lg: 16px;
-                --radius-xl: 20px;
-                --radius-full: 9999px;
-            }
-
-            /* ==========================================================
-                                           RESET & CƠ BẢN
-                                        ========================================================== */
-            *, *::before, *::after {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-
-            body {
-                font-family: 'Be Vietnam Pro', sans-serif;
-                background: var(--mau-nen);
-                color: var(--mau-chu);
-                display: flex;
-                height: 100vh;
-                overflow: clip;
-                -webkit-font-smoothing: antialiased;
-            }
-
-            /* ==========================================================
-                                           SIDEBAR – copy 1:1 từ ChuTro.cshtml
-                                        ========================================================== */
-            #thanh-sidebar {
-                width: 248px;
-                min-width: 248px;
-                background: var(--mau-sidebar);
-                display: flex;
-                flex-direction: column;
-                height: 100vh;
-                z-index: 100;
-                box-shadow: var(--bong-sidebar);
-                overflow-y: auto;
-                transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
-                position: relative;
-                border-right: 1px solid rgba(255,255,255,0.04);
-            }
-
-                #thanh-sidebar.an {
-                    width: 0;
-                    min-width: 0;
-                    overflow: hidden;
-                }
-
-            .ten-logo, .thong-tin-chu-tro .ten-chu {
-                transition: opacity 0.2s, max-width 0.35s;
-                max-width: 160px;
-                overflow: hidden;
-            }
-
-            .nhan-nhom-menu {
-                transition: opacity 0.2s, max-height 0.3s;
-            }
-
-            #thanh-sidebar.thu-gon .nhan-nhom-menu {
-                opacity: 0;
-                max-height: 0;
-                padding: 0;
-            }
-
-            .muc-menu span:not(.huy-hieu) {
-                transition: opacity 0.2s, max-width 0.35s;
-                max-width: 160px;
-                overflow: hidden;
-                display: inline-block;
-            }
-
-            #thanh-sidebar.thu-gon .muc-menu span:not(.huy-hieu) {
-                opacity: 0;
-                max-width: 0;
-            }
-
-            #thanh-sidebar.thu-gon .huy-hieu {
-                opacity: 0;
-                width: 0;
-                overflow: hidden;
-                padding: 0;
-            }
-
-            #thanh-sidebar.thu-gon .muc-menu {
-                padding: 10px 0;
-                justify-content: center;
-                border-radius: 10px;
-                margin: 2px 8px;
-                width: calc(100% - 12px);
-            }
-
-            #thanh-sidebar.thu-gon .thong-tin-chu-tro {
-                justify-content: center;
-            }
-
-            #thanh-sidebar.thu-gon .muc-menu i {
-                width: auto;
-                font-size: 16px;
-            }
-
-            #thanh-sidebar::-webkit-scrollbar {
-                width: 0;
-            }
-
-            .khu-vuc-logo {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 24px 20px 20px;
-                border-bottom: 1px solid var(--mau-sidebar-vien);
-            }
-
-            .bieu-tuong-logo {
-                width: 40px;
-                height: 40px;
-                flex-shrink: 0;
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 17px;
-                color: #fff;
-                box-shadow: 0 4px 14px rgba(184,114,10,0.45);
-            }
-
-            .ten-logo strong {
-                display: block;
-                color: #fff;
-                font-size: 13.5px;
-                font-weight: 800;
-                letter-spacing: 0.2px;
-            }
-
-            .ten-logo span {
-                font-size: 10px;
-                color: rgba(255,255,255,0.32);
-                letter-spacing: 0.3px;
-            }
-
-            .nhan-nhom-menu {
-                font-size: 9px;
-                font-weight: 800;
-                letter-spacing: 2px;
-                color: rgba(255,255,255,0.22);
-                text-transform: uppercase;
-                padding: 18px 20px 6px;
-            }
-
-            .muc-menu {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 9px 14px 9px 16px;
-                color: rgba(255,255,255,0.52);
-                cursor: pointer;
-                border-radius: 0 var(--radius-full) var(--radius-full) 0;
-                margin: 1px 12px 1px 0;
-                transition: all 0.18s ease;
-                font-size: 13px;
-                font-weight: 500;
-                text-decoration: none;
-                position: relative;
-            }
-
-                .muc-menu i {
-                    width: 18px;
-                    text-align: center;
-                    font-size: 13px;
-                    opacity: 0.75;
-                    flex-shrink: 0;
-                    transition: opacity 0.18s;
-                }
-
-                .muc-menu:hover {
-                    background: var(--mau-sidebar-hover);
-                    color: rgba(255,255,255,0.9);
-                }
-
-                    .muc-menu:hover i {
-                        opacity: 1;
-                    }
-
-                .muc-menu.dang-chon {
-                    background: var(--mau-sidebar-active);
-                    color: #fff;
-                    font-weight: 700;
-                }
-
-                    .muc-menu.dang-chon i {
-                        opacity: 1;
-                        color: var(--mau-chu-de-sang);
-                    }
-
-                    .muc-menu.dang-chon::before {
-                        content: '';
-                        position: absolute;
-                        left: 0;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        height: 60%;
-                        width: 3px;
-                        background: var(--mau-chu-de-sang);
-                        border-radius: 0 3px 3px 0;
-                    }
-
-            .huy-hieu {
-                margin-left: auto;
-                background: rgba(239,68,68,0.85);
-                color: #fff;
-                font-size: 9.5px;
-                font-weight: 800;
-                border-radius: var(--radius-full);
-                padding: 2px 7px;
-                min-width: 18px;
-                text-align: center;
-            }
-
-                .huy-hieu.vang {
-                    background: var(--mau-chu-de);
-                }
-
-            .thong-tin-chu-tro {
-                margin-top: auto;
-                padding: 14px 16px;
-                border-top: 1px solid var(--mau-sidebar-vien);
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                cursor: pointer;
-                flex-shrink: 0;
-                position: sticky;
-                bottom: 0;
-                background: var(--mau-sidebar-dam);
-                z-index: 1;
-                transition: background 0.18s;
-            }
-
-                .thong-tin-chu-tro:hover {
-                    background: rgba(255,255,255,0.04);
-                }
-
-            .anh-chu-tro {
-                width: 38px;
-                height: 38px;
-                border-radius: 10px;
-                flex-shrink: 0;
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #fff;
-                font-size: 15px;
-                font-weight: 800;
-            }
-
-            .ten-chu strong {
-                display: block;
-                color: #fff;
-                font-size: 12.5px;
-                font-weight: 700;
-            }
-
-            .ten-chu span {
-                color: rgba(255,255,255,0.35);
-                font-size: 10px;
-            }
-
-            /* ==========================================================
-                                           KHU VỰC CHÍNH
-                                        ========================================================== */
-            #khu-vuc-chinh {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-
-            /* HEADER – đồng bộ ChuTro.cshtml */
-            #thanh-header {
-                background: var(--mau-trang);
-                padding: 0 28px;
-                height: 62px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                box-shadow: var(--bong-header);
-                flex-shrink: 0;
-                z-index: 50;
-            }
-
-            .header-trai {
-                display: flex;
-                align-items: center;
-                gap: 14px;
-            }
-
-            .nut-ham-burger {
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 18px;
-                color: var(--mau-chu-phu);
-                padding: 8px;
-                border-radius: var(--radius-sm);
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-                .nut-ham-burger:hover {
-                    background: var(--mau-chu-de-nhat);
-                    color: var(--mau-chu-de);
-                }
-
-            .tieu-de-header {
-                font-size: 14.5px;
-                font-weight: 800;
-                color: var(--mau-chu);
-                font-family: 'Lexend', sans-serif;
-            }
-
-            .duong-dan-header {
-                font-size: 11px;
-                color: var(--mau-chu-phu);
-                margin-top: 1px;
-            }
-
-            .header-phai {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .o-tim-kiem {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                background: var(--mau-nen);
-                border: 1.5px solid var(--mau-vien);
-                border-radius: var(--radius-full);
-                padding: 7px 16px;
-                transition: all 0.2s;
-            }
-
-                .o-tim-kiem:focus-within {
-                    border-color: var(--mau-chu-de);
-                    background: #fff;
-                    box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
-                }
-
-                .o-tim-kiem input {
-                    border: none;
-                    background: none;
-                    outline: none;
-                    font-size: 12.5px;
-                    width: 170px;
-                    color: var(--mau-chu);
-                    font-family: inherit;
-                }
-
-                    .o-tim-kiem input::placeholder {
-                        color: var(--mau-chu-phu);
-                    }
-
-                .o-tim-kiem i {
-                    color: var(--mau-chu-phu);
-                    font-size: 12px;
-                }
-
-            .nut-chuong {
-                position: relative;
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-                color: var(--mau-chu-phu);
-                padding: 8px;
-                border-radius: var(--radius-full);
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 38px;
-                height: 38px;
-            }
-
-                .nut-chuong:hover {
-                    background: var(--mau-chu-de-nhat);
-                    color: var(--mau-chu-de);
-                }
-
-            .so-chuong {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                background: var(--mau-do);
-                color: #fff;
-                font-size: 8.5px;
-                font-weight: 800;
-                border-radius: var(--radius-full);
-                width: 15px;
-                height: 15px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 2px solid #fff;
-            }
-
-            .the-chu-tro {
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                color: #fff;
-                font-size: 9.5px;
-                font-weight: 800;
-                padding: 3px 10px;
-                border-radius: var(--radius-full);
-                letter-spacing: 0.8px;
-                text-transform: uppercase;
-            }
-
-            .khoi-admin-header {
-                display: flex;
-                align-items: center;
-                gap: 9px;
-                cursor: pointer;
-                padding: 5px 10px;
-                border-radius: var(--radius-full);
-                transition: background 0.2s;
-                position: relative;
-            }
-
-                .khoi-admin-header:hover {
-                    background: var(--mau-chu-de-nhat);
-                }
-
-            .anh-dai-dien-header {
-                width: 34px;
-                height: 34px;
-                border-radius: var(--radius-sm);
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #fff;
-                font-size: 13px;
-                font-weight: 800;
-            }
-
-            .ten-admin-header {
-                font-size: 12.5px;
-                font-weight: 700;
-            }
-
-            .vai-tro-header {
-                font-size: 10px;
-                color: var(--mau-chu-phu);
-            }
-
-            .header-divider {
-                width: 1px;
-                height: 22px;
-                background: var(--mau-vien);
-                margin: 0 2px;
-            }
-
-            /* Admin dropdown */
-            .admin-dropdown {
-                position: absolute;
-                top: calc(100% + 10px);
-                right: 0;
-                width: 240px;
-                background: var(--mau-trang);
-                border-radius: 14px;
-                border: 1px solid var(--mau-vien);
-                overflow: hidden;
-                box-shadow: 0 8px 32px rgba(13,27,46,0.12), 0 2px 8px rgba(13,27,46,0.06);
-                z-index: 999;
-                transform-origin: top right;
-                transform: scale(0.92) translateY(-8px);
-                opacity: 0;
-                pointer-events: none;
-                transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease;
-            }
-
-                .admin-dropdown.show {
-                    transform: scale(1) translateY(0);
-                    opacity: 1;
-                    pointer-events: all;
-                }
-
-            .add-header {
-                padding: 14px 16px 12px;
-                border-bottom: 1px solid var(--mau-vien);
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .add-header-avatar {
-                width: 40px;
-                height: 40px;
-                border-radius: 10px;
-                flex-shrink: 0;
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #fff;
-                font-size: 15px;
-                font-weight: 800;
-            }
-
-            .add-header-name {
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--mau-chu);
-            }
-
-            .add-header-email {
-                font-size: 11px;
-                color: var(--mau-chu-phu);
-                margin-top: 2px;
-            }
-
-            .add-header-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 9.5px;
-                font-weight: 800;
-                letter-spacing: 0.4px;
-                padding: 2px 8px;
-                border-radius: var(--radius-full);
-                margin-top: 4px;
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                color: #fff;
-            }
-
-            .add-body {
-                padding: 6px;
-            }
-
-            .add-item {
-                display: flex;
-                align-items: center;
-                gap: 11px;
-                padding: 9px 12px;
-                border-radius: 9px;
-                cursor: pointer;
-                transition: background 0.14s;
-                border: none;
-                background: none;
-                width: 100%;
-                font-family: inherit;
-                text-align: left;
-            }
-
-                .add-item:hover {
-                    background: var(--mau-nen);
-                }
-
-            .add-item-icon {
-                width: 32px;
-                height: 32px;
-                border-radius: 8px;
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 14px;
-            }
-
-                .add-item-icon.vang {
-                    background: var(--mau-chu-de-nhat);
-                    color: var(--mau-chu-de);
-                }
-
-                .add-item-icon.do {
-                    background: var(--mau-do-nhat);
-                    color: var(--mau-do);
-                }
-
-            .add-item-label {
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--mau-chu);
-            }
-
-            .add-item-sub {
-                font-size: 10.5px;
-                color: var(--mau-chu-phu);
-                margin-top: 1px;
-            }
-
-            .add-item.danger:hover {
-                background: var(--mau-do-nhat);
-            }
-
-                .add-item.danger:hover .add-item-label {
-                    color: var(--mau-do);
-                }
-
-            .add-divider {
-                height: 1px;
-                background: var(--mau-vien);
-                margin: 4px 0;
-            }
-
-            /* ==========================================================
-                                           NỘI DUNG CHÍNH
-                                        ========================================================== */
-            #noi-dung-chinh {
-                flex: 1;
-                overflow-y: auto;
-                padding: 24px 28px 32px;
-            }
-
-                #noi-dung-chinh::-webkit-scrollbar {
-                    width: 5px;
-                }
-
-                #noi-dung-chinh::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-
-                #noi-dung-chinh::-webkit-scrollbar-thumb {
-                    background: #d4d9e6;
-                    border-radius: 3px;
-                }
-
-            /* ==========================================================
-                                           CSS QUẢN LÝ PHÒNG
-                                        ========================================================== */
-            .dong-tieu-de-trang {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                margin-bottom: 24px;
-            }
-
-                .dong-tieu-de-trang h2 {
-                    font-size: 21px;
-                    font-weight: 900;
-                    font-family: 'Lexend', sans-serif;
-                    color: var(--mau-chu);
-                }
-
-                .dong-tieu-de-trang p {
-                    font-size: 12px;
-                    color: var(--mau-chu-phu);
-                    margin-top: 4px;
-                }
-
-            .nut-hanh-dong-chinh {
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                color: #fff;
-                border: none;
-                border-radius: var(--radius-md);
-                padding: 10px 20px;
-                font-size: 13px;
-                font-weight: 700;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                box-shadow: 0 4px 14px rgba(184,114,10,0.3);
-                transition: all 0.2s;
-                font-family: 'Be Vietnam Pro', sans-serif;
-                white-space: nowrap;
-            }
-
-                .nut-hanh-dong-chinh:hover {
-                    transform: translateY(-1px);
-                    box-shadow: 0 6px 20px rgba(184,114,10,0.42);
-                }
-
-            .mau-cam-nhat {
-                background: #fff8ee;
-                color: var(--mau-chu-de);
-            }
-
-            .mau-luc-nhat {
-                background: #f0fdf4;
-                color: #15803d;
-            }
-
-            .mau-hong-nhat {
-                background: #fff1f2;
-                color: #e11d48;
-            }
-
-            .mau-xanh-nhat-icon {
-                background: #eff6ff;
-                color: #1d4ed8;
-            }
-
-            /* Modal */
-            .lop-phu-modal {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(10,20,40,0.55);
-                z-index: 9999;
-                align-items: center;
-                justify-content: center;
-                backdrop-filter: blur(6px);
-            }
-
-                .lop-phu-modal.hien {
-                    display: flex;
-                }
-
-            .hop-modal {
-                background: var(--mau-trang);
-                border-radius: var(--radius-xl);
-                padding: 28px;
-                width: 540px;
-                max-width: 96vw;
-                max-height: 90vh;
-                overflow-y: auto;
-                box-shadow: 0 24px 64px rgba(0,0,0,0.2), 0 2px 12px rgba(0,0,0,0.08);
-                animation: hien-modal-qlp 0.3s cubic-bezier(0.34,1.56,0.64,1);
-                border: 1px solid rgba(255,255,255,0.8);
-            }
-
-                .hop-modal.rong {
-                    width: 700px;
-                }
-
-                .hop-modal.nho {
-                    width: 420px;
-                }
-
-                .hop-modal::-webkit-scrollbar {
-                    width: 4px;
-                }
-
-                .hop-modal::-webkit-scrollbar-thumb {
-                    background: #d4d9e6;
-                    border-radius: 3px;
-                }
-
-            @@keyframes hien-modal-qlp {
-                from {
-                    opacity: 0;
-                    transform: scale(0.9) translateY(-20px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: none;
-                }
-            }
-
-            .tieu-de-modal {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 22px;
-            }
-
-            .nut-dong-modal {
-                background: var(--mau-nen);
-                border: none;
-                font-size: 14px;
-                cursor: pointer;
-                color: var(--mau-chu-phu);
-                border-radius: var(--radius-full);
-                width: 32px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.2s;
-                flex-shrink: 0;
-            }
-
-                .nut-dong-modal:hover {
-                    background: #fee2e2;
-                    color: #dc2626;
-                }
-
-            .luoi-form-2 {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 14px;
-            }
-
-            .nhom-nhap {
-                margin-bottom: 2px;
-            }
-
-            .nhan-nhap {
-                display: block;
-                font-size: 11.5px;
-                font-weight: 700;
-                margin-bottom: 7px;
-                color: var(--mau-chu);
-            }
-
-            .o-nhap {
-                width: 100%;
-                padding: 10px 14px;
-                border: 1.5px solid var(--mau-vien);
-                border-radius: var(--radius-md);
-                font-size: 13px;
-                outline: none;
-                transition: all 0.2s;
-                color: var(--mau-chu);
-                font-family: 'Be Vietnam Pro', sans-serif;
-                background: #fff;
-                box-sizing: border-box;
-            }
-
-                .o-nhap:focus {
-                    border-color: var(--mau-chu-de);
-                    box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
-                }
-
-            textarea.o-nhap {
-                resize: vertical;
-            }
-
-            .nhom-nut-duoi-modal {
-                display: flex;
-                gap: 10px;
-                justify-content: flex-end;
-                margin-top: 22px;
-            }
-
-            .nut-huy-modal {
-                background: var(--mau-nen);
-                color: var(--mau-chu-phu);
-                border: none;
-                padding: 10px 20px;
-                border-radius: var(--radius-md);
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 700;
-                transition: all 0.2s;
-                font-family: 'Be Vietnam Pro', sans-serif;
-            }
-
-                .nut-huy-modal:hover {
-                    background: var(--mau-vien);
-                }
-
-            .nut-luu-modal {
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                color: #fff;
-                border: none;
-                padding: 10px 24px;
-                border-radius: var(--radius-md);
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 700;
-                box-shadow: 0 4px 14px rgba(184,114,10,0.3);
-                transition: all 0.2s;
-                font-family: 'Be Vietnam Pro', sans-serif;
-                display: inline-flex;
-                align-items: center;
-                gap: 7px;
-            }
-
-                .nut-luu-modal:hover {
-                    transform: translateY(-1px);
-                    box-shadow: 0 6px 20px rgba(184,114,10,0.42);
-                }
-
-            .duong-ke-modal {
-                border: none;
-                border-top: 1px solid var(--mau-vien);
-                margin: 18px 0;
-            }
-
-            .tieu-de-muc-modal {
-                font-size: 11px;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 1.2px;
-                color: var(--mau-chu-phu);
-                margin-bottom: 12px;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            #toastContainer {
-                position: fixed;
-                top: 24px;
-                right: 24px;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                z-index: 99999;
-            }
-
-            /* Thanh lọc */
-            .khu-vuc-loc {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
-                background: var(--mau-trang);
-                border-radius: var(--radius-lg);
-                padding: 14px 18px;
-                box-shadow: var(--bong-card);
-                border: 1.5px solid var(--mau-vien);
-                margin-bottom: 18px;
-            }
-
-            .o-tim-phong {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                border: 1.5px solid var(--mau-vien);
-                border-radius: var(--radius-md);
-                padding: 8px 14px;
-                background: var(--mau-nen);
-                flex: 1;
-                min-width: 200px;
-                transition: all 0.2s;
-            }
-
-                .o-tim-phong:focus-within {
-                    border-color: var(--mau-chu-de);
-                    background: #fff;
-                    box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
-                }
-
-                .o-tim-phong input {
-                    border: none;
-                    background: none;
-                    outline: none;
-                    font-size: 12.5px;
-                    color: var(--mau-chu);
-                    font-family: inherit;
-                    width: 100%;
-                }
-
-                    .o-tim-phong input::placeholder {
-                        color: var(--mau-chu-phu);
-                    }
-
-                .o-tim-phong i {
-                    color: var(--mau-chu-phu);
-                    font-size: 12px;
-                    flex-shrink: 0;
-                }
-
-            .chon-loc {
-                padding: 8px 14px;
-                border: 1.5px solid var(--mau-vien);
-                border-radius: var(--radius-md);
-                font-size: 12.5px;
-                color: var(--mau-chu);
-                font-family: inherit;
-                background: var(--mau-nen);
-                outline: none;
-                cursor: pointer;
-                transition: all 0.2s;
-                appearance: none;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-                background-repeat: no-repeat;
-                background-position: right 10px center;
-                padding-right: 32px;
-            }
-
-                .chon-loc:focus {
-                    border-color: var(--mau-chu-de);
-                    background-color: #fff;
-                }
-
-            /* Bảng phòng */
-            .the-bang-phong {
-                background: var(--mau-trang);
-                border-radius: var(--radius-lg);
-                box-shadow: var(--bong-card);
-                border: 1.5px solid var(--mau-vien);
-                overflow: hidden;
-                position: relative;
-            }
-
-                .the-bang-phong::after {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 3px;
-                    background: linear-gradient(90deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-                }
-
-            .dau-bang {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 18px 22px 0;
-            }
-
-                .dau-bang h3 {
-                    font-size: 14px;
-                    font-weight: 800;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-family: 'Lexend', sans-serif;
-                }
-
-                    .dau-bang h3 i {
-                        color: var(--mau-chu-de);
-                    }
-
-            .bang-phong {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 12.5px;
-            }
-
-                .bang-phong thead tr {
-                    border-bottom: 2px solid var(--mau-vien);
-                }
-
-                .bang-phong th {
-                    padding: 12px 16px;
-                    text-align: left;
-                    font-size: 10.5px;
-                    font-weight: 800;
-                    color: var(--mau-chu-phu);
-                    text-transform: uppercase;
-                    letter-spacing: 0.6px;
-                    white-space: nowrap;
-                }
-
-                .bang-phong td {
-                    padding: 13px 16px;
-                    border-bottom: 1px solid var(--mau-vien);
-                    vertical-align: middle;
-                }
-
-                .bang-phong tbody tr:last-child td {
-                    border-bottom: none;
-                }
-
-                .bang-phong tbody tr {
-                    transition: background 0.15s;
-                }
-
-                    .bang-phong tbody tr:hover td {
-                        background: var(--mau-chu-de-nhat);
-                    }
-
-            .trang-thai-phong {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                font-size: 10.5px;
-                font-weight: 700;
-                padding: 4px 11px;
-                border-radius: var(--radius-full);
-                white-space: nowrap;
-            }
-
-                .trang-thai-phong::before {
-                    content: '';
-                    width: 6px;
-                    height: 6px;
-                    border-radius: 50%;
-                    flex-shrink: 0;
-                }
-
-            .tt-trong {
-                background: #ecfdf5;
-                color: #059669;
-            }
-
-                .tt-trong::before {
-                    background: #059669;
-                    box-shadow: 0 0 0 2px #d1fae5;
-                }
-
-            .tt-da-thue {
-                background: #eff6ff;
-                color: #2563eb;
-            }
-
-                .tt-da-thue::before {
-                    background: #2563eb;
-                    box-shadow: 0 0 0 2px #dbeafe;
-                }
-
-            .tt-dang-sua {
-                background: #fff7ed;
-                color: #d97706;
-            }
-
-                .tt-dang-sua::before {
-                    background: #d97706;
-                    box-shadow: 0 0 0 2px #fed7aa;
-                }
-
-            .nhom-nut-bang {
-                display: flex;
-                gap: 4px;
-            }
-
-            .nut-hanh-dong-bang {
-                padding: 5px 10px;
-                border-radius: var(--radius-sm);
-                border: 1.5px solid var(--mau-vien);
-                background: none;
-                cursor: pointer;
-                font-size: 11.5px;
-                font-weight: 700;
-                transition: all 0.2s;
-                font-family: inherit;
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-            }
-
-                .nut-hanh-dong-bang.sua {
-                    color: var(--mau-chu-de);
-                    border-color: rgba(184,114,10,0.3);
-                }
-
-                    .nut-hanh-dong-bang.sua:hover {
-                        background: var(--mau-chu-de-nhat);
-                        border-color: var(--mau-chu-de);
-                    }
-
-                .nut-hanh-dong-bang.xoa {
-                    color: var(--mau-do);
-                    border-color: rgba(229,62,62,0.3);
-                }
-
-                    .nut-hanh-dong-bang.xoa:hover {
-                        background: var(--mau-do-nhat);
-                        border-color: var(--mau-do);
-                    }
-
-                .nut-hanh-dong-bang.xem {
-                    color: var(--mau-xanh-bien);
-                    border-color: rgba(37,99,235,0.3);
-                }
-
-                    .nut-hanh-dong-bang.xem:hover {
-                        background: var(--mau-xanh-bien-nhat);
-                        border-color: var(--mau-xanh-bien);
-                    }
-
-            .phan-trang {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 14px 22px;
-                border-top: 1px solid var(--mau-vien);
-                font-size: 12px;
-                color: var(--mau-chu-phu);
-            }
-
-            .nhom-nut-trang {
-                display: flex;
-                gap: 6px;
-            }
-
-            .nut-trang {
-                padding: 5px 10px;
-                border: 1.5px solid var(--mau-vien);
-                border-radius: var(--radius-sm);
-                background: none;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: 700;
-                color: var(--mau-chu-phu);
-                transition: all 0.2s;
-                font-family: inherit;
-            }
-
-                .nut-trang:hover, .nut-trang.hien-tai {
-                    background: var(--mau-chu-de);
-                    border-color: var(--mau-chu-de);
-                    color: #fff;
-                }
-
-                .nut-trang:disabled {
-                    opacity: 0.4;
-                    cursor: not-allowed;
-                }
-
-            .ten-phong-noi-bat {
-                font-weight: 800;
-                font-size: 14px;
-                font-family: 'Lexend', sans-serif;
-                color: var(--mau-chu);
-            }
-
-            .tang-phong {
-                font-size: 10.5px;
-                color: var(--mau-chu-phu);
-                margin-top: 2px;
-            }
-
-            .gia-phong-hien {
-                font-weight: 800;
-                color: var(--mau-chu-de);
-                font-family: 'Lexend', sans-serif;
-            }
-
-            /* Modal header phòng */
-            .modal-pv-hd {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 20px 24px 18px;
-                flex-shrink: 0;
-                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-                border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-                margin: -28px -28px 22px;
-                position: relative;
-                overflow: hidden;
-            }
-
-                .modal-pv-hd::before {
-                    content: '';
-                    position: absolute;
-                    top: -30px;
-                    right: -30px;
-                    width: 100px;
-                    height: 100px;
-                    border-radius: 50%;
-                    background: rgba(255,255,255,0.08);
-                    pointer-events: none;
-                }
-
-            .modal-pv-trai {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                position: relative;
-                z-index: 1;
-            }
-
-            .modal-pv-icon {
-                width: 42px;
-                height: 42px;
-                border-radius: 12px;
-                background: rgba(255,255,255,0.2);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 18px;
-                color: #fff;
-                flex-shrink: 0;
-            }
-
-            .modal-pv-ten {
-                font-size: 15px;
-                font-weight: 800;
-                color: #fff;
-                font-family: 'Lexend', sans-serif;
-            }
-
-            .modal-pv-phu {
-                font-size: 11px;
-                color: rgba(255,255,255,0.65);
-                margin-top: 2px;
-            }
-
-            .nhom-chon-trang-thai {
-                display: flex;
-                gap: 8px;
-                flex-wrap: wrap;
-                margin-top: 6px;
-            }
-
-            .nut-chon-tt {
-                padding: 7px 14px;
-                border-radius: var(--radius-full);
-                border: 1.5px solid var(--mau-vien);
-                background: var(--mau-nen);
-                font-size: 11.5px;
-                font-weight: 700;
-                cursor: pointer;
-                font-family: inherit;
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-                .nut-chon-tt.chon-trong {
-                    border-color: #059669;
-                    background: #ecfdf5;
-                    color: #059669;
-                }
-
-                .nut-chon-tt.chon-da-thue {
-                    border-color: #2563eb;
-                    background: #eff6ff;
-                    color: #2563eb;
-                }
-
-                .nut-chon-tt.chon-dang-sua {
-                    border-color: #d97706;
-                    background: #fff7ed;
-                    color: #d97706;
-                }
-
-            .bieu-tuong-xoa {
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background: #fee2e2;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 24px;
-                color: var(--mau-do);
-                margin: 0 auto 16px;
-            }
-
-            .chi-tiet-panel {
-                background: var(--mau-nen);
-                border-radius: var(--radius-md);
-                padding: 16px;
-                border: 1.5px solid var(--mau-vien);
-                margin-bottom: 14px;
-            }
-
-            .chi-tiet-hang {
-                display: flex;
-                align-items: flex-start;
-                gap: 12px;
-                padding: 9px 0;
-                border-bottom: 1px solid var(--mau-vien);
-            }
-
-                .chi-tiet-hang:last-child {
-                    border-bottom: none;
-                    padding-bottom: 0;
-                }
-
-                .chi-tiet-hang:first-child {
-                    padding-top: 0;
-                }
-
-            .chi-tiet-nhan {
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--mau-chu-phu);
-                min-width: 120px;
-            }
-
-            .chi-tiet-gia-tri {
-                font-size: 12.5px;
-                font-weight: 600;
-                color: var(--mau-chu);
-            }
-
-            .khung-nguoi-thue {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 12px;
-                background: var(--mau-xanh-bien-nhat);
-                border-radius: var(--radius-md);
-                border: 1.5px solid rgba(37,99,235,0.2);
-                margin-bottom: 14px;
-            }
-
-            .anh-nguoi-thue {
-                width: 40px;
-                height: 40px;
-                border-radius: 10px;
-                flex-shrink: 0;
-                background: linear-gradient(135deg, var(--mau-xanh-bien), #60a5fa);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #fff;
-                font-size: 15px;
-                font-weight: 800;
-            }
-
-            .thong-tin-nguoi-thue {
-                flex: 1;
-            }
-
-            .ten-nguoi-thue {
-                font-size: 13px;
-                font-weight: 800;
-                color: var(--mau-chu);
-            }
-
-            .phu-nguoi-thue {
-                font-size: 10.5px;
-                color: var(--mau-chu-phu);
-                margin-top: 2px;
-            }
-
-            .trong-phong-hint {
-                text-align: center;
-                padding: 20px;
-                color: var(--mau-chu-phu);
-                font-size: 12px;
-                background: var(--mau-nen);
-                border-radius: var(--radius-md);
-                border: 1.5px dashed var(--mau-vien);
-                margin-bottom: 14px;
-            }
-
-                .trong-phong-hint i {
-                    font-size: 22px;
-                    display: block;
-                    margin-bottom: 6px;
-                    opacity: 0.4;
-                }
-
-            /* Thống kê tóm tắt */
-            .hang-tom-tat-phong {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 14px;
-                margin-bottom: 18px;
-            }
-
-            .the-tom-tat-phong {
-                background: var(--mau-trang);
-                border-radius: var(--radius-lg);
-                padding: 16px 18px;
-                box-shadow: var(--bong-card);
-                border: 1.5px solid var(--mau-vien);
-                display: flex;
-                align-items: center;
-                gap: 14px;
-                transition: all 0.2s;
-            }
-
-                .the-tom-tat-phong:hover {
-                    box-shadow: var(--bong-card-hover);
-                }
-
-            .bieu-tuong-tom-tat {
-                width: 44px;
-                height: 44px;
-                border-radius: 12px;
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 18px;
-            }
-
-            .noi-dung-tom-tat .con-so {
-                font-size: 22px;
-                font-weight: 900;
-                font-family: 'Lexend', sans-serif;
-            }
-
-            .noi-dung-tom-tat .mo-ta {
-                font-size: 11px;
-                color: var(--mau-chu-phu);
-                margin-top: 3px;
-            }
+        /* ==========================================================
+        IMPORT FONT – đồng bộ ChuTro.cshtml
+        ========================================================== */
+        @@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+
+        /* ==========================================================
+        BIẾN MÀU & THIẾT KẾ TOÀN CỤC – copy 1:1 từ ChuTro.cshtml
+        ========================================================== */
+        :root {
+        --mau-chu-de: #b8720a;
+        --mau-chu-de-sang: #e8971c;
+        --mau-chu-de-nhat: #fdf6e3;
+        --mau-chu-de-vien: rgba(184,114,10,0.15);
+        --mau-sidebar: #0d1b2e;
+        --mau-sidebar-dam: #081020;
+        --mau-sidebar-vien: rgba(255,255,255,0.06);
+        --mau-sidebar-hover: rgba(232,151,28,0.12);
+        --mau-sidebar-active: rgba(232,151,28,0.18);
+        --mau-nen: #f0f2f8;
+        --mau-nen-card: #f8f9fd;
+        --mau-trang: #ffffff;
+        --mau-chu: #111827;
+        --mau-chu-phu: #6b7a99;
+        --mau-vien: #e5e9f5;
+        --mau-xanh: #0ea271;
+        --mau-xanh-nhat: #ecfdf5;
+        --mau-do: #e53e3e;
+        --mau-do-nhat: #fff5f5;
+        --mau-xanh-bien: #2563eb;
+        --mau-xanh-bien-nhat: #eff6ff;
+        --bong-card: 0 2px 12px rgba(13,27,46,0.06), 0 1px 3px rgba(13,27,46,0.04);
+        --bong-card-hover: 0 8px 28px rgba(184,114,10,0.14), 0 2px 8px rgba(13,27,46,0.08);
+        --bong-sidebar: 6px 0 32px rgba(0,0,0,0.3);
+        --bong-header: 0 1px 0 var(--mau-vien), 0 2px 16px rgba(13,27,46,0.04);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --radius-full: 9999px;
+        }
+
+        /* ==========================================================
+        RESET & CƠ BẢN
+        ========================================================== */
+        *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        }
+
+        body {
+        font-family: 'Be Vietnam Pro', sans-serif;
+        background: var(--mau-nen);
+        color: var(--mau-chu);
+        display: flex;
+        height: 100vh;
+        overflow: clip;
+        -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==========================================================
+        SIDEBAR – copy 1:1 từ ChuTro.cshtml
+        ========================================================== */
+        #thanh-sidebar {
+        width: 248px;
+        min-width: 248px;
+        background: var(--mau-sidebar);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        z-index: 100;
+        box-shadow: var(--bong-sidebar);
+        overflow-y: auto;
+        transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
+        position: relative;
+        border-right: 1px solid rgba(255,255,255,0.04);
+        }
+
+        #thanh-sidebar.an {
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
+        }
+
+        .ten-logo, .thong-tin-chu-tro .ten-chu {
+        transition: opacity 0.2s, max-width 0.35s;
+        max-width: 160px;
+        overflow: hidden;
+        }
+
+        .nhan-nhom-menu {
+        transition: opacity 0.2s, max-height 0.3s;
+        }
+
+        #thanh-sidebar.thu-gon .nhan-nhom-menu {
+        opacity: 0;
+        max-height: 0;
+        padding: 0;
+        }
+
+        .muc-menu span:not(.huy-hieu) {
+        transition: opacity 0.2s, max-width 0.35s;
+        max-width: 160px;
+        overflow: hidden;
+        display: inline-block;
+        }
+
+        #thanh-sidebar.thu-gon .muc-menu span:not(.huy-hieu) {
+        opacity: 0;
+        max-width: 0;
+        }
+
+        #thanh-sidebar.thu-gon .huy-hieu {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+        padding: 0;
+        }
+
+        #thanh-sidebar.thu-gon .muc-menu {
+        padding: 10px 0;
+        justify-content: center;
+        border-radius: 10px;
+        margin: 2px 8px;
+        width: calc(100% - 12px);
+        }
+
+        #thanh-sidebar.thu-gon .thong-tin-chu-tro {
+        justify-content: center;
+        }
+
+        #thanh-sidebar.thu-gon .muc-menu i {
+        width: auto;
+        font-size: 16px;
+        }
+
+        #thanh-sidebar::-webkit-scrollbar {
+        width: 0;
+        }
+
+        .khu-vuc-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 20px 20px;
+        border-bottom: 1px solid var(--mau-sidebar-vien);
+        }
+
+        .bieu-tuong-logo {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(184,114,10,0.45);
+        }
+
+        .ten-logo strong {
+        display: block;
+        color: #fff;
+        font-size: 13.5px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        }
+
+        .ten-logo span {
+        font-size: 10px;
+        color: rgba(255,255,255,0.32);
+        letter-spacing: 0.3px;
+        }
+
+        .nhan-nhom-menu {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: rgba(255,255,255,0.22);
+        text-transform: uppercase;
+        padding: 18px 20px 6px;
+        }
+
+        .muc-menu {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px 9px 16px;
+        color: rgba(255,255,255,0.52);
+        cursor: pointer;
+        border-radius: 0 var(--radius-full) var(--radius-full) 0;
+        margin: 1px 12px 1px 0;
+        transition: all 0.18s ease;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        position: relative;
+        }
+
+        .muc-menu i {
+        width: 18px;
+        text-align: center;
+        font-size: 13px;
+        opacity: 0.75;
+        flex-shrink: 0;
+        transition: opacity 0.18s;
+        }
+
+        .muc-menu:hover {
+        background: var(--mau-sidebar-hover);
+        color: rgba(255,255,255,0.9);
+        }
+
+        .muc-menu:hover i {
+        opacity: 1;
+        }
+
+        .muc-menu.dang-chon {
+        background: var(--mau-sidebar-active);
+        color: #fff;
+        font-weight: 700;
+        }
+
+        .muc-menu.dang-chon i {
+        opacity: 1;
+        color: var(--mau-chu-de-sang);
+        }
+
+        .muc-menu.dang-chon::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 60%;
+        width: 3px;
+        background: var(--mau-chu-de-sang);
+        border-radius: 0 3px 3px 0;
+        }
+
+        .huy-hieu {
+        margin-left: auto;
+        background: rgba(239,68,68,0.85);
+        color: #fff;
+        font-size: 9.5px;
+        font-weight: 800;
+        border-radius: var(--radius-full);
+        padding: 2px 7px;
+        min-width: 18px;
+        text-align: center;
+        }
+
+        .huy-hieu.vang {
+        background: var(--mau-chu-de);
+        }
+
+        .thong-tin-chu-tro {
+        margin-top: auto;
+        padding: 14px 16px;
+        border-top: 1px solid var(--mau-sidebar-vien);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        flex-shrink: 0;
+        position: sticky;
+        bottom: 0;
+        background: var(--mau-sidebar-dam);
+        z-index: 1;
+        transition: background 0.18s;
+        }
+
+        .thong-tin-chu-tro:hover {
+        background: rgba(255,255,255,0.04);
+        }
+
+        .anh-chu-tro {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        }
+
+        .ten-chu strong {
+        display: block;
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 700;
+        }
+
+        .ten-chu span {
+        color: rgba(255,255,255,0.35);
+        font-size: 10px;
+        }
+
+        /* ==========================================================
+        KHU VỰC CHÍNH
+        ========================================================== */
+        #khu-vuc-chinh {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        }
+
+        /* HEADER – đồng bộ ChuTro.cshtml */
+        #thanh-header {
+        background: var(--mau-trang);
+        padding: 0 28px;
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--bong-header);
+        flex-shrink: 0;
+        z-index: 50;
+        }
+
+        .header-trai {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        }
+
+        .nut-ham-burger {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        color: var(--mau-chu-phu);
+        padding: 8px;
+        border-radius: var(--radius-sm);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+
+        .nut-ham-burger:hover {
+        background: var(--mau-chu-de-nhat);
+        color: var(--mau-chu-de);
+        }
+
+        .tieu-de-header {
+        font-size: 14.5px;
+        font-weight: 800;
+        color: var(--mau-chu);
+        font-family: 'Lexend', sans-serif;
+        }
+
+        .duong-dan-header {
+        font-size: 11px;
+        color: var(--mau-chu-phu);
+        margin-top: 1px;
+        }
+
+        .header-phai {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        }
+
+        .o-tim-kiem {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--mau-nen);
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-full);
+        padding: 7px 16px;
+        transition: all 0.2s;
+        }
+
+        .o-tim-kiem:focus-within {
+        border-color: var(--mau-chu-de);
+        background: #fff;
+        box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
+        }
+
+        .o-tim-kiem input {
+        border: none;
+        background: none;
+        outline: none;
+        font-size: 12.5px;
+        width: 170px;
+        color: var(--mau-chu);
+        font-family: inherit;
+        }
+
+        .o-tim-kiem input::placeholder {
+        color: var(--mau-chu-phu);
+        }
+
+        .o-tim-kiem i {
+        color: var(--mau-chu-phu);
+        font-size: 12px;
+        }
+
+        .nut-chuong {
+        position: relative;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        color: var(--mau-chu-phu);
+        padding: 8px;
+        border-radius: var(--radius-full);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        }
+
+        .nut-chuong:hover {
+        background: var(--mau-chu-de-nhat);
+        color: var(--mau-chu-de);
+        }
+
+        .so-chuong {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: var(--mau-do);
+        color: #fff;
+        font-size: 8.5px;
+        font-weight: 800;
+        border-radius: var(--radius-full);
+        width: 15px;
+        height: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+        }
+
+        .the-chu-tro {
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        color: #fff;
+        font-size: 9.5px;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        }
+
+        .khoi-admin-header {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: var(--radius-full);
+        transition: background 0.2s;
+        position: relative;
+        }
+
+        .khoi-admin-header:hover {
+        background: var(--mau-chu-de-nhat);
+        }
+
+        .anh-dai-dien-header {
+        width: 34px;
+        height: 34px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 800;
+        }
+
+        .ten-admin-header {
+        font-size: 12.5px;
+        font-weight: 700;
+        }
+
+        .vai-tro-header {
+        font-size: 10px;
+        color: var(--mau-chu-phu);
+        }
+
+        .header-divider {
+        width: 1px;
+        height: 22px;
+        background: var(--mau-vien);
+        margin: 0 2px;
+        }
+
+        /* Admin dropdown */
+        .admin-dropdown {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 240px;
+        background: var(--mau-trang);
+        border-radius: 14px;
+        border: 1px solid var(--mau-vien);
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13,27,46,0.12), 0 2px 8px rgba(13,27,46,0.06);
+        z-index: 999;
+        transform-origin: top right;
+        transform: scale(0.92) translateY(-8px);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease;
+        }
+
+        .admin-dropdown.show {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+        pointer-events: all;
+        }
+
+        .add-header {
+        padding: 14px 16px 12px;
+        border-bottom: 1px solid var(--mau-vien);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        }
+
+        .add-header-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        }
+
+        .add-header-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--mau-chu);
+        }
+
+        .add-header-email {
+        font-size: 11px;
+        color: var(--mau-chu-phu);
+        margin-top: 2px;
+        }
+
+        .add-header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        padding: 2px 8px;
+        border-radius: var(--radius-full);
+        margin-top: 4px;
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        color: #fff;
+        }
+
+        .add-body {
+        padding: 6px;
+        }
+
+        .add-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 12px;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: background 0.14s;
+        border: none;
+        background: none;
+        width: 100%;
+        font-family: inherit;
+        text-align: left;
+        }
+
+        .add-item:hover {
+        background: var(--mau-nen);
+        }
+
+        .add-item-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        }
+
+        .add-item-icon.vang {
+        background: var(--mau-chu-de-nhat);
+        color: var(--mau-chu-de);
+        }
+
+        .add-item-icon.do {
+        background: var(--mau-do-nhat);
+        color: var(--mau-do);
+        }
+
+        .add-item-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--mau-chu);
+        }
+
+        .add-item-sub {
+        font-size: 10.5px;
+        color: var(--mau-chu-phu);
+        margin-top: 1px;
+        }
+
+        .add-item.danger:hover {
+        background: var(--mau-do-nhat);
+        }
+
+        .add-item.danger:hover .add-item-label {
+        color: var(--mau-do);
+        }
+
+        .add-divider {
+        height: 1px;
+        background: var(--mau-vien);
+        margin: 4px 0;
+        }
+
+        /* ==========================================================
+        NỘI DUNG CHÍNH
+        ========================================================== */
+        #noi-dung-chinh {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 28px 32px;
+        }
+
+        #noi-dung-chinh::-webkit-scrollbar {
+        width: 5px;
+        }
+
+        #noi-dung-chinh::-webkit-scrollbar-track {
+        background: transparent;
+        }
+
+        #noi-dung-chinh::-webkit-scrollbar-thumb {
+        background: #d4d9e6;
+        border-radius: 3px;
+        }
+
+        /* ==========================================================
+        CSS QUẢN LÝ PHÒNG
+        ========================================================== */
+        .dong-tieu-de-trang {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        }
+
+        .dong-tieu-de-trang h2 {
+        font-size: 21px;
+        font-weight: 900;
+        font-family: 'Lexend', sans-serif;
+        color: var(--mau-chu);
+        }
+
+        .dong-tieu-de-trang p {
+        font-size: 12px;
+        color: var(--mau-chu-phu);
+        margin-top: 4px;
+        }
+
+        .nut-hanh-dong-chinh {
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(184,114,10,0.3);
+        transition: all 0.2s;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        white-space: nowrap;
+        }
+
+        .nut-hanh-dong-chinh:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(184,114,10,0.42);
+        }
+
+        .mau-cam-nhat {
+        background: #fff8ee;
+        color: var(--mau-chu-de);
+        }
+
+        .mau-luc-nhat {
+        background: #f0fdf4;
+        color: #15803d;
+        }
+
+        .mau-hong-nhat {
+        background: #fff1f2;
+        color: #e11d48;
+        }
+
+        .mau-xanh-nhat-icon {
+        background: #eff6ff;
+        color: #1d4ed8;
+        }
+
+        /* Modal */
+        .lop-phu-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(10,20,40,0.55);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(6px);
+        }
+
+        .lop-phu-modal.hien {
+        display: flex;
+        }
+
+        .hop-modal {
+        background: var(--mau-trang);
+        border-radius: var(--radius-xl);
+        padding: 28px;
+        width: 540px;
+        max-width: 96vw;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.2), 0 2px 12px rgba(0,0,0,0.08);
+        animation: hien-modal-qlp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .hop-modal.rong {
+        width: 700px;
+        }
+
+        .hop-modal.nho {
+        width: 420px;
+        }
+
+        .hop-modal::-webkit-scrollbar {
+        width: 4px;
+        }
+
+        .hop-modal::-webkit-scrollbar-thumb {
+        background: #d4d9e6;
+        border-radius: 3px;
+        }
+
+        @@keyframes hien-modal-qlp {
+        from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+        }
+
+        to {
+        opacity: 1;
+        transform: none;
+        }
+        }
+
+        .tieu-de-modal {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        }
+
+        .nut-dong-modal {
+        background: var(--mau-nen);
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        color: var(--mau-chu-phu);
+        border-radius: var(--radius-full);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        }
+
+        .nut-dong-modal:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        }
+
+        .luoi-form-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        }
+
+        .nhom-nhap {
+        margin-bottom: 2px;
+        }
+
+        .nhan-nhap {
+        display: block;
+        font-size: 11.5px;
+        font-weight: 700;
+        margin-bottom: 7px;
+        color: var(--mau-chu);
+        }
+
+        .o-nhap {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        outline: none;
+        transition: all 0.2s;
+        color: var(--mau-chu);
+        font-family: 'Be Vietnam Pro', sans-serif;
+        background: #fff;
+        box-sizing: border-box;
+        }
+
+        .o-nhap:focus {
+        border-color: var(--mau-chu-de);
+        box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
+        }
+
+        textarea.o-nhap {
+        resize: vertical;
+        }
+
+        .nhom-nut-duoi-modal {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 22px;
+        }
+
+        .nut-huy-modal {
+        background: var(--mau-nen);
+        color: var(--mau-chu-phu);
+        border: none;
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        transition: all 0.2s;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        }
+
+        .nut-huy-modal:hover {
+        background: var(--mau-vien);
+        }
+
+        .nut-luu-modal {
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        color: #fff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 4px 14px rgba(184,114,10,0.3);
+        transition: all 0.2s;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        }
+
+        .nut-luu-modal:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(184,114,10,0.42);
+        }
+
+        .duong-ke-modal {
+        border: none;
+        border-top: 1px solid var(--mau-vien);
+        margin: 18px 0;
+        }
+
+        .tieu-de-muc-modal {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--mau-chu-phu);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        }
+
+        #toastContainer {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 99999;
+        }
+
+        /* Thanh lọc */
+        .khu-vuc-loc {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        padding: 14px 18px;
+        box-shadow: var(--bong-card);
+        border: 1.5px solid var(--mau-vien);
+        margin-bottom: 18px;
+        }
+
+        .o-tim-phong {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-md);
+        padding: 8px 14px;
+        background: var(--mau-nen);
+        flex: 1;
+        min-width: 200px;
+        transition: all 0.2s;
+        }
+
+        .o-tim-phong:focus-within {
+        border-color: var(--mau-chu-de);
+        background: #fff;
+        box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
+        }
+
+        .o-tim-phong input {
+        border: none;
+        background: none;
+        outline: none;
+        font-size: 12.5px;
+        color: var(--mau-chu);
+        font-family: inherit;
+        width: 100%;
+        }
+
+        .o-tim-phong input::placeholder {
+        color: var(--mau-chu-phu);
+        }
+
+        .o-tim-phong i {
+        color: var(--mau-chu-phu);
+        font-size: 12px;
+        flex-shrink: 0;
+        }
+
+        .chon-loc {
+        padding: 8px 14px;
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-md);
+        font-size: 12.5px;
+        color: var(--mau-chu);
+        font-family: inherit;
+        background: var(--mau-nen);
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 32px;
+        }
+
+        .chon-loc:focus {
+        border-color: var(--mau-chu-de);
+        background-color: #fff;
+        }
+
+        /* Bảng phòng */
+        .the-bang-phong {
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--bong-card);
+        border: 1.5px solid var(--mau-vien);
+        overflow: hidden;
+        position: relative;
+        }
+
+        .the-bang-phong::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .dau-bang {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px 0;
+        }
+
+        .dau-bang h3 {
+        font-size: 14px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Lexend', sans-serif;
+        }
+
+        .dau-bang h3 i {
+        color: var(--mau-chu-de);
+        }
+
+        .bang-phong {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+        }
+
+        .bang-phong thead tr {
+        border-bottom: 2px solid var(--mau-vien);
+        }
+
+        .bang-phong th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 10.5px;
+        font-weight: 800;
+        color: var(--mau-chu-phu);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        white-space: nowrap;
+        }
+
+        .bang-phong td {
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--mau-vien);
+        vertical-align: middle;
+        }
+
+        .bang-phong tbody tr:last-child td {
+        border-bottom: none;
+        }
+
+        .bang-phong tbody tr {
+        transition: background 0.15s;
+        }
+
+        .bang-phong tbody tr:hover td {
+        background: var(--mau-chu-de-nhat);
+        }
+
+        .trang-thai-phong {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 4px 11px;
+        border-radius: var(--radius-full);
+        white-space: nowrap;
+        }
+
+        .trang-thai-phong::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        }
+
+        .tt-trong {
+        background: #ecfdf5;
+        color: #059669;
+        }
+
+        .tt-trong::before {
+        background: #059669;
+        box-shadow: 0 0 0 2px #d1fae5;
+        }
+
+        .tt-da-thue {
+        background: #eff6ff;
+        color: #2563eb;
+        }
+
+        .tt-da-thue::before {
+        background: #2563eb;
+        box-shadow: 0 0 0 2px #dbeafe;
+        }
+
+        .tt-dang-sua {
+        background: #fff7ed;
+        color: #d97706;
+        }
+
+        .tt-dang-sua::before {
+        background: #d97706;
+        box-shadow: 0 0 0 2px #fed7aa;
+        }
+
+        .nhom-nut-bang {
+        display: flex;
+        gap: 4px;
+        }
+
+        .nut-hanh-dong-bang {
+        padding: 5px 10px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--mau-vien);
+        background: none;
+        cursor: pointer;
+        font-size: 11.5px;
+        font-weight: 700;
+        transition: all 0.2s;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        }
+
+        .nut-hanh-dong-bang.sua {
+        color: var(--mau-chu-de);
+        border-color: rgba(184,114,10,0.3);
+        }
+
+        .nut-hanh-dong-bang.sua:hover {
+        background: var(--mau-chu-de-nhat);
+        border-color: var(--mau-chu-de);
+        }
+
+        .nut-hanh-dong-bang.xoa {
+        color: var(--mau-do);
+        border-color: rgba(229,62,62,0.3);
+        }
+
+        .nut-hanh-dong-bang.xoa:hover {
+        background: var(--mau-do-nhat);
+        border-color: var(--mau-do);
+        }
+
+        .nut-hanh-dong-bang.xem {
+        color: var(--mau-xanh-bien);
+        border-color: rgba(37,99,235,0.3);
+        }
+
+        .nut-hanh-dong-bang.xem:hover {
+        background: var(--mau-xanh-bien-nhat);
+        border-color: var(--mau-xanh-bien);
+        }
+
+        .phan-trang {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 22px;
+        border-top: 1px solid var(--mau-vien);
+        font-size: 12px;
+        color: var(--mau-chu-phu);
+        }
+
+        .nhom-nut-trang {
+        display: flex;
+        gap: 6px;
+        }
+
+        .nut-trang {
+        padding: 5px 10px;
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-sm);
+        background: none;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--mau-chu-phu);
+        transition: all 0.2s;
+        font-family: inherit;
+        }
+
+        .nut-trang:hover, .nut-trang.hien-tai {
+        background: var(--mau-chu-de);
+        border-color: var(--mau-chu-de);
+        color: #fff;
+        }
+
+        .nut-trang:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        }
+
+        .ten-phong-noi-bat {
+        font-weight: 800;
+        font-size: 14px;
+        font-family: 'Lexend', sans-serif;
+        color: var(--mau-chu);
+        }
+
+        .tang-phong {
+        font-size: 10.5px;
+        color: var(--mau-chu-phu);
+        margin-top: 2px;
+        }
+
+        .gia-phong-hien {
+        font-weight: 800;
+        color: var(--mau-chu-de);
+        font-family: 'Lexend', sans-serif;
+        }
+
+        /* Modal header phòng */
+        .modal-pv-hd {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px 18px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        margin: -28px -28px 22px;
+        position: relative;
+        overflow: hidden;
+        }
+
+        .modal-pv-hd::before {
+        content: '';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        pointer-events: none;
+        }
+
+        .modal-pv-trai {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+        }
+
+        .modal-pv-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: #fff;
+        flex-shrink: 0;
+        }
+
+        .modal-pv-ten {
+        font-size: 15px;
+        font-weight: 800;
+        color: #fff;
+        font-family: 'Lexend', sans-serif;
+        }
+
+        .modal-pv-phu {
+        font-size: 11px;
+        color: rgba(255,255,255,0.65);
+        margin-top: 2px;
+        }
+
+        .nhom-chon-trang-thai {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+        }
+
+        .nut-chon-tt {
+        padding: 7px 14px;
+        border-radius: var(--radius-full);
+        border: 1.5px solid var(--mau-vien);
+        background: var(--mau-nen);
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        }
+
+        .nut-chon-tt.chon-trong {
+        border-color: #059669;
+        background: #ecfdf5;
+        color: #059669;
+        }
+
+        .nut-chon-tt.chon-da-thue {
+        border-color: #2563eb;
+        background: #eff6ff;
+        color: #2563eb;
+        }
+
+        .nut-chon-tt.chon-dang-sua {
+        border-color: #d97706;
+        background: #fff7ed;
+        color: #d97706;
+        }
+
+        .bieu-tuong-xoa {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #fee2e2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--mau-do);
+        margin: 0 auto 16px;
+        }
+
+        .chi-tiet-panel {
+        background: var(--mau-nen);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        border: 1.5px solid var(--mau-vien);
+        margin-bottom: 14px;
+        }
+
+        .chi-tiet-hang {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--mau-vien);
+        }
+
+        .chi-tiet-hang:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        }
+
+        .chi-tiet-hang:first-child {
+        padding-top: 0;
+        }
+
+        .chi-tiet-nhan {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--mau-chu-phu);
+        min-width: 120px;
+        }
+
+        .chi-tiet-gia-tri {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--mau-chu);
+        }
+
+        .khung-nguoi-thue {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: var(--mau-xanh-bien-nhat);
+        border-radius: var(--radius-md);
+        border: 1.5px solid rgba(37,99,235,0.2);
+        margin-bottom: 14px;
+        }
+
+        .anh-nguoi-thue {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--mau-xanh-bien), #60a5fa);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        }
+
+        .thong-tin-nguoi-thue {
+        flex: 1;
+        }
+
+        .ten-nguoi-thue {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--mau-chu);
+        }
+
+        .phu-nguoi-thue {
+        font-size: 10.5px;
+        color: var(--mau-chu-phu);
+        margin-top: 2px;
+        }
+
+        .trong-phong-hint {
+        text-align: center;
+        padding: 20px;
+        color: var(--mau-chu-phu);
+        font-size: 12px;
+        background: var(--mau-nen);
+        border-radius: var(--radius-md);
+        border: 1.5px dashed var(--mau-vien);
+        margin-bottom: 14px;
+        }
+
+        .trong-phong-hint i {
+        font-size: 22px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.4;
+        }
+
+        /* Thống kê tóm tắt */
+        .hang-tom-tat-phong {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+        }
+
+        .the-tom-tat-phong {
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        padding: 16px 18px;
+        box-shadow: var(--bong-card);
+        border: 1.5px solid var(--mau-vien);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: all 0.2s;
+        }
+
+        .the-tom-tat-phong:hover {
+        box-shadow: var(--bong-card-hover);
+        }
+
+        .bieu-tuong-tom-tat {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        }
+
+        .noi-dung-tom-tat .con-so {
+        font-size: 22px;
+        font-weight: 900;
+        font-family: 'Lexend', sans-serif;
+        }
+
+        .noi-dung-tom-tat .mo-ta {
+        font-size: 11px;
+        color: var(--mau-chu-phu);
+        margin-top: 3px;
+        }
     </style>
 </head>
 <body>
@@ -1540,7 +1541,7 @@
         <!-- Nhóm: Tổng quan -->
         <div class="nhan-nhom-menu">Tổng quan</div>
 
-        <div class="muc-menu" onclick="window.location.href='/Admin/ChuTro'">
+        <div class="muc-menu" onclick="chuyenMenu('trang-chu', this)">
             <i class="fas fa-home"></i>
             <span>Trang chủ</span>
         </div>
@@ -1548,20 +1549,20 @@
         <!-- Nhóm: Vận hành -->
         <div class="nhan-nhom-menu">Vận hành</div>
 
-        <div class="muc-menu dang-chon">
+        <div class="muc-menu dang-chon" onclick="chuyenMenu('quan-ly-phong', this)">
             <i class="fas fa-building"></i>
             <span>Quản lý phòng trọ</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/Admin/QuanLyNguoiThue'">
+        <div class="muc-menu" onclick="chuyenMenu('nguoi-thue', this)">
             <i class="fas fa-users"></i>
             <span>Người thuê</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/Admin/QuanLyHopDong'">
+        <div class="muc-menu" onclick="chuyenMenu('hop-dong', this)">
             <i class="fas fa-file-contract"></i>
             <span>Hợp đồng</span>
             <span class="huy-hieu vang">2</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/HoaDon'">
+        <div class="muc-menu" onclick="chuyenMenu('hoa-don', this)">
             <i class="fas fa-file-invoice-dollar"></i>
             <span>Hóa đơn & Thu tiền</span>
         </div>
@@ -1569,23 +1570,23 @@
         <!-- Nhóm: Quản trị chủ trọ -->
         <div class="nhan-nhom-menu">Quản trị chủ trọ</div>
 
-        <div class="muc-menu" onclick="window.location.href='/Admin/ChuTro'">
+        <div class="muc-menu" onclick="chuyenMenu('Tai-Khoan', this)">
             <i class="fas fa-user-shield"></i>
             <span>Tài khoản quản lý</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/Admin/QuanLyNguoiThue'">
+        <div class="muc-menu" onclick="chuyenMenu('nguoi-thue', this)">
             <i class="fas fa-users"></i>
             <span>Quản lý người thuê</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/Admin/ChuTro'">
+        <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
             <i class="fas fa-sliders-h"></i>
             <span>Cấu hình giá thuê</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/Admin/ChuTro'">
+        <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
             <i class="fas fa-bolt"></i>
             <span>Dịch vụ thông báo</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/Admin/ChuTro'">
+        <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
             <i class="fas fa-hand-holding-usd"></i>
             <span>Quy định đặt cọc</span>
         </div>
@@ -1593,16 +1594,16 @@
         <!-- Nhóm: Hỗ trợ -->
         <div class="nhan-nhom-menu">Hỗ trợ</div>
 
-        <div class="muc-menu" onclick="window.location.href='/SuCoBaoTri'">
+        <div class="muc-menu" onclick="chuyenMenu('sua-chua', this)">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
             <span class="huy-hieu">3</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/BaoCao'">
+        <div class="muc-menu" onclick="chuyenMenu('bao-cao', this)">
             <i class="fas fa-chart-bar"></i>
             <span>Báo cáo tài chính</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/CaiDat'">
+        <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
             <i class="fas fa-cog"></i>
             <span>Cài đặt hệ thống</span>
         </div>
@@ -2166,377 +2167,339 @@
      JAVASCRIPT
 ============================================= -->
     <script>
-            // ── HÀM SIDEBAR (đồng bộ với ChuTro-core.js) ──
-            function dongMoSidebar() {
-              document.getElementById('thanh-sidebar').classList.toggle('an');
-            }
+        // ── Các hàm sidebar, modal, dropdown đã có trong ChuTro-core.js ──
 
-            // ── ADMIN DROPDOWN ──
-            function toggleAdminMenu() {
-              const dd = document.getElementById('adminDropdown');
-              const ch = document.getElementById('adminChevron');
-              const open = dd.classList.toggle('show');
-              ch.style.transform = open ? 'rotate(180deg)' : '';
-            }
-            document.addEventListener('click', function(e) {
-              const wrap = document.getElementById('adminHeaderWrap');
-              if (wrap && !wrap.contains(e.target)) {
-                document.getElementById('adminDropdown')?.classList.remove('show');
-                const ch = document.getElementById('adminChevron');
-                if (ch) ch.style.transform = '';
-              }
-            });
-            function moDoiMatKhau() {
-              toggleAdminMenu();
-              // moModal('modal-doi-mat-khau');
-            }
-            function xacNhanDangXuat() {
-              toggleAdminMenu();
-              if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                window.location.href = '/logout';
-              }
-            }
+        function dongModalNhapNgoai(event, id) {
+        if (event.target === document.getElementById(id)) dongModal(id);
+        }
 
-            // ── MODAL ──
-            function moModal(id) {
-              document.getElementById(id).classList.add('hien');
-              document.body.style.overflow = 'hidden';
-            }
-            function dongModal(id) {
-              document.getElementById(id).classList.remove('hien');
-              document.body.style.overflow = '';
-            }
-            function dongModalNhapNgoai(event, id) {
-              if (event.target === document.getElementById(id)) dongModal(id);
-            }
+        // ── LỌC DANH SÁCH PHÒNG ──
+        function locDanhSachPhong() {
+        const tuKhoa = document.getElementById('tim-phong-input').value.toLowerCase().trim();
+        const tt     = document.getElementById('loc-trang-thai').value;
+        const tang   = document.getElementById('loc-tang').value;
+        const rows   = document.querySelectorAll('#tbody-phong tr');
+        let soHienThi = 0;
+        rows.forEach(row => {
+        const soPhong   = row.dataset.soPhong || '';
+        const trangThai = row.dataset.trangThai || '';
+        const tangRow   = row.dataset.tang || '';
+        const khopTu    = !tuKhoa || soPhong.includes(tuKhoa);
+        const khopTT    = !tt     || trangThai === tt;
+        const khopTang  = !tang   || tangRow === tang;
+        if (khopTu && khopTT && khopTang) { row.style.display = ''; soHienThi++; }
+        else row.style.display = 'none';
+        });
+        document.getElementById('so-ket-qua').textContent = soHienThi + ' phòng';
+        document.getElementById('bang-rong').style.display = soHienThi === 0 ? 'block' : 'none';
+        }
 
-            // ── LỌC DANH SÁCH PHÒNG ──
-            function locDanhSachPhong() {
-              const tuKhoa = document.getElementById('tim-phong-input').value.toLowerCase().trim();
-              const tt     = document.getElementById('loc-trang-thai').value;
-              const tang   = document.getElementById('loc-tang').value;
-              const rows   = document.querySelectorAll('#tbody-phong tr');
-              let soHienThi = 0;
-              rows.forEach(row => {
-                const soPhong   = row.dataset.soPhong || '';
-                const trangThai = row.dataset.trangThai || '';
-                const tangRow   = row.dataset.tang || '';
-                const khopTu    = !tuKhoa || soPhong.includes(tuKhoa);
-                const khopTT    = !tt     || trangThai === tt;
-                const khopTang  = !tang   || tangRow === tang;
-                if (khopTu && khopTT && khopTang) { row.style.display = ''; soHienThi++; }
-                else row.style.display = 'none';
-              });
-              document.getElementById('so-ket-qua').textContent = soHienThi + ' phòng';
-              document.getElementById('bang-rong').style.display = soHienThi === 0 ? 'block' : 'none';
-            }
+        // ── PHÂN TRANG ──
+        let trangHienTai = 1;
+        const soPhongMotTrang = @Model.SoPhongMotTrang;
+        function chuyenTrang(buoc) { denTrang(trangHienTai + buoc); }
+        function denTrang(trang) { trangHienTai = trang; }
 
-            // ── PHÂN TRANG ──
-            let trangHienTai = 1;
-            const soPhongMotTrang = @Model.SoPhongMotTrang;
-            function chuyenTrang(buoc) { denTrang(trangHienTai + buoc); }
-            function denTrang(trang) { trangHienTai = trang; }
+        // ── CHỌN TRẠNG THÁI MODAL ──
+        function chonTrangThai(gt, loai) {
+        document.getElementById(loai + '-trang-thai').value = gt;
+        const nhom = document.querySelectorAll('#modal-' + (loai === 'them' ? 'them' : 'sua') + '-phong .nut-chon-tt');
+        nhom.forEach(n => n.classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
+        const mapClass = { 'Trống': 'chon-trong', 'Đã thuê': 'chon-da-thue', 'Đang sửa': 'chon-dang-sua' };
+        event.currentTarget.classList.add(mapClass[gt] || 'chon-trong');
+        }
 
-            // ── CHỌN TRẠNG THÁI MODAL ──
-            function chonTrangThai(gt, loai) {
-              document.getElementById(loai + '-trang-thai').value = gt;
-              const nhom = document.querySelectorAll('#modal-' + (loai === 'them' ? 'them' : 'sua') + '-phong .nut-chon-tt');
-              nhom.forEach(n => n.classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
-              const mapClass = { 'Trống': 'chon-trong', 'Đã thuê': 'chon-da-thue', 'Đang sửa': 'chon-dang-sua' };
-              event.currentTarget.classList.add(mapClass[gt] || 'chon-trong');
-            }
+        // ── MODAL THÊM PHÒNG ──
+        function moModalThemPhong() {
+        ['them-so-phong','them-dien-tich','them-gia-phong','them-mo-ta'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('them-so-luong').value = 1;
+        document.getElementById('them-tang').value = 1;
+        document.getElementById('them-trang-thai').value = 'Trống';
+        const nhom = document.querySelectorAll('#modal-them-phong .nut-chon-tt');
+        nhom.forEach(n => n.classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
+        nhom[0].classList.add('chon-trong');
+        moModal('modal-them-phong');
+        }
 
-            // ── MODAL THÊM PHÒNG ──
-            function moModalThemPhong() {
-              ['them-so-phong','them-dien-tich','them-gia-phong','them-mo-ta'].forEach(id => document.getElementById(id).value = '');
-              document.getElementById('them-so-luong').value = 1;
-              document.getElementById('them-tang').value = 1;
-              document.getElementById('them-trang-thai').value = 'Trống';
-              const nhom = document.querySelectorAll('#modal-them-phong .nut-chon-tt');
-              nhom.forEach(n => n.classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
-              nhom[0].classList.add('chon-trong');
-              moModal('modal-them-phong');
-            }
+        function xacNhanThemPhong() {
+        const soPhong  = document.getElementById('them-so-phong').value.trim();
+        const tang     = parseInt(document.getElementById('them-tang').value);
+        const soLuong  = parseInt(document.getElementById('them-so-luong').value) || 1;
+        const dienTich = document.getElementById('them-dien-tich').value;
+        const giaPhong = parseFloat(document.getElementById('them-gia-phong').value);
+        const trangThai= document.getElementById('them-trang-thai').value;
+        const moTa     = document.getElementById('them-mo-ta').value.trim();
+        if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
+        if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
+        if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
+        if (!giaPhong || giaPhong < 0) { hienThiThongBao('Vui lòng nhập giá phòng hợp lệ!', 'canh-bao'); return; }
+        fetch('?handler=ThemPhong', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+        },
+        body: JSON.stringify({ soPhong, tang, soLuong, dienTich: dienTich ? parseFloat(dienTich) : null, giaPhongFix: giaPhong, trangThai, moTa: moTa || null })
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.success) { hienThiThongBao('Thêm phòng ' + soPhong + ' thành công!', 'thanh-cong'); dongModal('modal-them-phong'); setTimeout(() => location.reload(), 900); }
+        else hienThiThongBao(data.message || 'Có lỗi xảy ra!', 'loi');
+        })
+        .catch(() => hienThiThongBao('Lỗi kết nối máy chủ!', 'loi'));
+        }
 
-            function xacNhanThemPhong() {
-              const soPhong  = document.getElementById('them-so-phong').value.trim();
-              const tang     = parseInt(document.getElementById('them-tang').value);
-              const soLuong  = parseInt(document.getElementById('them-so-luong').value) || 1;
-              const dienTich = document.getElementById('them-dien-tich').value;
-              const giaPhong = parseFloat(document.getElementById('them-gia-phong').value);
-              const trangThai= document.getElementById('them-trang-thai').value;
-              const moTa     = document.getElementById('them-mo-ta').value.trim();
-              if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
-              if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
-              if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
-              if (!giaPhong || giaPhong < 0) { hienThiThongBao('Vui lòng nhập giá phòng hợp lệ!', 'canh-bao'); return; }
-              fetch('?handler=ThemPhong', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: JSON.stringify({ soPhong, tang, soLuong, dienTich: dienTich ? parseFloat(dienTich) : null, giaPhongFix: giaPhong, trangThai, moTa: moTa || null })
-              })
-              .then(r => r.json())
-              .then(data => {
-                if (data.success) { hienThiThongBao('Thêm phòng ' + soPhong + ' thành công!', 'thanh-cong'); dongModal('modal-them-phong'); setTimeout(() => location.reload(), 900); }
-                else hienThiThongBao(data.message || 'Có lỗi xảy ra!', 'loi');
-              })
-              .catch(() => hienThiThongBao('Lỗi kết nối máy chủ!', 'loi'));
-            }
+        // ── MODAL SỬA PHÒNG ──
+        const danhSachPhongData = @Html.Raw(Model.DanhSachPhongJson);
+        let idPhongHienTai = null;
 
-            // ── MODAL SỬA PHÒNG ──
-            const danhSachPhongData = @Html.Raw(Model.DanhSachPhongJson);
-            let idPhongHienTai = null;
+        function moModalSuaPhong(idPhong) {
+        const phong = danhSachPhongData.find(p => p.idPhong === idPhong);
+        if (!phong) return;
+        idPhongHienTai = idPhong;
+        document.getElementById('sua-id-phong').value   = idPhong;
+        document.getElementById('sua-so-phong').value   = phong.soPhong;
+        document.getElementById('sua-tang').value       = phong.tang;
+        document.getElementById('sua-so-luong').value   = phong.soLuong ?? 1;
+        document.getElementById('sua-dien-tich').value  = phong.dienTich ?? '';
+        document.getElementById('sua-gia-phong').value  = phong.giaPhongFix;
+        document.getElementById('sua-trang-thai').value = phong.trangThai;
+        document.getElementById('sua-mo-ta').value      = phong.moTa ?? '';
+        document.getElementById('sua-phu-tieu-de').textContent = 'Phòng ' + phong.soPhong;
+        const mapId  = { 'Trống': 'sua-tt-trong', 'Đã thuê': 'sua-tt-da-thue', 'Đang sửa': 'sua-tt-dang-sua' };
+        const mapCls = { 'Trống': 'chon-trong', 'Đã thuê': 'chon-da-thue', 'Đang sửa': 'chon-dang-sua' };
+        ['sua-tt-trong','sua-tt-da-thue','sua-tt-dang-sua'].forEach(id => document.getElementById(id).classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
+        const nutId = mapId[phong.trangThai];
+        if (nutId) document.getElementById(nutId).classList.add(mapCls[phong.trangThai]);
+        moModal('modal-sua-phong');
+        }
 
-            function moModalSuaPhong(idPhong) {
-              const phong = danhSachPhongData.find(p => p.idPhong === idPhong);
-              if (!phong) return;
-              idPhongHienTai = idPhong;
-              document.getElementById('sua-id-phong').value   = idPhong;
-              document.getElementById('sua-so-phong').value   = phong.soPhong;
-              document.getElementById('sua-tang').value       = phong.tang;
-              document.getElementById('sua-so-luong').value   = phong.soLuong ?? 1;
-              document.getElementById('sua-dien-tich').value  = phong.dienTich ?? '';
-              document.getElementById('sua-gia-phong').value  = phong.giaPhongFix;
-              document.getElementById('sua-trang-thai').value = phong.trangThai;
-              document.getElementById('sua-mo-ta').value      = phong.moTa ?? '';
-              document.getElementById('sua-phu-tieu-de').textContent = 'Phòng ' + phong.soPhong;
-              const mapId  = { 'Trống': 'sua-tt-trong', 'Đã thuê': 'sua-tt-da-thue', 'Đang sửa': 'sua-tt-dang-sua' };
-              const mapCls = { 'Trống': 'chon-trong', 'Đã thuê': 'chon-da-thue', 'Đang sửa': 'chon-dang-sua' };
-              ['sua-tt-trong','sua-tt-da-thue','sua-tt-dang-sua'].forEach(id => document.getElementById(id).classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
-              const nutId = mapId[phong.trangThai];
-              if (nutId) document.getElementById(nutId).classList.add(mapCls[phong.trangThai]);
-              moModal('modal-sua-phong');
-            }
+        function xacNhanSuaPhong() {
+        const idPhong   = parseInt(document.getElementById('sua-id-phong').value);
+        const soPhong   = document.getElementById('sua-so-phong').value.trim();
+        const tang      = parseInt(document.getElementById('sua-tang').value);
+        const soLuong   = parseInt(document.getElementById('sua-so-luong').value) || 1;
+        const dienTich  = document.getElementById('sua-dien-tich').value;
+        const giaPhong  = parseFloat(document.getElementById('sua-gia-phong').value);
+        const trangThai = document.getElementById('sua-trang-thai').value;
+        const moTa      = document.getElementById('sua-mo-ta').value.trim();
+        if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
+        if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
+        if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
+        if (!giaPhong || giaPhong < 0) { hienThiThongBao('Vui lòng nhập giá phòng hợp lệ!', 'canh-bao'); return; }
 
-            function xacNhanSuaPhong() {
-              const idPhong   = parseInt(document.getElementById('sua-id-phong').value);
-              const soPhong   = document.getElementById('sua-so-phong').value.trim();
-              const tang      = parseInt(document.getElementById('sua-tang').value);
-              const soLuong   = parseInt(document.getElementById('sua-so-luong').value) || 1;
-              const dienTich  = document.getElementById('sua-dien-tich').value;
-              const giaPhong  = parseFloat(document.getElementById('sua-gia-phong').value);
-              const trangThai = document.getElementById('sua-trang-thai').value;
-              const moTa      = document.getElementById('sua-mo-ta').value.trim();
-              if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
-              if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
-              if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
-              if (!giaPhong || giaPhong < 0) { hienThiThongBao('Vui lòng nhập giá phòng hợp lệ!', 'canh-bao'); return; }
+        // Lưu trạng thái cũ để so sánh sau khi lưu
+        const phongCu = danhSachPhongData.find(p => p.idPhong === idPhong);
+        const trangThaiCu = phongCu?.trangThai;
 
-              // Lưu trạng thái cũ để so sánh sau khi lưu
-              const phongCu = danhSachPhongData.find(p => p.idPhong === idPhong);
-              const trangThaiCu = phongCu?.trangThai;
+        fetch('?handler=SuaPhong', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+        },
+        body: JSON.stringify({ idPhong, soPhong, tang, soLuong, dienTich: dienTich ? parseFloat(dienTich) : null, giaPhongFix: giaPhong, trangThai, moTa: moTa || null })
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.success) {
+        // ── Cập nhật dữ liệu local ngay lập tức ──
+        if (phongCu) {
+        phongCu.soPhong   = soPhong;
+        phongCu.tang      = tang;
+        phongCu.soLuong   = soLuong;
+        phongCu.dienTich  = dienTich ? parseFloat(dienTich) : null;
+        phongCu.giaPhongFix = giaPhong;
+        phongCu.trangThai = trangThai;
+        phongCu.moTa      = moTa || null;
+        // Nếu chuyển sang Trống → xóa thông tin người thuê trong local data
+        if (trangThaiCu !== 'Trống' && trangThai === 'Trống') {
+        phongCu.tenNguoiThue = null;
+        phongCu.sdtNguoiThue = null;
+        }
+        }
 
-              fetch('?handler=SuaPhong', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: JSON.stringify({ idPhong, soPhong, tang, soLuong, dienTich: dienTich ? parseFloat(dienTich) : null, giaPhongFix: giaPhong, trangThai, moTa: moTa || null })
-              })
-              .then(r => r.json())
-              .then(data => {
-                if (data.success) {
-                  // ── Cập nhật dữ liệu local ngay lập tức ──
-                  if (phongCu) {
-                    phongCu.soPhong   = soPhong;
-                    phongCu.tang      = tang;
-                    phongCu.soLuong   = soLuong;
-                    phongCu.dienTich  = dienTich ? parseFloat(dienTich) : null;
-                    phongCu.giaPhongFix = giaPhong;
-                    phongCu.trangThai = trangThai;
-                    phongCu.moTa      = moTa || null;
-                    // Nếu chuyển sang Trống → xóa thông tin người thuê trong local data
-                    if (trangThaiCu !== 'Trống' && trangThai === 'Trống') {
-                      phongCu.tenNguoiThue = null;
-                      phongCu.sdtNguoiThue = null;
-                    }
-                  }
+        // ── Cập nhật dòng trong bảng DOM ──
+        capNhatDongBang(idPhong, soPhong, tang, soLuong, dienTich, giaPhong, trangThai, trangThaiCu);
 
-                  // ── Cập nhật dòng trong bảng DOM ──
-                  capNhatDongBang(idPhong, soPhong, tang, soLuong, dienTich, giaPhong, trangThai, trangThaiCu);
+        hienThiThongBao('Cập nhật phòng ' + soPhong + ' thành công!', 'thanh-cong');
+        dongModal('modal-sua-phong');
+        } else {
+        hienThiThongBao(data.message || 'Có lỗi xảy ra!', 'loi');
+        }
+        })
+        .catch(() => hienThiThongBao('Lỗi kết nối máy chủ!', 'loi'));
+        }
 
-                  hienThiThongBao('Cập nhật phòng ' + soPhong + ' thành công!', 'thanh-cong');
-                  dongModal('modal-sua-phong');
-                } else {
-                  hienThiThongBao(data.message || 'Có lỗi xảy ra!', 'loi');
-                }
-              })
-              .catch(() => hienThiThongBao('Lỗi kết nối máy chủ!', 'loi'));
-            }
+        // ── Cập nhật DOM dòng bảng sau khi sửa phòng ──
+        function capNhatDongBang(idPhong, soPhong, tang, soLuong, dienTich, giaPhong, trangThai, trangThaiCu) {
+        // Tìm row dựa vào nút sửa có idPhong tương ứng
+        const nutSua = document.querySelector(`#tbody-phong button[onclick*="moModalSuaPhong(${idPhong})"]`);
+        if (!nutSua) return;
+        const row = nutSua.closest('tr');
+        if (!row) return;
 
-            // ── Cập nhật DOM dòng bảng sau khi sửa phòng ──
-            function capNhatDongBang(idPhong, soPhong, tang, soLuong, dienTich, giaPhong, trangThai, trangThaiCu) {
-              // Tìm row dựa vào nút sửa có idPhong tương ứng
-              const nutSua = document.querySelector(`#tbody-phong button[onclick*="moModalSuaPhong(${idPhong})"]`);
-              if (!nutSua) return;
-              const row = nutSua.closest('tr');
-              if (!row) return;
+        // Cập nhật data attribute để bộ lọc hoạt động đúng
+        row.dataset.soPhong  = soPhong.toLowerCase();
+        row.dataset.trangThai = trangThai;
+        row.dataset.tang     = tang;
 
-              // Cập nhật data attribute để bộ lọc hoạt động đúng
-              row.dataset.soPhong  = soPhong.toLowerCase();
-              row.dataset.trangThai = trangThai;
-              row.dataset.tang     = tang;
+        const cells = row.querySelectorAll('td');
 
-              const cells = row.querySelectorAll('td');
+        // Cột 0: Số phòng
+        cells[0].querySelector('.ten-phong-noi-bat').textContent = soPhong;
 
-              // Cột 0: Số phòng
-              cells[0].querySelector('.ten-phong-noi-bat').textContent = soPhong;
+        // Cột 1: Tầng
+        cells[1].querySelector('span').textContent = 'Tầng ' + tang;
 
-              // Cột 1: Tầng
-              cells[1].querySelector('span').textContent = 'Tầng ' + tang;
+        // Cột 2: Diện tích
+        cells[2].innerHTML = dienTich
+        ? `<span>${parseFloat(dienTich).toFixed(1)} m²</span>`
+        : `<span style="color:var(--mau-chu-phu);font-style:italic;">—</span>`;
 
-              // Cột 2: Diện tích
-              cells[2].innerHTML = dienTich
-                ? `<span>${parseFloat(dienTich).toFixed(1)} m²</span>`
-                : `<span style="color:var(--mau-chu-phu);font-style:italic;">—</span>`;
+        // Cột 3: Giá cố định
+        cells[3].querySelector('.gia-phong-hien').textContent = new Intl.NumberFormat('vi-VN').format(giaPhong) + ' ₫';
 
-              // Cột 3: Giá cố định
-              cells[3].querySelector('.gia-phong-hien').textContent = new Intl.NumberFormat('vi-VN').format(giaPhong) + ' ₫';
+        // Cột 4: Trạng thái
+        const mapCss = { 'Trống': 'tt-trong', 'Đã thuê': 'tt-da-thue', 'Đang sửa': 'tt-dang-sua' };
+        const ttSpan = cells[4].querySelector('.trang-thai-phong');
+        ttSpan.className = 'trang-thai-phong ' + (mapCss[trangThai] || 'tt-trong');
+        ttSpan.textContent = trangThai;
 
-              // Cột 4: Trạng thái
-              const mapCss = { 'Trống': 'tt-trong', 'Đã thuê': 'tt-da-thue', 'Đang sửa': 'tt-dang-sua' };
-              const ttSpan = cells[4].querySelector('.trang-thai-phong');
-              ttSpan.className = 'trang-thai-phong ' + (mapCss[trangThai] || 'tt-trong');
-              ttSpan.textContent = trangThai;
+        // Cột 5: Số người ở
+        if (trangThai === 'Trống') {
+        cells[5].innerHTML = `<span style="color:var(--mau-chu-phu);font-size:12px;font-style:italic;">— Không có người ở —</span>`;
+        } else {
+        cells[5].innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:13px;color:var(--mau-chu);">
+        <i class="fas fa-users" style="color:var(--mau-chu-phu);font-size:11px;"></i>
+        ${soLuong} người
+        </span>`;
+        }
 
-              // Cột 5: Số người ở
-              if (trangThai === 'Trống') {
-                cells[5].innerHTML = `<span style="color:var(--mau-chu-phu);font-size:12px;font-style:italic;">— Không có người ở —</span>`;
-              } else {
-                cells[5].innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:13px;color:var(--mau-chu);">
-                  <i class="fas fa-users" style="color:var(--mau-chu-phu);font-size:11px;"></i>
-                  ${soLuong} người
-                </span>`;
-              }
+        // Cột 6: Người thuê hiện tại
+        // Nếu chuyển sang Trống → xóa thông tin người thuê
+        if (trangThaiCu !== 'Trống' && trangThai === 'Trống') {
+        cells[6].innerHTML = `<span style="color:var(--mau-chu-phu);font-size:12px;font-style:italic;">— Chưa có người thuê —</span>`;
+        }
 
-              // Cột 6: Người thuê hiện tại
-              // Nếu chuyển sang Trống → xóa thông tin người thuê
-              if (trangThaiCu !== 'Trống' && trangThai === 'Trống') {
-                cells[6].innerHTML = `<span style="color:var(--mau-chu-phu);font-size:12px;font-style:italic;">— Chưa có người thuê —</span>`;
-              }
+        // Cột 8: Nút thao tác — ẩn/hiện nút xóa
+        const nhomNut = cells[8].querySelector('.nhom-nut-bang');
+        let nutXoa = nhomNut.querySelector('.nut-hanh-dong-bang.xoa');
+        if (trangThai !== 'Đã thuê') {
+        if (!nutXoa) {
+        nutXoa = document.createElement('button');
+        nutXoa.className = 'nut-hanh-dong-bang xoa';
+        nutXoa.title = 'Xóa phòng';
+        nutXoa.innerHTML = '<i class="fas fa-trash"></i>';
+        nutXoa.setAttribute('onclick', `moModalXoaPhong(${idPhong}, '${soPhong}')`);
+        nhomNut.appendChild(nutXoa);
+        }
+        } else {
+        nutXoa?.remove();
+        }
+        }
 
-              // Cột 8: Nút thao tác — ẩn/hiện nút xóa
-              const nhomNut = cells[8].querySelector('.nhom-nut-bang');
-              let nutXoa = nhomNut.querySelector('.nut-hanh-dong-bang.xoa');
-              if (trangThai !== 'Đã thuê') {
-                if (!nutXoa) {
-                  nutXoa = document.createElement('button');
-                  nutXoa.className = 'nut-hanh-dong-bang xoa';
-                  nutXoa.title = 'Xóa phòng';
-                  nutXoa.innerHTML = '<i class="fas fa-trash"></i>';
-                  nutXoa.setAttribute('onclick', `moModalXoaPhong(${idPhong}, '${soPhong}')`);
-                  nhomNut.appendChild(nutXoa);
-                }
-              } else {
-                nutXoa?.remove();
-              }
-            }
+        // ── MODAL XÓA PHÒNG ──
+        function moModalXoaPhong(idPhong, soPhong) {
+        idPhongHienTai = idPhong;
+        document.getElementById('xoa-id-phong').value = idPhong;
+        document.getElementById('xoa-ten-phong').textContent = soPhong;
+        moModal('modal-xoa-phong');
+        }
 
-            // ── MODAL XÓA PHÒNG ──
-            function moModalXoaPhong(idPhong, soPhong) {
-              idPhongHienTai = idPhong;
-              document.getElementById('xoa-id-phong').value = idPhong;
-              document.getElementById('xoa-ten-phong').textContent = soPhong;
-              moModal('modal-xoa-phong');
-            }
+        function xacNhanXoaPhong() {
+        const idPhong = parseInt(document.getElementById('xoa-id-phong').value);
+        fetch('?handler=XoaPhong', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+        },
+        body: JSON.stringify({ idPhong })
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.success) { hienThiThongBao('Đã xóa phòng thành công!', 'thanh-cong'); dongModal('modal-xoa-phong'); setTimeout(() => location.reload(), 900); }
+        else hienThiThongBao(data.message || 'Không thể xóa phòng này!', 'loi');
+        })
+        .catch(() => hienThiThongBao('Lỗi kết nối máy chủ!', 'loi'));
+        }
 
-            function xacNhanXoaPhong() {
-              const idPhong = parseInt(document.getElementById('xoa-id-phong').value);
-              fetch('?handler=XoaPhong', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: JSON.stringify({ idPhong })
-              })
-              .then(r => r.json())
-              .then(data => {
-                if (data.success) { hienThiThongBao('Đã xóa phòng thành công!', 'thanh-cong'); dongModal('modal-xoa-phong'); setTimeout(() => location.reload(), 900); }
-                else hienThiThongBao(data.message || 'Không thể xóa phòng này!', 'loi');
-              })
-              .catch(() => hienThiThongBao('Lỗi kết nối máy chủ!', 'loi'));
-            }
+        // ── MODAL CHI TIẾT PHÒNG ──
+        function moModalChiTietPhong(idPhong) {
+        const phong = danhSachPhongData.find(p => p.idPhong === idPhong);
+        if (!phong) return;
+        idPhongHienTai = idPhong;
+        document.getElementById('cdt-ten-phong').textContent       = 'Phòng ' + phong.soPhong;
+        document.getElementById('cdt-trang-thai-header').textContent = phong.trangThai;
+        document.getElementById('cdt-so-phong').textContent        = phong.soPhong;
+        document.getElementById('cdt-tang').textContent            = 'Tầng ' + phong.tang;
+        document.getElementById('cdt-so-luong').textContent        = phong.trangThai === 'Trống' ? '— Không có người ở —' : (phong.soLuong ?? 1) + ' người';
+        document.getElementById('cdt-dien-tich').textContent       = phong.dienTich ? phong.dienTich.toFixed(1) + ' m²' : '— Chưa cập nhật —';
+        document.getElementById('cdt-gia-phong').textContent       = new Intl.NumberFormat('vi-VN').format(phong.giaPhongFix) + ' ₫';
+        document.getElementById('cdt-ngay-tao').textContent        = phong.createdAt;
+        document.getElementById('cdt-mo-ta').textContent           = phong.moTa || '— Chưa có mô tả —';
+        const container = document.getElementById('cdt-nguoi-thue-container');
+        if (phong.tenNguoiThue) {
+        container.innerHTML = `
+        <div class="khung-nguoi-thue">
+        <div class="anh-nguoi-thue">${phong.tenNguoiThue[0]}</div>
+        <div class="thong-tin-nguoi-thue">
+        <div class="ten-nguoi-thue">${phong.tenNguoiThue}</div>
+        <div class="phu-nguoi-thue"><i class="fas fa-phone" style="width:12px;margin-right:4px;"></i>${phong.sdtNguoiThue || '—'}</div>
+        </div>
+        <span class="trang-thai-phong tt-da-thue">Đang thuê</span>
+        </div>`;
+        } else {
+        container.innerHTML = `
+        <div class="trong-phong-hint">
+        <i class="fas fa-user-slash"></i>
+        Phòng hiện chưa có người thuê
+        </div>`;
+        }
+        moModal('modal-chi-tiet-phong');
+        }
 
-            // ── MODAL CHI TIẾT PHÒNG ──
-            function moModalChiTietPhong(idPhong) {
-              const phong = danhSachPhongData.find(p => p.idPhong === idPhong);
-              if (!phong) return;
-              idPhongHienTai = idPhong;
-              document.getElementById('cdt-ten-phong').textContent       = 'Phòng ' + phong.soPhong;
-              document.getElementById('cdt-trang-thai-header').textContent = phong.trangThai;
-              document.getElementById('cdt-so-phong').textContent        = phong.soPhong;
-              document.getElementById('cdt-tang').textContent            = 'Tầng ' + phong.tang;
-              document.getElementById('cdt-so-luong').textContent        = phong.trangThai === 'Trống' ? '— Không có người ở —' : (phong.soLuong ?? 1) + ' người';
-              document.getElementById('cdt-dien-tich').textContent       = phong.dienTich ? phong.dienTich.toFixed(1) + ' m²' : '— Chưa cập nhật —';
-              document.getElementById('cdt-gia-phong').textContent       = new Intl.NumberFormat('vi-VN').format(phong.giaPhongFix) + ' ₫';
-              document.getElementById('cdt-ngay-tao').textContent        = phong.createdAt;
-              document.getElementById('cdt-mo-ta').textContent           = phong.moTa || '— Chưa có mô tả —';
-              const container = document.getElementById('cdt-nguoi-thue-container');
-              if (phong.tenNguoiThue) {
-                container.innerHTML = `
-                  <div class="khung-nguoi-thue">
-                    <div class="anh-nguoi-thue">${phong.tenNguoiThue[0]}</div>
-                    <div class="thong-tin-nguoi-thue">
-                      <div class="ten-nguoi-thue">${phong.tenNguoiThue}</div>
-                      <div class="phu-nguoi-thue"><i class="fas fa-phone" style="width:12px;margin-right:4px;"></i>${phong.sdtNguoiThue || '—'}</div>
-                    </div>
-                    <span class="trang-thai-phong tt-da-thue">Đang thuê</span>
-                  </div>`;
-              } else {
-                container.innerHTML = `
-                  <div class="trong-phong-hint">
-                    <i class="fas fa-user-slash"></i>
-                    Phòng hiện chưa có người thuê
-                  </div>`;
-              }
-              moModal('modal-chi-tiet-phong');
-            }
+        function chuyenSangSuaTuChiTiet() {
+        dongModal('modal-chi-tiet-phong');
+        moModalSuaPhong(idPhongHienTai);
+        }
 
-            function chuyenSangSuaTuChiTiet() {
-              dongModal('modal-chi-tiet-phong');
-              moModalSuaPhong(idPhongHienTai);
-            }
+        // ── TOAST ──
+        function hienThiThongBao(noiDung, loai) {
+        if (typeof toastQuickShow === 'function') { toastQuickShow(noiDung, loai); return; }
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const mauMap = { 'thanh-cong': '#059669', 'loi': '#dc2626', 'canh-bao': '#d97706', 'thong-tin': '#2563eb' };
+        const iconMap = { 'thanh-cong': 'fa-check-circle', 'loi': 'fa-times-circle', 'canh-bao': 'fa-exclamation-triangle', 'thong-tin': 'fa-info-circle' };
+        const toast = document.createElement('div');
+        toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.14);border-left:4px solid ${mauMap[loai]||'#2563eb'};min-width:260px;font-size:13px;font-family:'Be Vietnam Pro',sans-serif;`;
+        toast.innerHTML = `<i class="fas ${iconMap[loai]||'fa-info-circle'}" style="color:${mauMap[loai]};font-size:15px;flex-shrink:0;"></i><span>${noiDung}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+        }
 
-            // ── TOAST ──
-            function hienThiThongBao(noiDung, loai) {
-              if (typeof toastQuickShow === 'function') { toastQuickShow(noiDung, loai); return; }
-              const container = document.getElementById('toastContainer');
-              if (!container) return;
-              const mauMap = { 'thanh-cong': '#059669', 'loi': '#dc2626', 'canh-bao': '#d97706', 'thong-tin': '#2563eb' };
-              const iconMap = { 'thanh-cong': 'fa-check-circle', 'loi': 'fa-times-circle', 'canh-bao': 'fa-exclamation-triangle', 'thong-tin': 'fa-info-circle' };
-              const toast = document.createElement('div');
-              toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.14);border-left:4px solid ${mauMap[loai]||'#2563eb'};min-width:260px;font-size:13px;font-family:'Be Vietnam Pro',sans-serif;`;
-              toast.innerHTML = `<i class="fas ${iconMap[loai]||'fa-info-circle'}" style="color:${mauMap[loai]};font-size:15px;flex-shrink:0;"></i><span>${noiDung}</span>`;
-              container.appendChild(toast);
-              setTimeout(() => toast.remove(), 3500);
-            }
+        // ── LOAD PROFILE từ API (đồng bộ ChuTro-core.js) ──
+        async function HienThiProfile() {
+        try {
+        const res   = await fetch('/api/ChuTro/Profile');
+        const dulieu = await res.json();
+        const adminHeader = document.querySelector('.ten-admin-header');
+        if (adminHeader) adminHeader.textContent = dulieu.fullName;
+        const tenChuEl = document.querySelector('.ten-chu-strong');
+        if (tenChuEl) tenChuEl.textContent = dulieu.fullName;
+        const emailEl = document.getElementById('dd-email');
+        if (emailEl) emailEl.textContent = dulieu.email ?? 'Chưa cập nhật';
+        const avatarEls = document.querySelectorAll('.anh-chu-tro, .anh-dai-dien-header, .add-header-avatar');
+        avatarEls.forEach(el => { if (dulieu.fullName) el.textContent = dulieu.fullName[0].toUpperCase(); });
+        } catch (e) {
+        console.error('Lỗi load profile:', e);
+        }
+        }
 
-            // ── LOAD PROFILE từ API (đồng bộ ChuTro-core.js) ──
-            async function HienThiProfile() {
-              try {
-                const res   = await fetch('/api/ChuTro/Profile');
-                const dulieu = await res.json();
-                const adminHeader = document.querySelector('.ten-admin-header');
-                if (adminHeader) adminHeader.textContent = dulieu.fullName;
-                const tenChuEl = document.querySelector('.ten-chu-strong');
-                if (tenChuEl) tenChuEl.textContent = dulieu.fullName;
-                const emailEl = document.getElementById('dd-email');
-                if (emailEl) emailEl.textContent = dulieu.email ?? 'Chưa cập nhật';
-                const avatarEls = document.querySelectorAll('.anh-chu-tro, .anh-dai-dien-header, .add-header-avatar');
-                avatarEls.forEach(el => { if (dulieu.fullName) el.textContent = dulieu.fullName[0].toUpperCase(); });
-              } catch (e) {
-                console.error('Lỗi load profile:', e);
-              }
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-              HienThiProfile();
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+        HienThiProfile();
+        });
     </script>
 
 </body>

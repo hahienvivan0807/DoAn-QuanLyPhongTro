@@ -23,6 +23,7 @@ function chuyenMenu(tenTrang, phanTu) {
         'quan-ly-phong': '/Admin/QuanLyPhong',
         'nguoi-thue': '/Admin/QuanLyNguoiThue',
         'hop-dong': '/Admin/QuanLyHopDong',
+        'Tai-Khoan':'/Admin/Taikhoanquanly',
         'hoa-don': '/HoaDon',
         'sua-chua': '/SuCoBaoTri',
         'bao-cao': '/BaoCao',

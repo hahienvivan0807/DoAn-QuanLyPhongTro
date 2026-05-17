@@ -1,0 +1,2442 @@
+﻿@page "/Admin/Taikhoanquanly"
+@model QuanLyNhaTro.Pages.Admin.TaiKhoanQuanLyModel
+@{
+    Layout = null;
+}
+
+@* ─── Embed dữ liệu server → JS ──────────────────────────────────── *@
+<script id="data-quan-ly" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.DanhSachQuanLy.Select(q => new
+            {
+                    idUser = q.IDUser,
+                    fullName = q.FullName,
+                    username = q.Username,
+                    phone = q.Phone,
+                    email = q.Email,
+                    isActive = q.IsActive,
+                    createdAt = q.CreatedAt.ToString("dd/MM/yyyy"),
+                    permissions = q.Permissions,
+                    phongs = q.Phongs.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai })
+            }),
+            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
+    ))
+</script>
+<script id="data-phong" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.TatCaPhong.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai }),
+            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
+    ))
+</script>
+
+@* Anti-forgery token dùng cho AJAX POST *@
+@Html.AntiForgeryToken()
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Quản Lý – Tài Khoản Quản Lý</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+            /* ==========================================================
+                   IMPORT FONT
+                ========================================================= */
+            @@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+
+            /* =========================================================
+                   BIẾN MÀU & THIẾT KẾ TOÀN CỤC
+                ========================================================= */
+            :root {
+                /* Màu chủ đề – vàng đồng sang trọng */
+                --mau-chu-de: #b8720a;
+                --mau-chu-de-sang: #e8971c;
+                --mau-chu-de-nhat: #fdf6e3;
+                --mau-chu-de-vien: rgba(184,114,10,0.15);
+                /* Sidebar */
+                --mau-sidebar: #0d1b2e;
+                --mau-sidebar-dam: #081020;
+                --mau-sidebar-vien: rgba(255,255,255,0.06);
+                --mau-sidebar-hover: rgba(232,151,28,0.12);
+                --mau-sidebar-active: rgba(232,151,28,0.18);
+                /* Nền & nội dung */
+                --mau-nen: #f0f2f8;
+                --mau-nen-card: #f8f9fd;
+                --mau-trang: #ffffff;
+                --mau-chu: #111827;
+                --mau-chu-phu: #6b7a99;
+                --mau-vien: #e5e9f5;
+                /* Trạng thái */
+                --mau-xanh: #0ea271;
+                --mau-xanh-nhat: #ecfdf5;
+                --mau-do: #e53e3e;
+                --mau-do-nhat: #fff5f5;
+                --mau-xanh-bien: #2563eb;
+                --mau-xanh-bien-nhat: #eff6ff;
+                /* Bóng đổ */
+                --bong-card: 0 2px 12px rgba(13,27,46,0.06), 0 1px 3px rgba(13,27,46,0.04);
+                --bong-card-hover: 0 8px 28px rgba(184,114,10,0.14), 0 2px 8px rgba(13,27,46,0.08);
+                --bong-sidebar: 6px 0 32px rgba(0,0,0,0.3);
+                --bong-header: 0 1px 0 var(--mau-vien), 0 2px 16px rgba(13,27,46,0.04);
+                /* Bo góc */
+                --radius-sm: 8px;
+                --radius-md: 12px;
+                --radius-lg: 16px;
+                --radius-xl: 20px;
+                --radius-full: 9999px;
+            }
+
+            /* =========================================================
+                   RESET & CƠ BẢN
+                ========================================================= */
+            *, *::before, *::after {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Be Vietnam Pro', sans-serif;
+                background: var(--mau-nen);
+                color: var(--mau-chu);
+                display: flex;
+                height: 100vh;
+                overflow: clip;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            /* =========================================================
+                   SIDEBAR – THANH ĐIỀU HƯỚNG TRÁI
+                ========================================================= */
+            #thanh-sidebar {
+                width: 248px;
+                min-width: 248px;
+                background: var(--mau-sidebar);
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                z-index: 100;
+                box-shadow: var(--bong-sidebar);
+                overflow-y: auto;
+                transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
+                position: relative;
+                border-right: 1px solid rgba(255,255,255,0.04);
+            }
+
+                #thanh-sidebar.an {
+                    width: 0;
+                    min-width: 0;
+                    overflow: hidden;
+                }
+
+                #thanh-sidebar::-webkit-scrollbar {
+                    width: 0;
+                }
+
+            /* Thu gọn sidebar */
+            .ten-logo, .thong-tin-chu-tro .ten-chu {
+                transition: opacity 0.2s, max-width 0.35s;
+                max-width: 160px;
+                overflow: hidden;
+            }
+
+            .nhan-nhom-menu {
+                transition: opacity 0.2s, max-height 0.3s;
+            }
+
+            #thanh-sidebar.thu-gon .nhan-nhom-menu {
+                opacity: 0;
+                max-height: 0;
+                padding: 0;
+            }
+
+            .muc-menu span:not(.huy-hieu) {
+                transition: opacity 0.2s, max-width 0.35s;
+                max-width: 160px;
+                overflow: hidden;
+                display: inline-block;
+            }
+
+            #thanh-sidebar.thu-gon .muc-menu span:not(.huy-hieu) {
+                opacity: 0;
+                max-width: 0;
+            }
+
+            #thanh-sidebar.thu-gon .huy-hieu {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+                padding: 0;
+            }
+
+            #thanh-sidebar.thu-gon .muc-menu {
+                padding: 10px 0;
+                justify-content: center;
+                border-radius: 10px;
+                margin: 2px 8px;
+                width: calc(100% - 12px);
+            }
+
+            #thanh-sidebar.thu-gon .thong-tin-chu-tro {
+                justify-content: center;
+            }
+
+            #thanh-sidebar.thu-gon .muc-menu i {
+                width: auto;
+                font-size: 16px;
+            }
+
+            /* Logo – khu vực trên cùng */
+            .khu-vuc-logo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 24px 20px 20px;
+                border-bottom: 1px solid var(--mau-sidebar-vien);
+            }
+
+            .bieu-tuong-logo {
+                width: 40px;
+                height: 40px;
+                flex-shrink: 0;
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 17px;
+                color: #fff;
+                box-shadow: 0 4px 14px rgba(184,114,10,0.45);
+            }
+
+            .ten-logo strong {
+                display: block;
+                color: #fff;
+                font-size: 13.5px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+
+            .ten-logo span {
+                font-size: 10px;
+                color: rgba(255,255,255,0.32);
+                letter-spacing: 0.3px;
+            }
+
+            /* Nhãn nhóm menu */
+            .nhan-nhom-menu {
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 2px;
+                color: rgba(255,255,255,0.22);
+                text-transform: uppercase;
+                padding: 18px 20px 6px;
+            }
+
+            /* Mỗi mục menu */
+            .muc-menu {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 9px 14px 9px 16px;
+                color: rgba(255,255,255,0.52);
+                cursor: pointer;
+                border-radius: 0 var(--radius-full) var(--radius-full) 0;
+                margin: 1px 12px 1px 0;
+                transition: all 0.18s ease;
+                font-size: 13px;
+                font-weight: 500;
+                text-decoration: none;
+                position: relative;
+            }
+
+                .muc-menu i {
+                    width: 18px;
+                    text-align: center;
+                    font-size: 13px;
+                    opacity: 0.75;
+                    flex-shrink: 0;
+                    transition: opacity 0.18s;
+                }
+
+                .muc-menu:hover {
+                    background: var(--mau-sidebar-hover);
+                    color: rgba(255,255,255,0.9);
+                }
+
+                    .muc-menu:hover i {
+                        opacity: 1;
+                    }
+
+                /* Menu đang chọn */
+                .muc-menu.dang-chon {
+                    background: var(--mau-sidebar-active);
+                    color: #fff;
+                    font-weight: 700;
+                }
+
+                    .muc-menu.dang-chon i {
+                        opacity: 1;
+                        color: var(--mau-chu-de-sang);
+                    }
+
+                    .muc-menu.dang-chon::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 60%;
+                        width: 3px;
+                        background: var(--mau-chu-de-sang);
+                        border-radius: 0 3px 3px 0;
+                    }
+
+            /* Badge số */
+            .huy-hieu {
+                margin-left: auto;
+                background: rgba(239,68,68,0.85);
+                color: #fff;
+                font-size: 9.5px;
+                font-weight: 800;
+                border-radius: var(--radius-full);
+                padding: 2px 7px;
+                min-width: 18px;
+                text-align: center;
+            }
+
+                .huy-hieu.vang {
+                    background: var(--mau-chu-de);
+                }
+
+            /* Thông tin chủ trọ dưới đáy */
+            .thong-tin-chu-tro {
+                margin-top: auto;
+                padding: 14px 16px;
+                border-top: 1px solid var(--mau-sidebar-vien);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                flex-shrink: 0;
+                position: sticky;
+                bottom: 0;
+                background: var(--mau-sidebar-dam);
+                z-index: 1;
+                transition: background 0.18s;
+            }
+
+                .thong-tin-chu-tro:hover {
+                    background: rgba(255,255,255,0.04);
+                }
+
+            .anh-chu-tro {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                flex-shrink: 0;
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 15px;
+                font-weight: 800;
+            }
+
+            .ten-chu strong {
+                display: block;
+                color: #fff;
+                font-size: 12.5px;
+                font-weight: 700;
+            }
+
+            .ten-chu span {
+                color: rgba(255,255,255,0.35);
+                font-size: 10px;
+            }
+
+            /* =========================================================
+                   KHU VỰC CHÍNH
+                ========================================================= */
+            #khu-vuc-chinh {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* HEADER */
+            #thanh-header {
+                background: var(--mau-trang);
+                padding: 0 28px;
+                height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: var(--bong-header);
+                flex-shrink: 0;
+                z-index: 50;
+            }
+
+            .header-trai {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+
+            .nut-ham-burger {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 18px;
+                color: var(--mau-chu-phu);
+                padding: 8px;
+                border-radius: var(--radius-sm);
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .nut-ham-burger:hover {
+                    background: var(--mau-chu-de-nhat);
+                    color: var(--mau-chu-de);
+                }
+
+            .tieu-de-header {
+                font-size: 14.5px;
+                font-weight: 800;
+                color: var(--mau-chu);
+                font-family: 'Lexend', sans-serif;
+            }
+
+            .duong-dan-header {
+                font-size: 11px;
+                color: var(--mau-chu-phu);
+                margin-top: 1px;
+            }
+
+            .header-phai {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            /* Ô tìm kiếm header */
+            .o-tim-kiem {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: var(--mau-nen);
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-full);
+                padding: 7px 16px;
+                transition: all 0.2s;
+            }
+
+                .o-tim-kiem:focus-within {
+                    border-color: var(--mau-chu-de);
+                    background: #fff;
+                    box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
+                }
+
+                .o-tim-kiem input {
+                    border: none;
+                    background: none;
+                    outline: none;
+                    font-size: 12.5px;
+                    width: 170px;
+                    color: var(--mau-chu);
+                    font-family: inherit;
+                }
+
+                    .o-tim-kiem input::placeholder {
+                        color: var(--mau-chu-phu);
+                    }
+
+                .o-tim-kiem i {
+                    color: var(--mau-chu-phu);
+                    font-size: 12px;
+                }
+
+            /* Chuông */
+            .nut-chuong {
+                position: relative;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+                color: var(--mau-chu-phu);
+                padding: 8px;
+                border-radius: var(--radius-full);
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 38px;
+                height: 38px;
+            }
+
+                .nut-chuong:hover {
+                    background: var(--mau-chu-de-nhat);
+                    color: var(--mau-chu-de);
+                }
+
+            .so-chuong {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                background: var(--mau-do);
+                color: #fff;
+                font-size: 8.5px;
+                font-weight: 800;
+                border-radius: var(--radius-full);
+                width: 15px;
+                height: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid #fff;
+            }
+
+            /* Tag vai trò */
+            .the-chu-tro {
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                color: #fff;
+                font-size: 9.5px;
+                font-weight: 800;
+                padding: 3px 10px;
+                border-radius: var(--radius-full);
+                letter-spacing: 0.8px;
+                text-transform: uppercase;
+            }
+
+            /* Avatar header */
+            .anh-dai-dien-header {
+                width: 34px;
+                height: 34px;
+                border-radius: var(--radius-sm);
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 13px;
+                font-weight: 800;
+            }
+
+            .ten-admin-header {
+                font-size: 12.5px;
+                font-weight: 700;
+            }
+
+            .vai-tro-header {
+                font-size: 10px;
+                color: var(--mau-chu-phu);
+            }
+
+            .header-divider {
+                width: 1px;
+                height: 22px;
+                background: var(--mau-vien);
+                margin: 0 2px;
+            }
+
+            /* =========================================================
+                   NỘI DUNG CHÍNH (cuộn được)
+                ========================================================= */
+            #noi-dung-chinh {
+                flex: 1;
+                overflow-y: auto;
+                padding: 24px 28px 32px;
+            }
+
+                #noi-dung-chinh::-webkit-scrollbar {
+                    width: 5px;
+                }
+
+                #noi-dung-chinh::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+
+                #noi-dung-chinh::-webkit-scrollbar-thumb {
+                    background: #d4d9e6;
+                    border-radius: 3px;
+                }
+
+            /* =========================================================
+                   TAIKHOANQUANLY – NỘI DUNG TRANG
+                ========================================================= */
+
+            /* PAGE HEADER */
+            .tql-page-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 28px;
+                flex-wrap: wrap;
+            }
+
+            .tql-page-header-left .breadcrumb {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11.5px;
+                color: var(--mau-chu-phu);
+                margin-bottom: 6px;
+            }
+
+                .tql-page-header-left .breadcrumb i {
+                    font-size: 10px;
+                    opacity: 0.6;
+                }
+
+            .tql-page-header-left h1 {
+                font-family: 'Lexend', sans-serif;
+                font-size: 22px;
+                font-weight: 800;
+                color: var(--mau-chu);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .tql-page-header-left h1 .icon-wrap {
+                    width: 38px;
+                    height: 38px;
+                    background: linear-gradient(135deg, #5b21b6, #7c3aed);
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 15px;
+                    box-shadow: 0 4px 14px rgba(124,58,237,0.32);
+                    flex-shrink: 0;
+                }
+
+            .tql-page-header-left p {
+                font-size: 12.5px;
+                color: var(--mau-chu-phu);
+                margin-top: 4px;
+            }
+
+            .btn-them-ql {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 10px 20px;
+                background: linear-gradient(135deg, #5b21b6, #7c3aed);
+                color: #fff;
+                font-size: 13px;
+                font-weight: 700;
+                border: none;
+                border-radius: var(--radius-full);
+                cursor: pointer;
+                box-shadow: 0 4px 14px rgba(124,58,237,0.28);
+                transition: all 0.18s ease;
+                white-space: nowrap;
+                font-family: inherit;
+            }
+
+                .btn-them-ql:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 20px rgba(124,58,237,0.38);
+                }
+
+            /* STAT CARDS */
+            .tql-stats-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+                margin-bottom: 28px;
+            }
+
+            @@media (max-width: 1024px) {
+                .tql-stats-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            @@media (max-width: 640px) {
+                .tql-stats-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .stat-card {
+                background: var(--mau-trang);
+                border-radius: var(--radius-lg);
+                padding: 20px;
+                box-shadow: var(--bong-card);
+                border: 1px solid var(--mau-vien);
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                transition: box-shadow 0.18s, transform 0.18s;
+                position: relative;
+                overflow: hidden;
+            }
+
+                .stat-card::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 0 var(--radius-lg) 0 80px;
+                    opacity: 0.06;
+                }
+
+                .stat-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: var(--bong-card-hover);
+                }
+
+                .stat-card .stat-icon {
+                    width: 48px;
+                    height: 48px;
+                    flex-shrink: 0;
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                }
+
+                .stat-card .stat-body {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .stat-card .stat-label {
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: var(--mau-chu-phu);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 4px;
+                }
+
+                .stat-card .stat-value {
+                    font-family: 'Lexend', sans-serif;
+                    font-size: 26px;
+                    font-weight: 800;
+                    color: var(--mau-chu);
+                    line-height: 1;
+                }
+
+                .stat-card .stat-sub {
+                    font-size: 10.5px;
+                    color: var(--mau-chu-phu);
+                    margin-top: 4px;
+                }
+
+                    .stat-card .stat-sub .up {
+                        color: var(--mau-xanh);
+                    }
+
+                    .stat-card .stat-sub .down {
+                        color: var(--mau-do);
+                    }
+
+                .stat-card.purple .stat-icon {
+                    background: #f5f3ff;
+                    color: #7c3aed;
+                }
+
+                .stat-card.purple::after {
+                    background: #7c3aed;
+                }
+
+                .stat-card.gold .stat-icon {
+                    background: var(--mau-chu-de-nhat);
+                    color: var(--mau-chu-de);
+                }
+
+                .stat-card.gold::after {
+                    background: var(--mau-chu-de);
+                }
+
+                .stat-card.green .stat-icon {
+                    background: var(--mau-xanh-nhat);
+                    color: var(--mau-xanh);
+                }
+
+                .stat-card.green::after {
+                    background: var(--mau-xanh);
+                }
+
+                .stat-card.blue .stat-icon {
+                    background: var(--mau-xanh-bien-nhat);
+                    color: var(--mau-xanh-bien);
+                }
+
+                .stat-card.blue::after {
+                    background: var(--mau-xanh-bien);
+                }
+
+            /* MAIN GRID */
+            .tql-main-grid {
+                display: grid;
+                grid-template-columns: 1fr 340px;
+                gap: 20px;
+                align-items: start;
+            }
+
+            @@media (max-width: 1100px) {
+                .tql-main-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* CARD CHUNG */
+            .tql-card {
+                background: var(--mau-trang);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--bong-card);
+                border: 1px solid var(--mau-vien);
+                overflow: hidden;
+            }
+
+            .tql-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 20px;
+                border-bottom: 1px solid var(--mau-vien);
+                background: var(--mau-nen-card);
+            }
+
+            .tql-card-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--mau-chu);
+            }
+
+            .tql-card-body {
+                padding: 16px 20px;
+            }
+
+            /* TOOLBAR */
+            .tql-toolbar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 14px 20px;
+                border-bottom: 1px solid var(--mau-vien);
+                background: var(--mau-nen-card);
+                flex-wrap: wrap;
+            }
+
+            .tql-search-wrap {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex: 1;
+                min-width: 200px;
+                background: var(--mau-trang);
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-full);
+                padding: 7px 14px;
+                font-size: 13px;
+                color: var(--mau-chu-phu);
+                transition: border-color 0.15s;
+            }
+
+                .tql-search-wrap:focus-within {
+                    border-color: #7c3aed;
+                }
+
+                .tql-search-wrap input {
+                    border: none;
+                    outline: none;
+                    flex: 1;
+                    font-size: 13px;
+                    color: var(--mau-chu);
+                    background: transparent;
+                }
+
+            .tql-filter-select {
+                padding: 8px 12px;
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-md);
+                font-size: 12.5px;
+                color: var(--mau-chu);
+                background: var(--mau-trang);
+                cursor: pointer;
+                outline: none;
+                transition: border-color 0.15s;
+                font-family: inherit;
+            }
+
+                .tql-filter-select:focus {
+                    border-color: #7c3aed;
+                }
+
+            /* BẢNG DANH SÁCH */
+            .tql-table-wrap {
+                overflow-x: auto;
+            }
+
+            .tql-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+                .tql-table thead th {
+                    padding: 10px 14px;
+                    text-align: left;
+                    font-size: 11px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    color: var(--mau-chu-phu);
+                    background: var(--mau-nen-card);
+                    border-bottom: 1.5px solid var(--mau-vien);
+                    white-space: nowrap;
+                }
+
+                .tql-table tbody tr {
+                    border-bottom: 1px solid var(--mau-vien);
+                    cursor: pointer;
+                    transition: background 0.12s;
+                }
+
+                    .tql-table tbody tr:hover {
+                        background: #f5f3ff;
+                    }
+
+                    .tql-table tbody tr.selected-row {
+                        background: #ede9fe;
+                        border-left: 3px solid #7c3aed;
+                    }
+
+                .tql-table tbody td {
+                    padding: 11px 14px;
+                    font-size: 13px;
+                    vertical-align: middle;
+                }
+
+            .tbl-avatar-wrap {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .tbl-avatar {
+                width: 36px;
+                height: 36px;
+                flex-shrink: 0;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                font-weight: 700;
+                color: #fff;
+            }
+
+            .tbl-avatar-name {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--mau-chu);
+            }
+
+            .tbl-avatar-user {
+                font-size: 11.5px;
+                color: var(--mau-chu-phu);
+            }
+
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 3px 10px;
+                border-radius: var(--radius-full);
+                font-size: 11.5px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+
+            .badge-active {
+                background: var(--mau-xanh-nhat);
+                color: var(--mau-xanh);
+            }
+
+            .badge-locked {
+                background: var(--mau-do-nhat);
+                color: var(--mau-do);
+            }
+
+            .badge-empty {
+                background: #f1f5f9;
+                color: var(--mau-chu-phu);
+                font-size: 11px;
+            }
+
+            .room-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .room-chip {
+                padding: 2px 8px;
+                border-radius: 4px;
+                background: #ede9fe;
+                color: #5b21b6;
+                font-size: 11px;
+                font-weight: 600;
+            }
+
+                .room-chip.more {
+                    background: var(--mau-nen-card);
+                    color: var(--mau-chu-phu);
+                }
+
+            .tbl-actions {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                justify-content: center;
+            }
+
+            .btn-icon {
+                width: 30px;
+                height: 30px;
+                border: none;
+                border-radius: var(--radius-sm);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+
+            .btn-icon-edit {
+                background: var(--mau-xanh-bien-nhat);
+                color: var(--mau-xanh-bien);
+            }
+
+                .btn-icon-edit:hover {
+                    background: var(--mau-xanh-bien);
+                    color: #fff;
+                }
+
+            .btn-icon-assign {
+                background: var(--mau-chu-de-nhat);
+                color: var(--mau-chu-de);
+            }
+
+                .btn-icon-assign:hover {
+                    background: var(--mau-chu-de);
+                    color: #fff;
+                }
+
+            .btn-icon-lock {
+                background: var(--mau-do-nhat);
+                color: var(--mau-do);
+            }
+
+                .btn-icon-lock:hover {
+                    background: var(--mau-do);
+                    color: #fff;
+                }
+
+            .btn-icon-unlock {
+                background: var(--mau-xanh-nhat);
+                color: var(--mau-xanh);
+            }
+
+                .btn-icon-unlock:hover {
+                    background: var(--mau-xanh);
+                    color: #fff;
+                }
+
+            .btn-icon-delete {
+                background: #fef2f2;
+                color: #b91c1c;
+            }
+
+                .btn-icon-delete:hover {
+                    background: #b91c1c;
+                    color: #fff;
+                }
+
+            .tql-empty {
+                padding: 48px 20px;
+                text-align: center;
+                color: var(--mau-chu-phu);
+            }
+
+                .tql-empty i {
+                    font-size: 36px;
+                    margin-bottom: 12px;
+                    opacity: 0.3;
+                }
+
+                .tql-empty p {
+                    font-size: 13px;
+                    line-height: 1.6;
+                }
+
+            .tql-pagination {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 20px;
+                border-top: 1px solid var(--mau-vien);
+                font-size: 12.5px;
+                color: var(--mau-chu-phu);
+            }
+
+            /* SIDEBAR PHẢI */
+            .tql-sidebar-right {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .no-selection-hint {
+                text-align: center;
+                padding: 36px 16px;
+                color: var(--mau-chu-phu);
+                font-size: 12.5px;
+                line-height: 1.6;
+            }
+
+                .no-selection-hint i {
+                    display: block;
+                    font-size: 28px;
+                    margin-bottom: 10px;
+                    opacity: 0.25;
+                }
+
+            .selected-manager-banner {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 14px;
+                background: #f5f3ff;
+                border-radius: var(--radius-md);
+                border: 1px solid #ede9fe;
+                margin-bottom: 16px;
+            }
+
+            .sm-avatar {
+                width: 38px;
+                height: 38px;
+                flex-shrink: 0;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
+                font-weight: 700;
+                color: #fff;
+            }
+
+            .sm-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--mau-chu);
+            }
+
+            .sm-hint {
+                font-size: 11px;
+                color: var(--mau-chu-phu);
+                margin-top: 1px;
+            }
+
+            /* Nhóm quyền */
+            .permission-group-title {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+                color: var(--mau-chu-phu);
+                margin: 14px 0 6px;
+            }
+
+            .permission-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid var(--mau-vien);
+            }
+
+                .permission-item:last-of-type {
+                    border-bottom: none;
+                }
+
+            .permission-label {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                flex: 1;
+            }
+
+                .permission-label > i {
+                    margin-top: 2px;
+                    font-size: 13px;
+                    color: #7c3aed;
+                    width: 16px;
+                    text-align: center;
+                }
+
+            .permission-label-text strong {
+                display: block;
+                font-size: 12.5px;
+                color: var(--mau-chu);
+            }
+
+            .permission-label-text small {
+                font-size: 11px;
+                color: var(--mau-chu-phu);
+            }
+
+            /* Toggle switch */
+            .toggle-wrap input[type="checkbox"] {
+                appearance: none;
+                width: 36px;
+                height: 20px;
+                background: #e2e8f0;
+                border-radius: 10px;
+                position: relative;
+                cursor: pointer;
+                transition: background 0.2s;
+                flex-shrink: 0;
+            }
+
+                .toggle-wrap input[type="checkbox"]::after {
+                    content: '';
+                    position: absolute;
+                    top: 3px;
+                    left: 3px;
+                    width: 14px;
+                    height: 14px;
+                    background: #fff;
+                    border-radius: 50%;
+                    transition: left 0.2s;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                }
+
+                .toggle-wrap input[type="checkbox"]:checked {
+                    background: #7c3aed;
+                }
+
+                    .toggle-wrap input[type="checkbox"]:checked::after {
+                        left: 19px;
+                    }
+
+            .btn-luu-quyen {
+                width: 100%;
+                margin-top: 14px;
+                padding: 10px;
+                background: linear-gradient(135deg, #5b21b6, #7c3aed);
+                color: #fff;
+                font-size: 13px;
+                font-weight: 700;
+                border: none;
+                border-radius: var(--radius-md);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                transition: all 0.18s;
+                font-family: inherit;
+            }
+
+                .btn-luu-quyen:hover:not(:disabled) {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+                }
+
+                .btn-luu-quyen:disabled {
+                    opacity: 0.45;
+                    cursor: not-allowed;
+                }
+
+            /* Phân công phòng */
+            .floor-group {
+                margin-bottom: 12px;
+            }
+
+            .floor-group-title {
+                font-size: 11.5px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--mau-chu-phu);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .floor-rooms {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+
+            .floor-room-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 8px;
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-sm);
+                cursor: pointer;
+                transition: all 0.15s;
+                font-size: 12px;
+            }
+
+                .floor-room-item:hover {
+                    border-color: var(--mau-chu-de);
+                    background: var(--mau-chu-de-nhat);
+                }
+
+                .floor-room-item input[type="checkbox"] {
+                    accent-color: var(--mau-chu-de);
+                    cursor: pointer;
+                }
+
+                .floor-room-item .room-tt {
+                    display: block;
+                    font-size: 9.5px;
+                    font-weight: 600;
+                }
+
+            .room-tt.da-thue {
+                color: var(--mau-xanh);
+            }
+
+            .room-tt.trong {
+                color: var(--mau-chu-phu);
+            }
+
+            .room-tt.dang-sua {
+                color: var(--mau-do);
+            }
+
+            .btn-phan-cong {
+                width: 100%;
+                margin-top: 14px;
+                padding: 10px;
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                color: #fff;
+                font-size: 13px;
+                font-weight: 700;
+                border: none;
+                border-radius: var(--radius-md);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                transition: all 0.18s;
+                font-family: inherit;
+            }
+
+                .btn-phan-cong:hover:not(:disabled) {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 14px rgba(184,114,10,0.28);
+                }
+
+                .btn-phan-cong:disabled {
+                    opacity: 0.45;
+                    cursor: not-allowed;
+                }
+
+            /* MODALS */
+            .lop-phu-modal {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(13,27,46,0.55);
+                z-index: 1000;
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+                backdrop-filter: blur(3px);
+            }
+
+                .lop-phu-modal.hien {
+                    display: flex;
+                }
+
+            .hop-modal {
+                background: var(--mau-trang);
+                border-radius: var(--radius-lg);
+                box-shadow: 0 24px 60px rgba(13,27,46,0.22);
+                width: 100%;
+                max-width: 500px;
+                max-height: 90vh;
+                overflow-y: auto;
+                animation: slideUp 0.22s ease;
+            }
+
+            @@keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(24px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .modal-header-purple {
+                padding: 20px 24px;
+                background: linear-gradient(135deg, #5b21b6, #7c3aed);
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+            }
+
+                .modal-header-purple::before {
+                    content: '';
+                    position: absolute;
+                    right: -30px;
+                    top: -30px;
+                    width: 120px;
+                    height: 120px;
+                    background: rgba(255,255,255,0.08);
+                    border-radius: 50%;
+                }
+
+            .mh-icon {
+                width: 40px;
+                height: 40px;
+                background: rgba(255,255,255,0.15);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                color: #fff;
+                flex-shrink: 0;
+            }
+
+            .mh-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #fff;
+            }
+
+            .mh-sub {
+                font-size: 12px;
+                color: rgba(255,255,255,0.75);
+                margin-top: 2px;
+            }
+
+            .mh-close {
+                width: 30px;
+                height: 30px;
+                background: rgba(255,255,255,0.15);
+                border: none;
+                border-radius: 8px;
+                color: #fff;
+                font-size: 14px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.15s;
+                flex-shrink: 0;
+                position: relative;
+                z-index: 1;
+            }
+
+                .mh-close:hover {
+                    background: rgba(255,255,255,0.25);
+                }
+
+            .modal-body {
+                padding: 24px;
+            }
+
+            .form-row {
+                margin-bottom: 16px;
+            }
+
+                .form-row label {
+                    display: block;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: var(--mau-chu);
+                    margin-bottom: 6px;
+                }
+
+                    .form-row label .req {
+                        color: var(--mau-do);
+                        margin-left: 2px;
+                    }
+
+            .form-input {
+                width: 100%;
+                padding: 9px 12px;
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                color: var(--mau-chu);
+                transition: border-color 0.15s;
+                outline: none;
+                background: var(--mau-trang);
+                font-family: inherit;
+            }
+
+                .form-input:focus {
+                    border-color: #7c3aed;
+                }
+
+                .form-input.error {
+                    border-color: var(--mau-do);
+                }
+
+            .form-2col {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            @@media (max-width: 480px) {
+                .form-2col {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .pass-wrap {
+                position: relative;
+            }
+
+                .pass-wrap .form-input {
+                    padding-right: 40px;
+                }
+
+            .btn-toggle-pass {
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--mau-chu-phu);
+                font-size: 13px;
+                padding: 4px;
+            }
+
+                .btn-toggle-pass:hover {
+                    color: var(--mau-chu);
+                }
+
+            .form-hint {
+                font-size: 11px;
+                color: var(--mau-chu-phu);
+                margin-top: 4px;
+            }
+
+            .modal-footer {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 10px;
+                padding: 16px 24px;
+                border-top: 1px solid var(--mau-vien);
+                background: var(--mau-nen-card);
+            }
+
+            .btn-huy {
+                padding: 9px 18px;
+                background: var(--mau-nen);
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--mau-chu-phu);
+                cursor: pointer;
+                transition: all 0.15s;
+                font-family: inherit;
+            }
+
+                .btn-huy:hover {
+                    border-color: var(--mau-chu-phu);
+                    color: var(--mau-chu);
+                }
+
+            .btn-luu-modal {
+                padding: 9px 22px;
+                background: linear-gradient(135deg, #5b21b6, #7c3aed);
+                border: none;
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-weight: 700;
+                color: #fff;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                transition: all 0.18s;
+                font-family: inherit;
+            }
+
+                .btn-luu-modal:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+                }
+
+                .btn-luu-modal:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+
+            /* TOAST */
+            #toast-container {
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .toast-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 18px;
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-weight: 500;
+                box-shadow: 0 8px 24px rgba(13,27,46,0.14);
+                max-width: 340px;
+                animation: toastIn 0.28s ease;
+            }
+
+            @@keyframes toastIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            .toast-item.success {
+                background: #ecfdf5;
+                color: #065f46;
+                border-left: 4px solid #059669;
+            }
+
+            .toast-item.error {
+                background: #fff5f5;
+                color: #991b1b;
+                border-left: 4px solid #e53e3e;
+            }
+
+            .toast-item.info {
+                background: var(--mau-xanh-bien-nhat);
+                color: #1e40af;
+                border-left: 4px solid var(--mau-xanh-bien);
+            }
+
+            .toast-item i {
+                font-size: 15px;
+                flex-shrink: 0;
+            }
+
+            /* CONFIRM OVERLAY */
+            .confirm-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(13,27,46,0.55);
+                z-index: 2000;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(3px);
+            }
+
+                .confirm-overlay.hien {
+                    display: flex;
+                }
+
+            .confirm-box {
+                background: var(--mau-trang);
+                border-radius: var(--radius-lg);
+                padding: 28px;
+                width: 100%;
+                max-width: 380px;
+                box-shadow: 0 24px 60px rgba(13,27,46,0.22);
+                text-align: center;
+                animation: slideUp 0.22s ease;
+            }
+
+            .confirm-icon {
+                font-size: 36px;
+                margin-bottom: 12px;
+            }
+
+            .confirm-title {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--mau-chu);
+                margin-bottom: 8px;
+            }
+
+            .confirm-msg {
+                font-size: 13px;
+                color: var(--mau-chu-phu);
+                margin-bottom: 20px;
+                line-height: 1.5;
+            }
+
+            .confirm-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
+
+            .btn-confirm-huy {
+                padding: 9px 20px;
+                background: var(--mau-nen);
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--mau-chu-phu);
+                cursor: pointer;
+                transition: all 0.15s;
+                font-family: inherit;
+            }
+
+                .btn-confirm-huy:hover {
+                    border-color: var(--mau-chu-phu);
+                }
+
+            .btn-confirm-ok {
+                padding: 9px 20px;
+                border: none;
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-weight: 700;
+                color: #fff;
+                cursor: pointer;
+                transition: all 0.18s;
+                font-family: inherit;
+            }
+
+                .btn-confirm-ok.danger {
+                    background: linear-gradient(135deg, #dc2626, #ef4444);
+                }
+
+                .btn-confirm-ok.warning {
+                    background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                }
+
+                .btn-confirm-ok:hover {
+                    transform: translateY(-1px);
+                }
+
+            /* SCROLLBAR TOÀN CỤC */
+            ::-webkit-scrollbar {
+                width: 5px;
+                height: 5px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #d4d9e6;
+                border-radius: 3px;
+            }
+
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #b0b9ce;
+                }
+
+            /* RESPONSIVE */
+            @@media (max-width: 768px) {
+                #thanh-sidebar {
+                    width: 0;
+                    min-width: 0;
+                    overflow: hidden;
+                    position: absolute;
+                }
+
+                    #thanh-sidebar.mo {
+                        width: 248px;
+                        min-width: 248px;
+                    }
+
+                #noi-dung-chinh {
+                    padding: 16px;
+                }
+
+                .tql-main-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+    </style>
+</head>
+<body>
+
+    <!-- =============================================
+     SIDEBAR – đồng bộ từ ChuTro.cshtml
+============================================= -->
+    <nav id="thanh-sidebar">
+
+        <!-- Logo -->
+        <div class="khu-vuc-logo">
+            <div class="bieu-tuong-logo">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="ten-logo">
+                <strong>NHÀ TRỌ BÀ NĂM</strong>
+                <span>Cổng Chủ Trọ</span>
+            </div>
+        </div>
+
+        <!-- Nhóm: Tổng quan -->
+        <div class="nhan-nhom-menu">Tổng quan</div>
+
+        <a class="muc-menu" href="/Admin/ChuTro">
+            <i class="fas fa-home"></i>
+            <span>Trang chủ</span>
+        </a>
+
+        <!-- Nhóm: Vận hành -->
+        <div class="nhan-nhom-menu">Vận hành</div>
+
+        <a class="muc-menu" href="/Admin/ChuTro#quan-ly-phong">
+            <i class="fas fa-building"></i>
+            <span>Quản lý phòng trọ</span>
+        </a>
+        <a class="muc-menu" href="/Admin/QuanLyNguoiThue">
+            <i class="fas fa-users"></i>
+            <span>Người thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro#hop-dong">
+            <i class="fas fa-file-contract"></i>
+            <span>Hợp đồng</span>
+            <span class="huy-hieu vang">2</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro#hoa-don">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Hóa đơn & Thu tiền</span>
+        </a>
+
+        <!-- Nhóm: Quản trị chủ trọ -->
+        <div class="nhan-nhom-menu">Quản trị chủ trọ</div>
+
+        <a class="muc-menu dang-chon" href="/Admin/Taikhoanquanly">
+            <i class="fas fa-user-shield"></i>
+            <span>Tài khoản quản lý</span>
+        </a>
+        <a class="muc-menu" href="/Admin/QuanLyNguoiThue">
+            <i class="fas fa-users"></i>
+            <span>Quản lý người thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro#cau-hinh-gia">
+            <i class="fas fa-sliders-h"></i>
+            <span>Cấu hình giá thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro#dich-vu">
+            <i class="fas fa-bolt"></i>
+            <span>Dịch vụ thông báo</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro#dat-coc">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>Quy định đặt cọc</span>
+        </a>
+
+        <!-- Nhóm: Hỗ trợ -->
+        <div class="nhan-nhom-menu">Hỗ trợ</div>
+
+        <a class="muc-menu" href="/Admin/ChuTro#sua-chua">
+            <i class="fas fa-tools"></i>
+            <span>Sự cố / Bảo trì</span>
+            <span class="huy-hieu">3</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro#bao-cao">
+            <i class="fas fa-chart-bar"></i>
+            <span>Báo cáo tài chính</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro#cai-dat">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt hệ thống</span>
+        </a>
+
+        <!-- Thông tin chủ trọ -->
+        <div class="thong-tin-chu-tro">
+            <div class="anh-chu-tro">C</div>
+            <div class="ten-chu">
+                <strong>Chủ Trọ ABC</strong>
+                <span>Chủ sở hữu</span>
+            </div>
+        </div>
+
+    </nav><!-- Kết thúc SIDEBAR -->
+    <!-- =============================================
+     KHU VỰC CHÍNH
+============================================= -->
+    <div id="khu-vuc-chinh">
+
+        <!-- HEADER -->
+        <header id="thanh-header">
+            <div class="header-trai">
+                <button class="nut-ham-burger" onclick="dongMoSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div>
+                    <div class="tieu-de-header">Tài Khoản Quản Lý</div>
+                    <div class="duong-dan-header">Bảng điều khiển / Quản trị / Tài khoản quản lý</div>
+                </div>
+            </div>
+
+            <div class="header-phai">
+                <!-- Tìm kiếm -->
+                <div class="o-tim-kiem">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Tìm phòng, người thuê, HĐ..." />
+                </div>
+
+                <!-- Chuông -->
+                <button class="nut-chuong">
+                    <i class="fas fa-bell"></i>
+                    <span class="so-chuong">7</span>
+                </button>
+
+                <div class="header-divider"></div>
+
+                <!-- Tag vai trò -->
+                <span class="the-chu-tro"><i class="fas fa-crown" style="margin-right:4px;font-size:8px;"></i>CHỦ TRỌ</span>
+
+                <!-- Avatar + tên -->
+                <div style="display:flex;align-items:center;gap:9px;cursor:pointer;padding:5px 10px;border-radius:var(--radius-full);">
+                    <div class="anh-dai-dien-header">C</div>
+                    <div>
+                        <div class="ten-admin-header">Nguyễn Văn Chủ</div>
+                        <div class="vai-tro-header">Chủ sở hữu</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- NỘI DUNG CHÍNH -->
+        <div id="noi-dung-chinh">
+
+            <!-- ============================================================
+         PAGE HEADER
+    ============================================================ -->
+            <div class="tql-page-header">
+                <div class="tql-page-header-left">
+                    <div class="breadcrumb">
+                        <span>Bảng điều khiển</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Quản trị</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span style="color:#7c3aed;font-weight:600;">Tài khoản quản lý</span>
+                    </div>
+                    <h1>
+                        <span class="icon-wrap"><i class="fas fa-users-cog"></i></span>
+                        Tài khoản quản lý
+                    </h1>
+                    <p>Quản lý tài khoản, phân quyền và phân công phòng cho đội ngũ quản lý.</p>
+                </div>
+                <button class="btn-them-ql" onclick="moModalThemQuanLy()">
+                    <i class="fas fa-user-plus"></i>
+                    Thêm quản lý mới
+                </button>
+            </div>
+
+            <!-- ============================================================
+         STAT CARDS
+    ============================================================ -->
+            <div class="tql-stats-grid">
+                <div class="stat-card purple">
+                    <div class="stat-icon"><i class="fas fa-users-cog"></i></div>
+                    <div class="stat-body">
+                        <div class="stat-label">Tổng quản lý</div>
+                        <div class="stat-value" id="stat-tong">@Model.TongQuanLy</div>
+                        <div class="stat-sub">Tất cả tài khoản Manager</div>
+                    </div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                    <div class="stat-body">
+                        <div class="stat-label">Đang hoạt động</div>
+                        <div class="stat-value" id="stat-active">@Model.QuanLyHoatDong</div>
+                        <div class="stat-sub"><span class="up">●</span> Tài khoản mở khóa</div>
+                    </div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-icon"><i class="fas fa-door-open"></i></div>
+                    <div class="stat-body">
+                        <div class="stat-label">Phòng chưa phân công</div>
+                        <div class="stat-value" id="stat-unassigned">@Model.PhongChuaPhanCong</div>
+                        <div class="stat-sub"><span class="down">●</span> Cần phân quản lý</div>
+                    </div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-icon"><i class="fas fa-door-closed"></i></div>
+                    <div class="stat-body">
+                        <div class="stat-label">Tổng phòng</div>
+                        <div class="stat-value" id="stat-phong">@Model.TongPhong</div>
+                        <div class="stat-sub">Toàn bộ khu nhà trọ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+         MAIN GRID: bảng + sidebar
+    ============================================================ -->
+            <div class="tql-main-grid">
+
+                <!-- ── CỘT TRÁI: BẢNG QUẢN LÝ ── -->
+                <div>
+                    <div class="tql-card">
+                        <div class="tql-toolbar">
+                            <div class="tql-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="inp-search"
+                                       placeholder="Tìm theo tên, SĐT, username..."
+                                       oninput="timKiemQL(this.value)" />
+                            </div>
+                            <select class="tql-filter-select" id="sel-filter" onchange="locTrangThai(this.value)">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="active">Hoạt động</option>
+                                <option value="locked">Bị khóa</option>
+                            </select>
+                        </div>
+
+                        <div class="tql-table-wrap">
+                            <table class="tql-table" id="bang-quan-ly">
+                                <thead>
+                                    <tr>
+                                        <th style="width:36px; padding-left:20px;">
+                                            <input type="checkbox" id="chk-all"
+                                                   style="accent-color:#7c3aed; cursor:pointer;"
+                                                   onchange="chonTatCa(this.checked)" />
+                                        </th>
+                                        <th>Quản lý</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Trạng thái</th>
+                                        <th>Phòng phụ trách</th>
+                                        <th>Ngày tạo</th>
+                                        <th style="text-align:center;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-quan-ly">
+                                    @foreach (var ql in Model.DanhSachQuanLy)
+                                    {
+                                        var bg = TaiKhoanQuanLyModel.GradientPool[ql.IDUser % TaiKhoanQuanLyModel.GradientPool.Length];
+                                        var initials = (ql.FullName ?? ql.Username ?? "?").Trim().Split(' ').Last()[0].ToString().ToUpper();
+                                        var phongShow = ql.Phongs.Take(3).ToList();
+                                        var phongMore = ql.Phongs.Count - 3;
+                                        var tenEsc = ql.FullName.Replace("'", "\\'");
+                                        <tr data-id="@ql.IDUser"
+                                            data-name="@ql.FullName.ToLower()"
+                                            data-phone="@ql.Phone"
+                                            data-status="@(ql.IsActive ? "active" : "locked")"
+                                            onclick="chonQuanLy(@ql.IDUser)">
+                                            <td style="padding-left:20px;" onclick="event.stopPropagation()">
+                                                <input type="checkbox" class="chk-row" data-id="@ql.IDUser"
+                                                       style="accent-color:#7c3aed; cursor:pointer;" />
+                                            </td>
+                                            <td>
+                                                <div class="tbl-avatar-wrap">
+                                                    <div class="tbl-avatar" style="background:@bg">@initials</div>
+                                                    <div>
+                                                        <div class="tbl-avatar-name">@ql.FullName</div>
+                                                        <div class="tbl-avatar-user">@@@ql.Username</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>@ql.Phone</td>
+                                            <td>
+                                                @if (ql.IsActive)
+                                                {
+                                                    <span class="badge badge-active"><i class="fas fa-circle" style="font-size:6px;"></i> Hoạt động</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-locked"><i class="fas fa-lock" style="font-size:9px;"></i> Bị khóa</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="room-chips">
+                                                    @foreach (var p in phongShow)
+                                                    {
+                                                        <span class="room-chip">@p.SoPhong</span>
+                                                    }
+                                                    @if (phongMore > 0)
+                                                    {
+                                                        <span class="room-chip more">+@phongMore</span>
+                                                    }
+                                                    @if (!ql.Phongs.Any())
+                                                    {
+                                                        <span class="badge badge-empty">Chưa phân công</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td style="font-size:12px; color:var(--mau-chu-phu);">
+                                                @ql.CreatedAt.ToString("dd/MM/yyyy")
+                                            </td>
+                                            <td onclick="event.stopPropagation()">
+                                                <div class="tbl-actions">
+                                                    <button class="btn-icon btn-icon-edit" title="Chỉnh sửa"
+                                                            onclick="moModalSuaQuanLy(@ql.IDUser)">
+                                                        <i class="fas fa-pen"></i>
+                                                    </button>
+                                                    <button class="btn-icon btn-icon-assign" title="Phân công phòng"
+                                                            onclick="chonQuanLy(@ql.IDUser)">
+                                                        <i class="fas fa-door-open"></i>
+                                                    </button>
+                                                    @if (ql.IsActive)
+                                                    {
+                                                        <button class="btn-icon btn-icon-lock" title="Khóa tài khoản"
+                                                                onclick="khoaTaiKhoan(@ql.IDUser, '@tenEsc', true)">
+                                                            <i class="fas fa-lock"></i>
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn-icon btn-icon-unlock" title="Mở khóa"
+                                                                onclick="khoaTaiKhoan(@ql.IDUser, '@tenEsc', false)">
+                                                            <i class="fas fa-lock-open"></i>
+                                                        </button>
+                                                    }
+                                                    <button class="btn-icon btn-icon-delete" title="Xóa tài khoản"
+                                                            onclick="xoaQuanLy(@ql.IDUser, '@tenEsc')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            @if (!Model.DanhSachQuanLy.Any())
+                            {
+                                <div class="tql-empty">
+                                    <i class="fas fa-user-slash"></i>
+                                    <p>
+                                        Chưa có tài khoản quản lý nào.<br />
+                                        Nhấn <strong>Thêm quản lý mới</strong> để bắt đầu.
+                                    </p>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="tql-pagination">
+                            <span>Hiển thị <strong id="pg-count">@Model.DanhSachQuanLy.Count</strong> quản lý</span>
+                            <div id="pg-btns"></div>
+                        </div>
+                    </div>
+                </div><!-- /col-left -->
+                <!-- ── CỘT PHẢI: QUYỀN + PHÂN PHÒNG ── -->
+                <div class="tql-sidebar-right">
+
+                    <!-- CARD: PHÂN QUYỀN -->
+                    <div class="tql-card">
+                        <div class="tql-card-header">
+                            <div class="tql-card-title">
+                                <i class="fas fa-shield-alt" style="color:#7c3aed;"></i>
+                                Phân quyền chi tiết
+                            </div>
+                        </div>
+                        <div class="tql-card-body">
+                            <div class="no-selection-hint" id="quyen-no-selection">
+                                <i class="fas fa-hand-pointer"></i>
+                                Chọn một quản lý từ bảng bên trái để chỉnh sửa quyền.
+                            </div>
+                            <div id="quyen-content" style="display:none;">
+                                <div class="selected-manager-banner">
+                                    <div class="sm-avatar" id="sel-avatar">?</div>
+                                    <div>
+                                        <div class="sm-name" id="sel-name">—</div>
+                                        <div class="sm-hint">Đang chỉnh quyền</div>
+                                    </div>
+                                </div>
+
+                                <div class="permission-group-title">
+                                    <i class="fas fa-file-contract" style="color:#7c3aed;"></i> Hợp đồng
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-label">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <div class="permission-label-text">
+                                            <strong>Tạo hợp đồng</strong>
+                                            <small>Thêm hợp đồng thuê mới</small>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-wrap"><input type="checkbox" id="perm-tao-hd" /></div>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-label">
+                                        <i class="fas fa-times-circle"></i>
+                                        <div class="permission-label-text">
+                                            <strong>Hủy / Kết thúc hợp đồng</strong>
+                                            <small>Chỉnh trạng thái hợp đồng</small>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-wrap"><input type="checkbox" id="perm-huy-hd" /></div>
+                                </div>
+
+                                <div class="permission-group-title">
+                                    <i class="fas fa-money-bill-wave" style="color:#7c3aed;"></i> Tài chính
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-label">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                        <div class="permission-label-text">
+                                            <strong>Thu hóa đơn</strong>
+                                            <small>Xác nhận thanh toán</small>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-wrap"><input type="checkbox" id="perm-thu-hd" /></div>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-label">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <div class="permission-label-text">
+                                            <strong>Nhập điện nước</strong>
+                                            <small>Ghi chỉ số điện / nước</small>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-wrap"><input type="checkbox" id="perm-dien-nuoc" /></div>
+                                </div>
+
+                                <div class="permission-group-title">
+                                    <i class="fas fa-tools" style="color:#7c3aed;"></i> Vận hành
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-label">
+                                        <i class="fas fa-wrench"></i>
+                                        <div class="permission-label-text">
+                                            <strong>Xử lý sửa chữa</strong>
+                                            <small>Duyệt đơn dịch vụ / sửa chữa</small>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-wrap"><input type="checkbox" id="perm-sua-chua" /></div>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-label">
+                                        <i class="fas fa-bell"></i>
+                                        <div class="permission-label-text">
+                                            <strong>Gửi thông báo</strong>
+                                            <small>Thông báo toàn khu / phòng</small>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-wrap"><input type="checkbox" id="perm-thong-bao" /></div>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-label">
+                                        <i class="fas fa-user-times"></i>
+                                        <div class="permission-label-text">
+                                            <strong>Quản lý khách thuê</strong>
+                                            <small>Thêm / xóa khách ở ghép</small>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-wrap"><input type="checkbox" id="perm-khach-thue" /></div>
+                                </div>
+
+                                <button class="btn-luu-quyen" id="btn-luu-quyen" onclick="luuQuyen()" disabled>
+                                    <i class="fas fa-save"></i> Lưu phân quyền
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD: PHÂN CÔNG PHÒNG -->
+                    <div class="tql-card">
+                        <div class="tql-card-header">
+                            <div class="tql-card-title">
+                                <i class="fas fa-map-marked-alt" style="color:var(--mau-chu-de);"></i>
+                                Phân công phòng
+                            </div>
+                        </div>
+                        <div class="tql-card-body">
+                            <div class="no-selection-hint" id="phong-no-selection">
+                                <i class="fas fa-door-open"></i>
+                                Chọn quản lý để phân công phòng.
+                            </div>
+                            <div id="phong-content" style="display:none;">
+                                <div id="floor-groups-container"></div>
+                                <button class="btn-phan-cong" id="btn-phan-cong" onclick="luuPhanCong()" disabled>
+                                    <i class="fas fa-check-circle"></i> Lưu phân công
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /sidebar-right -->
+            </div><!-- /main-grid -->
+        </div><!-- /noi-dung-chinh -->
+    </div><!-- /khu-vuc-chinh -->
+    <!-- ============================================================
+     MODAL: THÊM QUẢN LÝ
+============================================================ -->
+    <div class="lop-phu-modal" id="modal-them-ql" onclick="dongModalNgoai(event,'modal-them-ql')">
+        <div class="hop-modal">
+            <div class="modal-header-purple">
+                <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+                    <div class="mh-icon"><i class="fas fa-user-plus"></i></div>
+                    <div>
+                        <div class="mh-title">Thêm tài khoản quản lý</div>
+                        <div class="mh-sub">Tạo tài khoản mới với quyền Manager</div>
+                    </div>
+                </div>
+                <button class="mh-close" onclick="dongModal('modal-them-ql')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-2col">
+                    <div class="form-row">
+                        <label>Họ và tên <span class="req">*</span></label>
+                        <input type="text" id="them-fullname" class="form-input" placeholder="Nguyễn Văn A" />
+                    </div>
+                    <div class="form-row">
+                        <label>Username <span class="req">*</span></label>
+                        <input type="text" id="them-username" class="form-input" placeholder="nguyenvana" />
+                    </div>
+                </div>
+                <div class="form-2col">
+                    <div class="form-row">
+                        <label>Số điện thoại <span class="req">*</span></label>
+                        <input type="tel" id="them-phone" class="form-input" placeholder="09xxxxxxxx" />
+                    </div>
+                    <div class="form-row">
+                        <label>Email</label>
+                        <input type="email" id="them-email" class="form-input" placeholder="email@example.com" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Mật khẩu <span class="req">*</span></label>
+                    <div class="pass-wrap">
+                        <input type="password" id="them-password" class="form-input" placeholder="Tối thiểu 8 ký tự" />
+                        <button type="button" class="btn-toggle-pass" onclick="togglePass('them-password', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-hint">Mật khẩu phải có ít nhất 8 ký tự.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-huy" onclick="dongModal('modal-them-ql')">Hủy</button>
+                <button class="btn-luu-modal" id="btn-them-luu" onclick="themQuanLy()">
+                    <i class="fas fa-user-plus"></i> Tạo tài khoản
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+     MODAL: SỬA QUẢN LÝ
+============================================================ -->
+    <div class="lop-phu-modal" id="modal-sua-ql" onclick="dongModalNgoai(event,'modal-sua-ql')">
+        <div class="hop-modal">
+            <div class="modal-header-purple">
+                <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+                    <div class="mh-icon"><i class="fas fa-user-edit"></i></div>
+                    <div>
+                        <div class="mh-title">Chỉnh sửa tài khoản</div>
+                        <div class="mh-sub" id="sua-modal-sub">Cập nhật thông tin quản lý</div>
+                    </div>
+                </div>
+                <button class="mh-close" onclick="dongModal('modal-sua-ql')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="sua-iduser" />
+                <div class="form-2col">
+                    <div class="form-row">
+                        <label>Họ và tên <span class="req">*</span></label>
+                        <input type="text" id="sua-fullname" class="form-input" />
+                    </div>
+                    <div class="form-row">
+                        <label>Số điện thoại <span class="req">*</span></label>
+                        <input type="tel" id="sua-phone" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Email</label>
+                    <input type="email" id="sua-email" class="form-input" placeholder="(không bắt buộc)" />
+                </div>
+                <div class="form-row">
+                    <label>Mật khẩu mới <small style="font-weight:400;color:var(--mau-chu-phu);">(để trống nếu không đổi)</small></label>
+                    <div class="pass-wrap">
+                        <input type="password" id="sua-password" class="form-input" placeholder="Nhập mật khẩu mới..." />
+                        <button type="button" class="btn-toggle-pass" onclick="togglePass('sua-password', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-huy" onclick="dongModal('modal-sua-ql')">Hủy</button>
+                <button class="btn-luu-modal" id="btn-sua-luu" onclick="suaQuanLy()">
+                    <i class="fas fa-save"></i> Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+     CONFIRM DIALOG
+============================================================ -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <div class="confirm-icon" id="confirm-icon">⚠️</div>
+            <div class="confirm-title" id="confirm-title">Xác nhận</div>
+            <div class="confirm-msg" id="confirm-msg">Bạn có chắc chắn không?</div>
+            <div class="confirm-actions">
+                <button class="btn-confirm-huy" onclick="dongConfirm()">Hủy</button>
+                <button class="btn-confirm-ok" id="btn-confirm-ok">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <script>
+            // Toggle sidebar
+            function dongMoSidebar() {
+              const sb = document.getElementById('thanh-sidebar');
+              sb.classList.toggle('an');
+            }
+    </script>
+    <script src="~/js/TaiKhoanQuanLy.js"></script>
+
+</body>
+</html>
