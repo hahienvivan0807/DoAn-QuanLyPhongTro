@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
-
+using System.Security.Cryptography;
+using System.Text;
 namespace QuanLyNhaTro.Pages
 {
     [Authorize(Roles = "Manager")]
@@ -133,6 +134,91 @@ namespace QuanLyNhaTro.Pages
             var claim = User.FindFirst("IDUser") ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
             return claim != null && int.TryParse(claim.Value, out var id) ? id : 0;
         }
+        public async Task<IActionResult> OnPostChangePasswordAsync(
+    string oldPassword, string newPassword, string confirmPassword)
+        {
+            // 1. Lấy ID người dùng hiện tại
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+            {
+                TempData["ErrorMessage"] = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+                return RedirectToPage();
+            }
+
+            // 2. Validate đầu vào server-side
+            if (string.IsNullOrWhiteSpace(oldPassword) ||
+                string.IsNullOrWhiteSpace(newPassword) ||
+                string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                TempData["ErrorMessage"] = "Vui lòng điền đầy đủ tất cả các trường.";
+                return RedirectToPage();
+            }
+
+            if (newPassword.Length < 6)
+            {
+                TempData["ErrorMessage"] = "Mật khẩu mới phải có ít nhất 6 ký tự.";
+                return RedirectToPage();
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                TempData["ErrorMessage"] = "Mật khẩu xác nhận không khớp.";
+                return RedirectToPage();
+            }
+
+            if (newPassword == oldPassword)
+            {
+                TempData["ErrorMessage"] = "Mật khẩu mới phải khác mật khẩu hiện tại.";
+                return RedirectToPage();
+            }
+
+            // 3. Truy vấn tài khoản — chỉ lấy đúng record cần thiết
+            var user = await _db.ACCOUNT
+                .FirstOrDefaultAsync(a => a.IDUser == userId && a.IsActive);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy tài khoản hoặc tài khoản đã bị vô hiệu hóa.";
+                return RedirectToPage();
+            }
+
+            // 4. Kiểm tra mật khẩu cũ
+            //    - Thử SHA-256 trước (chuẩn lưu trữ)
+            //    - Fallback plain text cho tài khoản legacy chưa được hash
+            var hashedOld = HashPassword(oldPassword);
+            bool isMatch = user.Passwords == hashedOld       // SHA-256 hex (chuẩn)
+                        || user.Passwords == oldPassword;    // plain text (legacy)
+
+            if (!isMatch)
+            {
+                TempData["ErrorMessage"] = "Mật khẩu hiện tại không đúng.";
+                return RedirectToPage();
+            }
+
+            // 5. Lưu mật khẩu mới dạng SHA-256
+            //    Passwords có [StringLength(255)] — SHA-256 hex = 64 ký tự, hoàn toàn phù hợp
+            user.Passwords = HashPassword(newPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+
+            try
+            {
+                await _db.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đổi mật khẩu thành công!";
+            }
+            catch (DbUpdateException)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi lưu dữ liệu. Vui lòng thử lại.";
+            }
+
+            return RedirectToPage();
+        }
+
+        // SHA-256 hex — 64 ký tự, nằm gọn trong StringLength(255) của cột Passwords
+        private static string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToHexString(bytes).ToLower(); // vd: "a3f1c2..."
+        }
     }
 
     // ── ViewModel phụ cho hóa đơn ──────────────────────────────────
@@ -158,4 +244,5 @@ namespace QuanLyNhaTro.Pages
             ? $"xemHoaDon('P.{SoPhong}')"
             : $"nhacNhoThanhToan('P.{SoPhong}')";
     }
+
 }

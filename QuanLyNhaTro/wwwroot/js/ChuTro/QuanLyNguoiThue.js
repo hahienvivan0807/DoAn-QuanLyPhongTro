@@ -145,44 +145,53 @@ function ntKhoiTao() {
 async function ntTaiDuLieu() {
     ntHienThiLoading(true);
     try {
-        // ✅ Gọi endpoint mới — trả về TẤT CẢ hợp đồng
         const res = await fetch('/api/ChuTroQuanLyNguoiThue/ds-nguoi-thue');
         if (!res.ok) throw new Error('Lỗi mạng hoặc server');
-
         const result = await res.json();
 
         if (result.success) {
             NT.duLieu = result.danhSach.map(hd => ({
+                // IDs
                 IDKhachThue: hd.idHopDong,
                 IDUser: hd.idUser,
-                HoTen: hd.tenKhachThue || '—',
-                SoDienThoai: hd.soDienThoai || '',
-                Email: '',
-                SoCCCD: '',
-                NgaySinh: null,
-                GioiTinh: '',
-                QueQuan: '',
-                DiaChiThuongTru: '',
-                AnhChanDung: null,
-                GhiChu: hd.ghiChu || '',
+                IDPhong: hd.idPhong,
+
+                // Ưu tiên KHACH_THUE, fallback sang ACCOUNT
+                HoTen: hd.khachThue?.hoTen || hd.tenKhachThue || '—',
+                SoDienThoai: hd.khachThue?.soDienThoai || hd.soDienThoai || '',
+                SoCCCD: hd.khachThue?.soCCCD || '',
+                NgaySinh: hd.khachThue?.ngaySinh || null,
+                GioiTinh: hd.khachThue?.gioiTinh || '',
+                QueQuan: hd.khachThue?.queQuan || '',
+                DiaChiThuongTru: hd.khachThue?.diaChiThuongTru || '',
+                AnhChanDung: hd.khachThue?.anhChanDung || null,
+                GhiChu: hd.khachThue?.ghiChu || hd.ghiChu || '',
+
+                // ACCOUNT
+                Email: hd.email || '',
+                Username: hd.username || '',
+                IsActive: hd.isActive,
+
+                // HOPDONG
                 NgayVaoO: hd.ngayBatDau,
                 NgayKetThuc: hd.ngayKetThuc,
                 TienCoc: hd.tienCocBanDau,
+                DienDauKy: hd.dienDauKy,
+                NuocDauKy: hd.nuocDauKy,
+                GhiChuHD: hd.ghiChu || '',
                 SoNgayConLai: hd.soNgayConLai,
+                TrangThaiHD: hd.trangThaiHD,
+
+                // PHONG
                 SoPhong: hd.soPhong,
-                IDPhong: hd.idPhong,
 
-                // ✅ Dựa vào TrangThaiHD thay vì IsActive
+                // Trạng thái hiển thị
                 TrangThai: hd.trangThaiHD === 'Đang hiệu lực' ? 'dang-o' : 'da-roi',
-
-                Username: '',
             }));
 
             ntCapNhatThongKe();
             ntRenderFilterPhong();
             ntLocDuLieu();
-        } else {
-            throw new Error('API trả về lỗi');
         }
     } catch (e) {
         console.error('ntTaiDuLieu:', e);
@@ -752,6 +761,15 @@ function ntMoModalSua(id) {
     set('inp-dia-chi-thuong-tru', item.DiaChiThuongTru);
     set('inp-ghi-chu', item.GhiChu);
 
+    set('inp-so-cccd', item.SoCCCD);
+    set('inp-ngay-sinh', item.NgaySinh ? item.NgaySinh.split('T')[0] : '');
+    set('inp-gioi-tinh', item.GioiTinh);
+    set('inp-email', item.Email);
+    set('inp-dia-chi', item.DiaChiThuongTru);  // textarea địa chỉ
+    set('inp-que-quan', item.QueQuan);
+    set('inp-ghi-chu', item.GhiChu);
+    set('inp-username', item.Username);
+
     // ✅ Username lấy từ item — nếu API chưa trả về thì gọi thêm API
     set('inp-username', item.Username);
 
@@ -803,17 +821,27 @@ function ntXemChiTiet(id) {
 
     document.getElementById('nt-detail-mo-ta').textContent = `Hồ sơ: ${item.HoTen}`;
 
+    // Gán nút Sửa
+    const btnSua = document.getElementById('nt-detail-btn-sua');
+    if (btnSua) btnSua.onclick = () => {
+        ntDongOverlay('nt-detail-overlay');
+        ntMoModalSua(id);
+    };
+
     const body = document.getElementById('nt-detail-body');
     body.innerHTML = `
-    <!-- Profile -->
-    <div class="nt-detail-profile">
-      <div class="nt-detail-avatar">
-        ${item.AnhChanDung ? `<img src="${ntEscape(item.AnhChanDung)}" alt="">` : ntLayChuCai(item.HoTen)}
+    <!-- Profile hero -->
+    <div class="nt-detail-hero">
+      <div class="nt-detail-ava">
+        ${item.AnhChanDung
+            ? `<img src="${ntEscape(item.AnhChanDung)}" alt="">`
+            : ntLayChuCai(item.HoTen)}
       </div>
       <div>
         <div class="nt-detail-name">${ntEscape(item.HoTen)}</div>
         <div class="nt-detail-sub">
-          <i class="fas fa-phone" style="color:#0891b2;margin-right:4px;font-size:11px;"></i>${ntEscape(item.SoDienThoai || '—')}
+          <i class="fas fa-phone" style="color:#0891b2;margin-right:4px;font-size:11px;"></i>
+          ${ntEscape(item.SoDienThoai || '—')}
           &nbsp;•&nbsp;
           ${ntBadgeTrangThai(item.TrangThai)}
         </div>
@@ -821,8 +849,22 @@ function ntXemChiTiet(id) {
     </div>
 
     <!-- Thông tin cá nhân -->
-    <div class="nt-detail-sec-title"><i class="fas fa-id-card"></i> Thông tin cá nhân</div>
+    <div class="nt-detail-sec">
+      <i class="fas fa-id-card"></i> Thông tin cá nhân
+    </div>
     <div class="nt-detail-grid">
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Họ và tên</div>
+        <div class="nt-detail-val">${ntEscape(item.HoTen || '—')}</div>
+      </div>
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Số điện thoại</div>
+        <div class="nt-detail-val">${ntEscape(item.SoDienThoai || '—')}</div>
+      </div>
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Email</div>
+        <div class="nt-detail-val">${ntEscape(item.Email || '—')}</div>
+      </div>
       <div class="nt-detail-item">
         <div class="nt-detail-key">Ngày sinh</div>
         <div class="nt-detail-val">${ntDinhDangNgay(item.NgaySinh) || '—'}</div>
@@ -836,51 +878,101 @@ function ntXemChiTiet(id) {
         <div class="nt-detail-val">${ntEscape(item.SoCCCD || '—')}</div>
       </div>
       <div class="nt-detail-item">
-        <div class="nt-detail-key">Email</div>
-        <div class="nt-detail-val">${ntEscape(item.Email || '—')}</div>
-      </div>
-      <div class="nt-detail-item">
         <div class="nt-detail-key">Quê quán</div>
         <div class="nt-detail-val">${ntEscape(item.QueQuan || '—')}</div>
       </div>
       <div class="nt-detail-item">
         <div class="nt-detail-key">Tên đăng nhập</div>
-        <div class="nt-detail-val">${ntEscape(item.Username || '—')}</div>
+        <div class="nt-detail-val">
+          <i class="fas fa-at" style="color:#0891b2;font-size:11px;margin-right:3px;"></i>
+          ${ntEscape(item.Username || '—')}
+        </div>
       </div>
       <div class="nt-detail-item full">
         <div class="nt-detail-key">Địa chỉ thường trú</div>
         <div class="nt-detail-val">${ntEscape(item.DiaChiThuongTru || '—')}</div>
       </div>
+      ${item.GhiChu ? `
+      <div class="nt-detail-item full">
+        <div class="nt-detail-key">Ghi chú</div>
+        <div class="nt-detail-val" style="font-weight:400;">${ntEscape(item.GhiChu)}</div>
+      </div>` : ''}
     </div>
 
-    <!-- Thông tin phòng -->
-    <div class="nt-detail-sec-title" style="margin-top:8px;"><i class="fas fa-door-open"></i> Thông tin phòng & Hợp đồng</div>
+    <!-- Thông tin phòng & hợp đồng -->
+    <div class="nt-detail-sec" style="margin-top:12px;">
+      <i class="fas fa-door-open"></i> Phòng &amp; Hợp đồng
+    </div>
     <div class="nt-detail-grid">
       <div class="nt-detail-item">
-        <div class="nt-detail-key">Phòng hiện tại</div>
-        <div class="nt-detail-val">${ntEscape(item.SoPhong || '—')}</div>
+        <div class="nt-detail-key">Phòng</div>
+        <div class="nt-detail-val">
+          <span style="background:var(--mau-chu-de-nhat);color:var(--mau-chu-de);
+                       padding:2px 10px;border-radius:99px;font-weight:800;font-size:12px;">
+            ${ntEscape(item.SoPhong || '—')}
+          </span>
+        </div>
+      </div>
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Trạng thái HĐ</div>
+        <div class="nt-detail-val">${ntEscape(item.TrangThaiHD || '—')}</div>
       </div>
       <div class="nt-detail-item">
         <div class="nt-detail-key">Ngày vào ở</div>
         <div class="nt-detail-val">${ntDinhDangNgay(item.NgayVaoO) || '—'}</div>
       </div>
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Ngày hết hạn HĐ</div>
+        <div class="nt-detail-val">
+          ${item.NgayKetThuc
+            ? `${ntDinhDangNgay(item.NgayKetThuc)}
+               <span style="font-size:10.5px;color:${(item.SoNgayConLai ?? 999) < 0 ? 'var(--mau-do)' : '#d97706'};">
+                 (${(item.SoNgayConLai ?? 0) < 0
+                ? 'Đã hết hạn'
+                : `Còn ${item.SoNgayConLai} ngày`})
+               </span>`
+            : '<span style="color:var(--mau-chu-phu);font-style:italic;">Không thời hạn</span>'}
+        </div>
+      </div>
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Tiền cọc</div>
+        <div class="nt-detail-val" style="color:var(--mau-chu-de);font-weight:800;">
+          ${item.TienCoc ? ntDinhDangTien(item.TienCoc) : '—'}
+        </div>
+      </div>
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Trạng thái tài khoản</div>
+        <div class="nt-detail-val">
+          ${item.IsActive
+            ? '<span style="color:#059669;">✅ Đang hoạt động</span>'
+            : '<span style="color:#9ca3af;">⛔ Đã khóa</span>'}
+        </div>
+      </div>
+      ${item.DienDauKy != null ? `
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Điện đầu kỳ</div>
+        <div class="nt-detail-val">${item.DienDauKy} kWh</div>
+      </div>` : ''}
+      ${item.NuocDauKy != null ? `
+      <div class="nt-detail-item">
+        <div class="nt-detail-key">Nước đầu kỳ</div>
+        <div class="nt-detail-val">${item.NuocDauKy} m³</div>
+      </div>` : ''}
+      ${item.GhiChuHD ? `
+      <div class="nt-detail-item full">
+        <div class="nt-detail-key">Ghi chú hợp đồng</div>
+        <div class="nt-detail-val" style="font-weight:400;">${ntEscape(item.GhiChuHD)}</div>
+      </div>` : ''}
     </div>
+    `;
 
-    ${item.GhiChu ? `
-    <div class="nt-detail-sec-title" style="margin-top:8px;"><i class="fas fa-sticky-note"></i> Ghi chú</div>
-    <div class="nt-detail-item full" style="background:var(--mau-nen);padding:10px 14px;border-radius:var(--radius-sm);">
-      <div class="nt-detail-val" style="font-weight:400;">${ntEscape(item.GhiChu)}</div>
-    </div>` : ''}
-  `;
-
-    // Gán sự kiện nút Sửa trong modal detail
-
-    ntMoOverlay('nt-modal-detail-overlay');
+    ntMoOverlay('nt-detail-overlay');
 }
 
 function ntDongModalDetail(e) {
-    if (e && e.target !== document.getElementById('nt-modal-detail-overlay')) return;
-    ntDongOverlay('nt-modal-detail-overlay');
+    // ✅ Dùng đúng id có trong HTML
+    if (e && e.target !== document.getElementById('nt-detail-overlay')) return;
+    ntDongOverlay('nt-detail-overlay');
 }
 
 /* ================================================================

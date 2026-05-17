@@ -320,9 +320,8 @@ document.addEventListener('click', function (e) {
 
 function mgrMoDoiMatKhau() {
     mgrToggleMenu();
-    moModal('modal-doi-mat-khau'); // nối vào modal khi làm BE
+    moModalDoiMatKhau();
 }
-
 function mgrXacNhanDangXuat() {
     mgrToggleMenu();
     if (confirm('Bạn có chắc muốn đăng xuất?')) {
@@ -330,10 +329,9 @@ function mgrXacNhanDangXuat() {
     }
 }
 
-// Load email vào dropdown (nếu có API profile riêng cho Manager)
 async function mgrLoadEmail() {
     try {
-        const res = await fetch('/api/Manager/Profile'); // đổi route theo BE
+        const res = await fetch('/api/QuanLy/Profile');
         const data = await res.json();
         const el = document.getElementById('mgr-dd-email');
         if (el) el.textContent = data.email ?? 'Chưa cập nhật';
@@ -379,3 +377,60 @@ document.querySelectorAll(".dtab").forEach(tab => {
         document.getElementById("tab" + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1)).classList.add("on");
     });
 });
+// ===== ĐỔI MẬT KHẨU =====
+function moModalDoiMatKhau() {
+    document.getElementById('form-doi-mat-khau').reset();
+    const alert = document.getElementById('doi-mk-alert');
+    alert.style.display = 'none';
+    alert.textContent = '';
+    document.getElementById('modal-doi-mat-khau').classList.add('hien');
+}
+
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+// Client-side validation trước khi submit
+document.addEventListener('DOMContentLoaded', function () {
+    const formMk = document.getElementById('form-doi-mat-khau');
+    if (!formMk) return;
+    formMk.addEventListener('submit', function (e) {
+    const oldPwd = document.getElementById('old-password').value.trim();
+    const newPwd = document.getElementById('new-password').value.trim();
+    const conPwd = document.getElementById('confirm-password').value.trim();
+    const alertEl = document.getElementById('doi-mk-alert');
+
+    function showInlineError(msg) {
+        alertEl.style.display = 'block';
+        alertEl.style.background = '#fee2e2';
+        alertEl.style.color = '#dc2626';
+        alertEl.style.border = '1px solid #fca5a5';
+        alertEl.textContent = msg;
+        e.preventDefault();
+    }
+
+    if (!oldPwd || !newPwd || !conPwd) return showInlineError('Vui lòng điền đầy đủ tất cả các trường.');
+    if (newPwd.length < 6) return showInlineError('Mật khẩu mới phải có ít nhất 6 ký tự.');
+    if (newPwd !== conPwd) return showInlineError('Mật khẩu xác nhận không khớp.');
+    if (newPwd === oldPwd) return showInlineError('Mật khẩu mới phải khác mật khẩu hiện tại.');
+
+    // Hợp lệ — disable nút để tránh double submit
+    const btn = document.getElementById('btn-submit-mk');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+    });
+});
+function mgrXacNhanDangXuat() {
+    mgrToggleMenu();
+    if (confirm('Bạn có chắc muốn đăng xuất?')) {
+        window.location.href = '/Index'; //
+    }
+}

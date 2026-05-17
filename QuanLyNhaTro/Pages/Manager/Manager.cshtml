@@ -1829,7 +1829,7 @@
             }
         </div>
 
-        <div class="menu-item" onclick="chuyenTrang('bao-cao', this)">
+        <div class="menu-item" onclick="chuyenTrang('thong-ke', this)">
             <i class="fas fa-chart-bar"></i>
             <span>Thống kê & Báo cáo</span>
         </div>
@@ -2337,7 +2337,97 @@
     <!-- =============================================
      JAVASCRIPT - XỬ LÝ TƯƠNG TÁC
 ============================================= -->
+<!-- =============================================
+     MODAL: ĐỔI MẬT KHẨU
+============================================= -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="alert-success" style="position:fixed;top:20px;right:24px;z-index:9999;
+         background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:12px;
+         padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
+         display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+    </div>
+    <script>setTimeout(() => { const a = document.getElementById('alert-success'); if(a) a.remove(); }, 4000);</script>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="alert-error" style="position:fixed;top:20px;right:24px;z-index:9999;
+         background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:12px;
+         padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
+         display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+    </div>
+    <script>setTimeout(() => { const a = document.getElementById('alert-error'); if(a) a.remove(); }, 5000);</script>
+}
 
+<div class="lop-che-modal" id="modal-doi-mat-khau"
+     onclick="dongModalNeuNhanNgoai(event, 'modal-doi-mat-khau')">
+    <div class="hop-modal">
+        <div class="tieu-de-modal">
+            <h3><i class="fas fa-key" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đổi mật khẩu</h3>
+            <button class="nut-dong-modal" type="button"
+                    onclick="dongModal('modal-doi-mat-khau')">✕</button>
+        </div>
+
+        <form method="post" asp-page-handler="ChangePassword" id="form-doi-mat-khau">
+            @Html.AntiForgeryToken()
+
+            <div id="doi-mk-alert" style="display:none;margin-bottom:14px;padding:10px 14px;
+                 border-radius:10px;font-size:13px;font-weight:600;"></div>
+
+            <div class="nhom-truong-nhap">
+                <label class="nhan-truong-nhap">Mật khẩu hiện tại *</label>
+                <div style="position:relative;">
+                    <input class="truong-nhap" type="password" id="old-password"
+                           name="oldPassword" placeholder="Nhập mật khẩu hiện tại"
+                           autocomplete="current-password" />
+                    <button type="button" onclick="togglePwd('old-password', this)"
+                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                                   background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="nhom-truong-nhap" style="margin-top:12px;">
+                <label class="nhan-truong-nhap">Mật khẩu mới *</label>
+                <div style="position:relative;">
+                    <input class="truong-nhap" type="password" id="new-password"
+                           name="newPassword" placeholder="Tối thiểu 6 ký tự"
+                           autocomplete="new-password" />
+                    <button type="button" onclick="togglePwd('new-password', this)"
+                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                                   background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="nhom-truong-nhap" style="margin-top:12px;">
+                <label class="nhan-truong-nhap">Xác nhận mật khẩu mới *</label>
+                <div style="position:relative;">
+                    <input class="truong-nhap" type="password" id="confirm-password"
+                           name="confirmPassword" placeholder="Nhập lại mật khẩu mới"
+                           autocomplete="new-password" />
+                    <button type="button" onclick="togglePwd('confirm-password', this)"
+                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                                   background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="nhom-nut-modal" style="margin-top:20px;">
+                <button type="button" class="nut-huy"
+                        onclick="dongModal('modal-doi-mat-khau')">Hủy</button>
+                <button type="submit" class="nut-luu" id="btn-submit-mk">
+                    <i class="fas fa-save"></i> Cập nhật
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
     <script>
 
         // ===== CẬP NHẬT NGÀY GIỜ =====
@@ -2422,8 +2512,8 @@
         'quan-ly-nguoi-thue':  '/Manager/QuanLyDichVu',
         'hoa-don':             '/Manager/HoaDon',
         'su-co-bao-tri':       '/Manager/SuCoBaoTri',
-        'bao-cao':             '/Manager/ThongKe',
-        'cai-dat':             '/CaiDat',
+        'thong-ke':             '/Manager/ThongKe',
+        'cai-dat':             '/Manager/CaiDat',
         };
         const duongDan = bangDieuHuong[tenTrang];
         if (duongDan) {

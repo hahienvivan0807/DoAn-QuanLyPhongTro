@@ -30,6 +30,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script src="/js/QuanLy/QuanLy-core.js" defer></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản Lý Phòng Trọ – Chi Tiết Phòng</title>
@@ -1166,6 +1167,109 @@
                     grid-template-columns: 1fr;
                 }
             }
+            /* =========================================================
+   ADMIN HEADER DROPDOWN – REUSE từ Manager
+========================================================= */
+.thong-tin-admin-header { position: relative; }
+
+.mgr-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 240px;
+  background: var(--mau-trang);
+  border-radius: 14px;
+  border: 1px solid var(--mau-vien);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(13,27,62,0.14), 0 2px 8px rgba(13,27,62,0.06);
+  z-index: 999;
+  transform-origin: top right;
+  transform: scale(0.92) translateY(-8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease;
+}
+.mgr-dropdown.show {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+.mgr-dd-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--mau-vien);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mgr-dd-avatar {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px; font-weight: 700;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.mgr-dd-name  { font-size: 13px; font-weight: 700; color: var(--mau-chu); }
+.mgr-dd-sub   { font-size: 11px; color: var(--mau-chu-phu); margin-top: 2px; }
+.mgr-dd-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px;
+  padding: 2px 8px; border-radius: 9999px; margin-top: 4px;
+  background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+  color: #fff;
+}
+.mgr-dd-body { padding: 6px; }
+.mgr-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 12px; border-radius: 9px;
+  cursor: pointer; transition: background 0.14s;
+  border: none; background: none;
+  width: 100%; font-family: inherit; text-align: left;
+}
+.mgr-item:hover { background: var(--mau-nen); }
+.mgr-item-icon {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.mgr-item-icon.blue { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
+.mgr-item-icon.red  { background: #fef2f2; color: #dc2626; }
+.mgr-item-label { font-size: 13px; font-weight: 600; color: var(--mau-chu); }
+.mgr-item-sub   { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 1px; }
+.mgr-item.danger:hover { background: #fef2f2; }
+.mgr-item.danger:hover .mgr-item-label { color: #dc2626; }
+.mgr-divider { height: 1px; background: var(--mau-vien); margin: 4px 0; }
+
+/* Modal đổi mật khẩu — reuse .lop-phu-modal đã có sẵn */
+.lop-phu-modal .hop-modal .nhom-truong-nhap-mk {
+  margin-bottom: 12px;
+}
+.lop-phu-modal .hop-modal .nhan-truong-nhap-mk {
+  display: block; font-size: 12px; font-weight: 600;
+  margin-bottom: 6px; color: var(--mau-chu);
+}
+.lop-phu-modal .hop-modal .truong-nhap-mk {
+  width: 100%; padding: 10px 40px 10px 14px;
+  border: 1.5px solid var(--mau-vien); border-radius: 10px;
+  font-size: 13px; outline: none; transition: border-color 0.2s;
+  color: var(--mau-chu); font-family: inherit;
+}
+.lop-phu-modal .hop-modal .truong-nhap-mk:focus {
+  border-color: var(--mau-chu-de-sang);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.mk-input-wrap {
+  position: relative;
+}
+.mk-input-wrap .mk-eye-btn {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--mau-chu-phu); font-size: 13px;
+}
+.mk-alert {
+  display: none; margin-bottom: 14px; padding: 10px 14px;
+  border-radius: 10px; font-size: 13px; font-weight: 600;
+}
+        
     </style>
 </head>
 <body>
@@ -1285,13 +1389,52 @@
                         <span class="so-thong-bao">@Model.SoThongBaoChuaDoc</span>
                     }
                 </button>
-                <div class="thong-tin-admin-header" onclick="moMenuAdmin()">
-                    <div class="anh-dai-dien">@(Model.CurrentUser?.FullName?.Substring(0, 1).ToUpper() ?? "A")</div>
+                <div class="thong-tin-admin-header" id="mgrHeaderWrap">
+                  <button onclick="mgrToggleMenu()" id="mgrHeaderBtn"
+                          style="display:flex;align-items:center;gap:10px;cursor:pointer;
+                                 padding:6px 12px;border-radius:24px;border:none;background:none;
+                                 font-family:inherit;transition:background 0.2s;"
+                          onmouseover="this.style.background='var(--mau-xanh-nhat)'"
+                          onmouseout="this.style.background='none'">
+                    <div class="anh-dai-dien">@(Model.CurrentUser?.FullName?.Substring(0,1).ToUpper() ?? "A")</div>
                     <div>
-                        <div style="font-size:13px;font-weight:600;">@(Model.CurrentUser?.FullName ?? "Admin")</div>
-                        <div style="font-size:11px;color:var(--mau-chu-phu);">@(Model.CurrentUser?.Roles ?? "Quản trị viên")</div>
+                      <div style="font-size:13px;font-weight:600;">@(Model.CurrentUser?.FullName ?? "Admin")</div>
+                      <div style="font-size:11px;color:var(--mau-chu-phu);">@(Model.CurrentUser?.Roles ?? "Quản trị viên")</div>
                     </div>
-                    <i class="fas fa-chevron-down" style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;"></i>
+                    <i class="fas fa-chevron-down" id="mgrChevron"
+                       style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;transition:transform 0.2s;"></i>
+                  </button>
+
+                  <div class="mgr-dropdown" id="mgrDropdown">
+                    <div class="mgr-dd-header">
+                      <div class="mgr-dd-avatar">@(Model.CurrentUser?.FullName?.Substring(0,1).ToUpper() ?? "A")</div>
+                      <div>
+                        <div class="mgr-dd-name">@(Model.CurrentUser?.FullName ?? "Admin")</div>
+                        <div class="mgr-dd-sub" id="mgr-dd-email">Đang tải...</div>
+                        <span class="mgr-dd-badge">
+                          <i class="fas fa-user-shield" style="font-size:8px;"></i>
+                          Quản lý
+                        </span>
+                      </div>
+                    </div>
+                    <div class="mgr-dd-body">
+                      <button class="mgr-item" onclick="mgrMoDoiMatKhau()">
+                        <div class="mgr-item-icon blue"><i class="fas fa-key"></i></div>
+                        <div>
+                          <div class="mgr-item-label">Đổi mật khẩu</div>
+                          <div class="mgr-item-sub">Cập nhật mật khẩu đăng nhập</div>
+                        </div>
+                      </button>
+                      <div class="mgr-divider"></div>
+                      <button class="mgr-item danger" onclick="mgrXacNhanDangXuat()">
+                        <div class="mgr-item-icon red"><i class="fas fa-sign-out-alt"></i></div>
+                        <div>
+                          <div class="mgr-item-label">Đăng xuất</div>
+                          <div class="mgr-item-sub">Thoát khỏi hệ thống</div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
                 </div>
             </div>
         </header><!-- / HEADER -->
@@ -1834,7 +1977,7 @@
                     'hoa-don':            '/Manager/HoaDon',
                     'su-co-bao-tri':      '/Manager/SuCoBaoTri',
                     'bao-cao':            '/Manager/ThongKe',
-                    'cai-dat':            '/CaiDat',
+                    'cai-dat':            '/Manager/CaiDat',
                 };
                 const duongDan = bangDieuHuong[tenTrang];
                 if (duongDan) window.location.href = duongDan;
@@ -1852,10 +1995,90 @@
             // CÁC HÀM GIAO DIỆN PHỤ
             // ========================================================
             function moThongBao()     { alert('Mở danh sách thông báo'); }
-            function moMenuAdmin()    { alert('Menu tài khoản: Đổi mật khẩu / Đăng xuất'); }
             function moThongTinAdmin(){ alert('Thông tin quản trị viên'); }
 
     </script>
+    @if (TempData["SuccessMessage"] != null)
+{
+    <div id="alert-success" style="position:fixed;top:20px;right:24px;z-index:9999;
+         background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:12px;
+         padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
+         display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+    </div>
+    <script>setTimeout(()=>{document.getElementById('alert-success')?.remove();},4000);</script>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="alert-error" style="position:fixed;top:20px;right:24px;z-index:9999;
+         background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:12px;
+         padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
+         display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+    </div>
+    <script>setTimeout(()=>{document.getElementById('alert-error')?.remove();},5000);</script>
+}
 
+<!-- MODAL: ĐỔI MẬT KHẨU -->
+<div class="lop-phu-modal" id="modal-doi-mat-khau"
+     onclick="if(event.target.id==='modal-doi-mat-khau') dongModal('modal-doi-mat-khau')">
+  <div class="hop-modal" style="max-width:440px;">
+    <div class="tieu-de-modal">
+      <h3><i class="fas fa-key" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đổi mật khẩu</h3>
+      <button class="nut-dong-modal" type="button" onclick="dongModal('modal-doi-mat-khau')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form method="post" asp-page-handler="ChangePassword" id="form-doi-mat-khau">
+      @Html.AntiForgeryToken()
+      <div class="than-modal">
+        <div class="mk-alert" id="doi-mk-alert"></div>
+
+        <div class="nhom-truong-nhap-mk">
+          <label class="nhan-truong-nhap-mk">Mật khẩu hiện tại *</label>
+          <div class="mk-input-wrap">
+            <input class="truong-nhap-mk" type="password" id="old-password"
+                   name="oldPassword" placeholder="Nhập mật khẩu hiện tại"
+                   autocomplete="current-password" />
+            <button type="button" class="mk-eye-btn" onclick="togglePwd('old-password',this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="nhom-truong-nhap-mk">
+          <label class="nhan-truong-nhap-mk">Mật khẩu mới *</label>
+          <div class="mk-input-wrap">
+            <input class="truong-nhap-mk" type="password" id="new-password"
+                   name="newPassword" placeholder="Tối thiểu 6 ký tự"
+                   autocomplete="new-password" />
+            <button type="button" class="mk-eye-btn" onclick="togglePwd('new-password',this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="nhom-truong-nhap-mk">
+          <label class="nhan-truong-nhap-mk">Xác nhận mật khẩu mới *</label>
+          <div class="mk-input-wrap">
+            <input class="truong-nhap-mk" type="password" id="confirm-password"
+                   name="confirmPassword" placeholder="Nhập lại mật khẩu mới"
+                   autocomplete="new-password" />
+            <button type="button" class="mk-eye-btn" onclick="togglePwd('confirm-password',this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="chan-modal">
+        <button type="submit" class="nut-hanh-dong-modal xanh" id="btn-submit-mk">
+          <i class="fas fa-save"></i> Cập nhật
+        </button>
+        <button type="button" class="nut-hanh-dong-modal trang"
+                onclick="dongModal('modal-doi-mat-khau')">Hủy</button>
+      </div>
+    </form>
+  </div>
+</div>
 </body>
 </html>

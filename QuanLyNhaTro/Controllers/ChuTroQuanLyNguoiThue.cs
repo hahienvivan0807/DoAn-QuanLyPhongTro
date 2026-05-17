@@ -19,12 +19,12 @@ namespace QuanLyNhaTro.Controllers
         [HttpGet("ds-nguoi-thue")]
         public async Task<IActionResult> GetDanhSachNguoiThue()
         {
-            // Lấy TẤT CẢ hợp đồng (cả đang hiệu lực lẫn đã kết thúc)
             var dsHopDong = await _context.HOPDONG
                 .AsNoTracking()
                 .OrderByDescending(hd => hd.NgayBatDau)
                 .Select(hd => new
                 {
+                    // HOPDONG fields
                     hd.IDHopDong,
                     hd.IDUser,
                     hd.IDPhong,
@@ -33,12 +33,36 @@ namespace QuanLyNhaTro.Controllers
                     hd.TienCocBanDau,
                     hd.TrangThaiHD,
                     hd.GhiChu,
+                    hd.DienDauKy,
+                    hd.NuocDauKy,
 
+                    // ACCOUNT fields
                     TenKhachThue = hd.Tenant.FullName,
                     SoDienThoai = hd.Tenant.Phone,
+                    Email = hd.Tenant.Email,
+                    Username = hd.Tenant.Username,
                     IsActive = hd.Tenant.IsActive,
 
+                    // PHONG fields
                     SoPhong = hd.Phong.SoPhong,
+
+                    // KHACH_THUE fields — join qua IDUser
+                    KhachThue = _context.KHACH_THUE
+                        .Where(kt => kt.IDUser == hd.IDUser)
+                        .Select(kt => new {
+                            kt.IDKhachThue,
+                            kt.HoTen,
+                            kt.SoCCCD,
+                            kt.NgaySinh,
+                            kt.GioiTinh,
+                            kt.SoDienThoai,
+                            kt.QueQuan,
+                            kt.DiaChiThuongTru,
+                            kt.AnhChanDung,
+                            kt.GhiChu,
+                            kt.NgayVaoO,
+                        })
+                        .FirstOrDefault(),
 
                     SoNgayConLai = hd.NgayKetThuc.HasValue
                         ? (int?)EF.Functions.DateDiffDay(DateTime.UtcNow, hd.NgayKetThuc.Value)

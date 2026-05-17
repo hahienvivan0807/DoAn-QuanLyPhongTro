@@ -663,5 +663,86 @@ namespace QuanLyNhaTro.Pages.Manager
                 P("@NoiDung", noiDung),
                 P("@LoaiTB", loaiTB));
         }
+        public IActionResult OnPostChangePasswordAsync(
+    string oldPassword, string newPassword, string confirmPassword)
+        {
+            // 1. Lấy userId từ Claims
+            var userIdClaim = User.FindFirst("IDUser")
+                           ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim?.Value, out var userId) || userId == 0)
+            {
+                ThongBao = "Phiên đăng nhập đã hết hạn.";
+                LoaiThongBao = "danger";
+                return RedirectToPage();
+            }
+
+            // 2. Validate đầu vào
+            if (string.IsNullOrWhiteSpace(oldPassword) ||
+                string.IsNullOrWhiteSpace(newPassword) ||
+                string.IsNullOrWhiteSpace(confirmPassword))
+            { ThongBao = "Vui lòng điền đầy đủ tất cả các trường."; LoaiThongBao = "danger"; return RedirectToPage(); }
+
+            if (newPassword.Length < 6)
+            { ThongBao = "Mật khẩu mới phải có ít nhất 6 ký tự."; LoaiThongBao = "danger"; return RedirectToPage(); }
+
+            if (newPassword != confirmPassword)
+            { ThongBao = "Mật khẩu xác nhận không khớp."; LoaiThongBao = "danger"; return RedirectToPage(); }
+
+            if (newPassword == oldPassword)
+            { ThongBao = "Mật khẩu mới phải khác mật khẩu hiện tại."; LoaiThongBao = "danger"; return RedirectToPage(); }
+
+            try
+            {
+                using var conn = OpenConn();
+
+                // 3. Truy vấn mật khẩu hiện tại
+                string? currentPwd = null;
+                bool isActive = false;
+                using (var cmd = new SqlCommand(
+                    "SELECT Passwords, IsActive FROM dbo.ACCOUNT WHERE IDUser = @ID", conn))
+                {
+                    cmd.Parameters.AddWithValue("@ID", userId);
+                    using var r = cmd.ExecuteReader();
+                    if (r.Read())
+                    {
+                        currentPwd = r.GetString(0);
+                        isActive = r.GetBoolean(1);
+                    }
+                }
+
+                if (currentPwd == null || !isActive)
+                { ThongBao = "Không tìm thấy tài khoản hoặc tài khoản đã bị vô hiệu hóa."; LoaiThongBao = "danger"; return RedirectToPage(); }
+
+                // 4. Kiểm tra mật khẩu cũ — hỗ trợ cả SHA-256 lẫn plain text legacy
+                var hashedOld = HashPasswordDV(oldPassword);
+                if (currentPwd != hashedOld && currentPwd != oldPassword)
+                { ThongBao = "Mật khẩu hiện tại không đúng."; LoaiThongBao = "danger"; return RedirectToPage(); }
+
+                // 5. Cập nhật mật khẩu mới
+                ExecNonQuery(conn, @"
+            UPDATE dbo.ACCOUNT
+            SET Passwords = @NewPwd, UpdatedAt = GETUTCDATE()
+            WHERE IDUser = @ID",
+                    P("@NewPwd", HashPasswordDV(newPassword)),
+                    P("@ID", userId));
+
+                ThongBao = "Đổi mật khẩu thành công!";
+                LoaiThongBao = "success";
+            }
+            catch (Exception ex)
+            {
+                ThongBao = $"Lỗi: {ex.Message}";
+                LoaiThongBao = "danger";
+            }
+
+            return RedirectToPage();
+        }
+
+        private static string HashPasswordDV(string password)
+        {
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            var bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return Convert.ToHexString(bytes).ToLower();
+        }
     }
 }

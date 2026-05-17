@@ -6,6 +6,7 @@ using System.Security.Claims;
 
 namespace QuanLyNhaTro.Pages
 {
+
     // ViewModel gộp thông tin Phòng + HopDong đang hiệu lực
     public class PhongViewModel
     {
@@ -110,5 +111,61 @@ namespace QuanLyNhaTro.Pages
 
             return Page();
         }
+        public async Task<IActionResult> OnPostChangePasswordAsync(
+    string oldPassword, string newPassword, string confirmPassword)
+        {
+            var userIdClaim = User.FindFirst("IDUser")
+                           ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim?.Value, out var userId) || userId == 0)
+            {
+                TempData["ErrorMessage"] = "Phiên đăng nhập đã hết hạn.";
+                return RedirectToPage();
+            }
+
+            if (string.IsNullOrWhiteSpace(oldPassword) ||
+                string.IsNullOrWhiteSpace(newPassword) ||
+                string.IsNullOrWhiteSpace(confirmPassword))
+            { TempData["ErrorMessage"] = "Vui lòng điền đầy đủ tất cả các trường."; return RedirectToPage(); }
+
+            if (newPassword.Length < 6)
+            { TempData["ErrorMessage"] = "Mật khẩu mới phải có ít nhất 6 ký tự."; return RedirectToPage(); }
+
+            if (newPassword != confirmPassword)
+            { TempData["ErrorMessage"] = "Mật khẩu xác nhận không khớp."; return RedirectToPage(); }
+
+            if (newPassword == oldPassword)
+            { TempData["ErrorMessage"] = "Mật khẩu mới phải khác mật khẩu hiện tại."; return RedirectToPage(); }
+
+            var user = await _db.ACCOUNT.FirstOrDefaultAsync(a => a.IDUser == userId && a.IsActive);
+            if (user == null)
+            { TempData["ErrorMessage"] = "Không tìm thấy tài khoản."; return RedirectToPage(); }
+
+            var hashedOld = HashPassword(oldPassword);
+            if (user.Passwords != hashedOld && user.Passwords != oldPassword)
+            { TempData["ErrorMessage"] = "Mật khẩu hiện tại không đúng."; return RedirectToPage(); }
+
+            user.Passwords = HashPassword(newPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+
+            try
+            {
+                await _db.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đổi mật khẩu thành công!";
+            }
+            catch (DbUpdateException)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi lưu dữ liệu. Vui lòng thử lại.";
+            }
+
+            return RedirectToPage();
+        }
+
+        private static string HashPassword(string password)
+        {
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            var bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return Convert.ToHexString(bytes).ToLower();
+        }
     }
+
 }
