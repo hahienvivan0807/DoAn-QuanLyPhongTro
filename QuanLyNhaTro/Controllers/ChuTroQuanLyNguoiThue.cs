@@ -16,6 +16,38 @@ namespace QuanLyNhaTro.Controllers
             _context = context;
             _configuration = configuration;
         }
+        [HttpGet("ds-nguoi-thue")]
+        public async Task<IActionResult> GetDanhSachNguoiThue()
+        {
+            // Lấy TẤT CẢ hợp đồng (cả đang hiệu lực lẫn đã kết thúc)
+            var dsHopDong = await _context.HOPDONG
+                .AsNoTracking()
+                .OrderByDescending(hd => hd.NgayBatDau)
+                .Select(hd => new
+                {
+                    hd.IDHopDong,
+                    hd.IDUser,
+                    hd.IDPhong,
+                    hd.NgayBatDau,
+                    hd.NgayKetThuc,
+                    hd.TienCocBanDau,
+                    hd.TrangThaiHD,
+                    hd.GhiChu,
+
+                    TenKhachThue = hd.Tenant.FullName,
+                    SoDienThoai = hd.Tenant.Phone,
+                    IsActive = hd.Tenant.IsActive,
+
+                    SoPhong = hd.Phong.SoPhong,
+
+                    SoNgayConLai = hd.NgayKetThuc.HasValue
+                        ? (int?)EF.Functions.DateDiffDay(DateTime.UtcNow, hd.NgayKetThuc.Value)
+                        : null
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, danhSach = dsHopDong });
+        }
 
         [HttpGet("ds-phong")]
         public async Task<IActionResult> GetDanhSachPhong([FromQuery] string? trangThai, [FromQuery] string? tuKhoa)
