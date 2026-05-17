@@ -63,7 +63,6 @@ namespace QuanLyNhaTro.Pages.Manager
             // Include Phong, Tenant (người gửi), ManagerXuLy (người xử lý)
             // ----------------------------------------------------------------
             DanhSachSuCo = await _context.DONDV
-                .Where(d => d.LoaiDV == "Hư hỏng")
                 .Include(d => d.Phong)
                 .Include(d => d.Tenant)
                 .Include(d => d.ManagerXuLy)
