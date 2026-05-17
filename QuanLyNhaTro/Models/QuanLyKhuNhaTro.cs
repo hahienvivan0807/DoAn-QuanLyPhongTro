@@ -105,6 +105,7 @@ namespace QuanLyNhaTro.Models
         public string SoPhong { get; set; } = null!;
 
         public byte Tang { get; set; } = 1;
+        public int soluong { get; set; }
 
         [Column(TypeName = "decimal(6, 2)")]
         public decimal? DienTich { get; set; }

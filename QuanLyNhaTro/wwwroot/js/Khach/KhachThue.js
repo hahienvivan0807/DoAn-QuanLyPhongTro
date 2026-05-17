@@ -22,7 +22,7 @@ function ktMoDoiMatKhau() {
 function ktXacNhanDangXuat() {
     ktToggleMenu();
     if (confirm('Bạn có chắc muốn đăng xuất?')) {
-        window.location.href = '/logout'; // đổi route khi làm BE
+        window.location.href = '/Index'; // đổi route khi làm BE
     }
 }
 //

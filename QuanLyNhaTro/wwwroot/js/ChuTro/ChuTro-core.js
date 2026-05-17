@@ -20,8 +20,8 @@ function chuyenMenu(tenTrang, phanTu) {
     // ⚙️ BACKEND: Map tên trang → Razor Page route
     const bangDuongDan = {
         'trang-chu': '/Admin/ChuTro',
-        'quan-ly-phong': '/ChiTietPhong',
-        'nguoi-thue': '/QuanLyNguoiThue',
+        'quan-ly-phong': '/Admin/QuanLyPhong',
+        'nguoi-thue': '/Admin/QuanLyNguoiThue',
         'hop-dong': '/Admin/QuanLyHopDong',
         'hoa-don': '/HoaDon',
         'sua-chua': '/SuCoBaoTri',

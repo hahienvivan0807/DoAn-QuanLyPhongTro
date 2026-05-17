@@ -54,8 +54,8 @@
             }
 
             /* =============================================
-                   SIDEBAR
-                ============================================= */
+                               SIDEBAR
+                            ============================================= */
             #thanh-sidebar {
                 width: 220px;
                 min-width: 220px;
@@ -232,8 +232,8 @@
                 }
 
             /* =============================================
-                   KHU VỰC CHÍNH
-                ============================================= */
+                               KHU VỰC CHÍNH
+                            ============================================= */
             #khu-vuc-chinh {
                 flex: 1;
                 display: flex;
@@ -388,8 +388,8 @@
                 }
 
             /* =============================================
-                   NỘI DUNG CHÍNH
-                ============================================= */
+                               NỘI DUNG CHÍNH
+                            ============================================= */
             #noi-dung-chinh {
                 flex: 1;
                 overflow-y: auto;
@@ -1041,6 +1041,7 @@
                             <div class="item-thong-bao @Model.GetItemChuaDocClass(tb)"
                                  data-loai="@tb.LoaiTB"
                                  data-da-doc="@(tb.DaDoc ? "true" : "false")"
+                                 data-id="@tb.IDThongBao"
                                  onclick="moChiTietThongBao(this, '@tb.IDThongBao')">
                                 <div class="bieu-tuong-thong-bao @Model.GetBieuTuongClass(tb.LoaiTB)">
                                     <i class="@Model.GetIconClass(tb.LoaiTB)"></i>
@@ -1054,6 +1055,9 @@
                                     <div class="dong-duoi-thong-bao">
                                         <span class="the-loai-thong-bao @Model.GetLoaiClass(tb.LoaiTB)">@Model.GetLoaiNhan(tb.LoaiTB)</span>
                                         <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
+                                        <button class="nut-xoa-mem" onclick="xoaMemThongBao(event, '@tb.IDThongBao')" title="Xóa thông báo tạm thời">
+                                            <i class="fas fa-trash-alt"></i> Xóa
+                                        </button>
                                     </div>
                                 </div>
                                 @if (!tb.DaDoc)
@@ -1076,6 +1080,7 @@
                             <div class="item-thong-bao @Model.GetItemChuaDocClass(tb)"
                                  data-loai="@tb.LoaiTB"
                                  data-da-doc="@(tb.DaDoc ? "true" : "false")"
+                                 data-id="@tb.IDThongBao"
                                  onclick="moChiTietThongBao(this, '@tb.IDThongBao')">
                                 <div class="bieu-tuong-thong-bao @Model.GetBieuTuongClass(tb.LoaiTB)">
                                     <i class="@Model.GetIconClass(tb.LoaiTB)"></i>
@@ -1089,6 +1094,9 @@
                                     <div class="dong-duoi-thong-bao">
                                         <span class="the-loai-thong-bao @Model.GetLoaiClass(tb.LoaiTB)">@Model.GetLoaiNhan(tb.LoaiTB)</span>
                                         <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
+                                        <button class="nut-xoa-mem" onclick="xoaMemThongBao(event, '@tb.IDThongBao')" title="Ẩn thông báo này">
+                                            <i class="fas fa-trash-alt"></i> Ẩn
+                                        </button>
                                     </div>
                                 </div>
                                 @if (!tb.DaDoc)
@@ -1111,6 +1119,7 @@
                             <div class="item-thong-bao @Model.GetItemChuaDocClass(tb)"
                                  data-loai="@tb.LoaiTB"
                                  data-da-doc="@(tb.DaDoc ? "true" : "false")"
+                                 data-id="@tb.IDThongBao"
                                  onclick="moChiTietThongBao(this, '@tb.IDThongBao')">
                                 <div class="bieu-tuong-thong-bao @Model.GetBieuTuongClass(tb.LoaiTB)">
                                     <i class="@Model.GetIconClass(tb.LoaiTB)"></i>
@@ -1124,6 +1133,9 @@
                                     <div class="dong-duoi-thong-bao">
                                         <span class="the-loai-thong-bao @Model.GetLoaiClass(tb.LoaiTB)">@Model.GetLoaiNhan(tb.LoaiTB)</span>
                                         <button class="nut-xem-chi-tiet">Xem chi tiết →</button>
+                                        <button class="nut-xoa-mem" onclick="xoaMemThongBao(event, '@tb.IDThongBao')" title="Ẩn thông báo này">
+                                            <i class="fas fa-trash-alt"></i> Ẩn
+                                        </button>
                                     </div>
                                 </div>
                                 @if (!tb.DaDoc)
@@ -1165,19 +1177,50 @@
 
 
     <script>
+            // ── Soft Delete: CSS cho nút ẩn ─────────────────────────────
+    </script>
+    <style>
+            .nut-xoa-mem {
+                margin-left: auto;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 10px;
+                font-size: 11.5px;
+                font-weight: 600;
+                color: var(--mau-chu-phu);
+                background: transparent;
+                border: 1px solid var(--mau-vien);
+                border-radius: 6px;
+                cursor: pointer;
+                transition: color 0.18s, background 0.18s, border-color 0.18s;
+                white-space: nowrap;
+            }
+
+                .nut-xoa-mem:hover {
+                    color: var(--mau-do);
+                    background: var(--mau-do-nhat);
+                    border-color: var(--mau-do);
+                }
+
+            .item-thong-bao[data-deleted="true"] {
+                display: none !important;
+            }
+    </style>
+    <script>
             // ── Dữ liệu thông báo từ Model ──────────────────────────────
             const duLieuThongBao = {
               @foreach (var tb in Model.DanhSachThongBao)
               {
-                    <text>
-                        '@tb.IDThongBao': {
-                          ten: '@Html.Raw(tb.TieuDe.Replace("'", "\\'"))',
-                          loaiClass: '@Model.GetLoaiClass(tb.LoaiTB)',
-                          loaiNhan: '@Model.GetLoaiNhan(tb.LoaiTB)',
-                          thoiGian: '@tb.NgayTao.ToString("dd/MM/yyyy, HH:mm")',
-                          noiDung: '@Html.Raw((tb.NoiDung ?? "").Replace("'", "\\'").Replace("\n", "\\n"))'
-                        },
-                    </text>
+                        <text>
+                                '@tb.IDThongBao': {
+                                  ten: '@Html.Raw(tb.TieuDe.Replace("'", "\\'"))',
+                                  loaiClass: '@Model.GetLoaiClass(tb.LoaiTB)',
+                                  loaiNhan: '@Model.GetLoaiNhan(tb.LoaiTB)',
+                                  thoiGian: '@tb.NgayTao.ToString("dd/MM/yyyy, HH:mm")',
+                                  noiDung: '@Html.Raw((tb.NoiDung ?? "").Replace("'", "\\'").Replace("\n", "\\n"))'
+                                },
+                        </text>
               }
             };
 
@@ -1298,6 +1341,9 @@
               nut.classList.add('dang-chon-loc');
 
               document.querySelectorAll('.item-thong-bao').forEach(el => {
+                // Giữ ẩn các thông báo đã bị xóa mềm
+                if (el.dataset.deleted === 'true') return;
+
                 const dataLoai = el.dataset.loai;
                 const daDoc = el.dataset.daDoc;
                 if (loai === 'tat-ca') {
@@ -1308,6 +1354,60 @@
                   el.style.display = dataLoai === loai ? '' : 'none';
                 }
               });
+            }
+    </script>
+
+    <!-- ── Soft Delete (localStorage) ───────────────────────────── -->
+    <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const STORAGE_KEY = 'deletedNotifs';
+
+                // Đọc danh sách ID đã ẩn từ localStorage
+                function layDanhSachDaXoa() {
+                    try {
+                        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                    } catch {
+                        return [];
+                    }
+                }
+
+                // Lưu danh sách ID đã ẩn vào localStorage
+                function luuDanhSachDaXoa(arr) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+                }
+
+                // Khi tải trang: ẩn các thông báo đã bị xóa mềm trước đó
+                const daXoa = layDanhSachDaXoa();
+                if (daXoa.length > 0) {
+                    document.querySelectorAll('.item-thong-bao[data-id]').forEach(function (el) {
+                        if (daXoa.includes(el.dataset.id)) {
+                            el.dataset.deleted = 'true';
+                        }
+                    });
+                    // Cập nhật lại số chưa đọc sau khi ẩn
+                    capNhatSoChuaDoc();
+                }
+            });
+
+            // Xóa mềm 1 thông báo
+            function xoaMemThongBao(event, id) {
+                event.stopPropagation(); // Ngăn mở modal chi tiết
+
+                const el = document.querySelector('.item-thong-bao[data-id="' + id + '"]');
+                if (!el) return;
+
+                // Ẩn ngay lập tức
+                el.dataset.deleted = 'true';
+
+                // Lưu ID vào localStorage
+                const arr = JSON.parse(localStorage.getItem('deletedNotifs') || '[]');
+                if (!arr.includes(String(id))) {
+                    arr.push(String(id));
+                    localStorage.setItem('deletedNotifs', JSON.stringify(arr));
+                }
+
+                // Cập nhật lại bộ đếm chưa đọc
+                capNhatSoChuaDoc();
             }
     </script>
 
