@@ -28,7 +28,7 @@
                     new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
     ))
 </script>
-
+<script src="~/js/ChuTro/ChuTro-core.js"></script>
 @* Anti-forgery token dùng cho AJAX POST *@
 @Html.AntiForgeryToken()
 
@@ -1886,7 +1886,7 @@
         <!-- Nhóm: Vận hành -->
         <div class="nhan-nhom-menu">Vận hành</div>
 
-        <a class="muc-menu" href="/Admin/ChuTro#quan-ly-phong">
+        <a class="muc-menu" href="/Admin/QuanLyPhong"">
             <i class="fas fa-building"></i>
             <span>Quản lý phòng trọ</span>
         </a>
@@ -1894,14 +1894,10 @@
             <i class="fas fa-users"></i>
             <span>Người thuê</span>
         </a>
-        <a class="muc-menu" href="/Admin/ChuTro#hop-dong">
+        <a class="muc-menu" href="/Admin/QuanLyHopDong">
             <i class="fas fa-file-contract"></i>
             <span>Hợp đồng</span>
             <span class="huy-hieu vang">2</span>
-        </a>
-        <a class="muc-menu" href="/Admin/ChuTro#hoa-don">
-            <i class="fas fa-file-invoice-dollar"></i>
-            <span>Hóa đơn & Thu tiền</span>
         </a>
 
         <!-- Nhóm: Quản trị chủ trọ -->
@@ -1915,26 +1911,22 @@
             <i class="fas fa-users"></i>
             <span>Quản lý người thuê</span>
         </a>
-        <a class="muc-menu" href="/Admin/ChuTro#cau-hinh-gia">
+        <a class="muc-menu" href="/Admin/CauHinhGiaThue">
             <i class="fas fa-sliders-h"></i>
             <span>Cấu hình giá thuê</span>
         </a>
-        <a class="muc-menu" href="/Admin/ChuTro#dich-vu">
+        <a class="muc-menu" href="/Admin/DichVuThongBao">
             <i class="fas fa-bolt"></i>
             <span>Dịch vụ thông báo</span>
-        </a>
-        <a class="muc-menu" href="/Admin/ChuTro#dat-coc">
-            <i class="fas fa-hand-holding-usd"></i>
-            <span>Quy định đặt cọc</span>
         </a>
 
         <!-- Nhóm: Hỗ trợ -->
         <div class="nhan-nhom-menu">Hỗ trợ</div>
 
-        <a class="muc-menu" href="/Admin/ChuTro#sua-chua">
+        <a class="muc-menu" href="/Admin/SuCoBaoTri">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
-            <span class="huy-hieu">3</span>
+            <span class="huy-hieu" id="huy-hieu-sua-chua">3</span>
         </a>
         <a class="muc-menu" href="/Admin/ChuTro#bao-cao">
             <i class="fas fa-chart-bar"></i>

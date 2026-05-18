@@ -129,7 +129,6 @@ async function HienThiProfile() {
     try {
     const respone = await fetch('/api/ChuTro/Profile');
         const dulieu = await respone.json();
-         console.log(dulieu);
         const adminHeader = document.querySelector('.ten-admin-header');
         if (adminHeader) adminHeader.textContent = dulieu.fullName;
 
@@ -142,6 +141,19 @@ async function HienThiProfile() {
         if (theChaoHoi) theChaoHoi.textContent = `Xin chào, ${dulieu.fullName}! 👑`;
     } catch (error) {
         console.error("Lỗi khi lấy dữ liệu profile:", error);
+    }
+}
+async function SoLieuTaskBar() {
+    try {
+        const respone = await fetch('/api/ChuTro/SLTaskBar');
+        const dulieu = await respone.json();
+        console.log(dulieu);
+        if (respone.ok) {
+            console.log("hello");
+            document.getElementById("huy-hieu-sua-chua").innerText = dulieu.dem;
+        }
+    } catch (error) {
+        alert("Có lỗi xảy ra");
     }
 }
 ///////////////////Chỗ chưa sửa ////////////
@@ -181,4 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 document.addEventListener('DOMContentLoaded', () => {
     TyLeDoanhThu();
+});
+document.addEventListener('DOMContentLoaded', () => {
+    SoLieuTaskBar();
 });

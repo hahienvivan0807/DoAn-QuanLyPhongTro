@@ -1,0 +1,1913 @@
+﻿@page "/Admin/ThongKe"
+@model QuanLyNhaTro.Pages.Admin.ThongKeModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thống Kê – Cổng Chủ Trọ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* =========================================================
+        IMPORT FONT — matching ChuTro theme
+        ========================================================= */
+        @@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+
+        /* =========================================================
+        CSS VARIABLES — identical to ChuTro.cshtml
+        ========================================================= */
+        :root {
+        --mau-chu-de: #b8720a;
+        --mau-chu-de-sang: #e8971c;
+        --mau-chu-de-nhat: #fdf6e3;
+        --mau-chu-de-vien: rgba(184,114,10,0.15);
+        --mau-sidebar: #0d1b2e;
+        --mau-sidebar-dam: #081020;
+        --mau-sidebar-vien: rgba(255,255,255,0.06);
+        --mau-sidebar-hover: rgba(232,151,28,0.12);
+        --mau-sidebar-active: rgba(232,151,28,0.18);
+        --mau-nen: #f0f2f8;
+        --mau-nen-card: #f8f9fd;
+        --mau-trang: #ffffff;
+        --mau-chu: #111827;
+        --mau-chu-phu: #6b7a99;
+        --mau-vien: #e5e9f5;
+        --mau-xanh: #0ea271;
+        --mau-xanh-nhat: #ecfdf5;
+        --mau-do: #e53e3e;
+        --mau-do-nhat: #fff5f5;
+        --mau-xanh-bien: #2563eb;
+        --mau-xanh-bien-nhat: #eff6ff;
+        --bong-card: 0 2px 12px rgba(13,27,46,0.06), 0 1px 3px rgba(13,27,46,0.04);
+        --bong-card-hover: 0 8px 28px rgba(184,114,10,0.14), 0 2px 8px rgba(13,27,46,0.08);
+        --bong-sidebar: 6px 0 32px rgba(0,0,0,0.3);
+        --bong-header: 0 1px 0 var(--mau-vien), 0 2px 16px rgba(13,27,46,0.04);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --radius-full: 9999px;
+        }
+
+        /* =========================================================
+        RESET
+        ========================================================= */
+        *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        }
+
+        body {
+        font-family: 'Be Vietnam Pro', sans-serif;
+        background: var(--mau-nen);
+        color: var(--mau-chu);
+        display: flex;
+        height: 100vh;
+        overflow: clip;
+        -webkit-font-smoothing: antialiased;
+        }
+
+        /* =========================================================
+        SIDEBAR
+        ========================================================= */
+        #thanh-sidebar {
+        width: 248px;
+        min-width: 248px;
+        background: var(--mau-sidebar);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        z-index: 100;
+        box-shadow: var(--bong-sidebar);
+        overflow-y: auto;
+        transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
+        border-right: 1px solid rgba(255,255,255,0.04);
+        }
+
+        #thanh-sidebar.an {
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
+        }
+
+        #thanh-sidebar::-webkit-scrollbar {
+        width: 0;
+        }
+
+        .khu-vuc-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 20px 20px;
+        border-bottom: 1px solid var(--mau-sidebar-vien);
+        }
+
+        .bieu-tuong-logo {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(184,114,10,0.45);
+        }
+
+        .ten-logo strong {
+        display: block;
+        color: #fff;
+        font-size: 13.5px;
+        font-weight: 800;
+        }
+
+        .ten-logo span {
+        font-size: 10px;
+        color: rgba(255,255,255,0.32);
+        }
+
+        .nhan-nhom-menu {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: rgba(255,255,255,0.22);
+        text-transform: uppercase;
+        padding: 18px 20px 6px;
+        }
+
+        .muc-menu {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px 9px 16px;
+        color: rgba(255,255,255,0.52);
+        cursor: pointer;
+        border-radius: 0 var(--radius-full) var(--radius-full) 0;
+        margin: 1px 12px 1px 0;
+        transition: all 0.18s ease;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        position: relative;
+        }
+
+        .muc-menu i {
+        width: 18px;
+        text-align: center;
+        font-size: 13px;
+        opacity: .75;
+        flex-shrink: 0;
+        }
+
+        .muc-menu:hover {
+        background: var(--mau-sidebar-hover);
+        color: rgba(255,255,255,0.9);
+        }
+
+        .muc-menu:hover i {
+        opacity: 1;
+        }
+
+        .muc-menu.dang-chon {
+        background: var(--mau-sidebar-active);
+        color: #fff;
+        font-weight: 700;
+        }
+
+        .muc-menu.dang-chon i {
+        opacity: 1;
+        color: var(--mau-chu-de-sang);
+        }
+
+        .muc-menu.dang-chon::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 60%;
+        width: 3px;
+        background: var(--mau-chu-de-sang);
+        border-radius: 0 3px 3px 0;
+        }
+
+        .huy-hieu {
+        margin-left: auto;
+        background: rgba(239,68,68,0.85);
+        color: #fff;
+        font-size: 9.5px;
+        font-weight: 800;
+        border-radius: var(--radius-full);
+        padding: 2px 7px;
+        min-width: 18px;
+        text-align: center;
+        }
+
+        .thong-tin-chu-tro {
+        margin-top: auto;
+        padding: 14px 16px;
+        border-top: 1px solid var(--mau-sidebar-vien);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        flex-shrink: 0;
+        position: sticky;
+        bottom: 0;
+        background: var(--mau-sidebar-dam);
+        z-index: 1;
+        }
+
+        .anh-chu-tro {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        }
+
+        .ten-chu strong {
+        display: block;
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 700;
+        }
+
+        .ten-chu span {
+        color: rgba(255,255,255,0.35);
+        font-size: 10px;
+        }
+
+        /* =========================================================
+        MAIN AREA
+        ========================================================= */
+        #khu-vuc-chinh {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        }
+
+        #thanh-header {
+        background: var(--mau-trang);
+        padding: 0 28px;
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--bong-header);
+        flex-shrink: 0;
+        z-index: 50;
+        }
+
+        .header-trai {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        }
+
+        .nut-ham-burger {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        color: var(--mau-chu-phu);
+        padding: 8px;
+        border-radius: var(--radius-sm);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+
+        .nut-ham-burger:hover {
+        background: var(--mau-chu-de-nhat);
+        color: var(--mau-chu-de);
+        }
+
+        .tieu-de-header {
+        font-size: 14.5px;
+        font-weight: 800;
+        color: var(--mau-chu);
+        font-family: 'Lexend',sans-serif;
+        }
+
+        .duong-dan-header {
+        font-size: 11px;
+        color: var(--mau-chu-phu);
+        margin-top: 1px;
+        }
+
+        .header-phai {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        }
+
+        .nut-chuong {
+        position: relative;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        color: var(--mau-chu-phu);
+        padding: 8px;
+        border-radius: var(--radius-full);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        }
+
+        .nut-chuong:hover {
+        background: var(--mau-chu-de-nhat);
+        color: var(--mau-chu-de);
+        }
+
+        .so-chuong {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: var(--mau-do);
+        color: #fff;
+        font-size: 8.5px;
+        font-weight: 800;
+        border-radius: var(--radius-full);
+        width: 15px;
+        height: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+        }
+
+        .the-chu-tro {
+        background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        color: #fff;
+        font-size: 9.5px;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        }
+
+        .header-divider {
+        width: 1px;
+        height: 22px;
+        background: var(--mau-vien);
+        margin: 0 2px;
+        }
+
+        .khoi-admin-header {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: var(--radius-full);
+        transition: background 0.2s;
+        }
+
+        .khoi-admin-header:hover {
+        background: var(--mau-chu-de-nhat);
+        }
+
+        .anh-dai-dien-header {
+        width: 34px;
+        height: 34px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 800;
+        }
+
+        .ten-admin-header {
+        font-size: 12.5px;
+        font-weight: 700;
+        }
+
+        .vai-tro-header {
+        font-size: 10px;
+        color: var(--mau-chu-phu);
+        }
+
+        /* =========================================================
+        CONTENT AREA
+        ========================================================= */
+        #noi-dung-chinh {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 28px 32px;
+        }
+
+        #noi-dung-chinh::-webkit-scrollbar {
+        width: 5px;
+        }
+
+        #noi-dung-chinh::-webkit-scrollbar-thumb {
+        background: #d4d9e6;
+        border-radius: 3px;
+        }
+
+        .dong-tieu-de-trang {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+        }
+
+        .dong-tieu-de-trang h2 {
+        font-size: 21px;
+        font-weight: 900;
+        font-family: 'Lexend',sans-serif;
+        }
+
+        .dong-tieu-de-trang p {
+        font-size: 12px;
+        color: var(--mau-chu-phu);
+        margin-top: 4px;
+        }
+
+        /* ── Period selector ── */
+        .thanh-chon-ky {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        }
+
+        .chon-nam {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--mau-trang);
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-md);
+        padding: 7px 14px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: var(--mau-chu);
+        }
+
+        .chon-nam:hover {
+        border-color: var(--mau-chu-de);
+        background: var(--mau-chu-de-nhat);
+        }
+
+        .chon-nam.active {
+        background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        color: #fff;
+        border-color: transparent;
+        }
+
+        .o-chon-nam {
+        appearance: none;
+        background: var(--mau-trang);
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-md);
+        padding: 7px 32px 7px 14px;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--mau-chu);
+        cursor: pointer;
+        outline: none;
+        font-family: inherit;
+        transition: all 0.2s;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        }
+
+        .o-chon-nam:focus {
+        border-color: var(--mau-chu-de);
+        box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
+        }
+
+        .nut-xuat-bao-cao {
+        background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 9px 18px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        box-shadow: 0 4px 14px rgba(184,114,10,0.3);
+        transition: all 0.2s;
+        font-family: inherit;
+        }
+
+        .nut-xuat-bao-cao:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(184,114,10,0.42);
+        }
+
+        /* =========================================================
+        KPI CARDS ROW
+        ========================================================= */
+        .hang-kpi {
+        display: grid;
+        grid-template-columns: repeat(5,1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+        }
+
+        .card-kpi {
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        padding: 18px 20px;
+        box-shadow: var(--bong-card);
+        border: 1.5px solid transparent;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.22s ease;
+        cursor: default;
+        }
+
+        .card-kpi:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--bong-card-hover);
+        }
+
+        .card-kpi::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .card-kpi.vang::after {
+        background: linear-gradient(90deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        }
+
+        .card-kpi.vang {
+        border-color: rgba(232,151,28,0.14);
+        }
+
+        .card-kpi.xanh-bien::after {
+        background: linear-gradient(90deg,#2563eb,#60a5fa);
+        }
+
+        .card-kpi.xanh-bien {
+        border-color: rgba(37,99,235,0.10);
+        }
+
+        .card-kpi.xanh-la::after {
+        background: linear-gradient(90deg,#059669,#34d399);
+        }
+
+        .card-kpi.xanh-la {
+        border-color: rgba(5,150,105,0.10);
+        }
+
+        .card-kpi.do::after {
+        background: linear-gradient(90deg,#dc2626,#f87171);
+        }
+
+        .card-kpi.do {
+        border-color: rgba(220,38,38,0.10);
+        }
+
+        .card-kpi.tim::after {
+        background: linear-gradient(90deg,#7c3aed,#a78bfa);
+        }
+
+        .card-kpi.tim {
+        border-color: rgba(124,58,237,0.10);
+        }
+
+        .kpi-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 12px;
+        }
+
+        .kpi-icon.vang {
+        background: var(--mau-chu-de-nhat);
+        color: var(--mau-chu-de);
+        }
+
+        .kpi-icon.xanh-bien {
+        background: var(--mau-xanh-bien-nhat);
+        color: var(--mau-xanh-bien);
+        }
+
+        .kpi-icon.xanh-la {
+        background: var(--mau-xanh-nhat);
+        color: #059669;
+        }
+
+        .kpi-icon.do {
+        background: var(--mau-do-nhat);
+        color: #dc2626;
+        }
+
+        .kpi-icon.tim {
+        background: #f5f3ff;
+        color: #7c3aed;
+        }
+
+        .kpi-so {
+        font-size: 24px;
+        font-weight: 900;
+        line-height: 1;
+        font-family: 'Lexend',sans-serif;
+        margin-bottom: 5px;
+        }
+
+        .kpi-nhan {
+        font-size: 11.5px;
+        color: var(--mau-chu-phu);
+        font-weight: 500;
+        }
+
+        .kpi-the {
+        display: inline-block;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: var(--radius-full);
+        margin-top: 6px;
+        }
+
+        .kpi-the.tang {
+        background: #dcfce7;
+        color: #16a34a;
+        }
+
+        .kpi-the.giam {
+        background: #fee2e2;
+        color: #dc2626;
+        }
+
+        .kpi-the.trung {
+        background: #fef3c7;
+        color: #d97706;
+        }
+
+        /* =========================================================
+        ROW 2: BIG CHART + BREAKDOWN
+        ========================================================= */
+        .hang-bieu-do {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+        }
+
+        .card-chart, .card-pha-vo {
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        padding: 22px;
+        box-shadow: var(--bong-card);
+        border: 1.5px solid var(--mau-vien);
+        position: relative;
+        overflow: hidden;
+        }
+
+        .card-chart::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg,var(--mau-chu-de),var(--mau-chu-de-sang),#fbbf24);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .card-pha-vo::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg,#059669,#34d399,#60a5fa);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .tieu-de-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        }
+
+        .tieu-de-card h3 {
+        font-size: 14px;
+        font-weight: 800;
+        font-family: 'Lexend',sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        }
+
+        .tieu-de-card h3 i {
+        color: var(--mau-chu-de);
+        font-size: 13px;
+        }
+
+        .nut-xem-them {
+        background: none;
+        border: 1.5px solid var(--mau-vien);
+        color: var(--mau-chu-de);
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: var(--radius-md);
+        padding: 5px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+        }
+
+        .nut-xem-them:hover {
+        background: var(--mau-chu-de-nhat);
+        border-color: var(--mau-chu-de);
+        }
+
+        /* Breakdown items */
+        .dong-pha-vo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--mau-vien);
+        cursor: default;
+        }
+
+        .dong-pha-vo:last-of-type {
+        border-bottom: none;
+        }
+
+        .dot-pv {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        }
+
+        .ten-pv {
+        flex: 1;
+        font-size: 12.5px;
+        font-weight: 600;
+        }
+
+        .bar-pv-wrap {
+        width: 80px;
+        height: 6px;
+        background: var(--mau-vien);
+        border-radius: 3px;
+        overflow: hidden;
+        }
+
+        .bar-pv-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.6s ease;
+        }
+
+        .so-pv {
+        font-size: 12.5px;
+        font-weight: 800;
+        min-width: 60px;
+        text-align: right;
+        }
+
+        .tong-ket-box {
+        background: linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        margin-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        }
+
+        .tong-ket-box .nhan {
+        color: rgba(255,255,255,.75);
+        font-size: 11.5px;
+        font-weight: 600;
+        }
+
+        .tong-ket-box .so {
+        color: #fff;
+        font-size: 17px;
+        font-weight: 900;
+        font-family: 'Lexend',sans-serif;
+        }
+
+        /* =========================================================
+        ROW 3: TABLE + TREND CHART
+        ========================================================= */
+        .hang-bang {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+        gap: 16px;
+        margin-bottom: 20px;
+        }
+
+        .card-bang {
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--bong-card);
+        border: 1.5px solid var(--mau-vien);
+        overflow: hidden;
+        }
+
+        .card-bang-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--mau-vien);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg,var(--mau-chu-de-nhat) 0%,var(--mau-trang) 100%);
+        }
+
+        .card-bang-header h3 {
+        font-size: 14px;
+        font-weight: 800;
+        font-family: 'Lexend',sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        }
+
+        .card-bang-header h3 i {
+        color: var(--mau-chu-de);
+        }
+
+        .nhan-so-bang {
+        font-size: 11px;
+        background: var(--mau-chu-de);
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        font-weight: 700;
+        }
+
+        .bang-thong-ke {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+        }
+
+        .bang-thong-ke th {
+        text-align: left;
+        padding: 10px 14px;
+        color: var(--mau-chu-phu);
+        font-weight: 700;
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        background: #f8f9fd;
+        border-bottom: 2px solid var(--mau-vien);
+        }
+
+        .bang-thong-ke th:last-child {
+        text-align: right;
+        }
+
+        .bang-thong-ke td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--mau-vien);
+        }
+
+        .bang-thong-ke td:last-child {
+        text-align: right;
+        font-weight: 800;
+        }
+
+        .bang-thong-ke tr:last-child td {
+        border-bottom: none;
+        }
+
+        .bang-thong-ke tr:hover td {
+        background: var(--mau-nen);
+        }
+
+        .chip-ky {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--mau-xanh-bien-nhat);
+        color: var(--mau-xanh-bien);
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        font-size: 11.5px;
+        font-weight: 700;
+        }
+
+        .chip-ky i {
+        font-size: 9px;
+        }
+
+        .so-tien-xanh {
+        color: #059669;
+        }
+
+        .so-tien-vang {
+        color: var(--mau-chu-de);
+        }
+
+        .so-tien-do {
+        color: #dc2626;
+        }
+
+        .the-tang-truong {
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: var(--radius-full);
+        display: inline-block;
+        }
+
+        .the-tang-truong.tang {
+        background: #dcfce7;
+        color: #16a34a;
+        }
+
+        .the-tang-truong.giam {
+        background: #fee2e2;
+        color: #dc2626;
+        }
+
+        /* Trend chart card */
+        .card-trend {
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        padding: 22px;
+        box-shadow: var(--bong-card);
+        border: 1.5px solid var(--mau-vien);
+        position: relative;
+        overflow: hidden;
+        }
+
+        .card-trend::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg,#7c3aed,#a78bfa,#60a5fa);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        /* =========================================================
+        ROW 4: ROOM STATUS + SERVICE STATUS
+        ========================================================= */
+        .hang-trang-thai {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+        }
+
+        .card-trang-thai {
+        background: var(--mau-trang);
+        border-radius: var(--radius-lg);
+        padding: 22px;
+        box-shadow: var(--bong-card);
+        border: 1.5px solid var(--mau-vien);
+        position: relative;
+        overflow: hidden;
+        }
+
+        /* Donut chart wrapper */
+        .wrapper-donut {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        }
+
+        .canvas-donut {
+        width: 130px !important;
+        height: 130px !important;
+        flex-shrink: 0;
+        }
+
+        .legend-donut {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        }
+
+        .dong-legend {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        }
+
+        .dot-legend {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        }
+
+        .ten-legend {
+        flex: 1;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--mau-chu-phu);
+        }
+
+        .so-legend {
+        font-size: 12.5px;
+        font-weight: 800;
+        }
+
+        .phan-tram-legend {
+        font-size: 10.5px;
+        color: var(--mau-chu-phu);
+        margin-left: 4px;
+        }
+
+        /* =========================================================
+        EMPTY / LOADING STATES
+        ========================================================= */
+        .trang-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        color: var(--mau-chu-phu);
+        font-size: 13px;
+        gap: 10px;
+        }
+
+        .trang-loading i {
+        font-size: 24px;
+        color: var(--mau-chu-de);
+        }
+
+        /* =========================================================
+        TOAST
+        ========================================================= */
+        .toast-container {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 99999;
+        }
+
+        .toast {
+        min-width: 280px;
+        max-width: 340px;
+        background: #fff;
+        border: 0.5px solid #e5e9f5;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease;
+        position: relative;
+        overflow: hidden;
+        }
+
+        .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+        }
+
+        .toast.hide {
+        transform: translateX(120%);
+        opacity: 0;
+        transition: transform 0.25s ease, opacity 0.2s ease;
+        }
+
+        .toast-icon-wrap {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        }
+
+        .toast-title {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 2px;
+        }
+
+        .toast-msg {
+        font-size: 12px;
+        color: #6b7a99;
+        line-height: 1.5;
+        }
+
+        .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2.5px;
+        animation: progress linear forwards;
+        }
+
+        @@keyframes progress {
+        from {
+        width: 100%
+        }
+
+        to {
+        width: 0%
+        }
+        }
+
+        .toast-success .toast-icon-wrap {
+        background: #EAF3DE;
+        }
+
+        .toast-success .toast-progress {
+        background: #639922;
+        }
+
+        .toast-fail .toast-icon-wrap {
+        background: #FCEBEB;
+        }
+
+        .toast-fail .toast-progress {
+        background: #E24B4A;
+        }
+
+        /* =========================================================
+        SCROLLBAR
+        ========================================================= */
+        ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+        background: #d4d9e6;
+        border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+        background: #b0b9ce;
+        }
+
+        /* =========================================================
+        RESPONSIVE
+        ========================================================= */
+        @@media (max-width:1400px) {
+        .hang-kpi {
+        grid-template-columns: repeat(3,1fr);
+        }
+        }
+
+        @@media (max-width:1200px) {
+        .hang-bieu-do, .hang-bang, .hang-trang-thai {
+        grid-template-columns: 1fr;
+        }
+        }
+
+        @@media (max-width:900px) {
+        .hang-kpi {
+        grid-template-columns: repeat(2,1fr);
+        }
+        }
+
+        @@media (max-width:768px) {
+        #thanh-sidebar {
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
+        }
+
+        #thanh-sidebar.mo {
+        width: 248px;
+        min-width: 248px;
+        }
+
+        #noi-dung-chinh {
+        padding: 16px;
+        }
+
+        #thanh-header {
+        padding: 0 16px;
+        }
+
+        .hang-kpi {
+        grid-template-columns: 1fr 1fr;
+        }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =============================================
+     SIDEBAR
+============================================= -->
+    <nav id="thanh-sidebar">
+        <div class="khu-vuc-logo">
+            <div class="bieu-tuong-logo"><i class="fas fa-crown"></i></div>
+            <div class="ten-logo">
+                <strong>NHÀ TRỌ BÀ NĂM</strong>
+                <span>Cổng Chủ Trọ</span>
+            </div>
+        </div>
+
+        <div class="nhan-nhom-menu">Tổng quan</div>
+        <a class="muc-menu" href="/Admin/ChuTro">
+            <i class="fas fa-home"></i><span>Trang chủ</span>
+        </a>
+
+        <div class="nhan-nhom-menu">Vận hành</div>
+        <a class="muc-menu" href="/Admin/ChuTro">
+            <i class="fas fa-building"></i><span>Quản lý phòng trọ</span>
+        </a>
+        <a class="muc-menu" href="/Admin/QuanLyNguoiThue">
+            <i class="fas fa-users"></i><span>Người thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro">
+            <i class="fas fa-file-contract"></i><span>Hợp đồng</span>
+            <span class="huy-hieu">2</span>
+        </a>
+
+        <div class="nhan-nhom-menu">Quản trị chủ trọ</div>
+        <a class="muc-menu" href="/Admin/Taikhoanquanly">
+            <i class="fas fa-user-shield"></i><span>Tài khoản quản lý</span>
+        </a>
+        <a class="muc-menu" href="/Admin/CauHinhGiaThue">
+            <i class="fas fa-sliders-h"></i><span>Cấu hình giá thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/DichVuThongBao">
+            <i class="fas fa-bolt"></i><span>Dịch vụ thông báo</span>
+        </a>
+
+        <div class="nhan-nhom-menu">Hỗ trợ</div>
+        <a class="muc-menu" href="/Admin/ChuTro">
+            <i class="fas fa-tools"></i><span>Sự cố / Bảo trì</span>
+            <span class="huy-hieu" id="sb-badge-suco" style="display:none;"></span>
+        </a>
+        <a class="muc-menu dang-chon" href="/Admin/ThongKe">
+            <i class="fas fa-chart-bar"></i><span>Thống kê & Báo cáo</span>
+        </a>
+        <a class="muc-menu" href="/Admin/ChuTro">
+            <i class="fas fa-cog"></i><span>Cài đặt hệ thống</span>
+        </a>
+
+        <div class="thong-tin-chu-tro">
+            <div class="anh-chu-tro" id="sb-avatar">C</div>
+            <div class="ten-chu">
+                <strong id="sb-ten">Chủ Trọ</strong>
+                <span>Chủ sở hữu</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- =============================================
+     MAIN AREA
+============================================= -->
+    <div id="khu-vuc-chinh">
+
+        <!-- HEADER -->
+        <header id="thanh-header">
+            <div class="header-trai">
+                <button class="nut-ham-burger" onclick="dongMoSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div>
+                    <div class="tieu-de-header">Thống kê & Báo cáo</div>
+                    <div class="duong-dan-header">Trang chủ / Thống kê</div>
+                </div>
+            </div>
+            <div class="header-phai">
+                <button class="nut-chuong">
+                    <i class="fas fa-bell"></i>
+                    <span class="so-chuong" id="header-badge-tb" style="display:none;"></span>
+                </button>
+                <div class="header-divider"></div>
+                <span class="the-chu-tro"><i class="fas fa-crown" style="margin-right:4px;font-size:8px;"></i>CHỦ TRỌ</span>
+                <div class="khoi-admin-header">
+                    <div class="anh-dai-dien-header" id="hd-avatar">C</div>
+                    <div>
+                        <div class="ten-admin-header" id="hd-ten">Đang tải...</div>
+                        <div class="vai-tro-header">Chủ sở hữu</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main id="noi-dung-chinh">
+
+            <!-- ── Page title + controls ── -->
+            <div class="dong-tieu-de-trang">
+                <div>
+                    <h2>📊 Thống kê & Báo cáo</h2>
+                    <p id="txt-cap-nhat">Đang tải dữ liệu...</p>
+                </div>
+                <div class="thanh-chon-ky">
+                    <select class="o-chon-nam" id="chon-nam" onchange="taiDuLieu()">
+                        <!-- years injected by JS -->
+                    </select>
+                    <button class="nut-xuat-bao-cao" onclick="xuatCSV()">
+                        <i class="fas fa-file-export"></i> Xuất CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── ROW 1: KPI cards ── -->
+            <div class="hang-kpi" id="hang-kpi">
+                <!-- Skeleton placeholders while loading -->
+                @for (int i = 0; i < 5; i++)
+                {
+                    <div class="card-kpi" style="min-height:120px;">
+                        <div style="width:44px;height:44px;border-radius:var(--radius-md);background:#e8ecf4;margin-bottom:12px;"></div>
+                        <div style="width:60%;height:22px;background:#e8ecf4;border-radius:6px;margin-bottom:8px;"></div>
+                        <div style="width:40%;height:14px;background:#e8ecf4;border-radius:4px;"></div>
+                    </div>
+                }
+            </div>
+
+            <!-- ── ROW 2: Main chart + breakdown ── -->
+            <div class="hang-bieu-do">
+                <div class="card-chart">
+                    <div class="tieu-de-card">
+                        <h3><i class="fas fa-chart-area"></i> Doanh thu & Chi phí theo tháng</h3>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <div style="display:flex;gap:6px;font-size:11px;font-weight:700;">
+                                <span style="display:flex;align-items:center;gap:4px;color:var(--mau-chu-de);">
+                                    <span style="width:10px;height:10px;background:var(--mau-chu-de);border-radius:50%;display:inline-block;"></span>Doanh thu
+                                </span>
+                                <span style="display:flex;align-items:center;gap:4px;color:#dc2626;">
+                                    <span style="width:10px;height:10px;background:#dc2626;border-radius:50%;display:inline-block;"></span>Chi phí
+                                </span>
+                                <span style="display:flex;align-items:center;gap:4px;color:#059669;">
+                                    <span style="width:10px;height:10px;background:#059669;border-radius:50%;display:inline-block;"></span>Lợi nhuận
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <canvas id="chart-doanh-thu" height="120"></canvas>
+                </div>
+
+                <div class="card-pha-vo">
+                    <div class="tieu-de-card">
+                        <h3><i class="fas fa-balance-scale" style="color:#059669;"></i> Phân tích doanh thu</h3>
+                    </div>
+                    <div id="pha-vo-container">
+                        <div class="trang-loading"><i class="fas fa-spinner fa-spin"></i>Đang tính toán...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ROW 3: Table + trend chart ── -->
+            <div class="hang-bang">
+                <div class="card-bang">
+                    <div class="card-bang-header">
+                        <h3><i class="fas fa-table"></i> Chi tiết doanh thu theo tháng</h3>
+                        <span class="nhan-so-bang" id="badge-so-ban-ghi">0 bản ghi</span>
+                    </div>
+                    <div style="overflow-x:auto; max-height:360px; overflow-y:auto;">
+                        <table class="bang-thong-ke" id="bang-doanh-thu">
+                            <thead>
+                                <tr>
+                                    <th>Kỳ</th>
+                                    <th>Tiền phòng</th>
+                                    <th>Điện</th>
+                                    <th>Nước</th>
+                                    <th>Dịch vụ</th>
+                                    <th>Tổng thu</th>
+                                    <th>Chi phí</th>
+                                    <th>Lợi nhuận</th>
+                                    <th>HĐ đã đóng</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-doanh-thu">
+                                <tr>
+                                    <td colspan="9" style="text-align:center;padding:32px;color:var(--mau-chu-phu);">
+                                        <i class="fas fa-spinner fa-spin" style="font-size:20px;display:block;margin-bottom:8px;"></i>
+                                        Đang tải...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card-trend">
+                    <div class="tieu-de-card">
+                        <h3 style="color:var(--mau-chu);"><i class="fas fa-chart-pie" style="color:#7c3aed;"></i> Cơ cấu doanh thu</h3>
+                    </div>
+                    <canvas id="chart-pie" height="180"></canvas>
+                    <div id="legend-pie" style="margin-top:16px;display:flex;flex-direction:column;gap:6px;"></div>
+                </div>
+            </div>
+
+            <!-- ── ROW 4: Room status + invoice status ── -->
+            <div class="hang-trang-thai">
+                <div class="card-trang-thai">
+                    <div class="tieu-de-card">
+                        <h3><i class="fas fa-door-open" style="color:var(--mau-xanh-bien);"></i> Trạng thái phòng</h3>
+                    </div>
+                    <div class="wrapper-donut">
+                        <canvas id="chart-donut-phong" class="canvas-donut"></canvas>
+                        <div class="legend-donut" id="legend-phong"></div>
+                    </div>
+                </div>
+
+                <div class="card-trang-thai">
+                    <div class="tieu-de-card">
+                        <h3><i class="fas fa-file-invoice-dollar" style="color:#059669;"></i> Tình trạng hóa đơn</h3>
+                    </div>
+                    <div class="wrapper-donut">
+                        <canvas id="chart-donut-hoadon" class="canvas-donut"></canvas>
+                        <div class="legend-donut" id="legend-hoadon"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- =============================================
+     JAVASCRIPT
+============================================= -->
+    <script>
+        // ================================================================
+        // GLOBAL STATE
+        // ================================================================
+        let chartDoanhThu = null;
+        let chartPie      = null;
+        let chartDonutP   = null;
+        let chartDonutHD  = null;
+        let allData       = [];   // THONGKE_DOANHTHU_THANG[]
+        let tongData      = null; // THONGKE_TONG
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+        khoiTaoNam();
+        taiDuLieu();
+        taiThongTinAdmin();
+        });
+
+        function khoiTaoNam() {
+        const sel = document.getElementById('chon-nam');
+        const year = new Date().getFullYear();
+        for (let y = year; y >= year - 5; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = `Năm ${y}`;
+        if (y === year) opt.selected = true;
+        sel.appendChild(opt);
+        }
+        }
+
+        // ================================================================
+        // FETCH ADMIN INFO
+        // ================================================================
+        async function taiThongTinAdmin() {
+        try {
+        const res = await fetch('/api/thongke/admin-info');
+        if (!res.ok) return;
+        const d = await res.json();
+        const ten  = d.fullName || 'Chủ Trọ';
+        const char = ten.charAt(0).toUpperCase();
+        document.getElementById('hd-ten').textContent   = ten;
+        document.getElementById('hd-avatar').textContent = char;
+        document.getElementById('sb-ten').textContent   = ten;
+        document.getElementById('sb-avatar').textContent = char;
+        } catch(e) { /* silent */ }
+        }
+
+        // ================================================================
+        // LOAD ALL DATA
+        // ================================================================
+        async function taiDuLieu() {
+        const nam = document.getElementById('chon-nam').value;
+        try {
+        // Fetch both endpoints in parallel
+        const [resDT, resTong] = await Promise.all([
+        fetch(`/api/thongke/doanh-thu?nam=${nam}`),
+        fetch('/api/thongke/tong-quan')
+        ]);
+
+        if (resDT.ok)   allData   = await resDT.json();
+        if (resTong.ok) tongData  = await resTong.json();
+
+        capNhatTrangCap(tongData?.ngayCapNhat);
+        renderKPI(tongData);
+        renderChartDoanhThu(allData);
+        renderPhaVo(allData);
+        renderBang(allData);
+        renderPie(allData);
+        renderDonutPhong(tongData);
+        renderDonutHoaDon(tongData);
+
+        } catch(e) {
+        hienToast('Lỗi', 'Không thể tải dữ liệu thống kê.', 'fail');
+        }
+        }
+
+        // ================================================================
+        // KPI CARDS
+        // ================================================================
+        function renderKPI(d) {
+        if (!d) return;
+        const fmt = (n) => {
+        if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+        if (n >= 1_000)     return (n / 1_000).toFixed(0) + 'K';
+        return n?.toLocaleString('vi-VN') ?? '0';
+        };
+        const pct = d.tangTruongDoanhThu ?? 0;
+        const pctClass = pct >= 0 ? 'tang' : 'giam';
+        const pctText  = (pct >= 0 ? '↑ +' : '↓ ') + Math.abs(pct).toFixed(1) + '% so tháng trước';
+
+        const lapDay = d.tiLeLapDay ?? 0;
+        const lapDayClass = lapDay >= 70 ? 'tang' : lapDay >= 50 ? 'trung' : 'giam';
+
+        document.getElementById('hang-kpi').innerHTML = `
+        <div class="card-kpi vang">
+        <div class="kpi-icon vang"><i class="fas fa-coins"></i></div>
+        <div class="kpi-so">${fmt(d.doanhThuThangNay ?? 0)}đ</div>
+        <div class="kpi-nhan">Doanh thu tháng này</div>
+        <span class="kpi-the ${pctClass}">${pctText}</span>
+        </div>
+        <div class="card-kpi xanh-bien">
+        <div class="kpi-icon xanh-bien"><i class="fas fa-building"></i></div>
+        <div class="kpi-so">${d.tongSoPhong ?? 0}</div>
+        <div class="kpi-nhan">Tổng số phòng</div>
+        <span class="kpi-the ${lapDayClass}">↑ ${lapDay.toFixed(1)}% lấp đầy</span>
+        </div>
+        <div class="card-kpi xanh-la">
+        <div class="kpi-icon xanh-la"><i class="fas fa-door-open"></i></div>
+        <div class="kpi-so">${d.phongDangThue ?? 0}</div>
+        <div class="kpi-nhan">Phòng đang thuê</div>
+        <span class="kpi-the tang">${d.phongConTrong ?? 0} phòng trống</span>
+        </div>
+        <div class="card-kpi do">
+        <div class="kpi-icon do"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="kpi-so">${d.hoaDonChuaDong ?? 0}</div>
+        <div class="kpi-nhan">Hóa đơn chưa đóng</div>
+        <span class="kpi-the giam">${d.hoaDonQuaHan ?? 0} hóa đơn quá hạn</span>
+        </div>
+        <div class="card-kpi tim">
+        <div class="kpi-icon tim"><i class="fas fa-tools"></i></div>
+        <div class="kpi-so">${d.donDVChoXuLy ?? 0}</div>
+        <div class="kpi-nhan">Đơn dịch vụ chờ xử lý</div>
+        <span class="kpi-the giam">${d.donDVKhanCap ?? 0} khẩn cấp</span>
+        </div>
+        `;
+        }
+
+        // ================================================================
+        // CHART: Bar + Line (Doanh thu & Chi phí)
+        // ================================================================
+        function renderChartDoanhThu(data) {
+        const ctx = document.getElementById('chart-doanh-thu').getContext('2d');
+        const labels = data.map(r => `T${r.thang}/${r.nam}`);
+        const thu    = data.map(r => r.tongCong ?? 0);
+        const chi    = data.map(r => r.chiPhiThang ?? 0);
+        const loiNhuan = data.map((r,i) => (r.tongCong ?? 0) - (r.chiPhiThang ?? 0));
+
+        if (chartDoanhThu) chartDoanhThu.destroy();
+        chartDoanhThu = new Chart(ctx, {
+        type: 'bar',
+        data: {
+        labels,
+        datasets: [
+        {
+        label: 'Doanh thu',
+        data: thu,
+        backgroundColor: 'rgba(184,114,10,0.75)',
+        borderColor: '#b8720a',
+        borderWidth: 1.5,
+        borderRadius: 6,
+        borderSkipped: false,
+        order: 2
+        },
+        {
+        label: 'Chi phí',
+        data: chi,
+        backgroundColor: 'rgba(220,38,38,0.65)',
+        borderColor: '#dc2626',
+        borderWidth: 1.5,
+        borderRadius: 6,
+        borderSkipped: false,
+        order: 3
+        },
+        {
+        label: 'Lợi nhuận',
+        data: loiNhuan,
+        type: 'line',
+        borderColor: '#059669',
+        backgroundColor: 'rgba(5,150,105,0.12)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#059669',
+        pointRadius: 4,
+        tension: 0.4,
+        fill: true,
+        order: 1
+        }
+        ]
+        },
+        options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+        legend: { display: false },
+        tooltip: {
+        callbacks: {
+        label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('vi-VN')}đ`
+        }
+        }
+        },
+        scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 } } },
+        y: {
+        grid: { color: 'rgba(0,0,0,0.04)' },
+        ticks: {
+        font: { size: 11 },
+        callback: v => v >= 1_000_000 ? (v/1_000_000).toFixed(1)+'M' : v.toLocaleString('vi-VN')
+        }
+        }
+        }
+        }
+        });
+        }
+
+        // ================================================================
+        // BREAKDOWN PANEL
+        // ================================================================
+        function renderPhaVo(data) {
+        const el = document.getElementById('pha-vo-container');
+        if (!data.length) { el.innerHTML = '<div class="trang-loading"><i class="fas fa-chart-bar"></i>Không có dữ liệu</div>'; return; }
+
+        const totalPhong = data.reduce((s,r) => s + (r.tongTienPhong ?? 0), 0);
+        const totalDien  = data.reduce((s,r) => s + (r.tongTienDien  ?? 0), 0);
+        const totalNuoc  = data.reduce((s,r) => s + (r.tongTienNuoc  ?? 0), 0);
+        const totalDV    = data.reduce((s,r) => s + (r.tongTienDV    ?? 0), 0);
+        const totalThu   = data.reduce((s,r) => s + (r.tongCong      ?? 0), 0);
+        const totalChi   = data.reduce((s,r) => s + (r.chiPhiThang   ?? 0), 0);
+        const loiNhuan   = totalThu - totalChi;
+
+        const fmt = n => n.toLocaleString('vi-VN');
+        const pct = (n, t) => t > 0 ? ((n/t)*100).toFixed(1) : '0.0';
+        const w   = (n, t) => t > 0 ? Math.round((n/t)*100) : 0;
+
+        const items = [
+        { ten: 'Tiền phòng',    so: totalPhong, mau: '#b8720a', dot: '#b8720a' },
+        { ten: 'Tiền điện',     so: totalDien,  mau: '#2563eb', dot: '#2563eb' },
+        { ten: 'Tiền nước',     so: totalNuoc,  mau: '#0891b2', dot: '#0891b2' },
+        { ten: 'Dịch vụ khác', so: totalDV,    mau: '#7c3aed', dot: '#7c3aed' },
+        ];
+
+        let html = items.map(it => `
+        <div class="dong-pha-vo">
+        <span class="dot-pv" style="background:${it.dot};box-shadow:0 0 0 3px ${it.dot}33;"></span>
+        <span class="ten-pv">${it.ten}</span>
+        <div class="bar-pv-wrap">
+        <div class="bar-pv-fill" style="width:${w(it.so,totalThu)}%;background:${it.mau};"></div>
+        </div>
+        <span class="so-pv" style="color:${it.mau};">${fmt(it.so)}đ</span>
+        </div>
+        `).join('');
+
+        html += `
+        <div class="tong-ket-box">
+        <div>
+        <div class="nhan">Lợi nhuận tích lũy (năm)</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,0.6);margin-top:2px;">
+        Thu: ${fmt(totalThu)}đ · Chi: ${fmt(totalChi)}đ
+        </div>
+        </div>
+        <div class="so">${fmt(loiNhuan)}đ ${loiNhuan >= 0 ? '↑' : '↓'}</div>
+        </div>
+        `;
+        el.innerHTML = html;
+        }
+
+        // ================================================================
+        // TABLE
+        // ================================================================
+        function renderBang(data) {
+        document.getElementById('badge-so-ban-ghi').textContent = `${data.length} bản ghi`;
+        const tbody = document.getElementById('tbody-doanh-thu');
+        if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--mau-chu-phu);">Không có dữ liệu cho năm đã chọn.</td></tr>`;
+        return;
+        }
+        const fmt = n => (n ?? 0).toLocaleString('vi-VN');
+        tbody.innerHTML = [...data].reverse().map(r => {
+        const loiNhuan = (r.tongCong ?? 0) - (r.chiPhiThang ?? 0);
+        const loiClass = loiNhuan >= 0 ? 'so-tien-xanh' : 'so-tien-do';
+        return `<tr>
+        <td><span class="chip-ky"><i class="fas fa-calendar-alt"></i>T${r.thang}/${r.nam}</span></td>
+        <td class="so-tien-vang">${fmt(r.tongTienPhong)}đ</td>
+        <td>${fmt(r.tongTienDien)}đ</td>
+        <td>${fmt(r.tongTienNuoc)}đ</td>
+        <td>${fmt(r.tongTienDV)}đ</td>
+        <td class="so-tien-xanh" style="font-weight:800;">${fmt(r.tongCong)}đ</td>
+        <td class="so-tien-do">${fmt(r.chiPhiThang)}đ</td>
+        <td class="${loiClass}" style="font-weight:800;">${fmt(loiNhuan)}đ</td>
+        <td><span style="background:#dcfce7;color:#16a34a;padding:2px 9px;border-radius:9999px;font-size:11px;font-weight:700;">${r.soHoaDonDaDong ?? 0} HĐ</span></td>
+        </tr>`;
+        }).join('');
+        }
+
+        // ================================================================
+        // PIE CHART: Revenue structure
+        // ================================================================
+        function renderPie(data) {
+        if (!data.length) return;
+        const totalPhong = data.reduce((s,r) => s + (r.tongTienPhong ?? 0), 0);
+        const totalDien  = data.reduce((s,r) => s + (r.tongTienDien  ?? 0), 0);
+        const totalNuoc  = data.reduce((s,r) => s + (r.tongTienNuoc  ?? 0), 0);
+        const totalDV    = data.reduce((s,r) => s + (r.tongTienDV    ?? 0), 0);
+        const total      = totalPhong + totalDien + totalNuoc + totalDV;
+
+        const items = [
+        { ten: 'Tiền phòng',    val: totalPhong, mau: '#b8720a' },
+        { ten: 'Tiền điện',     val: totalDien,  mau: '#2563eb' },
+        { ten: 'Tiền nước',     val: totalNuoc,  mau: '#0891b2' },
+        { ten: 'Dịch vụ khác', val: totalDV,    mau: '#7c3aed' },
+        ];
+
+        const ctx = document.getElementById('chart-pie').getContext('2d');
+        if (chartPie) chartPie.destroy();
+        chartPie = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+        labels: items.map(i => i.ten),
+        datasets: [{ data: items.map(i => i.val), backgroundColor: items.map(i => i.mau), borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+        responsive: true,
+        cutout: '68%',
+        plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed.toLocaleString('vi-VN')}đ` } }
+        }
+        }
+        });
+
+        // Custom legend
+        document.getElementById('legend-pie').innerHTML = items.map(it => {
+        const p = total > 0 ? ((it.val/total)*100).toFixed(1) : '0.0';
+        return `<div class="dong-legend">
+        <span class="dot-legend" style="background:${it.mau};"></span>
+        <span class="ten-legend">${it.ten}</span>
+        <span class="so-legend" style="color:${it.mau};">${p}%</span>
+        </div>`;
+        }).join('');
+        }
+
+        // ================================================================
+        // DONUT: Room status
+        // ================================================================
+        function renderDonutPhong(d) {
+        if (!d) return;
+        const vals  = [d.phongDangThue ?? 0, d.phongConTrong ?? 0, d.phongDangSua ?? 0];
+        const maus  = ['#2563eb', '#059669', '#d97706'];
+        const labels= ['Đang thuê', 'Còn trống', 'Đang sửa'];
+        const total = vals.reduce((a,b) => a+b, 0);
+
+        const ctx = document.getElementById('chart-donut-phong').getContext('2d');
+        if (chartDonutP) chartDonutP.destroy();
+        chartDonutP = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: vals, backgroundColor: maus, borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed}` } } } }
+        });
+
+        document.getElementById('legend-phong').innerHTML = labels.map((l,i) => `
+        <div class="dong-legend">
+        <span class="dot-legend" style="background:${maus[i]};"></span>
+        <span class="ten-legend">${l}</span>
+        <span class="so-legend">${vals[i]}</span>
+        <span class="phan-tram-legend">${total > 0 ? ((vals[i]/total)*100).toFixed(0) : 0}%</span>
+        </div>
+        `).join('');
+        }
+
+        // ================================================================
+        // DONUT: Invoice status
+        // ================================================================
+        function renderDonutHoaDon(d) {
+        if (!d) return;
+        const vals  = [d.hoaDonChuaDong ?? 0, d.hoaDonSapDenHan ?? 0, d.hoaDonQuaHan ?? 0];
+        const maus  = ['#059669', '#d97706', '#dc2626'];
+        const labels= ['Chưa đóng (còn hạn)', 'Sắp đến hạn', 'Quá hạn'];
+        const total = vals.reduce((a,b) => a+b, 0);
+
+        const ctx = document.getElementById('chart-donut-hoadon').getContext('2d');
+        if (chartDonutHD) chartDonutHD.destroy();
+        chartDonutHD = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: vals, backgroundColor: maus, borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed}` } } } }
+        });
+
+        document.getElementById('legend-hoadon').innerHTML = labels.map((l,i) => `
+        <div class="dong-legend">
+        <span class="dot-legend" style="background:${maus[i]};"></span>
+        <span class="ten-legend">${l}</span>
+        <span class="so-legend">${vals[i]}</span>
+        <span class="phan-tram-legend">${total > 0 ? ((vals[i]/total)*100).toFixed(0) : 0}%</span>
+        </div>
+        `).join('');
+        }
+
+        // ================================================================
+        // HELPERS
+        // ================================================================
+        function capNhatTrangCap(dt) {
+        const el = document.getElementById('txt-cap-nhat');
+        if (dt) {
+        const d = new Date(dt);
+        el.textContent = `Cập nhật lần cuối: ${d.toLocaleString('vi-VN')}`;
+        } else {
+        el.textContent = 'Dữ liệu thời gian thực từ hệ thống';
+        }
+        }
+
+        function dongMoSidebar() {
+        document.getElementById('thanh-sidebar').classList.toggle('an');
+        }
+
+        // Export to CSV
+        function xuatCSV() {
+        if (!allData.length) { hienToast('Thông báo', 'Không có dữ liệu để xuất.', 'fail'); return; }
+        const header = ['Kỳ','Tiền phòng','Tiền điện','Tiền nước','Dịch vụ','Tổng thu','Chi phí','Lợi nhuận','HĐ đã đóng'];
+        const rows = allData.map(r => [
+        `T${r.thang}/${r.nam}`, r.tongTienPhong, r.tongTienDien, r.tongTienNuoc,
+        r.tongTienDV, r.tongCong, r.chiPhiThang,
+        (r.tongCong ?? 0) - (r.chiPhiThang ?? 0), r.soHoaDonDaDong
+        ]);
+        const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+        const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = Object.assign(document.createElement('a'), { href: url, download: `thongke_${document.getElementById('chon-nam').value}.csv` });
+        a.click(); URL.revokeObjectURL(url);
+        hienToast('Thành công', 'Đã xuất file CSV.', 'success');
+        }
+
+        // Toast notification
+        function hienToast(tieu, msg, loai = 'success') {
+        const container = document.getElementById('toastContainer');
+        const icons = { success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#639922" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>', fail: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' };
+        const div = document.createElement('div');
+        div.className = `toast toast-${loai}`;
+        div.innerHTML = `<div class="toast-icon-wrap">${icons[loai]}</div><div class="toast-body"><div class="toast-title">${tieu}</div><div class="toast-msg">${msg}</div></div><div class="toast-progress" style="animation-duration:3.5s;"></div>`;
+        container.appendChild(div);
+        requestAnimationFrame(() => div.classList.add('show'));
+        setTimeout(() => { div.classList.add('hide'); setTimeout(() => div.remove(), 260); }, 3500);
+        }
+    </script>
+</body>
+</html>
