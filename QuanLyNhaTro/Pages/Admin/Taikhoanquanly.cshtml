@@ -7,30 +7,83 @@
 @* ─── Embed dữ liệu server → JS ──────────────────────────────────── *@
 <script id="data-quan-ly" type="application/json">
     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-            Model.DanhSachQuanLy.Select(q => new
-            {
-                    idUser = q.IDUser,
-                    fullName = q.FullName,
-                    username = q.Username,
-                    phone = q.Phone,
-                    email = q.Email,
-                    isActive = q.IsActive,
-                    createdAt = q.CreatedAt.ToString("dd/MM/yyyy"),
-                    permissions = q.Permissions,
-                    phongs = q.Phongs.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai })
-            }),
-            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
+                    Model.DanhSachQuanLy.Select(q => new
+                    {
+                                idUser = q.IDUser,
+                                fullName = q.FullName,
+                                username = q.Username,
+                                phone = q.Phone,
+                                email = q.Email,
+                                isActive = q.IsActive,
+                                createdAt = q.CreatedAt.ToString("dd/MM/yyyy"),
+                                permissions = q.Permissions,
+                                phongs = q.Phongs.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai })
+                    }),
+                    new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
     ))
 </script>
 <script id="data-phong" type="application/json">
     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-            Model.TatCaPhong.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai }),
-            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
+                    Model.TatCaPhong.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai }),
+                    new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
     ))
 </script>
 
 @* Anti-forgery token dùng cho AJAX POST *@
 @Html.AntiForgeryToken()
+
+@* ─── Embed thông tin người dùng hiện tại từ ClaimsPrincipal → JS ─── *@
+@{
+    var _fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Người dùng";
+    var _username = User.Identity?.Name ?? "";
+    var _roles = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Admin";
+    var _idUser = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+    // Label vai trò hiển thị
+    var _vaiTroLabel = _roles switch
+    {
+        "Admin" => "Chủ sở hữu",
+        "Manager" => "Quản lý",
+        _ => "Nhân viên"
+    };
+
+    // Chữ cái đầu của tên (lấy từ cuối FullName như trong JS)
+    var _nameParts = _fullName.Trim().Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
+    var _initials = _nameParts.Length > 0 ? _nameParts[^1][0].ToString().ToUpper() : "?";
+
+    // Tag CHỦ TRỌ / QUẢN LÝ
+    var _roleTag = _roles switch
+    {
+        "Admin" => "CHỦ TRỌ",
+        "Manager" => "QUẢN LÝ",
+        _ => "NHÂN VIÊN"
+    };
+    var _roleIcon = _roles switch
+    {
+        "Admin" => "fa-crown",
+        "Manager" => "fa-user-shield",
+        _ => "fa-user"
+    };
+    var _roleGradient = _roles switch
+    {
+        "Admin" => "linear-gradient(135deg,#b8720a,#e8971c)",
+        "Manager" => "linear-gradient(135deg,#7c3aed,#a78bfa)",
+        _ => "linear-gradient(135deg,#2563eb,#60a5fa)"
+    };
+}
+<script id="data-chu-tro" type="application/json">
+    {
+      "idUser":    @_idUser,
+      "fullName":  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_fullName)),
+      "username":  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_username)),
+      "roles":     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_roles)),
+      "vaiTroLabel": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_vaiTroLabel)),
+      "initials":  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_initials)),
+      "roleTag":   @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_roleTag)),
+      "roleIcon":  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_roleIcon)),
+      "roleGradient": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_roleGradient))
+    }
+</script>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -41,13 +94,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
             /* ==========================================================
-                   IMPORT FONT
-                ========================================================= */
+                               IMPORT FONT
+                            ========================================================= */
             @@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
 
             /* =========================================================
-                   BIẾN MÀU & THIẾT KẾ TOÀN CỤC
-                ========================================================= */
+                               BIẾN MÀU & THIẾT KẾ TOÀN CỤC
+                            ========================================================= */
             :root {
                 /* Màu chủ đề – vàng đồng sang trọng */
                 --mau-chu-de: #b8720a;
@@ -88,8 +141,8 @@
             }
 
             /* =========================================================
-                   RESET & CƠ BẢN
-                ========================================================= */
+                               RESET & CƠ BẢN
+                            ========================================================= */
             *, *::before, *::after {
                 margin: 0;
                 padding: 0;
@@ -107,8 +160,8 @@
             }
 
             /* =========================================================
-                   SIDEBAR – THANH ĐIỀU HƯỚNG TRÁI
-                ========================================================= */
+                               SIDEBAR – THANH ĐIỀU HƯỚNG TRÁI
+                            ========================================================= */
             #thanh-sidebar {
                 width: 248px;
                 min-width: 248px;
@@ -358,8 +411,8 @@
             }
 
             /* =========================================================
-                   KHU VỰC CHÍNH
-                ========================================================= */
+                               KHU VỰC CHÍNH
+                            ========================================================= */
             #khu-vuc-chinh {
                 flex: 1;
                 display: flex;
@@ -545,8 +598,8 @@
             }
 
             /* =========================================================
-                   NỘI DUNG CHÍNH (cuộn được)
-                ========================================================= */
+                               NỘI DUNG CHÍNH (cuộn được)
+                            ========================================================= */
             #noi-dung-chinh {
                 flex: 1;
                 overflow-y: auto;
@@ -567,8 +620,8 @@
                 }
 
             /* =========================================================
-                   TAIKHOANQUANLY – NỘI DUNG TRANG
-                ========================================================= */
+                               TAIKHOANQUANLY – NỘI DUNG TRANG
+                            ========================================================= */
 
             /* PAGE HEADER */
             .tql-page-header {
@@ -1892,12 +1945,12 @@
             <span>Cài đặt hệ thống</span>
         </a>
 
-        <!-- Thông tin chủ trọ -->
+        <!-- Thông tin chủ trọ – render từ ClaimsPrincipal -->
         <div class="thong-tin-chu-tro">
-            <div class="anh-chu-tro">C</div>
+            <div class="anh-chu-tro">@_initials</div>
             <div class="ten-chu">
-                <strong>Chủ Trọ ABC</strong>
-                <span>Chủ sở hữu</span>
+                <strong>@_fullName</strong>
+                <span>@_vaiTroLabel</span>
             </div>
         </div>
 
@@ -1934,15 +1987,17 @@
 
                 <div class="header-divider"></div>
 
-                <!-- Tag vai trò -->
-                <span class="the-chu-tro"><i class="fas fa-crown" style="margin-right:4px;font-size:8px;"></i>CHỦ TRỌ</span>
+                <!-- Tag vai trò – render từ ClaimsPrincipal -->
+                <span class="the-chu-tro" style="background:@_roleGradient">
+                    <i class="fas @_roleIcon" style="margin-right:4px;font-size:8px;"></i>@_roleTag
+                </span>
 
-                <!-- Avatar + tên -->
+                <!-- Avatar + tên – render từ ClaimsPrincipal -->
                 <div style="display:flex;align-items:center;gap:9px;cursor:pointer;padding:5px 10px;border-radius:var(--radius-full);">
-                    <div class="anh-dai-dien-header">C</div>
+                    <div class="anh-dai-dien-header">@_initials</div>
                     <div>
-                        <div class="ten-admin-header">Nguyễn Văn Chủ</div>
-                        <div class="vai-tro-header">Chủ sở hữu</div>
+                        <div class="ten-admin-header">@_fullName</div>
+                        <div class="vai-tro-header">@_vaiTroLabel</div>
                     </div>
                 </div>
             </div>

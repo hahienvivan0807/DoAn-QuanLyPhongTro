@@ -38,7 +38,7 @@ namespace QuanLyNhaTro.Pages.Manager
             if (acc == null) return RedirectToPage("/Index");
 
             TenNguoiDung = acc.FullName;
-            ChucVu = acc.Roles == "Admin" ? "Quản trị viên" : "Quản lý hệ thống";
+            ChucVu = acc.Roles == "Admin" ? "Quản trị viên" : "Manager";
             Avatar = acc.Avatar;
             ChuCaiDaiDien = acc.FullName.Length > 0
                             ? acc.FullName[0].ToString().ToUpper()

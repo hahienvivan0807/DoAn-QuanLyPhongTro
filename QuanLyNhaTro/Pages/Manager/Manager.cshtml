@@ -1696,78 +1696,154 @@
         color: var(--mau-vien);
         }
         /* =========================================================
-   ADMIN HEADER DROPDOWN – MANAGER
-========================================================= */
-.thong-tin-admin { position: relative; }
+        ADMIN HEADER DROPDOWN – MANAGER
+        ========================================================= */
+        .thong-tin-admin {
+        position: relative;
+        }
 
-.mgr-dropdown {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  width: 240px;
-  background: var(--mau-trang);
-  border-radius: 14px;
-  border: 1px solid var(--mau-vien);
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(13,27,62,0.14), 0 2px 8px rgba(13,27,62,0.06);
-  z-index: 999;
-  transform-origin: top right;
-  transform: scale(0.92) translateY(-8px);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease;
-}
-.mgr-dropdown.show {
-  transform: scale(1) translateY(0);
-  opacity: 1;
-  pointer-events: all;
-}
+        .mgr-dropdown {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 240px;
+        background: var(--mau-trang);
+        border-radius: 14px;
+        border: 1px solid var(--mau-vien);
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13,27,62,0.14), 0 2px 8px rgba(13,27,62,0.06);
+        z-index: 999;
+        transform-origin: top right;
+        transform: scale(0.92) translateY(-8px);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease;
+        }
 
-.mgr-dd-header {
-  padding: 14px 16px 12px;
-  border-bottom: 1px solid var(--mau-vien);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.mgr-dd-avatar {
-  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 16px; font-weight: 700;
-  border: 2px solid rgba(255,255,255,0.2);
-}
-.mgr-dd-name  { font-size: 13px; font-weight: 700; color: var(--mau-chu); }
-.mgr-dd-sub   { font-size: 11px; color: var(--mau-chu-phu); margin-top: 2px; }
-.mgr-dd-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px;
-  padding: 2px 8px; border-radius: 9999px; margin-top: 4px;
-  background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
-  color: #fff;
-}
+        .mgr-dropdown.show {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+        pointer-events: all;
+        }
 
-.mgr-dd-body { padding: 6px; }
+        .mgr-dd-header {
+        padding: 14px 16px 12px;
+        border-bottom: 1px solid var(--mau-vien);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        }
 
-.mgr-item {
-  display: flex; align-items: center; gap: 11px;
-  padding: 9px 12px; border-radius: 9px;
-  cursor: pointer; transition: background 0.14s;
-  border: none; background: none;
-  width: 100%; font-family: inherit; text-align: left;
-}
-.mgr-item:hover { background: var(--mau-nen); }
-.mgr-item-icon {
-  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 14px;
-}
-.mgr-item-icon.blue { background: var(--mau-xanh-nhat); color: var(--mau-chu-de); }
-.mgr-item-icon.red  { background: #fef2f2; color: #dc2626; }
-.mgr-item-label { font-size: 13px; font-weight: 600; color: var(--mau-chu); }
-.mgr-item-sub   { font-size: 10.5px; color: var(--mau-chu-phu); margin-top: 1px; }
-.mgr-item.danger:hover { background: #fef2f2; }
-.mgr-item.danger:hover .mgr-item-label { color: #dc2626; }
-.mgr-divider { height: 1px; background: var(--mau-vien); margin: 4px 0; }
+        .mgr-dd-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .mgr-dd-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--mau-chu);
+        }
+
+        .mgr-dd-sub {
+        font-size: 11px;
+        color: var(--mau-chu-phu);
+        margin-top: 2px;
+        }
+
+        .mgr-dd-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        margin-top: 4px;
+        background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+        color: #fff;
+        }
+
+        .mgr-dd-body {
+        padding: 6px;
+        }
+
+        .mgr-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 12px;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: background 0.14s;
+        border: none;
+        background: none;
+        width: 100%;
+        font-family: inherit;
+        text-align: left;
+        }
+
+        .mgr-item:hover {
+        background: var(--mau-nen);
+        }
+
+        .mgr-item-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        }
+
+        .mgr-item-icon.blue {
+        background: var(--mau-xanh-nhat);
+        color: var(--mau-chu-de);
+        }
+
+        .mgr-item-icon.red {
+        background: #fef2f2;
+        color: #dc2626;
+        }
+
+        .mgr-item-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--mau-chu);
+        }
+
+        .mgr-item-sub {
+        font-size: 10.5px;
+        color: var(--mau-chu-phu);
+        margin-top: 1px;
+        }
+
+        .mgr-item.danger:hover {
+        background: #fef2f2;
+        }
+
+        .mgr-item.danger:hover .mgr-item-label {
+        color: #dc2626;
+        }
+
+        .mgr-divider {
+        height: 1px;
+        background: var(--mau-vien);
+        margin: 4px 0;
+        }
     </style>
 </head>
 <body>
@@ -1806,10 +1882,7 @@
         <div class="menu-item" onclick="chuyenTrang('quan-ly-nguoi-thue', this)">
             <i class="fas fa-users"></i>
             <span>Quản lý dịch vụ và tiện ích</span>
-            @if (Model.SoDichVuMoi > 0)
-            {
-                <span class="huy-hieu-menu">@Model.SoDichVuMoi</span>
-            }
+            <span class="huy-hieu-menu" id="badge-dichvu" style="display:none"></span>
         </div>
 
         <div class="menu-item" onclick="chuyenTrang('hoa-don', this)">
@@ -1823,10 +1896,7 @@
         <div class="menu-item" onclick="chuyenTrang('su-co-bao-tri', this)">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
-            @if (Model.SoDonDVChoXuLy > 0)
-            {
-                <span class="huy-hieu-menu">@Model.SoDonDVChoXuLy</span>
-            }
+            <span class="huy-hieu-menu" id="badge-suco" style="display:none"></span>
         </div>
 
         <div class="menu-item" onclick="chuyenTrang('thong-ke', this)">
@@ -1890,59 +1960,63 @@
                 </button>
 
                 <div class="thong-tin-admin" id="mgrHeaderWrap">
-                  <button onclick="mgrToggleMenu()" id="mgrHeaderBtn"
-                          style="display:flex;align-items:center;gap:10px;cursor:pointer;
-                                 padding:6px 12px;border-radius:24px;border:none;background:none;
-                                 font-family:inherit;transition:background 0.2s;"
-                          onmouseover="this.style.background='var(--mau-xanh-nhat)'"
-                          onmouseout="this.style.background='none'">
-                    <div class="anh-dai-dien">
-                      @if (!string.IsNullOrEmpty(Model.Avatar))
-                      {
-                        <img src="@Model.Avatar" alt="Avatar"
-                             style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
-                      }
-                      else { @initials }
-                    </div>
-                    <div>
-                      <div class="ten" id="mgr-header-ten">@Model.TenNguoiDung</div>
-                      <div class="chuc-vu">@Model.ChucVu</div>
-                    </div>
-                    <i class="fas fa-chevron-down" id="mgrChevron"
-                       style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;transition:transform 0.2s;"></i>
-                  </button>
+                    <button onclick="mgrToggleMenu()" id="mgrHeaderBtn"
+                            style="display:flex;align-items:center;gap:10px;cursor:pointer;
+                        padding:6px 12px;border-radius:24px;border:none;background:none;
+                        font-family:inherit;transition:background 0.2s;"
+                            onmouseover="this.style.background='var(--mau-xanh-nhat)'"
+                            onmouseout="this.style.background='none'">
+                        <div class="anh-dai-dien">
+                            @if (!string.IsNullOrEmpty(Model.Avatar))
+                            {
+                                <img src="@Model.Avatar" alt="Avatar"
+                                     style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                            }
+                            else
+                            {
 
-                  <div class="mgr-dropdown" id="mgrDropdown">
-                    <div class="mgr-dd-header">
-                      <div class="mgr-dd-avatar">@initials</div>
-                      <div>
-                        <div class="mgr-dd-name">@Model.TenNguoiDung</div>
-                        <div class="mgr-dd-sub" id="mgr-dd-email">Đang tải...</div>
-                        <span class="mgr-dd-badge">
-                          <i class="fas fa-user-shield" style="font-size:8px;"></i>
-                          Quản lý
-                        </span>
-                      </div>
-                    </div>
+                                @initials
+                            }
+                        </div>
+                        <div>
+                            <div class="ten" id="mgr-header-ten">@Model.TenNguoiDung</div>
+                            <div class="chuc-vu">@Model.ChucVu</div>
+                        </div>
+                        <i class="fas fa-chevron-down" id="mgrChevron"
+                           style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;transition:transform 0.2s;"></i>
+                    </button>
 
-                    <div class="mgr-dd-body">
-                      <button class="mgr-item" onclick="mgrMoDoiMatKhau()">
-                        <div class="mgr-item-icon blue"><i class="fas fa-key"></i></div>
-                        <div>
-                          <div class="mgr-item-label">Đổi mật khẩu</div>
-                          <div class="mgr-item-sub">Cập nhật mật khẩu đăng nhập</div>
+                    <div class="mgr-dropdown" id="mgrDropdown">
+                        <div class="mgr-dd-header">
+                            <div class="mgr-dd-avatar">@initials</div>
+                            <div>
+                                <div class="mgr-dd-name">@Model.TenNguoiDung</div>
+                                <div class="mgr-dd-sub" id="mgr-dd-email">Đang tải...</div>
+                                <span class="mgr-dd-badge">
+                                    <i class="fas fa-user-shield" style="font-size:8px;"></i>
+                                    Quản lý
+                                </span>
+                            </div>
                         </div>
-                      </button>
-                      <div class="mgr-divider"></div>
-                      <button class="mgr-item danger" onclick="mgrXacNhanDangXuat()">
-                        <div class="mgr-item-icon red"><i class="fas fa-sign-out-alt"></i></div>
-                        <div>
-                          <div class="mgr-item-label">Đăng xuất</div>
-                          <div class="mgr-item-sub">Thoát khỏi hệ thống</div>
+
+                        <div class="mgr-dd-body">
+                            <button class="mgr-item" onclick="mgrMoDoiMatKhau()">
+                                <div class="mgr-item-icon blue"><i class="fas fa-key"></i></div>
+                                <div>
+                                    <div class="mgr-item-label">Đổi mật khẩu</div>
+                                    <div class="mgr-item-sub">Cập nhật mật khẩu đăng nhập</div>
+                                </div>
+                            </button>
+                            <div class="mgr-divider"></div>
+                            <button class="mgr-item danger" onclick="mgrXacNhanDangXuat()">
+                                <div class="mgr-item-icon red"><i class="fas fa-sign-out-alt"></i></div>
+                                <div>
+                                    <div class="mgr-item-label">Đăng xuất</div>
+                                    <div class="mgr-item-sub">Thoát khỏi hệ thống</div>
+                                </div>
+                            </button>
                         </div>
-                      </button>
                     </div>
-                  </div>
                 </div>
             </div>
         </header><!-- Kết thúc HEADER -->
@@ -2337,97 +2411,101 @@
     <!-- =============================================
      JAVASCRIPT - XỬ LÝ TƯƠNG TÁC
 ============================================= -->
-<!-- =============================================
+    <!-- =============================================
      MODAL: ĐỔI MẬT KHẨU
 ============================================= -->
-@if (TempData["SuccessMessage"] != null)
-{
-    <div id="alert-success" style="position:fixed;top:20px;right:24px;z-index:9999;
-         background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:12px;
-         padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
-         display:flex;align-items:center;gap:8px;">
-        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
-    </div>
-    <script>setTimeout(() => { const a = document.getElementById('alert-success'); if(a) a.remove(); }, 4000);</script>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div id="alert-error" style="position:fixed;top:20px;right:24px;z-index:9999;
-         background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:12px;
-         padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
-         display:flex;align-items:center;gap:8px;">
-        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
-    </div>
-    <script>setTimeout(() => { const a = document.getElementById('alert-error'); if(a) a.remove(); }, 5000);</script>
-}
-
-<div class="lop-che-modal" id="modal-doi-mat-khau"
-     onclick="dongModalNeuNhanNgoai(event, 'modal-doi-mat-khau')">
-    <div class="hop-modal">
-        <div class="tieu-de-modal">
-            <h3><i class="fas fa-key" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đổi mật khẩu</h3>
-            <button class="nut-dong-modal" type="button"
-                    onclick="dongModal('modal-doi-mat-khau')">✕</button>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div id="alert-success" style="position:fixed;top:20px;right:24px;z-index:9999;
+            background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:12px;
+            padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
+            display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
         </div>
+        <script>setTimeout(() => { const a = document.getElementById('alert-success'); if(a) a.remove(); }, 4000);</script>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div id="alert-error" style="position:fixed;top:20px;right:24px;z-index:9999;
+            background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:12px;
+            padding:12px 20px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.1);
+            display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+        <script>setTimeout(() => { const a = document.getElementById('alert-error'); if(a) a.remove(); }, 5000);</script>
+    }
 
-        <form method="post" asp-page-handler="ChangePassword" id="form-doi-mat-khau">
-            @Html.AntiForgeryToken()
-
-            <div id="doi-mk-alert" style="display:none;margin-bottom:14px;padding:10px 14px;
-                 border-radius:10px;font-size:13px;font-weight:600;"></div>
-
-            <div class="nhom-truong-nhap">
-                <label class="nhan-truong-nhap">Mật khẩu hiện tại *</label>
-                <div style="position:relative;">
-                    <input class="truong-nhap" type="password" id="old-password"
-                           name="oldPassword" placeholder="Nhập mật khẩu hiện tại"
-                           autocomplete="current-password" />
-                    <button type="button" onclick="togglePwd('old-password', this)"
-                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
-                                   background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="nhom-truong-nhap" style="margin-top:12px;">
-                <label class="nhan-truong-nhap">Mật khẩu mới *</label>
-                <div style="position:relative;">
-                    <input class="truong-nhap" type="password" id="new-password"
-                           name="newPassword" placeholder="Tối thiểu 6 ký tự"
-                           autocomplete="new-password" />
-                    <button type="button" onclick="togglePwd('new-password', this)"
-                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
-                                   background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="nhom-truong-nhap" style="margin-top:12px;">
-                <label class="nhan-truong-nhap">Xác nhận mật khẩu mới *</label>
-                <div style="position:relative;">
-                    <input class="truong-nhap" type="password" id="confirm-password"
-                           name="confirmPassword" placeholder="Nhập lại mật khẩu mới"
-                           autocomplete="new-password" />
-                    <button type="button" onclick="togglePwd('confirm-password', this)"
-                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
-                                   background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="nhom-nut-modal" style="margin-top:20px;">
-                <button type="button" class="nut-huy"
-                        onclick="dongModal('modal-doi-mat-khau')">Hủy</button>
-                <button type="submit" class="nut-luu" id="btn-submit-mk">
-                    <i class="fas fa-save"></i> Cập nhật
+    <div class="lop-che-modal" id="modal-doi-mat-khau"
+         onclick="dongModalNeuNhanNgoai(event, 'modal-doi-mat-khau')">
+        <div class="hop-modal">
+            <div class="tieu-de-modal">
+                <h3><i class="fas fa-key" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đổi mật khẩu</h3>
+                <button class="nut-dong-modal" type="button"
+                        onclick="dongModal('modal-doi-mat-khau')">
+                    ✕
                 </button>
             </div>
-        </form>
+
+            <form method="post" asp-page-handler="ChangePassword" id="form-doi-mat-khau">
+                @Html.AntiForgeryToken()
+
+                <div id="doi-mk-alert" style="display:none;margin-bottom:14px;padding:10px 14px;
+                border-radius:10px;font-size:13px;font-weight:600;"></div>
+
+                <div class="nhom-truong-nhap">
+                    <label class="nhan-truong-nhap">Mật khẩu hiện tại *</label>
+                    <div style="position:relative;">
+                        <input class="truong-nhap" type="password" id="old-password"
+                               name="oldPassword" placeholder="Nhập mật khẩu hiện tại"
+                               autocomplete="current-password" />
+                        <button type="button" onclick="togglePwd('old-password', this)"
+                                style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                            background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="nhom-truong-nhap" style="margin-top:12px;">
+                    <label class="nhan-truong-nhap">Mật khẩu mới *</label>
+                    <div style="position:relative;">
+                        <input class="truong-nhap" type="password" id="new-password"
+                               name="newPassword" placeholder="Tối thiểu 6 ký tự"
+                               autocomplete="new-password" />
+                        <button type="button" onclick="togglePwd('new-password', this)"
+                                style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                            background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="nhom-truong-nhap" style="margin-top:12px;">
+                    <label class="nhan-truong-nhap">Xác nhận mật khẩu mới *</label>
+                    <div style="position:relative;">
+                        <input class="truong-nhap" type="password" id="confirm-password"
+                               name="confirmPassword" placeholder="Nhập lại mật khẩu mới"
+                               autocomplete="new-password" />
+                        <button type="button" onclick="togglePwd('confirm-password', this)"
+                                style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                            background:none;border:none;cursor:pointer;color:var(--mau-chu-phu);font-size:13px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="nhom-nut-modal" style="margin-top:20px;">
+                    <button type="button" class="nut-huy"
+                            onclick="dongModal('modal-doi-mat-khau')">
+                        Hủy
+                    </button>
+                    <button type="submit" class="nut-luu" id="btn-submit-mk">
+                        <i class="fas fa-save"></i> Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
     <script>
 
         // ===== CẬP NHẬT NGÀY GIỜ =====
@@ -2441,16 +2519,16 @@
 
         // ===== DỮ LIỆU PHÒNG TỪ SERVER (cho modal danh sách phòng) =====
         const roomData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                    Model.TatCaPhong.Select(p => new
-                    {
-                        id = p.IDPhong,
-                        soPhong = p.SoPhong,
-                        tang = (int)p.Tang,
-                        dienTich = p.DienTich,
-                        gia = p.GiaPhongFix,
-                        trangThai = p.TrangThai
-                    })
-                ));
+                            Model.TatCaPhong.Select(p => new
+                            {
+                                id = p.IDPhong,
+                                soPhong = p.SoPhong,
+                                tang = (int)p.Tang,
+                                dienTich = p.DienTich,
+                                gia = p.GiaPhongFix,
+                                trangThai = p.TrangThai
+                            })
+                        ));
 
         // ===== BIỂU ĐỒ DOANH THU Chart.js — dữ liệu từ server =====
         const duLieuDoanhThu = @Html.Raw(doanhThuJson); // đơn vị triệu đồng
@@ -2583,6 +2661,29 @@
         }
         function timKiem(tuKhoa) { console.log('Tìm kiếm:', tuKhoa); }
         function thayDoiNam(nam) { console.log('Đổi năm biểu đồ:', nam); }
+
+        // ===== ĐỒNG BỘ BADGE SIDEBAR (gọi API chung, không phụ thuộc từng trang) =====
+        (async function loadBadgeSidebar() {
+        try {
+        const res = await fetch('/Api/BadgeCounts');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const badgeDV = document.getElementById('badge-dichvu');
+        const badgeSC = document.getElementById('badge-suco');
+
+        if (badgeDV) {
+        badgeDV.textContent = data.dichVuMoi;
+        badgeDV.style.display = data.dichVuMoi > 0 ? 'inline' : 'none';
+        }
+        if (badgeSC) {
+        badgeSC.textContent = data.suCoChoXuLy;
+        badgeSC.style.display = data.suCoChoXuLy > 0 ? 'inline' : 'none';
+        }
+        } catch (e) {
+        console.warn('Không thể load badge sidebar:', e);
+        }
+        })();
     </script>
 </body>
 </html>

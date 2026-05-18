@@ -1,8 +1,32 @@
-﻿@page
-@model IndexModel
+﻿@* ================================================================
+   _Layout.cshtml — Bố cục chung toàn ứng dụng Quản Lý Khu Nhà Trọ
+   Bám sát model thực tế:
+     - ACCOUNT      → FullName, Roles ('Admin'|'Manager'|'Tenant'), Avatar
+     - DONDV        → TrangThai_DV: 'Chờ xử lý' | 'Đang xử lý' | ...
+     - DIENNUOC     → TrangThaiDuyet: 0=Chờ duyệt | 1=Đã duyệt | 2=Từ chối
+     - HDTHANG      → TrangThai_TT: 'Chưa đóng' | 'Chờ duyệt' | 'Quá hạn' | ...
+     - THONGBAO     → DaDoc (bool), IDUser (nullable = broadcast)
+     - THONGKE_TONG → snapshot thống kê tổng hợp
+   ================================================================ *@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
 @{
-    ViewData["Title"] = "Đăng nhập - Nhà Trọ ABC";
-    Layout = null;
+    // ── Map với ACCOUNT ──────────────────────────────────────────────
+    var idUser = HttpContextAccessor.HttpContext?.Session.GetInt32("IDUser") ?? 0;
+    var fullName = HttpContextAccessor.HttpContext?.Session.GetString("FullName") ?? "Người dùng";
+    var roles = HttpContextAccessor.HttpContext?.Session.GetString("Roles") ?? "Manager";
+    var avatar = HttpContextAccessor.HttpContext?.Session.GetString("Avatar") ?? "";
+    // Chữ viết tắt hiển thị khi không có avatar
+    var initials = fullName.Length > 0 ? fullName[0].ToString().ToUpper() : "?";
+    // Nhãn vai trò tiếng Việt (map ACCOUNT.Roles)
+    var nhanVaiTro = roles switch
+    {
+        "Admin" => "Quản trị viên",
+        "Manager" => "Quản lý",
+        "Tenant" => "Khách thuê",
+        _ => roles
+    };
 }
 
 <!DOCTYPE html>
@@ -10,1131 +34,436 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
+    <title>@ViewData["Title"] — Nhà Trọ</title>
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
     <style>
-        /* ===== BIẾN MÀU SẮC VÀ FONT TOÀN CỤC ===== */
+        /* ══════════════════════════════════════════════════════
+        BIẾN MÀU
+        ══════════════════════════════════════════════════════ */
         :root {
-            --xanh-chinh: #1a73e8;
-            --xanh-dam: #0d47a1;
-            --xanh-nhat: #e8f0fe;
-            --cam-nhan: #f97316;
-            --cam-nhat: #fff7ed;
-            --den-chu: #1e293b;
-            --xam-chu: #64748b;
-            --xam-nhat: #f1f5f9;
-            --trang: #ffffff;
-            --vien-xam: #e2e8f0;
-            --bong: 0 4px 24px rgba(26, 115, 232, 0.10);
-            --bong-lon: 0 8px 40px rgba(26, 115, 232, 0.18);
-            --bo-goc: 16px;
-            --bo-goc-nho: 10px;
+        --mau-sidebar: #0d1b3e;
+        --mau-sidebar-dam: #091429;
         }
 
-        /* ===== RESET CƠ BẢN ===== */
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        /* ══════════════════════════════════════════════════════
+        SIDEBAR
+        ══════════════════════════════════════════════════════ */
+        #thanh-sidebar {
+        width: 220px;
+        min-width: 220px;
+        background: linear-gradient(180deg, var(--mau-sidebar) 0%, var(--mau-sidebar-dam) 100%);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        position: relative;
+        z-index: 100;
+        box-shadow: 4px 0 24px rgba(0,0,0,.18);
+        overflow-y: auto;
+        transition: width .35s cubic-bezier(.4,0,.2,1), min-width .35s cubic-bezier(.4,0,.2,1);
         }
 
-        body {
-            font-family: 'Be Vietnam Pro', sans-serif;
-            background: var(--xam-nhat);
-            min-height: 100vh;
-            display: flex;
-            align-items: stretch;
-            overflow: hidden;
+        #thanh-sidebar.an-sidebar {
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
         }
 
-        /* ===================================================
-           KHỐI CHỨA TOÀN BỘ TRANG (chia đôi trái - phải)
-        =================================================== */
-        .khung-toan-trang {
-            display: flex;
-            width: 100%;
-            min-height: 100vh;
+        /* ── Thu gọn ─────────────────────────────────────────── */
+        .nhan-nhom {
+        transition: opacity .2s ease, max-height .3s ease;
+        max-height: 40px;
+        overflow: hidden;
         }
 
-        /* ===================================================
-           CỘT TRÁI: GIỚI THIỆU NHÀ TRỌ
-        =================================================== */
-        .cot-trai-gioi-thieu {
-            flex: 1.1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            overflow: hidden;
-            min-height: 100vh;
+        #thanh-sidebar.thu-gon .nhan-nhom {
+        opacity: 0;
+        max-height: 0;
+        padding: 0;
         }
 
-        /* --- Ảnh nền chính của cột trái --- */
-        /* 
-         * ======================================================
-         * 📸 KHU VỰC THÊM ẢNH #1: ẢNH NỀN TOÀN CỘT TRÁI
-         * ======================================================
-         * Thay đường dẫn dưới đây bằng ảnh nhà trọ của bạn.
-         * Ảnh nên là ảnh toàn cảnh khu nhà trọ hoặc mặt tiền.
-         * Kích thước đề xuất: 900x1080px trở lên, tỉ lệ đứng.
-         * Ví dụ: background-image: url('/images/nha-tro-chinh.jpg');
-         * ======================================================
-        */
-        .anh-nen-cot-trai {
-            position: absolute;
-            inset: 0;
-            background-image: url(''); /* 👈 THÊM ẢNH NỀN NHÀ TRỌ VÀO ĐÂY */
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            /* Màu nền tạm khi chưa có ảnh */
-            background-color: #1a3a6e;
+        .menu-item span:not(.huy-hieu-menu) {
+        transition: opacity .2s ease, max-width .35s ease;
+        max-width: 160px;
+        overflow: hidden;
+        display: inline-block;
         }
 
-        /* Lớp phủ gradient tối để chữ dễ đọc trên ảnh */
-        .lop-phu-gradient {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(
-                160deg,
-                rgba(13, 71, 161, 0.55) 0%,
-                rgba(10, 30, 70, 0.82) 100%
-            );
+        #thanh-sidebar.thu-gon .menu-item span:not(.huy-hieu-menu) {
+        opacity: 0;
+        max-width: 0;
         }
 
-        /* Hiệu ứng lưới trang trí nhẹ phía trên */
-        .hieu-ung-luoi {
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-            background-size: 40px 40px;
+        #thanh-sidebar.thu-gon .huy-hieu-menu {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+        padding: 0;
         }
 
-        /* Logo + tên thương hiệu góc trên trái */
-        .thuong-hieu-goc-tren {
-            position: absolute;
-            top: 36px;
-            left: 40px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 10;
+        #thanh-sidebar.thu-gon .menu-item {
+        padding: 10px 0;
+        justify-content: center;
+        border-radius: 10px;
+        margin: 2px 8px;
         }
 
-        .bieu-tuong-logo {
-            width: 48px;
-            height: 48px;
-            background: var(--trang);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        #thanh-sidebar.thu-gon .admin-sidebar {
+        justify-content: center;
         }
 
-        .bieu-tuong-logo svg {
-            width: 24px;
-            height: 24px;
-            stroke: var(--xanh-chinh);
-            stroke-width: 1.75;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        /* ── Logo ────────────────────────────────────────────── */
+        .logo-sidebar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 28px 20px 24px 20px;
+        border-bottom: 1px solid rgba(255,255,255,.07);
+        }
+
+        .logo-sidebar .bieu-tuong {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: transparent;
+        flex-shrink: 0;
         }
 
-        .ten-thuong-hieu {
-            display: flex;
-            flex-direction: column;
+        .logo-sidebar .bieu-tuong img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 10px;
+        }
+
+        .logo-sidebar .ten-logo {
+        color: #fff;
         }
 
-        .ten-lon {
-            font-size: 17px;
-            font-weight: 800;
-            color: var(--trang);
-            letter-spacing: 0.5px;
-            line-height: 1.2;
-        }
-
-        .ten-nho {
-            font-size: 11px;
-            color: rgba(255,255,255,0.7);
-            font-weight: 400;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        /* Nội dung giới thiệu phía dưới cột trái */
-        .noi-dung-gioi-thieu {
-            position: relative;
-            z-index: 10;
-            padding: 0 44px 48px 44px;
-        }
-
-        .the-tinh-trang {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            background: rgba(249, 115, 22, 0.15);
-            border: 1px solid rgba(249, 115, 22, 0.4);
-            color: #fdba74;
-            font-size: 11.5px;
-            font-weight: 600;
-            padding: 6px 14px;
-            border-radius: 20px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 18px;
-        }
-
-        .the-tinh-trang .dot-xanh-la {
-            width: 7px;
-            height: 7px;
-            background: #4ade80;
-            border-radius: 50%;
-            animation: nhap-nhay 1.5s infinite;
-        }
-
-        @@keyframes nhap-nhay {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .tieu-de-chinh {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(28px, 3vw, 40px);
-            font-weight: 700;
-            color: var(--trang);
-            line-height: 1.25;
-            margin-bottom: 16px;
-        }
-
-        .tieu-de-chinh span {
-            color: #93c5fd;
-        }
-
-        .mo-ta-ngan {
-            font-size: 14.5px;
-            color: rgba(255,255,255,0.75);
-            line-height: 1.7;
-            margin-bottom: 32px;
-            max-width: 420px;
-        }
-
-        /* Lưới ảnh nhỏ giới thiệu cơ sở vật chất */
-        .luoi-anh-co-so {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 32px;
-        }
-
-        .o-anh-nho {
-            position: relative;
-            border-radius: 10px;
-            overflow: hidden;
-            aspect-ratio: 4/3;
-            background: rgba(255,255,255,0.1);
-            border: 1.5px solid rgba(255,255,255,0.15);
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .o-anh-nho:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
-
-        /* 
-         * ======================================================
-         * 📸 KHU VỰC THÊM ẢNH #2, #3, #4: LƯỚI 3 ẢNH NHỎ
-         * ======================================================
-         * Thay nội dung background-image trong mỗi class dưới đây.
-         * Kích thước đề xuất mỗi ảnh: 300x225px.
-         *
-         * .anh-nho-1: Ảnh phòng ngủ / nội thất phòng trọ
-         * .anh-nho-2: Ảnh bếp / khu vực chung
-         * .anh-nho-3: Ảnh nhà vệ sinh / tiện ích
-         *
-         * Ví dụ:
-         * .anh-nho-1 { background-image: url('/images/phong-ngu.jpg'); }
-         * ======================================================
-        */
-        .anh-nho-1 {
-            background-image: url(''); /* 👈 ẢNH PHÒNG NGỦ / NỘI THẤT */
-            background-size: cover;
-            background-position: center;
-        }
-
-        .anh-nho-2 {
-            background-image: url(''); /* 👈 ẢNH BẾP / KHU CHUNG */
-            background-size: cover;
-            background-position: center;
-        }
-
-        .anh-nho-3 {
-            background-image: url(''); /* 👈 ẢNH NHÀ VỆ SINH / TIỆN ÍCH */
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* Nhãn hiển thị tên ảnh */
-        .nhan-anh {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7));
-            color: var(--trang);
-            font-size: 10.5px;
-            font-weight: 600;
-            padding: 16px 10px 8px;
-            letter-spacing: 0.3px;
-        }
-
-        /* Placeholder khi chưa có ảnh */
-        .placeholder-anh {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            gap: 6px;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .placeholder-anh .bieu-tuong-them {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .placeholder-anh .bieu-tuong-them svg {
-            width: 26px;
-            height: 26px;
-            stroke: rgba(255,255,255,0.55);
-            stroke-width: 1.5;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .placeholder-anh .chu-them {
-            font-size: 10px;
-            text-align: center;
-            line-height: 1.4;
-        }
-
-        /* Thống kê nhanh */
-        .thong-ke-nhanh {
-            display: flex;
-            gap: 24px;
-        }
-
-        .muc-thong-ke {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .so-lon {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--trang);
-        }
-
-        .chu-thich-so {
-            font-size: 11px;
-            color: rgba(255,255,255,0.6);
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-
-        .duong-ngan {
-            width: 1px;
-            background: rgba(255,255,255,0.2);
-            align-self: stretch;
-            margin: 4px 0;
-        }
-
-        /* ===================================================
-           CỘT PHẢI: FORM ĐĂNG NHẬP / ĐĂNG KÝ
-        =================================================== */
-        .cot-phai-form {
-            flex: 0.9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 32px;
-            background: var(--trang);
-            position: relative;
-            overflow-y: auto;
-            min-height: 100vh;
-        }
-
-        /* Trang trí góc phải */
-        .trang-tri-goc {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 180px;
-            height: 180px;
-            background: radial-gradient(circle at top right, var(--xanh-nhat) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .trang-tri-goc-duoi {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 140px;
-            height: 140px;
-            background: radial-gradient(circle at bottom left, var(--cam-nhat) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        /* Hộp form chính */
-        .hop-form-chinh {
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Tiêu đề form */
-        .tieu-de-form {
-            margin-bottom: 32px;
-        }
-
-        .chao-mung {
-            font-size: 13px;
-            color: var(--xanh-chinh);
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .ten-trang {
-            font-family: Arial;
-            font-size: 30px;
-            font-weight: 700;
-            color: var(--den-chu);
-            line-height: 1.2;
-            margin-bottom: 8px;
-        }
-
-        .mo-ta-form {
-            font-size: 14px;
-            color: var(--xam-chu);
-            line-height: 1.6;
-        }
-
-        /* Tab chuyển đổi Đăng nhập / Đăng ký */
-        .thanh-tab-chuyen-doi {
-            display: flex;
-            background: var(--xam-nhat);
-            border-radius: var(--bo-goc-nho);
-            padding: 4px;
-            margin-bottom: 28px;
-        }
-
-        .nut-tab {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            border-radius: 7px;
-            font-family: 'Be Vietnam Pro', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--xam-chu);
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .nut-tab.dang-chon {
-            background: var(--trang);
-            color: var(--xanh-chinh);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-
-        /* Các trường nhập liệu */
-        .nhom-nhap-lieu {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            margin-bottom: 24px;
-        }
-
-        .truong-nhap {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-        }
-
-        .nhan-truong {
-            font-size: 13.5px;
-            font-weight: 600;
-            color: var(--den-chu);
-        }
-
-        /* Bọc input + icon */
-        .boc-input {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .bieu-tuong-truong {
-            position: absolute;
-            left: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--xam-chu);
-            pointer-events: none;
-            transition: color 0.2s;
-        }
-
-        .bieu-tuong-truong svg {
-            width: 16px;
-            height: 16px;
-            stroke: currentColor;
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .o-nhap-lieu {
-            width: 100%;
-            padding: 12px 14px 12px 44px;
-            border: 1.5px solid var(--vien-xam);
-            border-radius: var(--bo-goc-nho);
-            font-family: 'Be Vietnam Pro', sans-serif;
-            font-size: 14.5px;
-            color: var(--den-chu);
-            background: var(--trang);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .o-nhap-lieu::placeholder {
-            color: #c0cdd8;
-        }
-
-        .o-nhap-lieu:focus {
-            border-color: var(--xanh-chinh);
-            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
-        }
-
-        .o-nhap-lieu:focus + .bieu-tuong-truong,
-        .boc-input:focus-within .bieu-tuong-truong {
-            color: var(--xanh-chinh);
-        }
-
-        /* Ô nhập có icon bên phải (mật khẩu) */
-        .co-icon-phai .o-nhap-lieu {
-            padding-right: 44px;
-        }
-
-        .nut-hien-mat-khau {
-            position: absolute;
-            right: 14px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--xam-chu);
-            padding: 4px;
-            border-radius: 4px;
-            transition: color 0.2s;
-        }
-
-        .nut-hien-mat-khau svg {
-            width: 16px;
-            height: 16px;
-            stroke: currentColor;
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .nut-hien-mat-khau:hover {
-            color: var(--xanh-chinh);
-        }
-
-        /* Hàng ghi nhớ + quên mật khẩu */
-        .hang-tuy-chon {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 26px;
-        }
-
-        .o-ghi-nho {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 13.5px;
-            color: var(--xam-chu);
-            user-select: none;
-        }
-
-        .o-ghi-nho input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--xanh-chinh);
-            cursor: pointer;
-        }
-
-        .lien-ket-quen {
-            font-size: 13.5px;
-            color: var(--xanh-chinh);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .lien-ket-quen:hover {
-            color: var(--xanh-dam);
-        }
-
-        /* Nút đăng nhập chính */
-        .nut-chinh {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--xanh-chinh), var(--xanh-dam));
-            color: var(--trang);
-            border: none;
-            border-radius: var(--bo-goc-nho);
-            font-family: 'Be Vietnam Pro', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
-            box-shadow: 0 4px 16px rgba(26, 115, 232, 0.35);
-            letter-spacing: 0.3px;
-        }
-
-        .nut-chinh:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.45);
-        }
-
-        .nut-chinh:active {
-            transform: translateY(0);
-        }
-
-        /* Thông báo lỗi */
-        .thong-bao-loi {
-            padding: 12px 16px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            color: #dc2626;
-            font-size: 13.5px;
-            display: none;
-            margin-bottom: 16px;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .thong-bao-loi svg {
-            width: 15px;
-            height: 15px;
-            stroke: currentColor;
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            flex-shrink: 0;
-        }
-
-        /* Phần đường kẻ "hoặc" */
-        .duong-phan-cach {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 24px 0;
-        }
-
-        .net-ke {
-            flex: 1;
-            height: 1px;
-            background: var(--vien-xam);
-        }
-
-        .chu-hoac {
-            font-size: 12.5px;
-            color: var(--xam-chu);
-            white-space: nowrap;
-            padding: 0 4px;
-        }
-
-        /* Phần footer form */
-        .chan-form {
-            margin-top: 24px;
-            text-align: center;
-        }
-
-        .chu-footer {
-            font-size: 13px;
-            color: var(--xam-chu);
-        }
-
-        .lien-ket-chinh {
-            color: var(--xanh-chinh);
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-family: inherit;
-            font-size: inherit;
-            padding: 0;
-        }
-
-        .lien-ket-chinh:hover {
-            text-decoration: underline;
-        }
-
-        /* Mục đăng ký ẩn mặc định */
-        .noi-dung-dang-ky {
-            display: none;
-        }
-
-        /* Hai cột họ tên */
-        .hai-cot {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        /* Điều khoản */
-        .dong-dieu-khoan {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            font-size: 12.5px;
-            color: var(--xam-chu);
-            line-height: 1.5;
-            cursor: pointer;
-        }
-
-        .dong-dieu-khoan input {
-            margin-top: 2px;
-            accent-color: var(--xanh-chinh);
-            flex-shrink: 0;
-        }
-
-        .dong-dieu-khoan a {
-            color: var(--xanh-chinh);
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        /* ===== RESPONSIVE CHO MÀN HÌNH NHỎ ===== */
-        @@media (max-width: 900px) {
-            .khung-toan-trang {
-                flex-direction: column;
-            }
-
-            .cot-trai-gioi-thieu {
-                min-height: 280px;
-                flex: none;
-            }
-
-            .noi-dung-gioi-thieu {
-                padding: 0 24px 32px;
-            }
-
-            .cot-phai-form {
-                flex: none;
-                min-height: auto;
-                padding: 32px 20px 40px;
-            }
-
-            .hai-cot {
-                grid-template-columns: 1fr;
-            }
-
-            .luoi-anh-co-so {
-                display: none;
-            }
+        .logo-sidebar .ten-logo strong {
+        display: block;
+        font-size: 13px;
+        letter-spacing: .5px;
+        }
+
+        .logo-sidebar .ten-logo span {
+        font-size: 11px;
+        color: rgba(255,255,255,.45);
+        }
+
+        /* ── Nhãn nhóm ───────────────────────────────────────── */
+        .nhan-nhom {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: rgba(255,255,255,.3);
+        text-transform: uppercase;
+        padding: 18px 20px 6px 20px;
+        }
+
+        /* ── Menu item ───────────────────────────────────────── */
+        .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 11px 20px;
+        color: rgba(255,255,255,.65);
+        cursor: pointer;
+        border-radius: 0 30px 30px 0;
+        margin: 2px 10px 2px 0;
+        transition: all .2s;
+        font-size: 14px;
+        text-decoration: none;
+        position: relative;
+        }
+
+        .menu-item i {
+        width: 20px;
+        text-align: center;
+        font-size: 15px;
+        flex-shrink: 0;
+        }
+
+        .menu-item:hover {
+        background: rgba(59,130,246,.15);
+        color: #fff;
+        }
+
+        .menu-item.dang-chon {
+        background: linear-gradient(90deg, rgba(26,86,219,.85) 0%, rgba(59,130,246,.6) 100%);
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 4px 16px rgba(26,86,219,.3);
+        }
+
+        .menu-item.dang-chon::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 70%;
+        width: 4px;
+        background: #60a5fa;
+        border-radius: 0 4px 4px 0;
+        }
+
+        /* ── Badge (map TrangThai_DV / TrangThaiDuyet / TrangThai_TT / DaDoc) ── */
+        .huy-hieu-menu {
+        margin-left: auto;
+        background: #ef4444;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 20px;
+        padding: 1px 7px;
+        min-width: 20px;
+        text-align: center;
+        transition: opacity .2s ease;
+        }
+
+        .huy-hieu-menu[data-so="0"], .huy-hieu-menu:empty {
+        display: none;
+        }
+
+        /* ── Admin footer ────────────────────────────────────── */
+        .admin-sidebar {
+        margin-top: auto;
+        padding: 18px 16px;
+        border-top: 1px solid rgba(255,255,255,.07);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        }
+
+        .admin-sidebar .anh-admin {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a56db, #60a5fa);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 16px;
+        border: 2px solid rgba(255,255,255,.2);
+        flex-shrink: 0;
+        overflow: hidden;
+        }
+
+        .admin-sidebar .anh-admin img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        }
+
+        .admin-sidebar .ten-admin strong {
+        display: block;
+        color: #fff;
+        font-size: 10px;
+        }
+
+        .admin-sidebar .ten-admin span {
+        color: rgba(255,255,255,.45);
+        font-size: 11px;
         }
     </style>
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
 
-<!-- ===================================================
-     KHỐI CHỨA TOÀN BỘ TRANG (chia đôi trái / phải)
-=================================================== -->
-<div class="khung-toan-trang">
+<body class="flex h-screen overflow-hidden bg-gray-100">
 
-    <!-- ===================================================
-         CỘT TRÁI: GIỚI THIỆU NHÀ TRỌ
-    =================================================== -->
-    <div class="cot-trai-gioi-thieu">
 
-        <!-- Ảnh nền toàn cột trái (thêm ảnh nhà trọ vào đây) -->
-        <div class="anh-nen-cot-trai"></div>
+    <nav id="thanh-sidebar">
 
-        <!-- Lớp phủ tối để chữ nổi bật trên ảnh -->
-        <div class="lop-phu-gradient"></div>
-
-        <!-- Lưới trang trí nhẹ -->
-        <div class="hieu-ung-luoi"></div>
-
-        <!-- Logo và tên thương hiệu góc trên -->
-        <div class="thuong-hieu-goc-tren">
-            <div class="bieu-tuong-logo">
-                <!-- Icon ngôi nhà đơn sắc -->
-                <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+        <div class="logo-sidebar">
+            <div class="bieu-tuong">
+                <img src="~/images/LogoBaNam.png" alt="Logo Nhà Trọ" />
             </div>
-            <div class="ten-thuong-hieu">
-                <span class="ten-lon">NHÀ TRỌ ABC</span>
-                <span class="ten-nho">Quản lý hệ thống</span>
+            <div class="ten-logo">
+                <strong>Nhà Trọ Bà Năm</strong>
+                <span>Quản lý hệ thống</span>
             </div>
         </div>
 
-        <!-- Nội dung giới thiệu phía dưới -->
-        <div class="noi-dung-gioi-thieu">
 
-            <!-- Nhãn trạng thái -->
-            <div class="the-tinh-trang">
-                <span class="dot-xanh-la"></span>
-                Đang hoạt động · 48 phòng
+        <div class="nhan-nhom">Tổng quan</div>
+
+        <a class="menu-item" href="/QuanLy/TrangChu">
+            <i class="fas fa-home"></i>
+            <span>Trang chủ</span>
+        </a>
+
+        <div class="nhan-nhom">Quản lý</div>
+
+
+        <a class="menu-item" href="/QuanLy/Phong">
+            <i class="fas fa-door-open"></i>
+            <span>Quản lý phòng trọ</span>
+        </a>
+
+
+        <a class="menu-item" href="/QuanLy/HopDong">
+            <i class="fas fa-file-signature"></i>
+            <span>Hợp đồng thuê phòng</span>
+        </a>
+
+
+        <a class="menu-item" href="/QuanLy/KhachThue">
+            <i class="fas fa-users"></i>
+            <span>Khách thuê</span>
+        </a>
+
+        <div class="nhan-nhom">Vận hành</div>
+
+        <a class="menu-item" href="/QuanLy/DonDV">
+            <i class="fas fa-tools"></i>
+            <span>Đơn dịch vụ / Sự cố</span>
+            <span id="badge-don-dv" class="huy-hieu-menu" data-so="0"></span>
+        </a>
+
+
+        <a class="menu-item" href="/QuanLy/DienNuoc">
+            <i class="fas fa-bolt"></i>
+            <span>Chỉ số điện &amp; nước</span>
+            <span id="badge-dien-nuoc" class="huy-hieu-menu" data-so="0"></span>
+        </a>
+
+     
+        <a class="menu-item" href="/QuanLy/HoaDon">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Hóa đơn &amp; Thu tiền</span>
+            <span id="badge-hoa-don" class="huy-hieu-menu" data-so="0"></span>
+        </a>
+
+
+        <div class="nhan-nhom">Cài đặt</div>
+
+        <a class="menu-item" href="/QuanLy/ConfigGia">
+            <i class="fas fa-tags"></i>
+            <span>Đơn giá dịch vụ</span>
+
+        @if (roles == "Admin")
+        {
+            <a class="menu-item" href="/QuanLy/TaiKhoan">
+                <i class="fas fa-user-cog"></i>
+                <span>Tài khoản hệ thống</span>
+            </a>
+
+         
+            <a class="menu-item" href="/QuanLy/PhanCongManager">
+                <i class="fas fa-sitemap"></i>
+                <span>Phân công quản lý</span>
+            </a>
+        }
+
+        <a class="menu-item" href="/QuanLy/ThongKe">
+            <i class="fas fa-chart-bar"></i>
+            <span>Thống kê &amp; Báo cáo</span>
+        </a>
+
+
+        <a class="menu-item" href="/QuanLy/ThongBao">
+            <i class="fas fa-bell"></i>
+            <span>Thông báo</span>
+            <span id="badge-thong-bao" class="huy-hieu-menu" data-so="0"></span>
+        </a>
+
+        {{!-- ══ Admin footer — map ACCOUNT.FullName, Roles, Avatar ══ --}}
+        <div class="admin-sidebar" onclick="moThongTinAdmin()">
+            <div class="anh-admin">
+                @if (!string.IsNullOrEmpty(avatar))
+                {
+                    <img src="@avatar" alt="Ảnh đại diện @fullName" />
+                }
+                else
+                {
+                    @initials
+                }
             </div>
-
-            <!-- Tiêu đề chính -->
-            <h1 class="tieu-de-chinh">
-                Quản lý nhà trọ<br />
-                <span>thông minh & hiện đại</span>
-            </h1>
-
-            <!-- Mô tả ngắn -->
-            <p class="mo-ta-ngan">
-                Hệ thống quản lý phòng trọ toàn diện — theo dõi hóa đơn,
-                tiếp nhận sự cố và quản lý người thuê mọi lúc, mọi nơi.
-            </p>
-
-            <!-- ================================================
-                 LƯỚI 3 ẢNH NHỎ: CƠ SỞ VẬT CHẤT
-            ================================================ -->
-            <div class="luoi-anh-co-so">
-
-                <!-- Ô ảnh nhỏ 1: Phòng ngủ / nội thất -->
-                <div class="o-anh-nho anh-nho-1">
-                    <!--
-                     * 📸 THÊM ẢNH #2: PHÒNG NGỦ / NỘI THẤT PHÒNG TRỌ
-                     * Gán background-image vào class .anh-nho-1 trong CSS
-                     * Nếu chưa có ảnh, placeholder bên dưới sẽ hiển thị
-                    -->
-                    <div class="placeholder-anh">
-                        <span class="bieu-tuong-them">
-                            <!-- Icon giường ngủ đơn sắc -->
-                            <svg viewBox="0 0 24 24"><path d="M2 9V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3"/><path d="M2 11v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6"/><path d="M2 14h20"/><path d="M7 14v-3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3"/></svg>
-                        </span>
-                        <span class="chu-them">Thêm ảnh<br/>phòng ngủ</span>
-                    </div>
-                    <div class="nhan-anh">Phòng ngủ</div>
-                </div>
-
-                <!-- Ô ảnh nhỏ 2: Bếp / khu chung -->
-                <div class="o-anh-nho anh-nho-2">
-                    <!--
-                     * 📸 THÊM ẢNH #3: BẾP / KHU VỰC CHUNG
-                     * Gán background-image vào class .anh-nho-2 trong CSS
-                    -->
-                    <div class="placeholder-anh">
-                        <span class="bieu-tuong-them">
-                            <!-- Icon bếp nấu đơn sắc -->
-                            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-                        </span>
-                        <span class="chu-them">Thêm ảnh<br/>bếp chung</span>
-                    </div>
-                    <div class="nhan-anh">Khu bếp</div>
-                </div>
-
-                <!-- Ô ảnh nhỏ 3: Nhà vệ sinh / tiện ích -->
-                <div class="o-anh-nho anh-nho-3">
-                    <!--
-                     * 📸 THÊM ẢNH #4: NHÀ VỆ SINH / TIỆN ÍCH
-                     * Gán background-image vào class .anh-nho-3 trong CSS
-                    -->
-                    <div class="placeholder-anh">
-                        <span class="bieu-tuong-them">
-                            <!-- Icon vòi hoa sen đơn sắc -->
-                            <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 16 0"/><line x1="12" y1="12" x2="12" y2="22"/><path d="M12 12c0 0-3 2-3 5"/><path d="M12 12c0 0 3 2 3 5"/><circle cx="12" cy="5" r="1"/></svg>
-                        </span>
-                        <span class="chu-them">Thêm ảnh<br/>tiện ích</span>
-                    </div>
-                    <div class="nhan-anh">Tiện ích</div>
-                </div>
-
+            <div class="ten-admin">
+                <strong>@fullName</strong>
+                <span>@nhanVaiTro</span>
             </div>
-            <!-- KẾT THÚC LƯỚI 3 ẢNH NHỎ -->
-
-            <!-- Thống kê nhanh -->
-            <div class="thong-ke-nhanh">
-                <div class="muc-thong-ke">
-                    <span class="so-lon">48</span>
-                    <span class="chu-thich-so">Tổng phòng</span>
-                </div>
-                <div class="duong-ngan"></div>
-                <div class="muc-thong-ke">
-                    <span class="so-lon">81%</span>
-                    <span class="chu-thich-so">Lấp đầy</span>
-                </div>
-                <div class="duong-ngan"></div>
-                <div class="muc-thong-ke">
-                    <span class="so-lon">4.8★</span>
-                    <span class="chu-thich-so">Đánh giá</span>
-                </div>
-            </div>
-
         </div>
-        <!-- KẾT THÚC NỘI DUNG GIỚI THIỆU -->
 
-    </div>
-    <!-- KẾT THÚC CỘT TRÁI -->
+    </nav>
 
 
-    <!-- ===================================================
-         CỘT PHẢI: FORM ĐĂNG NHẬP / ĐĂNG KÝ
-    =================================================== -->
-    <div class="cot-phai-form">
-
-        <!-- Trang trí nền nhẹ -->
-        <div class="trang-tri-goc"></div>
-        <div class="trang-tri-goc-duoi"></div>
-
-        <!-- Hộp form chính -->
-        <div class="hop-form-chinh">
-
-            <!-- Tiêu đề phía trên form -->
-            <div class="tieu-de-form">
-                <p class="chao-mung">Chào mừng trở lại</p>
-                <h2 class="ten-trang">Đăng nhập hệ thống</h2>
-                <p class="mo-ta-form">Nhập thông tin để truy cập bảng điều khiển quản lý.</p>
-            </div>
-
-            <!-- Tab chuyển đổi giữa Đăng nhập và Đăng ký -->
-            <div class="thanh-tab-chuyen-doi">
-                <button class="nut-tab dang-chon" id="tab-dang-nhap" onclick="chuyenTab('dang-nhap')">
-                    Đăng nhập
-                </button>
-            </div>
-
-            <!-- =======================================
-                 PHẦN ĐĂNG NHẬP
-            ======================================= -->
-            <div id="noi-dung-dang-nhap">
-
-                <!-- Thông báo lỗi (ẩn mặc định, hiện khi có lỗi) -->
-                <div class="thong-bao-loi" id="loi-dang-nhap">
-                    <!-- Icon cảnh báo đơn sắc -->
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.
-                </div>
-
-                <!-- Các trường nhập liệu đăng nhập -->
-                <div class="nhom-nhap-lieu">
-
-                    <!-- Trường tên đăng nhập -->
-                    <div class="truong-nhap">
-                        <label class="nhan-truong" for="ten-dang-nhap">Tên đăng nhập</label>
-                        <div class="boc-input">
-                            <input
-                                class="o-nhap-lieu"
-                                type="text"
-                                id="ten-dang-nhap"
-                                name="TenDangNhap"
-                                placeholder="Nhập tên đăng nhập của bạn"
-                                autocomplete="username"
-                            />
-                            <span class="bieu-tuong-truong">
-                                <!-- Icon người dùng đơn sắc -->
-                                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Trường mật khẩu -->
-                    <div class="truong-nhap">
-                        <label class="nhan-truong" for="mat-khau">Mật khẩu</label>
-                        <div class="boc-input co-icon-phai">
-                            <input
-                                class="o-nhap-lieu"
-                                type="password"
-                                id="mat-khau"
-                                name="MatKhau"
-                                placeholder="Nhập mật khẩu"
-                                autocomplete="current-password"
-                            />
-                            <span class="bieu-tuong-truong">
-                                <!-- Icon ổ khoá đơn sắc -->
-                                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            </span>
-                            <button
-                                class="nut-hien-mat-khau"
-                                type="button"
-                                onclick="toggleMatKhau('mat-khau', this)"
-                                title="Hiện/ẩn mật khẩu"
-                            >
-                                <!-- Icon mắt đơn sắc (mặc định: hiện) -->
-                                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-                <!-- KẾT THÚC NHÓM NHẬP LIỆU ĐĂNG NHẬP -->
-
-                <!-- Hàng ghi nhớ & quên mật khẩu -->
-                <div class="hang-tuy-chon">
-                    <label class="o-ghi-nho">
-                        <input type="checkbox" name="GhiNho" />
-                        Ghi nhớ đăng nhập
-                    </label>
-                    <a href="#" class="lien-ket-quen">Quên mật khẩu?</a>
-                </div>
-
-                <!-- Nút đăng nhập -->
-                <button class="nut-chinh" type="button" onclick="xuLyDangNhap()">
-                    <span>Đăng nhập</span>
-                    <svg style="width:16px;height:16px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-left:6px" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </button>
-
-            </div>
-            <!-- KẾT THÚC PHẦN ĐĂNG NHẬP -->
+    <main class="flex-1 overflow-y-auto p-6">
+        @RenderBody()
+    </main>
 
 
-
-            <!-- Footer form -->
-            <div class="chan-form">
-               
-                <p class="chu-footer" id="chu-footer-dang-ky" style="display:none">
-                    Đã có tài khoản?
-                    <button class="lien-ket-chinh" onclick="chuyenTab('dang-nhap')">Đăng nhập</button>
-                </p>
-            </div>
-
-        </div>
-        <!-- KẾT THÚC HỘP FORM CHÍNH -->
-
-    </div>
-    <!-- KẾT THÚC CỘT PHẢI -->
-
-</div>
-<!-- KẾT THÚC KHUNG TOÀN TRANG -->
-
-
-<script>
-    /* ===== CHUYỂN ĐỔI GIỮA TAB ĐĂNG NHẬP VÀ ĐĂNG KÝ ===== */
-    function chuyenTab(loai) {
-        const laDangNhap = loai === 'dang-nhap';
-
-        // Cập nhật trạng thái tab
-        document.getElementById('tab-dang-nhap').classList.toggle('dang-chon', laDangNhap);
-        document.getElementById('tab-dang-ky').classList.toggle('dang-chon', !laDangNhap);
-
-        // Hiện/ẩn nội dung tương ứng
-        document.getElementById('noi-dung-dang-nhap').style.display = laDangNhap ? 'block' : 'none';
-        document.getElementById('noi-dung-dang-ky').style.display = laDangNhap ? 'none' : 'block';
-
-        // Hiện/ẩn footer
-        document.getElementById('chu-footer-dang-nhap').style.display = laDangNhap ? 'block' : 'none';
-        document.getElementById('chu-footer-dang-ky').style.display = laDangNhap ? 'none' : 'block';
-
-        // Cập nhật tiêu đề
-        const tenTrang = document.querySelector('.ten-trang');
-        const moTaForm = document.querySelector('.mo-ta-form');
-        const chaoMung = document.querySelector('.chao-mung');
-
-        if (laDangNhap) {
-            chaoMung.textContent = 'Chào mừng trở lại';
-            tenTrang.textContent = 'Đăng nhập hệ thống';
-            moTaForm.textContent = 'Nhập thông tin để truy cập bảng điều khiển quản lý.';
-        } else {
-            chaoMung.textContent = 'Bắt đầu ngay hôm nay';
-            tenTrang.textContent = 'Tạo tài khoản mới';
-            moTaForm.textContent = 'Điền đầy đủ thông tin để tạo tài khoản quản lý.';
+    <script>
+        // ── Tự động đánh dấu menu active theo URL ─────────────────────
+        (function () {
+        var path = window.location.pathname.toLowerCase();
+        document.querySelectorAll('#thanh-sidebar .menu-item').forEach(function (el) {
+        var href = (el.getAttribute('href') || '').toLowerCase();
+        if (href && path.startsWith(href)) {
+        el.classList.add('dang-chon');
         }
-    }
+        });
+        })();
 
-    /* ===== HIỆN / ẨN MẬT KHẨU ===== */
-    // SVG icon mắt mở (đang ẩn mật khẩu)
-    const svgMatMo = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-    // SVG icon mắt gạch chéo (đang hiện mật khẩu)
-    const svgMatGach = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
-
-    function toggleMatKhau(idInput, nutBam) {
-        const o = document.getElementById(idInput);
-        if (o.type === 'password') {
-            o.type = 'text';
-            nutBam.innerHTML = svgMatGach;
-        } else {
-            o.type = 'password';
-            nutBam.innerHTML = svgMatMo;
+        // ── AJAX cập nhật badge — endpoint CountBadges ─────────────────
+        // JSON trả về bám sát các trường model:
+        //  {
+        //    soDonDVChoXuLy:      DONDV.TrangThai_DV IN ('Chờ xử lý','Đang xử lý')
+        //    soDienNuocChoDuyet:  DIENNUOC.TrangThaiDuyet = 0
+        //    soHoaDonCanDuyet:    HDTHANG.TrangThai_TT IN ('Chờ duyệt','Quá hạn')
+        //    soThongBaoChuaDoc:   THONGBAO.DaDoc = false AND (IDUser = me OR IDUser IS NULL)
+        //  }
+        function capNhatBadge() {
+        fetch('/QuanLy/TrangChu?handler=CountBadges', {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (res) {
+        if (!res.ok) { console.warn('[Badge] HTTP:', res.status); return null; }
+        return res.json();
+        })
+        .then(function (d) {
+        if (!d) return;
+        function ganBadge(id, so) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = so > 0 ? so : '';
+        el.dataset.so  = so;
         }
-    }
-
-    /* ===== XỬ LÝ ĐĂNG NHẬP (kết nối với backend Razor Pages) ===== */
-    function xuLyDangNhap() {
-        const tenDangNhap = document.getElementById('ten-dang-nhap').value.trim();
-        const matKhau = document.getElementById('mat-khau').value;
-        const loiEl = document.getElementById('loi-dang-nhap');
-
-        // Kiểm tra cơ bản phía client
-        if (!tenDangNhap || !matKhau) {
-            loiEl.style.display = 'flex';
-            loiEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.`;
-            return;
+        // Map đúng tên trường từ JSON handler
+        ganBadge('badge-don-dv',    d.soDonDVChoXuLy      || 0);
+        ganBadge('badge-dien-nuoc', d.soDienNuocChoDuyet  || 0);
+        ganBadge('badge-hoa-don',   d.soHoaDonCanDuyet    || 0);
+        ganBadge('badge-thong-bao', d.soThongBaoChuaDoc   || 0);
+        })
+        .catch(function (err) {
+        console.error('[Badge] Lỗi:', err);
+        });
         }
 
-        loiEl.style.display = 'none';
+        capNhatBadge();               // Gọi ngay khi tải trang
+        setInterval(capNhatBadge, 60000); // Lặp mỗi 60 giây
 
-        /*
-         * TODO: Kết nối với backend Razor Pages
-         * Tạo form POST hoặc dùng fetch() để gửi dữ liệu lên server.
-         * Ví dụ tạo form và submit:
-         *
-         * const form = document.createElement('form');
-         * form.method = 'POST';
-         * form.action = '/Login';
-         * // Thêm __RequestVerificationToken (AntiForgery)
-         * // Thêm các input ẩn
-         * document.body.appendChild(form);
-         * form.submit();
-         */
-        alert('Đang đăng nhập... (Kết nối backend tại hàm xuLyDangNhap)');
-    }
-
-    /* ===== XỬ LÝ ĐĂNG KÝ ===== */
-    function xuLyDangKy() {
-        const dongYDieuKhoan = document.getElementById('dong-y-dieu-khoan').checked;
-        const loiEl = document.getElementById('loi-dang-ky');
-
-        if (!dongYDieuKhoan) {
-            loiEl.style.display = 'block';
-            loiEl.textContent = '⚠️ Bạn cần đồng ý với điều khoản sử dụng.';
-            return;
+        // ── Điều hướng tới trang tài khoản cá nhân ─────────────────────
+        function moThongTinAdmin() {
+        window.location.href = '/QuanLy/TaiKhoan/CaNhan';
         }
+    </script>
 
-        loiEl.style.display = 'none';
-        alert('Đang đăng ký... (Kết nối backend tại hàm xuLyDangKy)');
-    }
-</script>
-
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

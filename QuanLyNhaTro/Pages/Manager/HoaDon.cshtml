@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
             /* ============================================================
-                                   BIẾN MÀU & RESET
-                                ============================================================ */
+                                               BIẾN MÀU & RESET
+                                            ============================================================ */
             :root {
                 --sidebar: #0d1b3e;
                 --sidebar-dark: #091429;
@@ -50,8 +50,8 @@
             }
 
             /* ============================================================
-                                   SIDEBAR
-                                ============================================================ */
+                                               SIDEBAR
+                                            ============================================================ */
             #sidebar {
                 width: 220px;
                 min-width: 220px;
@@ -215,8 +215,8 @@
             }
 
             /* ============================================================
-                                   MAIN
-                                ============================================================ */
+                                               MAIN
+                                            ============================================================ */
             #main {
                 flex: 1;
                 display: flex;
@@ -375,8 +375,8 @@
             }
 
             /* ============================================================
-                                   PAGE CONTENT
-                                ============================================================ */
+                                               PAGE CONTENT
+                                            ============================================================ */
             #content {
                 flex: 1;
                 overflow-y: auto;
@@ -448,8 +448,8 @@
                 }
 
             /* ============================================================
-                                   STATS CARDS
-                                ============================================================ */
+                                               STATS CARDS
+                                            ============================================================ */
             .stats-grid {
                 display: grid;
                 grid-template-columns: repeat(5,1fr);
@@ -544,8 +544,8 @@
             }
 
             /* ============================================================
-                                   MAIN TABS
-                                ============================================================ */
+                                               MAIN TABS
+                                            ============================================================ */
             .main-tabs {
                 display: flex;
                 gap: 0;
@@ -608,8 +608,8 @@
                 }
 
             /* ============================================================
-                                   TAB PANEL WRAPPER
-                                ============================================================ */
+                                               TAB PANEL WRAPPER
+                                            ============================================================ */
             .tab-panel-wrap {
                 background: var(--white);
                 border-radius: 0 0 14px 14px;
@@ -628,8 +628,8 @@
                 }
 
             /* ============================================================
-                                   SUB TABS
-                                ============================================================ */
+                                               SUB TABS
+                                            ============================================================ */
             .sub-tabs {
                 display: flex;
                 gap: 6px;
@@ -722,8 +722,8 @@
                 }
 
             /* ============================================================
-                                   TOOLBAR
-                                ============================================================ */
+                                               TOOLBAR
+                                            ============================================================ */
             .toolbar {
                 display: flex;
                 align-items: center;
@@ -772,8 +772,8 @@
                 }
 
             /* ============================================================
-                                   INVOICE LIST
-                                ============================================================ */
+                                               INVOICE LIST
+                                            ============================================================ */
             .invoice-list {
                 display: flex;
                 flex-direction: column;
@@ -1029,8 +1029,8 @@
                 }
 
             /* ============================================================
-                                   MODAL
-                                ============================================================ */
+                                               MODAL
+                                            ============================================================ */
             .modal-overlay {
                 display: none;
                 position: fixed;
@@ -1480,10 +1480,7 @@
         </a>
         <a class="menu-item" onclick="navigate('quan-ly-nguoi-thue', this)">
             <i class="fas fa-users"></i> Quản lý dịch vụ và tiện ích
-            @if (Model.SoChoXacNhan > 0)
-            {
-                <span class="menu-badge">@Model.SoChoXacNhan</span>
-            }
+            <span class="menu-badge" id="badge-dichvu" style="display:none"></span>
         </a>
         <a class="menu-item active" onclick="navigate('hoa-don', this)">
             <i class="fas fa-file-invoice-dollar"></i> Hóa đơn &amp; Thu tiền
@@ -1492,10 +1489,7 @@
         <div class="menu-label">Hỗ trợ</div>
         <a class="menu-item" onclick="navigate('su-co', this)">
             <i class="fas fa-tools"></i> Sự cố / Bảo trì
-            @if (Model.SoChoXacNhan > 0)
-            {
-                <span class="menu-badge">@Model.SoChoXacNhan</span>
-            }
+            <span class="menu-badge" id="badge-suco" style="display:none"></span>
         </a>
         <a class="menu-item" onclick="navigate('bao-cao', this)">
             <i class="fas fa-chart-bar"></i> Thống kê &amp; Báo cáo
@@ -2425,6 +2419,19 @@
             function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
             function moThongBao()    { toast(`⚠️ Có @Model.SoChoXacNhan hóa đơn chờ xác nhận`, 'warning'); }
             function moMenuUser()    { }
+
+            // ===== ĐỒNG BỘ BADGE SIDEBAR =====
+            (async function loadBadgeSidebar() {
+                try {
+                    const res = await fetch('/Api/BadgeCounts');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const badgeDV = document.getElementById('badge-dichvu');
+                    const badgeSC = document.getElementById('badge-suco');
+                    if (badgeDV) { badgeDV.textContent = data.dichVuMoi; badgeDV.style.display = data.dichVuMoi > 0 ? 'inline' : 'none'; }
+                    if (badgeSC) { badgeSC.textContent = data.suCoChoXuLy; badgeSC.style.display = data.suCoChoXuLy > 0 ? 'inline' : 'none'; }
+                } catch (e) { console.warn('Không thể load badge sidebar:', e); }
+            })();
     </script>
 </body>
 </html>

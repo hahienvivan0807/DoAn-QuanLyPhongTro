@@ -45,7 +45,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;                // Bảo mật Cookie
     options.Cookie.IsEssential = true;             // Đánh dấu là Cookie thiết yếu
 });
-
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // ============================================================

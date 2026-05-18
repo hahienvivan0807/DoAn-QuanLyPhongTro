@@ -6,8 +6,13 @@ using System.Text.Json;
 
 namespace QuanLyNhaTro.Pages.Admin
 {
+    /// <summary>
+    /// Page back-end: Quản lý tài khoản Manager
+    /// Bảng liên quan: ACCOUNT, PHONG, PHONG_MANAGER, ACCOUNT_PERMISSION
+    /// </summary>
     public class TaiKhoanQuanLyModel : PageModel
     {
+        // ─── DI ───────────────────────────────────────────────────────
         private readonly IConfiguration _config;
         private readonly ILogger<TaiKhoanQuanLyModel> _logger;
 
@@ -17,7 +22,7 @@ namespace QuanLyNhaTro.Pages.Admin
             _logger = logger;
         }
 
-        // ─── Gradient pool đồng bộ với JS ───────────────────────────────
+        // ─── Gradient pool đồng bộ với JS ────────────────────────────
         public static readonly string[] GradientPool =
         [
             "linear-gradient(135deg,#7c3aed,#a78bfa)",
@@ -28,7 +33,7 @@ namespace QuanLyNhaTro.Pages.Admin
             "linear-gradient(135deg,#0891b2,#22d3ee)"
         ];
 
-        // ─── View-model cho từng quản lý ────────────────────────────────
+        // ─── View-model cho từng quản lý ─────────────────────────────
         public class QuanLyViewModel
         {
             public int IDUser { get; set; }
@@ -63,7 +68,7 @@ namespace QuanLyNhaTro.Pages.Admin
             public decimal GiaPhongFix { get; set; }
         }
 
-        // ─── DTO nhận từ AJAX ──────────────────────────────────────────
+        // ─── DTO nhận từ AJAX ─────────────────────────────────────────
         public record TaoTaiKhoanDto(
             string Username,
             string Passwords,
@@ -86,7 +91,7 @@ namespace QuanLyNhaTro.Pages.Admin
         public record PhanCongDto(int IDManager, List<int> IDPhongs);
         public record LuuQuyenDto(int IDManager, Dictionary<string, bool> Permissions);
 
-        // ─── Thuộc tính trang ─────────────────────────────────────────
+        // ─── Thuộc tính trang ────────────────────────────────────────
         public List<QuanLyViewModel> DanhSachQuanLy { get; private set; } = [];
         public List<PhongInfo> TatCaPhong { get; private set; } = [];
 
@@ -95,11 +100,13 @@ namespace QuanLyNhaTro.Pages.Admin
         public int PhongChuaPhanCong { get; private set; }
         public int TongPhong { get; private set; }
 
-        // ─── Connection string helper ──────────────────────────────────
-        private string ConnStr => _config.GetConnectionString("DefaultConnection")
-                                  ?? throw new InvalidOperationException("Chưa cấu hình ConnectionString.");
+        // ─── Connection string helper ─────────────────────────────────
+        private string ConnStr => _config.GetConnectionString("QuanLyKhuNhaTro")
+                                  ?? throw new InvalidOperationException("Chưa cấu hình ConnectionString 'QuanLyKhuNhaTro' trong appsettings.json.");
 
-        // ─── GET ───────────────────────────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════
+        // GET — Render trang lần đầu
+        // ═══════════════════════════════════════════════════════════════
         public void OnGet()
         {
             try
@@ -112,19 +119,24 @@ namespace QuanLyNhaTro.Pages.Admin
                 TongPhong = TatCaPhong.Count;
 
                 var assignedIds = DanhSachQuanLy
-                                        .SelectMany(q => q.Phongs.Select(p => p.IDPhong))
-                                        .Distinct()
-                                        .ToHashSet();
+                                    .SelectMany(q => q.Phongs.Select(p => p.IDPhong))
+                                    .Distinct()
+                                    .ToHashSet();
                 PhongChuaPhanCong = TatCaPhong.Count(p => !assignedIds.Contains(p.IDPhong));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi tải trang TaiKhoanQuanLy");
+                // Log chi tiết để dễ debug, sau đó re-throw
+                // để ASP.NET hiển thị trang lỗi thay vì render trang trống với toàn số 0.
+                _logger.LogError(ex,
+                    "Lỗi khi tải trang TaiKhoanQuanLy. ConnStr key=QuanLyKhuNhaTro | Message={Msg}",
+                    ex.Message);
+                throw;
             }
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // TRUY VẤN DB – LẤY DỮ LIỆU THẬT
+        // TRUY VẤN DB — LẤY DỮ LIỆU
         // ═══════════════════════════════════════════════════════════════
 
         /// <summary>Lấy toàn bộ phòng từ bảng PHONG</summary>
@@ -155,7 +167,10 @@ namespace QuanLyNhaTro.Pages.Admin
             return list;
         }
 
-        /// <summary>Lấy danh sách Manager từ ACCOUNT + phòng phân công từ PHONG_MANAGER</summary>
+        /// <summary>
+        /// Lấy danh sách Manager từ ACCOUNT + phòng phân công từ PHONG_MANAGER
+        /// + quyền từ ACCOUNT_PERMISSION (nếu bảng tồn tại).
+        /// </summary>
         private List<QuanLyViewModel> LayDanhSachQuanLy(List<PhongInfo> tatCaPhong)
         {
             var dict = new Dictionary<int, QuanLyViewModel>();
@@ -163,7 +178,7 @@ namespace QuanLyNhaTro.Pages.Admin
             using var conn = new SqlConnection(ConnStr);
             conn.Open();
 
-            // 1. Lấy tất cả Manager
+            // ── 1. Lấy tất cả Manager ──────────────────────────────
             const string sqlManager = @"
                 SELECT IDUser, Username, FullName, Phone, Email, Avatar, IsActive, CreatedAt
                 FROM   ACCOUNT
@@ -192,7 +207,7 @@ namespace QuanLyNhaTro.Pages.Admin
 
             if (dict.Count == 0) return [];
 
-            // 2. Lấy phân công phòng (PHONG_MANAGER IsActive=1)
+            // ── 2. Lấy phân công phòng (PHONG_MANAGER IsActive=1) ──
             const string sqlPhanCong = @"
                 SELECT pm.IDManager, pm.IDPhong
                 FROM   PHONG_MANAGER pm
@@ -216,25 +231,51 @@ namespace QuanLyNhaTro.Pages.Admin
                 }
             }
 
-            // 3. (Optional) Lấy quyền nếu có bảng ACCOUNT_PERMISSION
-            // Hiện tại DB chưa có bảng ACCOUNT_PERMISSION nên để mặc định false.
-            // Khi thêm bảng, uncomment đoạn dưới:
-            /*
-            const string sqlQuyen = @"
-                SELECT IDManager, PermissionKey, IsGranted
-                FROM   ACCOUNT_PERMISSION
-                WHERE  IDManager IN (SELECT value FROM STRING_SPLIT(@ids, ','))";
-            // ... xử lý quyền ...
-            */
+            // ── 3. Lấy quyền từ ACCOUNT_PERMISSION ────────────────
+            //      Kiểm tra bảng tồn tại trước để tránh lỗi runtime
+            //      khi DB chưa có migration.
+            if (BangTonTai(conn, "ACCOUNT_PERMISSION"))
+            {
+                var idList = string.Join(",", dict.Keys);   // an toàn vì là int
+
+                var sqlQuyen = $@"
+                    SELECT IDManager, PermissionKey, IsGranted
+                    FROM   ACCOUNT_PERMISSION
+                    WHERE  IDManager IN ({idList})";
+
+                using var cmd = new SqlCommand(sqlQuyen, conn);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var idManager = reader.GetInt32(0);
+                    var permKey = reader.GetString(1);
+                    var isGranted = reader.GetBoolean(2);
+
+                    if (dict.TryGetValue(idManager, out var ql)
+                        && ql.Permissions.ContainsKey(permKey))
+                    {
+                        ql.Permissions[permKey] = isGranted;
+                    }
+                }
+            }
 
             return [.. dict.Values];
+        }
+
+        /// <summary>Kiểm tra bảng có tồn tại trong schema hiện tại không</summary>
+        private static bool BangTonTai(SqlConnection conn, string tenBang)
+        {
+            using var cmd = new SqlCommand(
+                "SELECT COUNT(1) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @t", conn);
+            cmd.Parameters.AddWithValue("@t", tenBang);
+            return (int)cmd.ExecuteScalar()! > 0;
         }
 
         // ═══════════════════════════════════════════════════════════════
         // API HANDLERS
         // ═══════════════════════════════════════════════════════════════
 
-        // ─── API: Tạo tài khoản ───────────────────────────────────────
+        // ─── Tạo tài khoản ───────────────────────────────────────────
         public IActionResult OnPostTaoTaiKhoan([FromBody] TaoTaiKhoanDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Username) ||
@@ -242,6 +283,9 @@ namespace QuanLyNhaTro.Pages.Admin
                 string.IsNullOrWhiteSpace(dto.FullName) ||
                 string.IsNullOrWhiteSpace(dto.Phone))
                 return BadRequest(new { message = "Vui lòng điền đầy đủ thông tin bắt buộc." });
+
+            if (dto.Passwords.Length < 8)
+                return BadRequest(new { message = "Mật khẩu phải có ít nhất 8 ký tự." });
 
             try
             {
@@ -252,12 +296,12 @@ namespace QuanLyNhaTro.Pages.Admin
                 using (var chk = new SqlCommand(
                     "SELECT COUNT(1) FROM ACCOUNT WHERE Username = @u", conn))
                 {
-                    chk.Parameters.AddWithValue("@u", dto.Username);
+                    chk.Parameters.AddWithValue("@u", dto.Username.Trim());
                     if ((int)chk.ExecuteScalar()! > 0)
                         return BadRequest(new { message = $"Username '@{dto.Username}' đã tồn tại." });
                 }
 
-                // Hash mật khẩu – dùng BCrypt (cài NuGet: BCrypt.Net-Next)
+                // Hash mật khẩu — BCrypt.Net-Next NuGet
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Passwords);
 
                 const string sql = @"
@@ -268,14 +312,30 @@ namespace QuanLyNhaTro.Pages.Admin
                         (@username, @pwd, @fullname, @phone, @email, @roles, 1, GETDATE(), GETDATE())";
 
                 using var cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("@username", dto.Username);
+                cmd.Parameters.AddWithValue("@username", dto.Username.Trim());
                 cmd.Parameters.AddWithValue("@pwd", passwordHash);
-                cmd.Parameters.AddWithValue("@fullname", dto.FullName);
-                cmd.Parameters.AddWithValue("@phone", dto.Phone);
-                cmd.Parameters.AddWithValue("@email", (object?)dto.Email ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@fullname", dto.FullName.Trim());
+                cmd.Parameters.AddWithValue("@phone", dto.Phone.Trim());
+                cmd.Parameters.AddWithValue("@email", (object?)dto.Email?.Trim() ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@roles", dto.Roles);
 
                 var newId = (int)cmd.ExecuteScalar()!;
+
+                // Seed quyền mặc định = false cho Manager mới
+                if (BangTonTai(conn, "ACCOUNT_PERMISSION"))
+                {
+                    var keys = new[] { "tao-hd", "huy-hd", "thu-hd", "dien-nuoc", "sua-chua", "thong-bao", "khach-thue" };
+                    foreach (var key in keys)
+                    {
+                        using var ins = new SqlCommand(@"
+                            IF NOT EXISTS (SELECT 1 FROM ACCOUNT_PERMISSION WHERE IDManager=@m AND PermissionKey=@k)
+                                INSERT INTO ACCOUNT_PERMISSION (IDManager, PermissionKey, IsGranted)
+                                VALUES (@m, @k, 0)", conn);
+                        ins.Parameters.AddWithValue("@m", newId);
+                        ins.Parameters.AddWithValue("@k", key);
+                        ins.ExecuteNonQuery();
+                    }
+                }
 
                 return new JsonResult(new
                 {
@@ -290,7 +350,7 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ─── API: Sửa tài khoản ───────────────────────────────────────
+        // ─── Sửa tài khoản ───────────────────────────────────────────
         public IActionResult OnPostSuaTaiKhoan([FromBody] SuaTaiKhoanDto dto)
         {
             if (dto.IDUser <= 0 || string.IsNullOrWhiteSpace(dto.FullName))
@@ -303,14 +363,17 @@ namespace QuanLyNhaTro.Pages.Admin
 
                 if (!string.IsNullOrWhiteSpace(dto.NewPassword))
                 {
+                    if (dto.NewPassword.Length < 8)
+                        return BadRequest(new { message = "Mật khẩu mới phải có ít nhất 8 ký tự." });
+
                     var hash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
                     using var cmd = new SqlCommand(@"
                         UPDATE ACCOUNT
                         SET    FullName=@fn, Phone=@ph, Email=@em, Passwords=@pwd, UpdatedAt=GETDATE()
                         WHERE  IDUser=@id AND Roles='Manager'", conn);
-                    cmd.Parameters.AddWithValue("@fn", dto.FullName);
-                    cmd.Parameters.AddWithValue("@ph", dto.Phone);
-                    cmd.Parameters.AddWithValue("@em", (object?)dto.Email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@fn", dto.FullName.Trim());
+                    cmd.Parameters.AddWithValue("@ph", dto.Phone.Trim());
+                    cmd.Parameters.AddWithValue("@em", (object?)dto.Email?.Trim() ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@pwd", hash);
                     cmd.Parameters.AddWithValue("@id", dto.IDUser);
                     cmd.ExecuteNonQuery();
@@ -321,9 +384,9 @@ namespace QuanLyNhaTro.Pages.Admin
                         UPDATE ACCOUNT
                         SET    FullName=@fn, Phone=@ph, Email=@em, UpdatedAt=GETDATE()
                         WHERE  IDUser=@id AND Roles='Manager'", conn);
-                    cmd.Parameters.AddWithValue("@fn", dto.FullName);
-                    cmd.Parameters.AddWithValue("@ph", dto.Phone);
-                    cmd.Parameters.AddWithValue("@em", (object?)dto.Email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@fn", dto.FullName.Trim());
+                    cmd.Parameters.AddWithValue("@ph", dto.Phone.Trim());
+                    cmd.Parameters.AddWithValue("@em", (object?)dto.Email?.Trim() ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@id", dto.IDUser);
                     cmd.ExecuteNonQuery();
                 }
@@ -337,7 +400,7 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ─── API: Khóa / Mở khóa ─────────────────────────────────────
+        // ─── Khóa / Mở khóa tài khoản ────────────────────────────────
         public IActionResult OnPostKhoaTaiKhoan([FromBody] KhoaDto dto)
         {
             if (dto.IDUser <= 0)
@@ -348,7 +411,6 @@ namespace QuanLyNhaTro.Pages.Admin
                 using var conn = new SqlConnection(ConnStr);
                 conn.Open();
 
-                // IsLocked=true → set IsActive=0, IsLocked=false → set IsActive=1
                 using var cmd = new SqlCommand(@"
                     UPDATE ACCOUNT
                     SET    IsActive=@active, UpdatedAt=GETDATE()
@@ -367,7 +429,7 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ─── API: Xóa tài khoản ───────────────────────────────────────
+        // ─── Xóa tài khoản ───────────────────────────────────────────
         public IActionResult OnPostXoaTaiKhoan([FromBody] IdDto dto)
         {
             if (dto.IDUser <= 0)
@@ -377,24 +439,43 @@ namespace QuanLyNhaTro.Pages.Admin
             {
                 using var conn = new SqlConnection(ConnStr);
                 conn.Open();
+                using var tran = conn.BeginTransaction();
 
-                // Xóa phân công phòng trước
-                using (var delPM = new SqlCommand(
-                    "DELETE FROM PHONG_MANAGER WHERE IDManager=@id", conn))
+                try
                 {
-                    delPM.Parameters.AddWithValue("@id", dto.IDUser);
-                    delPM.ExecuteNonQuery();
-                }
+                    // Xóa quyền
+                    if (BangTonTai(conn, "ACCOUNT_PERMISSION"))
+                    {
+                        using var delPerm = new SqlCommand(
+                            "DELETE FROM ACCOUNT_PERMISSION WHERE IDManager=@id", conn, tran);
+                        delPerm.Parameters.AddWithValue("@id", dto.IDUser);
+                        delPerm.ExecuteNonQuery();
+                    }
 
-                // Xóa tài khoản
-                using (var delAcc = new SqlCommand(
-                    "DELETE FROM ACCOUNT WHERE IDUser=@id AND Roles='Manager'", conn))
+                    // Xóa phân công phòng
+                    using (var delPM = new SqlCommand(
+                        "DELETE FROM PHONG_MANAGER WHERE IDManager=@id", conn, tran))
+                    {
+                        delPM.Parameters.AddWithValue("@id", dto.IDUser);
+                        delPM.ExecuteNonQuery();
+                    }
+
+                    // Xóa tài khoản
+                    using (var delAcc = new SqlCommand(
+                        "DELETE FROM ACCOUNT WHERE IDUser=@id AND Roles='Manager'", conn, tran))
+                    {
+                        delAcc.Parameters.AddWithValue("@id", dto.IDUser);
+                        delAcc.ExecuteNonQuery();
+                    }
+
+                    tran.Commit();
+                    return new JsonResult(new { message = "Đã xóa tài khoản quản lý." });
+                }
+                catch
                 {
-                    delAcc.Parameters.AddWithValue("@id", dto.IDUser);
-                    delAcc.ExecuteNonQuery();
+                    tran.Rollback();
+                    throw;
                 }
-
-                return new JsonResult(new { message = "Đã xóa tài khoản quản lý." });
             }
             catch (Exception ex)
             {
@@ -403,7 +484,7 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ─── API: Phân công phòng ─────────────────────────────────────
+        // ─── Phân công phòng ─────────────────────────────────────────
         public IActionResult OnPostPhanCongPhong([FromBody] PhanCongDto dto)
         {
             if (dto.IDManager <= 0)
@@ -426,7 +507,7 @@ namespace QuanLyNhaTro.Pages.Admin
                         cmd.ExecuteNonQuery();
                     }
 
-                    // Thêm phân công mới (upsert theo IDPhong+IDManager)
+                    // Upsert phân công mới
                     foreach (var idPhong in dto.IDPhongs)
                     {
                         using var cmd = new SqlCommand(@"
@@ -465,17 +546,10 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ─── API: Lưu quyền ───────────────────────────────────────────
+        // ─── Lưu quyền ───────────────────────────────────────────────
         /// <summary>
-        /// Lưu quyền vào bảng ACCOUNT_PERMISSION (nếu chưa có thì tạo).
-        /// Script tạo bảng:
-        ///   CREATE TABLE ACCOUNT_PERMISSION (
-        ///       ID INT IDENTITY PRIMARY KEY,
-        ///       IDManager INT NOT NULL REFERENCES ACCOUNT(IDUser),
-        ///       PermissionKey VARCHAR(30) NOT NULL,
-        ///       IsGranted BIT NOT NULL DEFAULT 0,
-        ///       UNIQUE(IDManager, PermissionKey)
-        ///   );
+        /// Upsert quyền vào ACCOUNT_PERMISSION.
+        /// Bảng cần tồn tại trước (xem QUANLY_KHUTRO_Schema.sql mục 5).
         /// </summary>
         public IActionResult OnPostLuuQuyen([FromBody] LuuQuyenDto dto)
         {
@@ -516,7 +590,7 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ─── API: Danh sách quản lý (AJAX refresh) ───────────────────
+        // ─── AJAX refresh danh sách (không reload trang) ─────────────
         public IActionResult OnGetDanhSachQuanLy()
         {
             try
@@ -538,7 +612,7 @@ namespace QuanLyNhaTro.Pages.Admin
                     {
                         p.IDPhong,
                         p.SoPhong,
-                        p.Tang,
+                        tang = (int)p.Tang,
                         p.TrangThai
                     })
                 }));
