@@ -1,0 +1,1487 @@
+﻿@page "/Admin/CaiDatHT"
+@model QuanLyNhaTro.Pages.Admin.CaiDatModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cài Đặt Hệ Thống – Nhà Trọ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+            /* ==========================================================
+                       IMPORT FONT – đồng bộ với ChuTro.cshtml
+                    ========================================================== */
+            @@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+
+            /* ==========================================================
+                       BIẾN MÀU & THIẾT KẾ – bản sao từ ChuTro.cshtml
+                    ========================================================== */
+            :root {
+                --mau-chu-de: #b8720a;
+                --mau-chu-de-sang: #e8971c;
+                --mau-chu-de-nhat: #fdf6e3;
+                --mau-chu-de-vien: rgba(184,114,10,0.15);
+                --mau-sidebar: #0d1b2e;
+                --mau-sidebar-dam: #081020;
+                --mau-sidebar-vien: rgba(255,255,255,0.06);
+                --mau-sidebar-hover: rgba(232,151,28,0.12);
+                --mau-sidebar-active: rgba(232,151,28,0.18);
+                --mau-nen: #f0f2f8;
+                --mau-trang: #ffffff;
+                --mau-chu: #111827;
+                --mau-chu-phu: #6b7a99;
+                --mau-vien: #e5e9f5;
+                --mau-xanh: #0ea271;
+                --mau-xanh-nhat: #ecfdf5;
+                --mau-do: #e53e3e;
+                --mau-do-nhat: #fff5f5;
+                --bong-card: 0 2px 12px rgba(13,27,46,0.06), 0 1px 3px rgba(13,27,46,0.04);
+                --bong-sidebar: 6px 0 32px rgba(0,0,0,0.3);
+                --bong-header: 0 1px 0 #e5e9f5, 0 2px 16px rgba(13,27,46,0.04);
+                --radius-sm: 8px;
+                --radius-md: 12px;
+                --radius-lg: 16px;
+                --radius-full: 9999px;
+            }
+
+            /* ==========================================================
+                       RESET & CƠ BẢN
+                    ========================================================== */
+            *, *::before, *::after {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Be Vietnam Pro', sans-serif;
+                background: var(--mau-nen);
+                color: var(--mau-chu);
+                display: flex;
+                height: 100vh;
+                overflow: clip;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            /* ==========================================================
+                       SIDEBAR – THANH ĐIỀU HƯỚNG TRÁI (đồng bộ ChuTro)
+                    ========================================================== */
+            #thanh-sidebar {
+                width: 248px;
+                min-width: 248px;
+                background: var(--mau-sidebar);
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                z-index: 100;
+                box-shadow: var(--bong-sidebar);
+                overflow-y: auto;
+                transition: width 0.35s cubic-bezier(.4,0,.2,1), min-width 0.35s cubic-bezier(.4,0,.2,1);
+                position: relative;
+                border-right: 1px solid rgba(255,255,255,0.04);
+            }
+
+                #thanh-sidebar.an {
+                    width: 0;
+                    min-width: 0;
+                    overflow: hidden;
+                }
+
+                #thanh-sidebar::-webkit-scrollbar {
+                    width: 0;
+                }
+
+            /* Logo khu vực trên */
+            .khu-vuc-logo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 24px 20px 20px;
+                border-bottom: 1px solid var(--mau-sidebar-vien);
+            }
+
+            .bieu-tuong-logo {
+                width: 40px;
+                height: 40px;
+                flex-shrink: 0;
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 17px;
+                color: #fff;
+                box-shadow: 0 4px 14px rgba(184,114,10,0.45);
+            }
+
+            .ten-logo strong {
+                display: block;
+                color: #fff;
+                font-size: 13.5px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+
+            .ten-logo span {
+                font-size: 10px;
+                color: rgba(255,255,255,0.32);
+                letter-spacing: 0.3px;
+            }
+
+            /* Nhãn nhóm menu */
+            .nhan-nhom-menu {
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 2px;
+                color: rgba(255,255,255,0.22);
+                text-transform: uppercase;
+                padding: 18px 20px 6px;
+            }
+
+            /* Mỗi mục menu */
+            .muc-menu {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 9px 14px 9px 16px;
+                color: rgba(255,255,255,0.52);
+                cursor: pointer;
+                border-radius: 0 var(--radius-full) var(--radius-full) 0;
+                margin: 1px 12px 1px 0;
+                transition: all 0.18s ease;
+                font-size: 13px;
+                font-weight: 500;
+                text-decoration: none;
+                position: relative;
+            }
+
+                .muc-menu i {
+                    width: 18px;
+                    text-align: center;
+                    font-size: 13px;
+                    opacity: 0.75;
+                    flex-shrink: 0;
+                    transition: opacity 0.18s;
+                }
+
+                .muc-menu:hover {
+                    background: var(--mau-sidebar-hover);
+                    color: rgba(255,255,255,0.9);
+                }
+
+                    .muc-menu:hover i {
+                        opacity: 1;
+                    }
+
+                /* Menu đang chọn */
+                .muc-menu.dang-chon {
+                    background: var(--mau-sidebar-active);
+                    color: #fff;
+                    font-weight: 700;
+                }
+
+                    .muc-menu.dang-chon i {
+                        opacity: 1;
+                        color: var(--mau-chu-de-sang);
+                    }
+
+                    .muc-menu.dang-chon::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 60%;
+                        width: 3px;
+                        background: var(--mau-chu-de-sang);
+                        border-radius: 0 3px 3px 0;
+                    }
+
+            /* Badge số */
+            .huy-hieu {
+                margin-left: auto;
+                background: rgba(239,68,68,0.85);
+                color: #fff;
+                font-size: 9.5px;
+                font-weight: 800;
+                border-radius: var(--radius-full);
+                padding: 2px 7px;
+                min-width: 18px;
+                text-align: center;
+            }
+
+                .huy-hieu.vang {
+                    background: var(--mau-chu-de);
+                }
+
+            /* Thông tin chủ trọ dưới đáy sidebar */
+            .thong-tin-chu-tro {
+                margin-top: auto;
+                padding: 14px 16px;
+                border-top: 1px solid var(--mau-sidebar-vien);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                flex-shrink: 0;
+                position: sticky;
+                bottom: 0;
+                background: var(--mau-sidebar-dam);
+                z-index: 1;
+                transition: background 0.18s;
+            }
+
+                .thong-tin-chu-tro:hover {
+                    background: rgba(255,255,255,0.04);
+                }
+
+            .anh-chu-tro {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                flex-shrink: 0;
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 15px;
+                font-weight: 800;
+            }
+
+            .ten-chu strong {
+                display: block;
+                color: #fff;
+                font-size: 12.5px;
+                font-weight: 700;
+            }
+
+            .ten-chu span {
+                color: rgba(255,255,255,0.35);
+                font-size: 10px;
+            }
+
+            /* ==========================================================
+                       KHU VỰC CHÍNH – BÊN PHẢI
+                    ========================================================== */
+            #khu-vuc-chinh {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* HEADER */
+            #thanh-header {
+                background: var(--mau-trang);
+                padding: 0 28px;
+                height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: var(--bong-header);
+                flex-shrink: 0;
+                z-index: 50;
+            }
+
+            .header-trai {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+
+            .nut-ham-burger {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 18px;
+                color: var(--mau-chu-phu);
+                padding: 8px;
+                border-radius: var(--radius-sm);
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .nut-ham-burger:hover {
+                    background: var(--mau-chu-de-nhat);
+                    color: var(--mau-chu-de);
+                }
+
+            .tieu-de-header {
+                font-size: 14.5px;
+                font-weight: 800;
+                color: var(--mau-chu);
+                font-family: 'Lexend',sans-serif;
+            }
+
+            .duong-dan-header {
+                font-size: 11px;
+                color: var(--mau-chu-phu);
+                margin-top: 1px;
+            }
+
+            .header-phai {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .the-chu-tro {
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                color: #fff;
+                font-size: 9.5px;
+                font-weight: 800;
+                padding: 3px 10px;
+                border-radius: var(--radius-full);
+                letter-spacing: 0.8px;
+                text-transform: uppercase;
+            }
+
+            .khoi-admin-header {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+            }
+
+            .anh-dai-dien-header {
+                width: 34px;
+                height: 34px;
+                border-radius: var(--radius-sm);
+                background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 13px;
+                font-weight: 800;
+            }
+
+            .ten-admin-header {
+                font-size: 12.5px;
+                font-weight: 700;
+            }
+
+            .vai-tro-header {
+                font-size: 10px;
+                color: var(--mau-chu-phu);
+            }
+
+            /* ==========================================================
+                       NỘI DUNG TRANG CÀI ĐẶT
+                    ========================================================== */
+            #noi-dung-chinh {
+                flex: 1;
+                overflow-y: auto;
+                padding: 28px 32px 40px;
+            }
+
+                #noi-dung-chinh::-webkit-scrollbar {
+                    width: 5px;
+                }
+
+                #noi-dung-chinh::-webkit-scrollbar-thumb {
+                    background: #d4d9e6;
+                    border-radius: 3px;
+                }
+
+            /* Tiêu đề trang */
+            .tieu-de-trang {
+                margin-bottom: 28px;
+            }
+
+                .tieu-de-trang h2 {
+                    font-size: 22px;
+                    font-weight: 900;
+                    font-family: 'Lexend',sans-serif;
+                    color: var(--mau-chu);
+                }
+
+                .tieu-de-trang p {
+                    font-size: 12px;
+                    color: var(--mau-chu-phu);
+                    margin-top: 5px;
+                }
+
+            /* Lưới 2 cột cài đặt */
+            .luoi-cai-dat {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                max-width: 960px;
+            }
+
+            @@media (max-width:768px) {
+                .luoi-cai-dat {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* Card cài đặt chung */
+            .card-cai-dat {
+                background: var(--mau-trang);
+                border-radius: var(--radius-lg);
+                border: 1.5px solid var(--mau-vien);
+                box-shadow: var(--bong-card);
+                overflow: hidden;
+                transition: box-shadow 0.2s;
+            }
+
+                .card-cai-dat:hover {
+                    box-shadow: 0 6px 24px rgba(13,27,46,0.09);
+                }
+
+            /* Header của mỗi card */
+            .dau-card {
+                padding: 18px 22px 14px;
+                border-bottom: 1px solid var(--mau-vien);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .bieu-tuong-card {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
+                color: #fff;
+            }
+
+                .bieu-tuong-card.vang {
+                    background: linear-gradient(135deg,#b8720a,#e8971c);
+                    box-shadow: 0 4px 12px rgba(184,114,10,0.3);
+                }
+
+                .bieu-tuong-card.do {
+                    background: linear-gradient(135deg,#dc2626,#ef4444);
+                    box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+                }
+
+                .bieu-tuong-card.xanh-la {
+                    background: linear-gradient(135deg,#059669,#10b981);
+                    box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+                }
+
+            .tieu-de-card h3 {
+                font-size: 14px;
+                font-weight: 800;
+                font-family: 'Lexend',sans-serif;
+                color: var(--mau-chu);
+            }
+
+            .tieu-de-card p {
+                font-size: 11px;
+                color: var(--mau-chu-phu);
+                margin-top: 2px;
+            }
+
+            /* Thân card */
+            .than-card {
+                padding: 20px 22px;
+            }
+
+            /* Nhóm nhập liệu */
+            .nhom-nhap {
+                margin-bottom: 16px;
+            }
+
+                .nhom-nhap:last-child {
+                    margin-bottom: 0;
+                }
+
+            .nhan-nhap {
+                display: block;
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--mau-chu);
+                margin-bottom: 7px;
+            }
+
+                .nhan-nhap .bat-buoc {
+                    color: #dc2626;
+                    margin-left: 2px;
+                }
+
+            /* Ô nhập */
+            .o-nhap {
+                width: 100%;
+                padding: 10px 14px;
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-family: inherit;
+                color: var(--mau-chu);
+                background: var(--mau-nen);
+                transition: all 0.2s;
+                outline: none;
+            }
+
+                .o-nhap:focus {
+                    border-color: var(--mau-chu-de);
+                    background: #fff;
+                    box-shadow: 0 0 0 3px var(--mau-chu-de-vien);
+                }
+
+                .o-nhap::placeholder {
+                    color: var(--mau-chu-phu);
+                }
+
+            /* Wrapper ô mật khẩu có nút mắt */
+            .o-mat-khau {
+                position: relative;
+            }
+
+                .o-mat-khau .o-nhap {
+                    padding-right: 42px;
+                }
+
+            .nut-hien-mat-khau {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--mau-chu-phu);
+                font-size: 13px;
+                padding: 2px;
+                transition: color 0.2s;
+            }
+
+                .nut-hien-mat-khau:hover {
+                    color: var(--mau-chu-de);
+                }
+
+            /* Thanh mạnh mật khẩu */
+            .thanh-mat-khau {
+                margin-top: 8px;
+            }
+
+            .nhan-mat-khau {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                color: var(--mau-chu-phu);
+                margin-bottom: 5px;
+            }
+
+            .vach-mat-khau {
+                display: flex;
+                gap: 4px;
+            }
+
+            .doan-mat-khau {
+                flex: 1;
+                height: 4px;
+                border-radius: 2px;
+                background: #e5e9f5;
+                transition: background 0.35s;
+            }
+
+            /* Ghi chú nhỏ */
+            .ghi-chu-nhap {
+                font-size: 10.5px;
+                color: var(--mau-chu-phu);
+                margin-top: 5px;
+            }
+
+            /* Nút hành động */
+            .nut-hanh-dong {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 11px 22px;
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-weight: 700;
+                font-family: inherit;
+                cursor: pointer;
+                border: none;
+                transition: all 0.2s;
+            }
+
+                .nut-hanh-dong.chinh {
+                    background: linear-gradient(135deg, var(--mau-chu-de), var(--mau-chu-de-sang));
+                    color: #fff;
+                    box-shadow: 0 4px 14px rgba(184,114,10,0.32);
+                    width: 100%;
+                    justify-content: center;
+                    margin-top: 4px;
+                }
+
+                    .nut-hanh-dong.chinh:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 20px rgba(184,114,10,0.44);
+                    }
+
+                    .nut-hanh-dong.chinh:active {
+                        transform: none;
+                    }
+
+                    .nut-hanh-dong.chinh:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                        transform: none;
+                    }
+
+                .nut-hanh-dong.nguy-hiem {
+                    background: linear-gradient(135deg,#dc2626,#ef4444);
+                    color: #fff;
+                    box-shadow: 0 4px 14px rgba(220,38,38,0.32);
+                    width: 100%;
+                    justify-content: center;
+                    margin-top: 4px;
+                }
+
+                    .nut-hanh-dong.nguy-hiem:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 20px rgba(220,38,38,0.44);
+                    }
+
+            /* Đường kẻ phân cách */
+            .duong-ke {
+                height: 1px;
+                background: var(--mau-vien);
+                margin: 16px 0;
+            }
+
+            /* Card thông tin tài khoản – chỉ đọc */
+            .hang-thong-tin {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 0;
+                border-bottom: 1px solid var(--mau-vien);
+            }
+
+                .hang-thong-tin:last-child {
+                    border-bottom: none;
+                    padding-bottom: 0;
+                }
+
+            .nhan-tt {
+                font-size: 11.5px;
+                color: var(--mau-chu-phu);
+                font-weight: 600;
+            }
+
+            .gia-tri-tt {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--mau-chu);
+            }
+
+            .the-trang-thai {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 10px;
+                border-radius: var(--radius-full);
+                font-size: 11px;
+                font-weight: 700;
+            }
+
+                .the-trang-thai.hoat-dong {
+                    background: var(--mau-xanh-nhat);
+                    color: #0a7c57;
+                }
+
+                .the-trang-thai::before {
+                    content: '';
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: currentColor;
+                }
+
+            /* Thông báo toast */
+            #vung-thong-bao {
+                position: fixed;
+                top: 24px;
+                right: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                z-index: 99999;
+            }
+
+            .thong-bao {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 13px 18px;
+                border-radius: var(--radius-md);
+                font-size: 13px;
+                font-weight: 600;
+                min-width: 300px;
+                box-shadow: 0 8px 28px rgba(13,27,46,0.14);
+                animation: truotVao 0.3s ease forwards;
+            }
+
+                .thong-bao.thanh-cong {
+                    background: #fff;
+                    border-left: 4px solid var(--mau-xanh);
+                    color: var(--mau-chu);
+                }
+
+                .thong-bao.that-bai {
+                    background: #fff;
+                    border-left: 4px solid var(--mau-do);
+                    color: var(--mau-chu);
+                }
+
+                .thong-bao i.thanh-cong-icon {
+                    color: var(--mau-xanh);
+                    font-size: 15px;
+                }
+
+                .thong-bao i.that-bai-icon {
+                    color: var(--mau-do);
+                    font-size: 15px;
+                }
+
+            @@keyframes truotVao {
+                from {
+                    opacity: 0;
+                    transform: translateX(30px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            @@keyframes truotRa {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+
+                to {
+                    opacity: 0;
+                    transform: translateX(30px);
+                }
+            }
+
+            /* Loading spinner nhỏ trong nút */
+            .vong-tai {
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                border: 2px solid rgba(255,255,255,0.4);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: quay 0.7s linear infinite;
+            }
+
+            @@keyframes quay {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Modal xác nhận đăng xuất */
+            .lop-phu-modal {
+                position: fixed;
+                inset: 0;
+                background: rgba(13,27,46,0.55);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s;
+            }
+
+                .lop-phu-modal.hien {
+                    opacity: 1;
+                    pointer-events: all;
+                }
+
+            .hop-modal-xac-nhan {
+                background: #fff;
+                border-radius: var(--radius-lg);
+                padding: 28px;
+                width: 380px;
+                max-width: 90vw;
+                box-shadow: 0 20px 60px rgba(13,27,46,0.22);
+                transform: scale(0.94) translateY(-8px);
+                transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+            }
+
+            .lop-phu-modal.hien .hop-modal-xac-nhan {
+                transform: scale(1) translateY(0);
+            }
+
+            .bieu-tuong-modal-xac-nhan {
+                width: 56px;
+                height: 56px;
+                border-radius: 16px;
+                background: var(--mau-do-nhat);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                color: var(--mau-do);
+                margin: 0 auto 16px;
+            }
+
+            .tieu-de-modal-xac-nhan {
+                text-align: center;
+                font-size: 16px;
+                font-weight: 800;
+                font-family: 'Lexend',sans-serif;
+            }
+
+            .mo-ta-modal-xac-nhan {
+                text-align: center;
+                font-size: 12.5px;
+                color: var(--mau-chu-phu);
+                margin-top: 6px;
+                line-height: 1.6;
+            }
+
+            .nhom-nut-modal {
+                display: flex;
+                gap: 10px;
+                margin-top: 22px;
+            }
+
+            .nut-huy-modal {
+                flex: 1;
+                padding: 11px;
+                border: 1.5px solid var(--mau-vien);
+                border-radius: var(--radius-md);
+                background: none;
+                font-size: 13px;
+                font-weight: 700;
+                font-family: inherit;
+                cursor: pointer;
+                color: var(--mau-chu-phu);
+                transition: all 0.15s;
+            }
+
+                .nut-huy-modal:hover {
+                    background: var(--mau-nen);
+                }
+
+            .nut-xac-nhan-dang-xuat {
+                flex: 1;
+                padding: 11px;
+                border: none;
+                border-radius: var(--radius-md);
+                background: linear-gradient(135deg,#dc2626,#ef4444);
+                color: #fff;
+                font-size: 13px;
+                font-weight: 700;
+                font-family: inherit;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+                transition: all 0.2s;
+            }
+
+                .nut-xac-nhan-dang-xuat:hover {
+                    transform: translateY(-1px);
+                }
+
+            /* Banner phân quyền */
+            .bang-thong-tin-quyen {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 11px 14px;
+                border-radius: var(--radius-sm);
+                margin-bottom: 18px;
+                font-size: 12px;
+                line-height: 1.55;
+            }
+
+                .bang-thong-tin-quyen.vang {
+                    background: var(--mau-chu-de-nhat);
+                    border-left: 3px solid var(--mau-chu-de);
+                    color: #7a4e08;
+                }
+
+                .bang-thong-tin-quyen i {
+                    flex-shrink: 0;
+                    margin-top: 1px;
+                }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================
+         SIDEBAR – THANH ĐIỀU HƯỚNG TRÁI (đồng bộ ChuTro.cshtml)
+    ========================================================== -->
+    <nav id="thanh-sidebar">
+
+        <!-- Logo -->
+        <div class="khu-vuc-logo">
+            <div class="bieu-tuong-logo">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="ten-logo">
+                <strong>NHÀ TRỌ BÀ NĂM</strong>
+                <span>Cổng Chủ Trọ</span>
+            </div>
+        </div>
+
+        <!-- Nhóm: Tổng quan -->
+        <div class="nhan-nhom-menu">Tổng quan</div>
+
+        <a class="muc-menu" href="/Admin/ChuTro">
+            <i class="fas fa-home"></i>
+            <span>Trang chủ</span>
+        </a>
+
+        <!-- Nhóm: Vận hành -->
+        <div class="nhan-nhom-menu">Vận hành</div>
+
+        <a class="muc-menu" href="/Admin/QuanLyPhong">
+            <i class="fas fa-building"></i>
+            <span>Quản lý phòng trọ</span>
+        </a>
+        <a class="muc-menu" href="/Admin/QuanLyNguoiThue">
+            <i class="fas fa-users"></i>
+            <span>Người thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/HopDong">
+            <i class="fas fa-file-contract"></i>
+            <span>Hợp đồng</span>
+            <span class="huy-hieu vang">2</span>
+        </a>
+
+        <!-- Nhóm: Quản trị chủ trọ -->
+        <div class="nhan-nhom-menu">Quản trị chủ trọ</div>
+
+        <a class="muc-menu" href="/Admin/Taikhoanquanly">
+            <i class="fas fa-user-shield"></i>
+            <span>Tài khoản quản lý</span>
+        </a>
+        <a class="muc-menu" href="/Admin/QuanLyNguoiThue">
+            <i class="fas fa-users"></i>
+            <span>Quản lý người thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/CauHinhGiaThue">
+            <i class="fas fa-sliders-h"></i>
+            <span>Cấu hình giá thuê</span>
+        </a>
+        <a class="muc-menu" href="/Admin/DichVuThongBao">
+            <i class="fas fa-bolt"></i>
+            <span>Dịch vụ thông báo</span>
+        </a>
+
+        <!-- Nhóm: Hỗ trợ -->
+        <div class="nhan-nhom-menu">Hỗ trợ</div>
+
+        <a class="muc-menu" href="/Admin/SuaChua">
+            <i class="fas fa-tools"></i>
+            <span>Sự cố / Bảo trì</span>
+            <span class="huy-hieu">3</span>
+        </a>
+        <a class="muc-menu" href="/Admin/BaoCao">
+            <i class="fas fa-chart-bar"></i>
+            <span>Báo cáo tài chính</span>
+        </a>
+        <!-- MỤC CÀI ĐẶT – đang chọn -->
+        <a class="muc-menu dang-chon" href="/Admin/CaiDatHT">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt hệ thống</span>
+        </a>
+
+        <!-- Thông tin chủ trọ dưới đáy -->
+        <div class="thong-tin-chu-tro">
+            <div class="anh-chu-tro" id="sidebar-chu-viet-tat">C</div>
+            <div class="ten-chu">
+                <strong id="sidebar-ten-chu">Đang tải...</strong>
+                <span id="sidebar-vai-tro">Chủ sở hữu</span>
+            </div>
+        </div>
+
+    </nav><!-- Kết thúc SIDEBAR -->
+    <!-- ==========================================================
+         KHU VỰC CHÍNH – BÊN PHẢI
+    ========================================================== -->
+    <div id="khu-vuc-chinh">
+
+        <!-- HEADER -->
+        <header id="thanh-header">
+            <div class="header-trai">
+                <button class="nut-ham-burger" onclick="dongMoSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div>
+                    <div class="tieu-de-header">Cài Đặt Hệ Thống</div>
+                    <div class="duong-dan-header">Trang chủ / Cài đặt</div>
+                </div>
+            </div>
+
+            <div class="header-phai">
+                <span class="the-chu-tro">
+                    <i class="fas fa-crown" style="margin-right:4px;font-size:8px;"></i>CHỦ TRỌ
+                </span>
+                <div class="khoi-admin-header">
+                    <div class="anh-dai-dien-header" id="header-chu-viet-tat">C</div>
+                    <div>
+                        <div class="ten-admin-header" id="header-ten-chu">Đang tải...</div>
+                        <div class="vai-tro-header" id="header-vai-tro">Chủ sở hữu</div>
+                    </div>
+                </div>
+            </div>
+        </header><!-- Kết thúc HEADER -->
+        <!-- ==========================================================
+             NỘI DUNG TRANG CÀI ĐẶT
+        ========================================================== -->
+        <main id="noi-dung-chinh">
+
+            <!-- Tiêu đề trang -->
+            <div class="tieu-de-trang">
+                <h2>⚙️ Cài đặt hệ thống</h2>
+                <p>Quản lý tài khoản và bảo mật đăng nhập của bạn</p>
+            </div>
+
+            <!-- Lưới 2 cột: đổi mật khẩu | thông tin tài khoản + đăng xuất -->
+            <div class="luoi-cai-dat">
+
+                <!-- ==================================================
+                     CỘT TRÁI – CARD ĐỔI MẬT KHẨU
+                ================================================== -->
+                <div class="card-cai-dat">
+
+                    <!-- Header card -->
+                    <div class="dau-card">
+                        <div class="bieu-tuong-card vang">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="tieu-de-card">
+                            <h3>Đổi mật khẩu</h3>
+                            <p>Cập nhật mật khẩu đăng nhập của bạn</p>
+                        </div>
+                    </div>
+
+                    <!-- Thân card – form đổi mật khẩu -->
+                    <div class="than-card">
+
+                        <!-- Banner gợi ý bảo mật -->
+                        <div class="bang-thong-tin-quyen vang">
+                            <i class="fas fa-shield-alt" style="color:var(--mau-chu-de);"></i>
+                            <span>Mật khẩu được mã hóa bằng <strong>BCrypt</strong> trước khi lưu vào cơ sở dữ liệu. Hãy chọn mật khẩu ít nhất 8 ký tự.</span>
+                        </div>
+
+                        <!-- Ô mật khẩu hiện tại -->
+                        <div class="nhom-nhap">
+                            <label class="nhan-nhap" for="mat-khau-cu">
+                                Mật khẩu hiện tại <span class="bat-buoc">*</span>
+                            </label>
+                            <div class="o-mat-khau">
+                                <input class="o-nhap" type="password" id="mat-khau-cu"
+                                       placeholder="Nhập mật khẩu hiện tại..." />
+                                <button type="button" class="nut-hien-mat-khau"
+                                        onclick="batTatMatKhau('mat-khau-cu', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ô mật khẩu mới -->
+                        <div class="nhom-nhap">
+                            <label class="nhan-nhap" for="mat-khau-moi">
+                                Mật khẩu mới <span class="bat-buoc">*</span>
+                            </label>
+                            <div class="o-mat-khau">
+                                <input class="o-nhap" type="password" id="mat-khau-moi"
+                                       placeholder="Tối thiểu 8 ký tự..."
+                                       oninput="kiemTraMatKhauMoi(this.value)" />
+                                <button type="button" class="nut-hien-mat-khau"
+                                        onclick="batTatMatKhau('mat-khau-moi', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <!-- Thanh độ mạnh mật khẩu -->
+                            <div class="thanh-mat-khau">
+                                <div class="nhan-mat-khau">
+                                    <span>Độ mạnh</span>
+                                    <span id="nhan-do-manh">Chưa nhập</span>
+                                </div>
+                                <div class="vach-mat-khau">
+                                    <div class="doan-mat-khau" id="doan-1"></div>
+                                    <div class="doan-mat-khau" id="doan-2"></div>
+                                    <div class="doan-mat-khau" id="doan-3"></div>
+                                    <div class="doan-mat-khau" id="doan-4"></div>
+                                </div>
+                            </div>
+                            <div class="ghi-chu-nhap">Nên dùng chữ hoa, chữ thường, số và ký tự đặc biệt</div>
+                        </div>
+
+                        <!-- Ô xác nhận mật khẩu mới -->
+                        <div class="nhom-nhap">
+                            <label class="nhan-nhap" for="xac-nhan-mat-khau">
+                                Xác nhận mật khẩu mới <span class="bat-buoc">*</span>
+                            </label>
+                            <div class="o-mat-khau">
+                                <input class="o-nhap" type="password" id="xac-nhan-mat-khau"
+                                       placeholder="Nhập lại mật khẩu mới..." />
+                                <button type="button" class="nut-hien-mat-khau"
+                                        onclick="batTatMatKhau('xac-nhan-mat-khau', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Nút đổi mật khẩu -->
+                        <button class="nut-hanh-dong chinh" id="nut-doi-mat-khau" onclick="doiMatKhau()">
+                            <i class="fas fa-save"></i>
+                            <span id="nhan-nut-doi">Lưu mật khẩu mới</span>
+                        </button>
+
+                    </div><!-- Kết thúc thân card đổi mật khẩu -->
+                </div><!-- Kết thúc CARD ĐỔI MẬT KHẨU -->
+                <!-- ==================================================
+                     CỘT PHẢI – THÔNG TIN TÀI KHOẢN + ĐĂNG XUẤT
+                ================================================== -->
+                <div style="display:flex; flex-direction:column; gap:24px;">
+
+                    <!-- Card thông tin tài khoản -->
+                    <div class="card-cai-dat">
+
+                        <!-- Header card -->
+                        <div class="dau-card">
+                            <div class="bieu-tuong-card xanh-la">
+                                <i class="fas fa-id-badge"></i>
+                            </div>
+                            <div class="tieu-de-card">
+                                <h3>Thông tin tài khoản</h3>
+                                <p>Thông tin hiển thị từ cơ sở dữ liệu</p>
+                            </div>
+                        </div>
+
+                        <!-- Thân card – các hàng thông tin (render từ server) -->
+                        <div class="than-card">
+                            <div class="hang-thong-tin">
+                                <span class="nhan-tt">Họ và tên</span>
+                                <span class="gia-tri-tt" id="hien-thi-ten">@Model.TenHienThi</span>
+                            </div>
+                            <div class="hang-thong-tin">
+                                <span class="nhan-tt">Tên đăng nhập</span>
+                                <span class="gia-tri-tt" id="hien-thi-username">@Model.UserName</span>
+                            </div>
+                            <div class="hang-thong-tin">
+                                <span class="nhan-tt">Số điện thoại</span>
+                                <span class="gia-tri-tt" id="hien-thi-sdt">@Model.SoDienThoai</span>
+                            </div>
+                            <div class="hang-thong-tin">
+                                <span class="nhan-tt">Email</span>
+                                <span class="gia-tri-tt" id="hien-thi-email">@(Model.Email ?? "Chưa cập nhật")</span>
+                            </div>
+                            <div class="hang-thong-tin">
+                                <span class="nhan-tt">Vai trò</span>
+                                <span class="gia-tri-tt">@Model.VaiTro</span>
+                            </div>
+                            <div class="hang-thong-tin">
+                                <span class="nhan-tt">Trạng thái</span>
+                                <span class="the-trang-thai hoat-dong">Đang hoạt động</span>
+                            </div>
+                            <div class="hang-thong-tin" style="border-bottom:none;padding-bottom:0;">
+                                <span class="nhan-tt">Ngày tạo</span>
+                                <span class="gia-tri-tt">@Model.NgayTao.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </div><!-- Kết thúc thân card thông tin -->
+
+                    </div><!-- Kết thúc CARD THÔNG TIN TÀI KHOẢN -->
+                    <!-- Card đăng xuất -->
+                    <div class="card-cai-dat">
+
+                        <!-- Header card -->
+                        <div class="dau-card">
+                            <div class="bieu-tuong-card do">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <div class="tieu-de-card">
+                                <h3>Đăng xuất hệ thống</h3>
+                                <p>Kết thúc phiên làm việc hiện tại</p>
+                            </div>
+                        </div>
+
+                        <!-- Thân card đăng xuất -->
+                        <div class="than-card">
+                            <p style="font-size:13px; color:var(--mau-chu-phu); line-height:1.7; margin-bottom:16px;">
+                                Bấm nút bên dưới để thoát khỏi hệ thống. Cookie xác thực sẽ bị xóa ngay lập tức và bạn cần đăng nhập lại để tiếp tục sử dụng.
+                            </p>
+                            <button class="nut-hanh-dong nguy-hiem" onclick="moXacNhanDangXuat()">
+                                <i class="fas fa-power-off"></i>
+                                Đăng xuất ngay
+                            </button>
+                        </div><!-- Kết thúc thân card đăng xuất -->
+
+                    </div><!-- Kết thúc CARD ĐĂNG XUẤT -->
+
+                </div><!-- Kết thúc CỘT PHẢI -->
+
+            </div><!-- Kết thúc LƯỚI 2 CỘT -->
+
+        </main><!-- Kết thúc NỘI DUNG CHÍNH -->
+    </div><!-- Kết thúc KHU VỰC CHÍNH -->
+    <!-- ==========================================================
+         MODAL XÁC NHẬN ĐĂNG XUẤT
+    ========================================================== -->
+    <div class="lop-phu-modal" id="modal-xac-nhan-dang-xuat"
+         onclick="dongModalXacNhan(event)">
+        <div class="hop-modal-xac-nhan">
+            <div class="bieu-tuong-modal-xac-nhan">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <div class="tieu-de-modal-xac-nhan">Xác nhận đăng xuất?</div>
+            <div class="mo-ta-modal-xac-nhan">
+                Bạn sắp thoát khỏi hệ thống quản lý. Phiên làm việc hiện tại sẽ kết thúc và mọi thao tác chưa lưu có thể bị mất.
+            </div>
+            <div class="nhom-nut-modal">
+                <button class="nut-huy-modal" onclick="dongModal()">Ở lại</button>
+                <button class="nut-xac-nhan-dang-xuat" id="nut-xac-nhan-dang-xuat-chinh" onclick="thucHienDangXuat()">
+                    <i class="fas fa-power-off"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </div><!-- Kết thúc MODAL XÁC NHẬN ĐĂNG XUẤT -->
+    <!-- ==========================================================
+         VÙNG THÔNG BÁO TOAST (góc phải trên)
+    ========================================================== -->
+    <div id="vung-thong-bao"></div>
+
+    <!-- ==========================================================
+         JAVASCRIPT XỬ LÝ
+    ========================================================== -->
+    <script>
+            // ===========================================================
+            // BIẾN TOÀN CỤC
+            // ===========================================================
+            const API_GOC = '/api';
+
+            // ===========================================================
+            // KHỞi TẠO KHI TẢI TRANG – điền thông tin từ server vào sidebar/header
+            // ===========================================================
+            (function khoiTaoThongTin() {
+                const ten  = document.getElementById('hien-thi-ten')?.textContent?.trim() || '';
+                const user = document.getElementById('hien-thi-username')?.textContent?.trim() || '';
+
+                // Lấy chữ cái đầu viết tắt
+                const viTat = ten ? ten.charAt(0).toUpperCase() : (user ? user.charAt(0).toUpperCase() : 'U');
+
+                // Cập nhật sidebar
+                const sidebarVietTat = document.getElementById('sidebar-chu-viet-tat');
+                const sidebarTen     = document.getElementById('sidebar-ten-chu');
+                if (sidebarVietTat) sidebarVietTat.textContent = viTat;
+                if (sidebarTen)     sidebarTen.textContent     = ten || user;
+
+                // Cập nhật header
+                const headerVietTat = document.getElementById('header-chu-viet-tat');
+                const headerTen     = document.getElementById('header-ten-chu');
+                if (headerVietTat) headerVietTat.textContent = viTat;
+                if (headerTen)     headerTen.textContent     = ten || user;
+            })();
+
+            // ===========================================================
+            // TOGGLE SIDEBAR
+            // ===========================================================
+            function dongMoSidebar() {
+                document.getElementById('thanh-sidebar').classList.toggle('an');
+            }
+
+            // ===========================================================
+            // HIỆN / ẨN MẬT KHẨU
+            // ===========================================================
+            function batTatMatKhau(idO, nutBam) {
+                const o = document.getElementById(idO);
+                const icon = nutBam.querySelector('i');
+                if (o.type === 'password') {
+                    o.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    o.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            }
+
+            // ===========================================================
+            // THANH ĐỘ MẠNH MẬT KHẨU
+            // ===========================================================
+            function kiemTraMatKhauMoi(giaTri) {
+                const doan  = [1,2,3,4].map(i => document.getElementById(`doan-${i}`));
+                const nhan  = document.getElementById('nhan-do-manh');
+                let diem = 0;
+
+                if (giaTri.length >= 8)                              diem++;
+                if (/[A-Z]/.test(giaTri) && /[a-z]/.test(giaTri)) diem++;
+                if (/\d/.test(giaTri))                               diem++;
+                if (/[^A-Za-z0-9]/.test(giaTri))                    diem++;
+
+                const mauSac = ['#ef4444','#f97316','#eab308','#22c55e'];
+                const nhanChu = ['Yếu','Trung bình','Khá','Mạnh'];
+
+                doan.forEach((d, i) => {
+                    d.style.background = i < diem ? mauSac[diem - 1] : '#e5e9f5';
+                });
+
+                if (giaTri.length === 0) {
+                    nhan.textContent = 'Chưa nhập';
+                    nhan.style.color = 'var(--mau-chu-phu)';
+                } else {
+                    nhan.textContent  = nhanChu[diem - 1] || 'Yếu';
+                    nhan.style.color  = mauSac[diem - 1];
+                }
+            }
+
+            // ===========================================================
+            // ĐỔI MẬT KHẨU – gọi API back-end
+            // ===========================================================
+            async function doiMatKhau() {
+                const matKhauCu      = document.getElementById('mat-khau-cu').value.trim();
+                const matKhauMoi     = document.getElementById('mat-khau-moi').value.trim();
+                const xacNhanMatKhau = document.getElementById('xac-nhan-mat-khau').value.trim();
+
+                // Kiểm tra phía client
+                if (!matKhauCu || !matKhauMoi || !xacNhanMatKhau) {
+                    hienThongBao('Vui lòng điền đầy đủ tất cả các trường!', 'that-bai');
+                    return;
+                }
+                if (matKhauMoi.length < 8) {
+                    hienThongBao('Mật khẩu mới phải có ít nhất 8 ký tự!', 'that-bai');
+                    return;
+                }
+                if (matKhauMoi !== xacNhanMatKhau) {
+                    hienThongBao('Mật khẩu xác nhận không khớp!', 'that-bai');
+                    return;
+                }
+
+                // Hiển thị trạng thái đang tải
+                const nut   = document.getElementById('nut-doi-mat-khau');
+                const nhan  = document.getElementById('nhan-nut-doi');
+                nut.disabled  = true;
+                nhan.innerHTML = '<span class="vong-tai"></span> Đang cập nhật...';
+
+                try {
+                    // Gọi API đổi mật khẩu
+                    const phanHoi = await fetch(`${API_GOC}/CaiDatTaiKhoan/DoiMatKhau`, {
+                        method : 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body   : JSON.stringify({
+                            matKhauHienTai : matKhauCu,
+                            matKhauMoi     : matKhauMoi,
+                            xacNhanMatKhau : xacNhanMatKhau
+                        })
+                    });
+
+                    const ketQua = await phanHoi.json();
+
+                    if (phanHoi.ok) {
+                        hienThongBao(ketQua.message || 'Đổi mật khẩu thành công!', 'thanh-cong');
+                        // Xóa các ô nhập sau khi thành công
+                        ['mat-khau-cu','mat-khau-moi','xac-nhan-mat-khau'].forEach(id => {
+                            document.getElementById(id).value = '';
+                        });
+                        kiemTraMatKhauMoi(''); // reset thanh độ mạnh
+                    } else {
+                        hienThongBao(ketQua.message || 'Đổi mật khẩu thất bại!', 'that-bai');
+                    }
+                } catch (loi) {
+                    hienThongBao('Lỗi kết nối đến máy chủ. Vui lòng thử lại!', 'that-bai');
+                } finally {
+                    nut.disabled   = false;
+                    nhan.textContent = 'Lưu mật khẩu mới';
+                }
+            }
+
+            // ===========================================================
+            // MỞ MODAL XÁC NHẬN ĐĂNG XUẤT
+            // ===========================================================
+            function moXacNhanDangXuat() {
+                document.getElementById('modal-xac-nhan-dang-xuat').classList.add('hien');
+            }
+
+            // ===========================================================
+            // ĐÓNG MODAL KHI BẤM RA NGOÀI
+            // ===========================================================
+            function dongModalXacNhan(su_kien) {
+                if (su_kien.target === document.getElementById('modal-xac-nhan-dang-xuat')) {
+                    dongModal();
+                }
+            }
+            function dongModal() {
+                document.getElementById('modal-xac-nhan-dang-xuat').classList.remove('hien');
+            }
+
+            // ===========================================================
+            // THỰC HIỆN ĐĂNG XUẤT – gọi API XuLyDangNhap/DangXuat
+            // ===========================================================
+            async function thucHienDangXuat() {
+                const nut = document.getElementById('nut-xac-nhan-dang-xuat-chinh');
+                nut.disabled     = true;
+                nut.innerHTML    = '<span class="vong-tai"></span> Đang đăng xuất...';
+
+                try {
+                    const phanHoi = await fetch('/api/XuLyDangNhap/DangXuat', {
+                        method : 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (phanHoi.ok) {
+                        // Chuyển hướng về trang đăng nhập sau khi xóa cookie
+                        window.location.href = '/DangNhap';
+                    } else {
+                        hienThongBao('Đăng xuất thất bại. Vui lòng thử lại!', 'that-bai');
+                        nut.disabled  = false;
+                        nut.innerHTML = '<i class="fas fa-power-off"></i> Đăng xuất';
+                        dongModal();
+                    }
+                } catch (loi) {
+                    hienThongBao('Lỗi kết nối. Vui lòng thử lại!', 'that-bai');
+                    nut.disabled  = false;
+                    nut.innerHTML = '<i class="fas fa-power-off"></i> Đăng xuất';
+                    dongModal();
+                }
+            }
+
+            // ===========================================================
+            // HÀM HIỆN TOAST THÔNG BÁO
+            // ===========================================================
+            function hienThongBao(noiDung, loai) {
+                const vung = document.getElementById('vung-thong-bao');
+                const hop  = document.createElement('div');
+                const icon = loai === 'thanh-cong'
+                    ? '<i class="fas fa-check-circle thanh-cong-icon"></i>'
+                    : '<i class="fas fa-times-circle that-bai-icon"></i>';
+
+                hop.className   = `thong-bao ${loai}`;
+                hop.innerHTML   = `${icon}<span>${noiDung}</span>`;
+                vung.appendChild(hop);
+
+                // Tự ẩn sau 3.5 giây
+                setTimeout(() => {
+                    hop.style.animation = 'truotRa 0.3s ease forwards';
+                    setTimeout(() => hop.remove(), 300);
+                }, 3500);
+            }
+
+            // ===========================================================
+            // BẮT PHÍM ENTER TRÊN FORM ĐỔI MẬT KHẨU
+            // ===========================================================
+            ['mat-khau-cu','mat-khau-moi','xac-nhan-mat-khau'].forEach(id => {
+                document.getElementById(id)?.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') doiMatKhau();
+                });
+            });
+    </script>
+
+</body>
+</html>

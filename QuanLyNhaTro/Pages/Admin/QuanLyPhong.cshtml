@@ -1562,33 +1562,24 @@
             <span>Hợp đồng</span>
             <span class="huy-hieu vang">2</span>
         </div>
-        <div class="muc-menu" onclick="chuyenMenu('hoa-don', this)">
-            <i class="fas fa-file-invoice-dollar"></i>
-            <span>Hóa đơn & Thu tiền</span>
-        </div>
-
         <!-- Nhóm: Quản trị chủ trọ -->
         <div class="nhan-nhom-menu">Quản trị chủ trọ</div>
 
-        <div class="muc-menu" onclick="chuyenMenu('Tai-Khoan', this)">
+        <div class="muc-menu" onclick="window.location.href='/Admin/Taikhoanquanly'">
             <i class="fas fa-user-shield"></i>
             <span>Tài khoản quản lý</span>
         </div>
-        <div class="muc-menu" onclick="chuyenMenu('nguoi-thue', this)">
+        <div class="muc-menu" onclick="window.location.href='/Admin/QuanLyNguoiThue'">
             <i class="fas fa-users"></i>
             <span>Quản lý người thuê</span>
         </div>
-        <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
+        <div class="muc-menu" onclick="window.location.href='/Admin/CauHinhGiaThue'">
             <i class="fas fa-sliders-h"></i>
             <span>Cấu hình giá thuê</span>
         </div>
-        <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
+        <div class="muc-menu" onclick="window.location.href='/Admin/DichVuThongBao'">
             <i class="fas fa-bolt"></i>
             <span>Dịch vụ thông báo</span>
-        </div>
-        <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
-            <i class="fas fa-hand-holding-usd"></i>
-            <span>Quy định đặt cọc</span>
         </div>
 
         <!-- Nhóm: Hỗ trợ -->
@@ -1597,7 +1588,7 @@
         <div class="muc-menu" onclick="chuyenMenu('sua-chua', this)">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
-            <span class="huy-hieu">3</span>
+            <span id="huy-hieu-sua-chua" class="huy-hieu">3</span>
         </div>
         <div class="muc-menu" onclick="chuyenMenu('bao-cao', this)">
             <i class="fas fa-chart-bar"></i>

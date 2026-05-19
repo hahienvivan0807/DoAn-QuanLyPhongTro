@@ -4104,42 +4104,34 @@
             <i class="fas fa-building"></i>
             <span>Quản lý phòng trọ</span>
         </div>
-        <div class="muc-menu" onclick="window.location.href='/Admin/QuanLyNguoiThue'">
-            <i class="fas fa-users"></i>
-            <span>Người thuê</span>
-        </div>
+            <div class="muc-menu" onclick="window.location.href='/Admin/QuanLyNguoiThue'">
+                <i class="fas fa-users"></i>
+                <span>Người thuê</span>
+            </div>
         <div class="muc-menu" onclick="chuyenMenu('hop-dong', this)">
             <i class="fas fa-file-contract"></i>
             <span>Hợp đồng</span>
             <span class="huy-hieu vang">2</span>
         </div>
-        <div class="muc-menu" onclick="chuyenMenu('hoa-don', this)">
-            <i class="fas fa-file-invoice-dollar"></i>
-            <span>Hóa đơn & Thu tiền</span>
-        </div>
 
         <!-- Nhóm: Quản trị chủ trọ -->
         <div class="nhan-nhom-menu">Quản trị chủ trọ</div>
 
-        <div class="muc-menu" onclick="chuyenMenu('Tai-Khoan', this)">
+        <div class="muc-menu" onclick="window.location.href='/Admin/Taikhoanquanly'">
             <i class="fas fa-user-shield"></i>
             <span>Tài khoản quản lý</span>
         </div>
-        <div class="muc-menu" onclick="moModalQuanLyNguoiThue()">
+        <div class="muc-menu" onclick="window.location.href='/Admin/QuanLyNguoiThue'"">
             <i class="fas fa-users"></i>
             <span>Quản lý người thuê</span>
         </div>
-        <div class="muc-menu" onclick="moModal('modal-cau-hinh-gia-v2')">
+        <div class="muc-menu" onclick="window.location.href='/Admin/CauHinhGiaThue'">
             <i class="fas fa-sliders-h"></i>
             <span>Cấu hình giá thuê</span>
         </div>
-        <div class="muc-menu" onclick="moModal('modal-chi-phi-dich-vu')">
+        <div class="muc-menu" onclick="window.location.href='/Admin/DichVuThongBao'">
             <i class="fas fa-bolt"></i>
             <span>Dịch vụ thông báo</span>
-        </div>
-        <div class="muc-menu" onclick="moModal('modal-dat-coc')">
-            <i class="fas fa-hand-holding-usd"></i>
-            <span>Quy định đặt cọc</span>
         </div>
 
         <!-- Nhóm: Hỗ trợ -->
@@ -4148,7 +4140,7 @@
         <div class="muc-menu" onclick="chuyenMenu('sua-chua', this)">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
-            <span class="huy-hieu">3</span>
+            <span id="huy-hieu-sua-chua" class="huy-hieu">3</span>
         </div>
         <div class="muc-menu" onclick="chuyenMenu('bao-cao', this)">
             <i class="fas fa-chart-bar"></i>

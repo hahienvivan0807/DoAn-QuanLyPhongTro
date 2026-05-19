@@ -261,6 +261,14 @@ namespace QuanLyNhaTro.Controllers
 
             return Ok(data);
         }
+        [HttpGet("SLTaskBar")]
+        public async Task<IActionResult> SoLuongTaskBar()
+        {
+            int count = await _context.THONGBAO
+                   .CountAsync(x => x.LoaiTB == "canh-bao");
+
+            return Ok(new { Dem = count });
+        }
     }   
 
 }
