@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="/css/ChuTro.css" />
   <link rel="stylesheet" href="/css/QuanLyNguoiThue.css" />
+  <link rel="stylesheet" href="/css/site.css" />
   <script src="/js/ChuTro/ChuTro-ThongBao.js"></script>
   <script src="/js/ChuTro/ChuTro-core.js"></script>
   <script src="/js/ChuTro/ChuTro-quanLy.js"></script>
@@ -709,10 +710,10 @@
     <i class="fas fa-users"></i>
     <span>Quản lý người thuê</span>
   </a>
-  <a class="muc-menu" href="/Admin/CauHinhGiaThue">
+<a class="muc-menu" href="#" onclick="event.preventDefault(); ModalChung.mo('cau-hinh-gia')">
     <i class="fas fa-sliders-h"></i>
     <span>Cấu hình giá thuê</span>
-  </a>
+</a>
   <a class="muc-menu" href="/Admin/DichVuThongBao">
     <i class="fas fa-bolt"></i>
     <span>Dịch vụ thông báo</span>
@@ -1487,5 +1488,6 @@
     }
   }
 </script>
+@await Html.PartialAsync("ModalChung")
 </body>
 </html>

@@ -1,0 +1,430 @@
+﻿
+
+<!-- ================================================================
+     MODAL 1 – CẤU HÌNH GIÁ THUÊ (modal-cau-hinh-gia-v2)
+     Gồm 2 tab:
+       Tab 1 – Cấu hình giá dịch vụ  → chgSubmit() → POST /api/ConfigGia
+       Tab 2 – Cấu hình phòng        → chgSubmit() → PUT  /api/Phong/{id}
+================================================================ -->
+<div class="lop-phu-modal" id="modal-cau-hinh-gia-v2"
+     onclick="chgDongNgoai(event)">
+    <div class="chg-box" onclick="event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="chg-hd">
+            <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+                <div class="chg-hd-icon"><i class="fas fa-sliders-h"></i></div>
+                <div>
+                    <div class="chg-hd-title">Cấu hình giá thuê</div>
+                    <div class="chg-hd-sub">Dịch vụ &amp; Phòng trọ</div>
+                </div>
+            </div>
+            <button class="chg-close" onclick="chgDong()">✕</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="chg-tabs">
+            <button class="chg-tab active" id="chg-tab-dv" onclick="chgSwitch('dv')">
+                <i class="fas fa-bolt"></i> Cấu hình Giá Dịch Vụ
+            </button>
+            <button class="chg-tab" id="chg-tab-phong" onclick="chgSwitch('phong')">
+                <i class="fas fa-door-open"></i> Cấu hình Phòng
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="chg-body">
+
+            <!-- ── Panel 1: Giá Dịch Vụ ── -->
+            <div class="chg-panel show" id="chg-panel-dv">
+
+                <div class="chg-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Thiết lập đơn giá cho từng loại dịch vụ. Đơn giá này sẽ được áp dụng khi tính hóa đơn hàng tháng cho tất cả các phòng.</span>
+                </div>
+
+                <div class="chg-sec"><i class="fas fa-cog"></i> Thiết lập đơn giá dịch vụ</div>
+
+                <!-- Form thêm / sửa dịch vụ -->
+                <div class="fg2" id="chg-dv-form">
+                    <div class="field">
+                        <label class="f-lbl">Mã dịch vụ <span class="req">*</span></label>
+                        <input class="inp" type="text" id="dv-ma" placeholder="VD: DIEN, NUOC, INET..." />
+                        <div class="f-note">Mã định danh duy nhất, không dấu cách</div>
+                    </div>
+                    <div class="field">
+                        <label class="f-lbl">Tên dịch vụ <span class="req">*</span></label>
+                        <input class="inp" type="text" id="dv-ten" placeholder="VD: Tiền điện, Tiền nước..." />
+                    </div>
+                    <div class="field">
+                        <label class="f-lbl">Đơn giá <span class="req">*</span></label>
+                        <div class="inp-u">
+                            <input class="inp" type="number" id="dv-gia" placeholder="VD: 3500" min="0" />
+                            <span class="unit">đ</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="f-lbl">Đơn vị tính <span class="req">*</span></label>
+                        <select class="inp" id="dv-donvi">
+                            <option value="">-- Chọn đơn vị --</option>
+                            <option value="kWh">kWh (điện)</option>
+                            <option value="m3">m³ (nước)</option>
+                            <option value="phong/thang">phòng / tháng</option>
+                            <option value="nguoi/thang">người / tháng</option>
+                            <option value="xe/thang">xe / tháng</option>
+                            <option value="thang">tháng (khoán)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Nút thêm dịch vụ -->
+                <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+                    <button class="chg-btn-add" onclick="chgThemDichVu()">
+                        <i class="fas fa-plus"></i> Thêm dịch vụ
+                    </button>
+                </div>
+
+                <!-- Danh sách dịch vụ hiện có -->
+                <div class="mdiv"></div>
+                <div class="chg-sec"><i class="fas fa-list"></i> Danh sách dịch vụ hiện có</div>
+                <div id="chg-dv-list">
+                    <!-- ⚙️ BACKEND: render từ GET /api/ConfigGia -->
+                    <div class="chg-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Đang tải danh sách dịch vụ...
+                    </div>
+                </div>
+
+            </div><!-- /panel-dv -->
+            <!-- ── Panel 2: Cấu Hình Phòng ── -->
+            <div class="chg-panel" id="chg-panel-phong">
+
+                <div class="chg-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Chọn phòng để chỉnh sửa thông tin. Khi chưa chọn phòng, các trường nhập liệu sẽ bị khoá.</span>
+                </div>
+
+                <!-- Room Picker -->
+                <div class="chg-sec"><i class="fas fa-search"></i> Chọn phòng</div>
+                <div class="field" style="margin-bottom:16px;">
+                    <label class="f-lbl">Số phòng <span class="req">*</span></label>
+                    <div class="room-wrap-chg" id="chgRoomWrap">
+                        <button type="button" class="room-btn-chg" id="chgRoomBtn" onclick="toggleRoomChg()">
+                            Nhấn để chọn phòng cần chỉnh sửa...
+                        </button>
+                        <span class="room-btn-icon-chg"><i class="fas fa-door-open"></i></span>
+                        <div class="room-panel-chg" id="chgRoomPanel">
+                            <div class="rpc-search">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="chg-rp-q" placeholder="Tìm số phòng, tầng..." oninput="chgRenderRooms()" />
+                            </div>
+                            <div class="rpc-filters">
+                                <button class="rfc ra" id="chg-rf-all" onclick="chgSetFilter('all',this)">Tất cả</button>
+                                <button class="rfc rt" id="chg-rf-trong" onclick="chgSetFilter('Trống',this)">Trống</button>
+                                <button class="rfc rr" id="chg-rf-datthue" onclick="chgSetFilter('Đã thuê',this)">Đã thuê</button>
+                                <button class="rfc rs" id="chg-rf-dangsua" onclick="chgSetFilter('Đang sửa',this)">Đang sửa</button>
+                            </div>
+                            <div class="rpc-list" id="chgRpList">
+                                <!-- ⚙️ BACKEND: render từ GET /api/Phong -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="f-note">Có thể chỉnh sửa phòng ở bất kỳ trạng thái nào.</div>
+                </div>
+
+                <div class="mdiv" style="margin-top:0;"></div>
+                <div class="chg-sec"><i class="fas fa-edit"></i> Thông tin phòng</div>
+
+                <!-- Fields – lock khi chưa chọn phòng -->
+                <div class="fields-group locked" id="chg-phong-fields">
+                    <div class="fg2">
+                        <div class="field">
+                            <label class="f-lbl">Số phòng <span class="req">*</span></label>
+                            <input class="inp" type="text" id="phong-so" placeholder="VD: 101" disabled />
+                        </div>
+                        <div class="field">
+                            <label class="f-lbl">Tầng <span class="req">*</span></label>
+                            <input class="inp" type="number" id="phong-tang" placeholder="VD: 1" min="1" disabled />
+                        </div>
+                        <div class="field">
+                            <label class="f-lbl">Trạng thái <span class="req">*</span></label>
+                            <select class="inp" id="phong-trang-thai" disabled>
+                                <option value="Trống">Trống</option>
+                                <option value="Đã thuê">Đã thuê</option>
+                                <option value="Đang sửa">Đang sửa</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label class="f-lbl">Diện tích (m²) <span class="req">*</span></label>
+                            <div class="inp-u">
+                                <input class="inp" type="number" id="phong-dien-tich" placeholder="VD: 22" min="1" disabled />
+                                <span class="unit">m²</span>
+                            </div>
+                        </div>
+                        <div class="field" style="grid-column:1/-1;">
+                            <label class="f-lbl">Giá phòng cố định <span style="font-weight:400;color:#6b7a99;font-size:10.5px;">(GiaPhongFix – để trống = dùng giá hệ thống)</span></label>
+                            <div class="inp-u">
+                                <input class="inp" type="number" id="phong-gia-fix" placeholder="Để trống = dùng giá mặc định hệ thống" min="0" disabled />
+                                <span class="unit">đ/tháng</span>
+                            </div>
+                            <div class="f-note">Nếu đặt giá riêng, giá này sẽ ưu tiên cao hơn cấu hình mặc định.</div>
+                        </div>
+                    </div>
+                    <div class="field" style="margin-bottom:6px;">
+                        <label class="f-lbl">Mô tả phòng</label>
+                        <textarea class="inp" id="phong-mo-ta" rows="3"
+                                  placeholder="VD: Phòng gần cầu thang, có ban công, máy lạnh 2 chiều..."
+                                  disabled></textarea>
+                        <div class="f-note">Thông tin thêm về tiện ích, vị trí, đặc điểm phòng.</div>
+                    </div>
+                </div><!-- /fields-group -->
+
+                <div id="chg-phong-hint" style="text-align:center;padding:24px 0 8px;color:#6b7a99;font-size:12.5px;">
+                    <i class="fas fa-hand-pointer" style="font-size:22px;display:block;margin-bottom:8px;color:#0891b2;opacity:0.6;"></i>
+                    Hãy chọn một phòng ở trên để bắt đầu chỉnh sửa.
+                </div>
+
+            </div><!-- /panel-phong -->
+
+        </div><!-- /chg-body -->
+        <!-- Footer -->
+        <div class="chg-ft">
+            <div class="ft-note"><span>*</span> Trường bắt buộc</div>
+            <div class="ft-btns">
+                <button class="btn-cancel-chg" onclick="chgDong()">Hủy</button>
+                <button class="btn-confirm-chg" id="chg-btn-submit" onclick="chgSubmit()">
+                    <i class="fas fa-check"></i>
+                    <span id="chg-btn-label">Xác nhận thay đổi</span>
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /chg-box -->
+</div><!-- /modal-cau-hinh-gia-v2 -->
+<!-- ================================================================
+     MODAL 2 – DỊCH VỤ THÔNG BÁO (modal-chi-phi-dich-vu)
+     Gửi thông báo đến người thuê (tất cả / theo phòng / theo người)
+     JS: guiThongBao() → POST /api/ThongBao
+================================================================ -->
+<div class="lop-phu-modal" id="modal-chi-phi-dich-vu"
+     onclick="dongModalNhapNgoai(event,'modal-chi-phi-dich-vu')">
+    <div class="hop-modal" style="width:580px;">
+
+        <!-- Header gradient xanh dương -->
+        <div class="tb-hd">
+            <!-- decorative circles -->
+            <div class="tb-hd-circle tb-hd-circle--1"></div>
+            <div class="tb-hd-circle tb-hd-circle--2"></div>
+            <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+                <div class="tb-hd-icon"><i class="fas fa-bell"></i></div>
+                <div>
+                    <div class="tb-hd-title">Gửi thông báo</div>
+                    <div class="tb-hd-sub">Gửi thông báo đến người thuê</div>
+                </div>
+            </div>
+            <button class="nut-dong-modal tb-close" onclick="dongModal('modal-chi-phi-dich-vu')">✕</button>
+        </div>
+
+        <!-- Nội dung thông báo -->
+        <div class="tieu-de-muc-modal" style="color:#0891b2;"><i class="fas fa-heading"></i> Nội dung thông báo</div>
+        <div class="nhom-nhap" style="margin-bottom:14px;">
+            <label class="nhan-nhap">Tiêu đề <span style="color:#dc2626;">*</span></label>
+            <input class="o-nhap" type="text" id="tb-tieu-de"
+                   placeholder="VD: Thông báo lịch cắt điện tháng 6..." maxlength="200" />
+            <div style="font-size:10.5px;color:#6b7a99;margin-top:4px;">Tối đa 200 ký tự</div>
+        </div>
+        <div class="nhom-nhap" style="margin-bottom:18px;">
+            <label class="nhan-nhap">Nội dung <span style="color:#dc2626;">*</span></label>
+            <textarea class="o-nhap" id="tb-noi-dung" rows="4"
+                      placeholder="Nhập nội dung thông báo chi tiết..." maxlength="500"
+                      style="resize:vertical;"></textarea>
+            <div style="font-size:10.5px;color:#6b7a99;margin-top:4px;">Tối đa 500 ký tự</div>
+        </div>
+
+        <hr class="duong-ke-modal" />
+
+        <!-- Người nhận -->
+        <div class="tieu-de-muc-modal" style="color:#0891b2;"><i class="fas fa-users"></i> Người nhận</div>
+        <div class="nhom-nhap" style="margin-bottom:14px;">
+            <label class="nhan-nhap">Loại người nhận <span style="color:#dc2626;">*</span></label>
+            <select class="o-nhap o-chon" id="tb-loai-nguoi-nhan" onchange="tbChuyenLoaiNguoiNhan(this.value)">
+                <option value="all">Tất cả người thuê</option>
+                <option value="phong">Theo phòng</option>
+                <option value="nguoi">Theo người thuê cụ thể</option>
+            </select>
+        </div>
+
+        <!-- Chọn phòng – ẩn mặc định -->
+        <div id="tb-chon-phong" style="display:none;margin-bottom:14px;">
+            <label class="nhan-nhap">Chọn phòng <span style="color:#dc2626;">*</span></label>
+            <!-- ⚙️ BACKEND: populate từ GET /api/Phong -->
+            <select class="o-nhap o-chon" id="tb-phong-id">
+                <option value="">-- Đang tải danh sách phòng... --</option>
+            </select>
+        </div>
+
+        <!-- Chọn người thuê cụ thể – ẩn mặc định -->
+        <div id="tb-chon-nguoi" style="display:none;margin-bottom:14px;">
+            <label class="nhan-nhap">Chọn người thuê <span style="color:#dc2626;">*</span></label>
+            <!-- ⚙️ BACKEND: populate từ GET /api/NguoiThue -->
+            <select class="o-nhap o-chon" id="tb-user-id">
+                <option value="">-- Đang tải danh sách người thuê... --</option>
+            </select>
+        </div>
+
+        <!-- Preview người nhận -->
+        <div id="tb-preview-nguoi-nhan" class="tb-preview-box">
+            <i class="fas fa-info-circle" style="margin-right:6px;color:#0891b2;"></i>
+            <span id="tb-preview-text">Sẽ gửi đến tất cả người thuê</span>
+        </div>
+
+        <hr class="duong-ke-modal" />
+
+        <!-- Cài đặt -->
+        <div class="tieu-de-muc-modal" style="color:#0891b2;"><i class="fas fa-cog"></i> Cài đặt</div>
+        <div class="luoi-form-2">
+            <div class="nhom-nhap">
+                <label class="nhan-nhap">Mức độ thông báo <span style="color:#dc2626;">*</span></label>
+                <select class="o-nhap o-chon" id="tb-muc-do" onchange="tbCapNhatMucDo(this.value)">
+                    <option value="thong-tin">🔵 Bình thường</option>
+                    <option value="canh-bao">🟡 Quan trọng</option>
+                    <option value="khan-cap">🔴 Khẩn cấp</option>
+                </select>
+            </div>
+            <div class="nhom-nhap">
+                <label class="nhan-nhap">Ngày gửi <span style="color:#dc2626;">*</span></label>
+                <input class="o-nhap" type="datetime-local" id="tb-ngay-gui" />
+            </div>
+        </div>
+
+        <!-- Badge mức độ -->
+        <div id="tb-muc-do-preview" style="margin-bottom:4px;">
+            <span id="tb-badge-muc-do" class="tb-badge muc-thong-tin">🔵 Thông tin thông thường</span>
+        </div>
+
+        <div class="nhom-nut-duoi-modal" style="margin-top:22px;">
+            <button class="nut-huy-modal" onclick="dongModal('modal-chi-phi-dich-vu')">Hủy</button>
+            <button class="nut-luu-modal tb-btn-gui" id="tb-btn-gui" onclick="guiThongBao()">
+                <i class="fas fa-paper-plane"></i> Gửi thông báo
+            </button>
+        </div>
+
+    </div>
+</div><!-- /modal-chi-phi-dich-vu -->
+<!-- ================================================================
+     MODAL 3 – QUY ĐỊNH ĐẶT CỌC (modal-dat-coc)
+     JS: luuQuyDinhDatCoc() → POST /api/QuyDinhDatCoc
+================================================================ -->
+<div class="lop-phu-modal" id="modal-dat-coc"
+     onclick="dongModalNhapNgoai(event,'modal-dat-coc')">
+    <div class="hop-modal">
+
+        <!-- Header -->
+        <div class="tieu-de-modal">
+            <h3>
+                <span class="modal-icon-badge" style="background:linear-gradient(135deg,#e11d48,#fb7185);">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </span>
+                Quy định đặt cọc thuê phòng
+            </h3>
+            <button class="nut-dong-modal" onclick="dongModal('modal-dat-coc')">✕</button>
+        </div>
+
+        <!-- Mức đặt cọc -->
+        <div class="tieu-de-muc-modal">Mức đặt cọc</div>
+        <div class="luoi-form-2" style="margin-bottom:16px;">
+            <div class="nhom-nhap">
+                <label class="nhan-nhap">Số tháng đặt cọc</label>
+                <select class="o-nhap o-chon" id="so-thang-dat-coc" onchange="datCocChuyenLoai(this.value)">
+                    <option value="1">1 tháng tiền thuê</option>
+                    <option value="2" selected>2 tháng tiền thuê</option>
+                    <option value="3">3 tháng tiền thuê</option>
+                    <option value="co-dinh">Số tiền cố định</option>
+                </select>
+            </div>
+            <div class="nhom-nhap" id="nhom-so-tien-co-dinh" style="display:none;">
+                <label class="nhan-nhap">Số tiền cố định <span style="color:#dc2626;">*</span></label>
+                <input class="o-nhap" type="number" id="so-tien-co-dinh-coc"
+                       placeholder="VD: 5000000" min="0" />
+                <div style="font-size:10.5px;color:#6b7a99;margin-top:4px;">Đơn vị: đồng (VNĐ)</div>
+            </div>
+            <div class="nhom-nhap" id="nhom-preview-coc">
+                <label class="nhan-nhap">Xem trước mức cọc</label>
+                <div class="dc-preview-box">
+                    <i class="fas fa-coins" style="color:#e11d48;"></i>
+                    <span id="dc-preview-text">= 2 tháng tiền thuê phòng</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Điều kiện hoàn trả cọc -->
+        <div class="tieu-de-muc-modal">Điều kiện hoàn trả cọc</div>
+        <div class="luoi-form-2" style="margin-bottom:16px;">
+            <div class="nhom-nhap">
+                <label class="nhan-nhap">Thời gian hoàn cọc sau khi trả phòng</label>
+                <select class="o-nhap o-chon" id="thoi-han-hoan-coc">
+                    <option value="7">7 ngày</option>
+                    <option value="15" selected>15 ngày</option>
+                    <option value="30">30 ngày</option>
+                    <option value="45">45 ngày</option>
+                    <option value="60">60 ngày</option>
+                </select>
+            </div>
+            <div class="nhom-nhap">
+                <label class="nhan-nhap">Báo trước khi trả phòng (ngày) <span style="color:#dc2626;">*</span></label>
+                <input class="o-nhap" type="number" id="bao-truoc-ngay" value="30" min="7" max="90" />
+                <div style="font-size:10.5px;color:#6b7a99;margin-top:4px;">Tối thiểu 7 ngày, tối đa 90 ngày</div>
+            </div>
+        </div>
+
+        <!-- Điều kiện khấu trừ -->
+        <div class="tieu-de-muc-modal">Điều kiện khấu trừ tiền cọc</div>
+        <div class="luoi-quyen" style="margin-bottom:12px;">
+            <label class="dong-quyen">
+                <input type="checkbox" id="kt-no-tien" checked />
+                <div>
+                    <div class="nhan-quyen">Nợ tiền thuê / dịch vụ</div>
+                    <div class="mo-ta-quyen">Khấu trừ toàn bộ số nợ còn lại</div>
+                </div>
+            </label>
+            <label class="dong-quyen">
+                <input type="checkbox" id="kt-hu-hong" checked />
+                <div>
+                    <div class="nhan-quyen">Hư hỏng tài sản</div>
+                    <div class="mo-ta-quyen">Theo biên bản kiểm kê khi trả phòng</div>
+                </div>
+            </label>
+            <label class="dong-quyen">
+                <input type="checkbox" id="kt-khong-bao" />
+                <div>
+                    <div class="nhan-quyen">Không báo trước đúng hạn</div>
+                    <div class="mo-ta-quyen">Phạt tối đa 1 tháng tiền thuê</div>
+                </div>
+            </label>
+            <label class="dong-quyen">
+                <input type="checkbox" id="kt-vi-pham" />
+                <div>
+                    <div class="nhan-quyen">Vi phạm nội quy nhà trọ</div>
+                    <div class="mo-ta-quyen">Theo biên bản vi phạm đã lập</div>
+                </div>
+            </label>
+        </div>
+
+        <!-- Ghi chú hợp đồng -->
+        <div class="nhom-nhap" style="margin-bottom:4px;">
+            <label class="nhan-nhap">Ghi chú thêm vào hợp đồng</label>
+            <textarea class="o-nhap" rows="3" id="ghi-chu-dat-coc"
+                      placeholder="Ghi rõ điều khoản hoàn cọc vào hợp đồng thuê..."></textarea>
+        </div>
+
+        <div class="nhom-nut-duoi-modal">
+            <button class="nut-huy-modal" onclick="dongModal('modal-dat-coc')">Hủy</button>
+            <button class="nut-luu-modal" style="background:linear-gradient(135deg,#e11d48,#fb7185);box-shadow:0 4px 14px rgba(225,29,72,0.35);"
+                    onclick="luuQuyDinhDatCoc()">
+                <i class="fas fa-save"></i> Lưu quy định đặt cọc
+            </button>
+        </div>
+
+    </div>
+</div><!-- /modal-dat-coc -->
+<script src="~/js/ChuTro/ChuTro-core.js"></script>
