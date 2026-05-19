@@ -26,8 +26,8 @@ function chuyenMenu(tenTrang, phanTu) {
         'Tai-Khoan':'/Admin/Taikhoanquanly',
         'hoa-don': '/Admin/HoaDon',
         'sua-chua': '/Admin/SuCoBaoTri',
-        'bao-cao': '/Admin/BaoCao',
-        'cai-dat': '/Admin/CaiDat',
+        'bao-cao': '/Admin/ThongKe',
+        'cai-dat': '/Admin/CaiDatHT',
     };
     const url = bangDuongDan[tenTrang];
     if (url) window.location.href = url;
@@ -182,7 +182,7 @@ function moDoiMatKhau() {
 function xacNhanDangXuat() {
     toggleAdminMenu();
     if (confirm('Bạn có chắc muốn đăng xuất?')) {
-        window.location.href = '/logout'; // đổi route khi làm BE
+        window.location.href = '/Index'; // đổi route khi làm BE
     }
 }
 document.addEventListener('DOMContentLoaded', () => {
