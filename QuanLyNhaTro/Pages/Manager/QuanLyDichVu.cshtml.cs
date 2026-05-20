@@ -19,6 +19,7 @@ namespace QuanLyNhaTro.Pages.Manager
         public string TrangThai_DV { get; set; } = "";
         public string? GhiChuXuLy { get; set; }
         public DateTime NgayTao { get; set; }
+        public string? AnhChuyenKhoan { get; set; } // Ảnh chuyển khoản do khách gửi
     }
 
     // =====================================================================
@@ -97,16 +98,35 @@ namespace QuanLyNhaTro.Pages.Manager
         //   → TrangThai_DV: "Chờ xử lý" → "Chờ thanh toán"
         //   → Gửi thông báo cho khách
         // =====================================================================
-        public IActionResult OnPostNhapGiaNuocVaGiao(int idDonDV, decimal tongTien, string? ghiChuXuLy)
+        public IActionResult OnPostNhapGiaNuocVaGiao(int idDonDV, string? ghiChuXuLy)
         {
             try
             {
                 using var conn = OpenConn();
-                // 1) Lấy IDUser của khách để gửi thông báo
+                // 1) Lấy IDUser và thông tin đơn
                 int idUser = GetIDUserFromDon(conn, idDonDV);
                 string soPhong = GetSoPhongFromDon(conn, idDonDV);
 
-                // 2) Cập nhật đơn
+                // 2) Lấy đơn giá nước bình từ CONFIG_GIA (quản lý không được tự nhập giá)
+                decimal tongTien = 0;
+                using (var cmd = new SqlCommand(
+                    "SELECT TOP 1 DonGia FROM dbo.CONFIG_GIA WHERE MaDichVu = N'NUOC_BINH' AND IsActive = 1", conn))
+                {
+                    var v = cmd.ExecuteScalar();
+                    if (v != null && v != DBNull.Value) tongTien = Convert.ToDecimal(v);
+                }
+
+                // Nếu không có config thì lấy từ TongTien đã có trong đơn
+                if (tongTien == 0)
+                {
+                    using var cmd2 = new SqlCommand(
+                        "SELECT TongTien FROM dbo.DONDV WHERE IDDonDV = @ID", conn);
+                    cmd2.Parameters.AddWithValue("@ID", idDonDV);
+                    var v2 = cmd2.ExecuteScalar();
+                    if (v2 != null && v2 != DBNull.Value) tongTien = Convert.ToDecimal(v2);
+                }
+
+                // 3) Cập nhật đơn → Chờ thanh toán
                 ExecNonQuery(conn, @"
                     UPDATE dbo.DONDV
                     SET TongTien    = @TongTien,
@@ -119,15 +139,92 @@ namespace QuanLyNhaTro.Pages.Manager
                     P("@TongTien", tongTien),
                     P("@GhiChu", (object?)ghiChuXuLy ?? DBNull.Value));
 
-                // 3) Gửi thông báo cho khách
+                // 4) Gửi thông báo cho khách
                 if (idUser > 0)
                     GuiThongBao(conn, idUser, idDonDV, "DonDV",
-                        "Nước bình đã được giao",
-                        $"Đơn nước bình phòng {soPhong} đã được giao. Số tiền: {tongTien:N0} đ. Vui lòng thanh toán đúng hạn.",
+                        "Nước bình đã được giao — vui lòng thanh toán",
+                        $"Đơn nước bình phòng {soPhong} đã được giao. Số tiền: {tongTien:N0} đ. " +
+                        "Vui lòng thanh toán và gửi ảnh chuyển khoản để xác nhận.",
                         "thanh-toan");
 
                 ThongBao = $"Đã xác nhận giao nước phòng {soPhong}. Tiền: {tongTien:N0} đ.";
                 LoaiThongBao = "success";
+            }
+            catch (Exception ex)
+            {
+                ThongBao = $"Lỗi: {ex.Message}";
+                LoaiThongBao = "danger";
+            }
+            return RedirectToPage();
+        }
+
+        // =====================================================================
+        // HANDLER: Xác nhận khách đã thanh toán nước bình (sau khi gửi ảnh CK)
+        //   → TrangThai_DV: "Chờ thanh toán" → "Thành công"
+        // =====================================================================
+        public IActionResult OnPostXacNhanThanhToanNuoc(int idDonDV)
+        {
+            try
+            {
+                using var conn = OpenConn();
+                int idUser = GetIDUserFromDon(conn, idDonDV);
+                string soPhong = GetSoPhongFromDon(conn, idDonDV);
+
+                ExecNonQuery(conn, @"
+                    UPDATE dbo.DONDV
+                    SET TrangThai_DV  = N'Thành công',
+                        NgayHoanThanh = GETDATE(),
+                        UpdatedAt     = GETDATE()
+                    WHERE IDDonDV = @ID",
+                    P("@ID", idDonDV));
+
+                if (idUser > 0)
+                    GuiThongBao(conn, idUser, idDonDV, "DonDV",
+                        "Thanh toán nước bình đã được xác nhận",
+                        $"Quản lý đã xác nhận thanh toán đơn nước bình phòng {soPhong}. Cảm ơn bạn!",
+                        "thong-tin");
+
+                ThongBao = $"Đã xác nhận thanh toán đơn nước bình phòng {soPhong}.";
+                LoaiThongBao = "success";
+            }
+            catch (Exception ex)
+            {
+                ThongBao = $"Lỗi: {ex.Message}";
+                LoaiThongBao = "danger";
+            }
+            return RedirectToPage();
+        }
+
+        // =====================================================================
+        // HANDLER: Nhắc nhở khách thanh toán nước bình (không đổi trạng thái)
+        // =====================================================================
+        public IActionResult OnPostNhacNhoThanhToanNuoc(int idDonDV)
+        {
+            try
+            {
+                using var conn = OpenConn();
+                int idUser = GetIDUserFromDon(conn, idDonDV);
+                string soPhong = GetSoPhongFromDon(conn, idDonDV);
+
+                // Lấy số tiền để nhắc
+                decimal tongTien = 0;
+                using (var cmd = new SqlCommand(
+                    "SELECT TongTien FROM dbo.DONDV WHERE IDDonDV = @ID", conn))
+                {
+                    cmd.Parameters.AddWithValue("@ID", idDonDV);
+                    var v = cmd.ExecuteScalar();
+                    if (v != null && v != DBNull.Value) tongTien = Convert.ToDecimal(v);
+                }
+
+                if (idUser > 0)
+                    GuiThongBao(conn, idUser, idDonDV, "DonDV",
+                        "Nhắc nhở thanh toán nước bình",
+                        $"Đơn nước bình phòng {soPhong} số tiền {tongTien:N0} đ chưa được thanh toán. " +
+                        "Vui lòng thanh toán và gửi ảnh xác nhận sớm để tránh bị cộng vào hóa đơn tháng.",
+                        "canh-bao");
+
+                ThongBao = $"Đã gửi nhắc nhở thanh toán đến khách phòng {soPhong}.";
+                LoaiThongBao = "warning";
             }
             catch (Exception ex)
             {
@@ -439,7 +536,7 @@ namespace QuanLyNhaTro.Pages.Manager
                 DanhSachDonNuoc = LayDanhSachDon(conn, "Nước bình");
                 SoDonNuocChoBinhChoXuLy = DanhSachDonNuoc.Count(d => d.TrangThai_DV == "Chờ xử lý");
 
-                
+
                 // ── Đơn giặt sấy
                 DanhSachDonGiatSay = LayDanhSachDon(conn, "Giặt sấy");
                 SoDonGiatSayChoXuLy = DanhSachDonGiatSay.Count(d => d.TrangThai_DV == "Chờ xử lý" || d.TrangThai_DV == "Đang xử lý");
@@ -475,7 +572,8 @@ namespace QuanLyNhaTro.Pages.Manager
                 SELECT d.IDDonDV, p.SoPhong,
                        ISNULL(kt.HoTen, a.FullName) AS TenKhach,
                        d.LoaiDV, d.NoiDung, d.TongTien, d.TrangThai_DV,
-                       d.GhiChuXuLy, d.NgayTao
+                       d.GhiChuXuLy, d.NgayTao,
+                       d.AnhBienLai
                 FROM dbo.DONDV d
                 JOIN dbo.PHONG p ON p.IDPhong = d.IDPhong
                 JOIN dbo.ACCOUNT a ON a.IDUser = d.IDUser
@@ -504,6 +602,7 @@ namespace QuanLyNhaTro.Pages.Manager
                     TrangThai_DV = r.GetString(6),
                     GhiChuXuLy = r.IsDBNull(7) ? null : r.GetString(7),
                     NgayTao = r.GetDateTime(8),
+                    AnhChuyenKhoan = r.IsDBNull(9) ? null : r.GetString(9),
                 });
             return list;
         }

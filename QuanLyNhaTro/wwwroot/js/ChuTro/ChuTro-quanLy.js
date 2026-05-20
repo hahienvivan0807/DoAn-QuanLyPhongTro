@@ -1,604 +1,657 @@
 ﻿/**
- * TaiKhoanQuanLy.js
- * Quản lý tài khoản quản lý – phân quyền & phân công phòng
- * Kết nối với TaiKhoanQuanLy.cshtml + .cshtml.cs
- * DB: ACCOUNT, PHONG, PHONG_MANAGER (QUANLY_KHUTRO)
+ * ChuTro-quanLy.js
+ * Xử lý toàn bộ tương tác trang Tài Khoản Quản Lý
+ * Phụ thuộc: data-quan-ly, data-phong, data-chu-tro (embed từ Razor)
  */
 
-'use strict';
+// ═══════════════════════════════════════════════════════════
+// 1. KHỞI TẠO DỮ LIỆU TỪ SERVER
+// ═══════════════════════════════════════════════════════════
+let danhSachQL = JSON.parse(document.getElementById('data-quan-ly')?.textContent || '[]');
+let tatCaPhong = JSON.parse(document.getElementById('data-phong')?.textContent || '[]');
+const chuTroInfo = JSON.parse(document.getElementById('data-chu-tro')?.textContent || '{}');
 
-// ────────────────────────────────────────────────────────────
-// CONSTANTS
-// ────────────────────────────────────────────────────────────
-const GRADIENT_POOL = [
-    'linear-gradient(135deg,#7c3aed,#a78bfa)',
-    'linear-gradient(135deg,#b8720a,#e8971c)',
-    'linear-gradient(135deg,#059669,#34d399)',
-    'linear-gradient(135deg,#1a56db,#60a5fa)',
-    'linear-gradient(135deg,#e11d48,#f87171)',
-    'linear-gradient(135deg,#0891b2,#22d3ee)',
-];
+// Quản lý đang được chọn ở cột phải
+let idDangChon = null;
 
-const PERMISSION_KEYS = [
-    'tao-hd', 'huy-hd', 'thu-hd', 'dien-nuoc',
-    'sua-chua', 'thong-bao', 'khach-thue',
-];
+// ─── Anti-forgery token (Razor Pages) ───────────────────────
+function layToken() {
+    return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+}
 
-// ────────────────────────────────────────────────────────────
-// STATE
-// ────────────────────────────────────────────────────────────
-let state = {
-    quanLyList: [],   // List<QuanLyViewModel> từ JSON embed
-    phongList: [],   // List<PhongInfo> từ JSON embed
-    selectedId: null, // IDUser đang chọn
-    filterText: '',
-    filterStatus: '',
-};
+// ─── Tiêu đề request chung ──────────────────────────────────
+function headers() {
+    return {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': layToken()
+    };
+}
 
-// ────────────────────────────────────────────────────────────
-// KHỞI TẠO
-// ────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    // Đọc dữ liệu thật embed từ server (JSON serialized từ DB)
-    try {
-        const qlEl = document.getElementById('data-quan-ly');
-        const phEl = document.getElementById('data-phong');
-        if (qlEl) state.quanLyList = JSON.parse(qlEl.textContent);
-        if (phEl) state.phongList = JSON.parse(phEl.textContent);
-    } catch (e) {
-        console.error('[TaiKhoanQuanLy] Lỗi parse JSON embed:', e);
+// ═══════════════════════════════════════════════════════════
+// 2. RENDER SIDEBAR THÔNG TIN CHỦ TRỌ
+// ═══════════════════════════════════════════════════════════
+function renderThongTinChuTro() {
+    const el = document.getElementById('thong-tin-chu-tro-sidebar');
+    if (!el || !chuTroInfo.fullName) return;
+
+    const avatarEl = el.querySelector('.anh-chu-tro');
+    const tenEl = el.querySelector('.ten-chu');
+    const vaiTroEl = el.querySelector('.vai-tro-chu');
+
+    if (avatarEl) {
+        avatarEl.style.background = chuTroInfo.roleGradient || '';
+        avatarEl.textContent = chuTroInfo.initials || '?';
     }
+    if (tenEl) tenEl.textContent = chuTroInfo.fullName;
+    if (vaiTroEl) vaiTroEl.textContent = chuTroInfo.vaiTroLabel || chuTroInfo.roles;
+}
 
-    renderFloorGroups();
-    apDungFilter();
-});
-
-// ────────────────────────────────────────────────────────────
-// TOAST NOTIFICATION
-// ────────────────────────────────────────────────────────────
-/**
- * @param {string} message
- * @param {'success'|'error'|'info'} type
- * @param {number} duration ms
- */
-function hienToast(message, type = 'success', duration = 3200) {
-    const container = document.getElementById('toast-container');
+// ═══════════════════════════════════════════════════════════
+// 3. RENDER DANH SÁCH QUẢN LÝ
+// ═══════════════════════════════════════════════════════════
+function renderDanhSach(ds) {
+    const container = document.getElementById('danh-sach-quan-ly');
     if (!container) return;
 
-    const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-circle',
-        info: 'fa-info-circle',
-    };
-    const el = document.createElement('div');
-    el.className = `toast-item ${type}`;
-    el.innerHTML = `<i class="fas ${icons[type] ?? icons.info}"></i><span>${message}</span>`;
-    container.appendChild(el);
-
-    setTimeout(() => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateX(20px)';
-        el.style.transition = 'all 0.3s';
-        setTimeout(() => el.remove(), 320);
-    }, duration);
-}
-
-// Alias tương thích cũ
-function hienThongBao(msg, type = 'success') { hienToast(msg, type); }
-
-// ────────────────────────────────────────────────────────────
-// MODAL HELPERS
-// ────────────────────────────────────────────────────────────
-function moModal(id) {
-    document.getElementById(id)?.classList.add('hien');
-}
-function dongModal(id) {
-    document.getElementById(id)?.classList.remove('hien');
-}
-function dongModalNgoai(event, id) {
-    if (event.target.id === id) dongModal(id);
-}
-function togglePass(inputId, btn) {
-    const inp = document.getElementById(inputId);
-    if (!inp) return;
-    const ico = btn.querySelector('i');
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        if (ico) ico.className = 'fas fa-eye-slash';
-    } else {
-        inp.type = 'password';
-        if (ico) ico.className = 'fas fa-eye';
-    }
-}
-
-// ────────────────────────────────────────────────────────────
-// CONFIRM DIALOG
-// ────────────────────────────────────────────────────────────
-let _confirmCallback = null;
-
-/**
- * @param {{ icon, title, msg, btnClass, btnLabel, onOk }} opts
- */
-function moConfirm({ icon = '⚠️', title = 'Xác nhận', msg = '', btnClass = 'danger', btnLabel = 'Xác nhận', onOk }) {
-    document.getElementById('confirm-icon').textContent = icon;
-    document.getElementById('confirm-title').textContent = title;
-    document.getElementById('confirm-msg').textContent = msg;
-
-    const btnOk = document.getElementById('btn-confirm-ok');
-    btnOk.className = `btn-confirm-ok ${btnClass}`;
-    btnOk.textContent = btnLabel;
-
-    _confirmCallback = onOk;
-    document.getElementById('confirm-overlay').classList.add('hien');
-}
-
-function dongConfirm() {
-    document.getElementById('confirm-overlay').classList.remove('hien');
-    _confirmCallback = null;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('btn-confirm-ok')?.addEventListener('click', () => {
-        dongConfirm();
-        if (typeof _confirmCallback === 'function') _confirmCallback();
-    });
-});
-
-// ────────────────────────────────────────────────────────────
-// CHỌN QUẢN LÝ – cập nhật panel quyền & phân phòng
-// ────────────────────────────────────────────────────────────
-function chonQuanLy(idUser) {
-    state.selectedId = idUser;
-
-    // Highlight row trong bảng
-    document.querySelectorAll('#tbody-quan-ly tr').forEach(tr => {
-        tr.classList.toggle('selected-row', parseInt(tr.dataset.id) === idUser);
-    });
-
-    const ql = state.quanLyList.find(q => q.IDUser === idUser);
-    if (!ql) return;
-
-    // ── Panel quyền ─────────────────────────────────────────
-    document.getElementById('quyen-no-selection').style.display = 'none';
-    document.getElementById('quyen-content').style.display = '';
-
-    const bg = GRADIENT_POOL[idUser % GRADIENT_POOL.length];
-    const namePart = (ql.FullName || ql.Username || '?').trim().split(' ');
-    const initials = namePart[namePart.length - 1][0].toUpperCase();
-
-    const selAvatar = document.getElementById('sel-avatar');
-    selAvatar.style.background = bg;
-    selAvatar.textContent = initials;
-    document.getElementById('sel-name').textContent = ql.FullName || ql.Username;
-
-    PERMISSION_KEYS.forEach(key => {
-        const el = document.getElementById(`perm-${key}`);
-        if (el) el.checked = !!(ql.Permissions && ql.Permissions[key]);
-    });
-    document.getElementById('btn-luu-quyen').disabled = false;
-
-    // ── Panel phân công phòng ───────────────────────────────
-    document.getElementById('phong-no-selection').style.display = 'none';
-    document.getElementById('phong-content').style.display = '';
-    document.getElementById('btn-phan-cong').disabled = false;
-
-    // Tick phòng đang được phân công
-    const assignedIds = new Set((ql.Phongs || []).map(p => p.IDPhong));
-    document.querySelectorAll('.chk-phong').forEach(cb => {
-        cb.checked = assignedIds.has(parseInt(cb.dataset.idphong));
-    });
-}
-
-// ────────────────────────────────────────────────────────────
-// RENDER NHÓM PHÒNG THEO TẦNG (cột phải)
-// ────────────────────────────────────────────────────────────
-function renderFloorGroups() {
-    const container = document.getElementById('floor-groups-container');
-    if (!container || !state.phongList.length) return;
-
-    // Nhóm theo Tang
-    const byFloor = {};
-    state.phongList.forEach(p => {
-        if (!byFloor[p.Tang]) byFloor[p.Tang] = [];
-        byFloor[p.Tang].push(p);
-    });
-
-    let html = '';
-    Object.keys(byFloor).sort((a, b) => +a - +b).forEach(tang => {
-        html += `<div class="floor-group">
-            <div class="floor-group-title">
-              <i class="fas fa-layer-group"></i> Tầng ${tang}
-            </div>
-            <div class="floor-rooms">`;
-
-        byFloor[tang].forEach(p => {
-            const ttClass = p.TrangThai === 'Đã thuê' ? 'da-thue'
-                : p.TrangThai === 'Đang sửa' ? 'dang-sua'
-                    : 'trong';
-            html += `<label class="floor-room-item">
-                <input type="checkbox"
-                       class="chk-phong"
-                       data-idphong="${p.IDPhong}"
-                       data-tang="${p.Tang}" />
-                <span>
-                  <strong>${p.SoPhong}</strong>
-                  <span class="room-tt ${ttClass}">${p.TrangThai}</span>
-                </span>
-              </label>`;
-        });
-
-        html += `</div></div>`;
-    });
-
-    container.innerHTML = html;
-}
-
-// ────────────────────────────────────────────────────────────
-// MODAL: THÊM QUẢN LÝ
-// ────────────────────────────────────────────────────────────
-function moModalThemQuanLy() {
-    // Reset form
-    ['them-fullname', 'them-username', 'them-phone', 'them-email', 'them-password'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.value = ''; el.classList.remove('error'); }
-    });
-    moModal('modal-them-ql');
-    document.getElementById('them-fullname')?.focus();
-}
-
-async function themQuanLy() {
-    const fullName = document.getElementById('them-fullname')?.value.trim();
-    const username = document.getElementById('them-username')?.value.trim();
-    const phone = document.getElementById('them-phone')?.value.trim();
-    const email = document.getElementById('them-email')?.value.trim() || null;
-    const password = document.getElementById('them-password')?.value;
-
-    // Validate
-    let valid = true;
-    [['them-fullname', fullName], ['them-username', username],
-    ['them-phone', phone], ['them-password', password]].forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!val) { el?.classList.add('error'); valid = false; }
-        else el?.classList.remove('error');
-    });
-    if (!valid) { hienToast('Vui lòng điền đầy đủ thông tin bắt buộc.', 'error'); return; }
-    if (password.length < 8) {
-        hienToast('Mật khẩu phải có ít nhất 8 ký tự.', 'error');
+    if (!ds || ds.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px 20px;color:var(--mau-chu-phu);">
+                <i class="fas fa-users-slash" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px;"></i>
+                Chưa có tài khoản quản lý nào.
+            </div>`;
         return;
     }
 
-    const btn = document.getElementById('btn-them-luu');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
+    const gradients = [
+        "linear-gradient(135deg,#7c3aed,#a78bfa)",
+        "linear-gradient(135deg,#b8720a,#e8971c)",
+        "linear-gradient(135deg,#059669,#34d399)",
+        "linear-gradient(135deg,#1a56db,#60a5fa)",
+        "linear-gradient(135deg,#e11d48,#f87171)",
+        "linear-gradient(135deg,#0891b2,#22d3ee)"
+    ];
 
-    try {
-        const res = await fetch('/Admin/TaiKhoanQuanLy?handler=TaoTaiKhoan', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'RequestVerificationToken': _getAntiForgeryToken(),
-            },
-            body: JSON.stringify({ Username: username, Passwords: password, FullName: fullName, Phone: phone, Email: email }),
+    container.innerHTML = ds.map((q, i) => {
+        const initials = (q.fullName || '?').trim().split(' ').pop()[0].toUpperCase();
+        const gradient = gradients[i % gradients.length];
+        const soPhong = q.phongs ? q.phongs.length : 0;
+        const isActive = q.isActive;
+        const selected = q.idUser === idDangChon ? 'dang-chon' : '';
+
+        return `
+        <div class="tql-item ${selected}" data-id="${q.idUser}" onclick="chonQuanLy(${q.idUser})">
+            <div class="tql-avatar" style="background:${gradient}">${initials}</div>
+            <div class="tql-info">
+                <div class="tql-name">${escHtml(q.fullName)}</div>
+                <div class="tql-meta">
+                    <span><i class="fas fa-at"></i> ${escHtml(q.username)}</span>
+                    <span><i class="fas fa-phone"></i> ${escHtml(q.phone || '—')}</span>
+                </div>
+                <div class="tql-meta" style="margin-top:3px;">
+                    <span><i class="fas fa-door-open"></i> ${soPhong} phòng</span>
+                    <span class="tql-badge ${isActive ? 'xanh' : 'do'}">${isActive ? 'Hoạt động' : 'Đã khóa'}</span>
+                </div>
+            </div>
+            <div class="tql-actions" onclick="event.stopPropagation()">
+                <button class="btn-icon" title="Sửa" onclick="moModalSua(${q.idUser})"><i class="fas fa-pen"></i></button>
+                <button class="btn-icon ${isActive ? 'do' : 'xanh'}" title="${isActive ? 'Khóa' : 'Mở khóa'}"
+                    onclick="khoaTaiKhoan(${q.idUser}, ${isActive})">
+                    <i class="fas fa-${isActive ? 'lock' : 'lock-open'}"></i>
+                </button>
+                <button class="btn-icon do" title="Xóa" onclick="xoaTaiKhoan(${q.idUser}, '${escHtml(q.fullName)}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 4. CHỌN QUẢN LÝ → HIỂN THỊ PANEL PHẢI
+// ═══════════════════════════════════════════════════════════
+function chonQuanLy(idUser) {
+    idDangChon = idUser;
+    const q = danhSachQL.find(x => x.idUser === idUser);
+
+    // Highlight item
+    document.querySelectorAll('.tql-item').forEach(el => {
+        el.classList.toggle('dang-chon', parseInt(el.dataset.id) === idUser);
+    });
+
+    if (!q) return;
+
+    // ─── Panel Thông tin ────────────────────────────────────
+    const panelInfo = document.getElementById('quan-ly-no-selection');
+    const panelContent = document.getElementById('quan-ly-content');
+    if (panelInfo) panelInfo.style.display = 'none';
+    if (panelContent) panelContent.style.display = '';
+
+    // Điền thông tin
+    setValue('ql-ten', q.fullName);
+    setValue('ql-username', '@' + q.username);
+    setValue('ql-phone', q.phone || '—');
+    setValue('ql-email', q.email || '—');
+    setValue('ql-ngay', q.createdAt || '—');
+    setValue('ql-so-phong', (q.phongs?.length || 0) + ' phòng');
+
+    const badgeEl = document.getElementById('ql-trang-thai');
+    if (badgeEl) {
+        badgeEl.textContent = q.isActive ? 'Hoạt động' : 'Đã khóa';
+        badgeEl.className = 'tql-badge ' + (q.isActive ? 'xanh' : 'do');
+    }
+
+    // ─── Panel Phân quyền ────────────────────────────────────
+    const pqInfo = document.getElementById('pq-no-selection');
+    const pqContent = document.getElementById('pq-content');
+    if (pqInfo) pqInfo.style.display = 'none';
+    if (pqContent) pqContent.style.display = '';
+
+    const perms = q.permissions || {};
+    Object.keys(perms).forEach(key => {
+        const toggle = document.getElementById('perm-' + key);
+        if (toggle) toggle.checked = !!perms[key];
+    });
+
+    const btnQuyen = document.getElementById('btn-luu-quyen');
+    if (btnQuyen) btnQuyen.disabled = false;
+
+    // ─── Panel Phân công phòng ───────────────────────────────
+    const phongInfo = document.getElementById('phong-no-selection');
+    const phongContent = document.getElementById('phong-content');
+    if (phongInfo) phongInfo.style.display = 'none';
+    if (phongContent) phongContent.style.display = '';
+
+    renderFloorGroups(q.phongs || []);
+
+    const btnPC = document.getElementById('btn-phan-cong');
+    if (btnPC) btnPC.disabled = false;
+}
+
+// ─── Render nhóm tầng + checkbox phòng ─────────────────────
+function renderFloorGroups(phongDuocPhanCong) {
+    const container = document.getElementById('floor-groups-container');
+    if (!container) return;
+
+    const assignedIds = new Set((phongDuocPhanCong || []).map(p => p.IDPhong));
+    const byFloor = {};
+    tatCaPhong.forEach(p => {
+        const tang = p.Tang ?? p.tang ?? 0;
+        if (!byFloor[tang]) byFloor[tang] = [];
+        byFloor[tang].push(p);
+    });
+
+    const tangs = Object.keys(byFloor).sort((a, b) => a - b);
+    if (tangs.length === 0) {
+        container.innerHTML = '<p style="color:var(--mau-chu-phu);font-size:13px;">Chưa có phòng nào trong hệ thống.</p>';
+        return;
+    }
+
+    container.innerHTML = tangs.map(tang => {
+        const phongs = byFloor[tang];
+        const allChecked = phongs.every(p => assignedIds.has(p.IDPhong));
+        const someChecked = phongs.some(p => assignedIds.has(p.IDPhong));
+
+        const roomChips = phongs.map(p => {
+            const id = p.IDPhong;
+            const so = p.SoPhong || p.soPhong;
+            const tt = p.TrangThai || p.trangThai || '';
+            const chk = assignedIds.has(id) ? 'checked' : '';
+            const cls = tt === 'Trống' ? 'trong' : tt === 'Đang thuê' ? 'thue' : '';
+            return `<label class="room-chip ${cls}">
+                <input type="checkbox" value="${id}" ${chk} onchange="onCheckPhong()"> P.${so}
+            </label>`;
+        }).join('');
+
+        return `
+        <div class="floor-group">
+            <div class="floor-header">
+                <label class="floor-chk-all">
+                    <input type="checkbox" class="chk-all-tang" data-tang="${tang}"
+                        ${allChecked ? 'checked' : (someChecked ? 'indeterminate' : '')}
+                        onchange="chkAllTang(this,'${tang}')">
+                    Tầng ${tang}
+                </label>
+                <span class="floor-count">${phongs.length} phòng</span>
+            </div>
+            <div class="room-chips">${roomChips}</div>
+        </div>`;
+    }).join('');
+
+    // Set indeterminate state
+    document.querySelectorAll('.chk-all-tang').forEach(el => {
+        const tang = el.dataset.tang;
+        const phongs = byFloor[tang] || [];
+        const checked = phongs.filter(p => {
+            const cb = container.querySelector(`input[value="${p.IDPhong}"]`);
+            return cb && cb.checked;
         });
-
-        const data = await res.json();
-        hienToast(data.message, res.ok ? 'success' : 'error');
-        if (res.ok) {
-            dongModal('modal-them-ql');
-            setTimeout(() => location.reload(), 1200);
+        if (checked.length > 0 && checked.length < phongs.length) {
+            el.indeterminate = true;
         }
-    } catch (err) {
-        console.error('[TaoTK]', err);
-        hienToast('Lỗi kết nối. Vui lòng thử lại.', 'error');
+    });
+}
+
+function chkAllTang(masterCb, tang) {
+    const container = document.getElementById('floor-groups-container');
+    const phongs = tatCaPhong.filter(p => String(p.Tang ?? p.tang) === String(tang));
+    phongs.forEach(p => {
+        const cb = container.querySelector(`input[value="${p.IDPhong}"]`);
+        if (cb) cb.checked = masterCb.checked;
+    });
+}
+
+function onCheckPhong() {
+    // Cập nhật trạng thái indeterminate của chk-all-tang
+    const container = document.getElementById('floor-groups-container');
+    const byFloor = {};
+    tatCaPhong.forEach(p => {
+        const tang = p.Tang ?? p.tang ?? 0;
+        if (!byFloor[tang]) byFloor[tang] = [];
+        byFloor[tang].push(p);
+    });
+
+    document.querySelectorAll('.chk-all-tang').forEach(el => {
+        const tang = el.dataset.tang;
+        const phongs = byFloor[tang] || [];
+        const total = phongs.length;
+        const cntChk = phongs.filter(p => {
+            const cb = container.querySelector(`input[value="${p.IDPhong}"]`);
+            return cb && cb.checked;
+        }).length;
+        el.checked = cntChk === total;
+        el.indeterminate = cntChk > 0 && cntChk < total;
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 5. THÊM QUẢN LÝ
+// ═══════════════════════════════════════════════════════════
+function moModalThem() {
+    clearForm(['them-fullname', 'them-username', 'them-phone', 'them-email', 'them-password']);
+    moModal('modal-them-ql');
+}
+
+async function themQuanLy() {
+    const fullName = val('them-fullname');
+    const username = val('them-username');
+    const phone = val('them-phone');
+    const email = val('them-email');
+    const password = val('them-password');
+
+    if (!fullName || !username || !phone || !password) {
+        return showToast('Vui lòng điền đầy đủ thông tin bắt buộc.', 'error');
+    }
+    if (password.length < 8) {
+        return showToast('Mật khẩu phải có ít nhất 8 ký tự.', 'error');
+    }
+
+    setBtnLoading('btn-them-luu', true);
+    try {
+        const res = await fetch('/Admin/Taikhoanquanly?handler=TaoTaiKhoan', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ Username: username, Passwords: password, FullName: fullName, Phone: phone, Email: email || null })
+        });
+        const data = await res.json();
+
+        if (!res.ok) return showToast(data.message || 'Lỗi khi tạo tài khoản.', 'error');
+
+        showToast(data.message || 'Tạo tài khoản thành công!', 'success');
+        dongModal('modal-them-ql');
+        await laiDanhSach();
+    } catch {
+        showToast('Lỗi kết nối máy chủ.', 'error');
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-user-plus"></i> Tạo tài khoản';
+        setBtnLoading('btn-them-luu', false);
     }
 }
 
-// Alias cũ
-async function ThemUser() { await themQuanLy(); }
-
-// ────────────────────────────────────────────────────────────
-// MODAL: SỬA QUẢN LÝ
-// ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// 6. SỬA QUẢN LÝ
+// ═══════════════════════════════════════════════════════════
 function moModalSuaQuanLy(idUser) {
-    const ql = state.quanLyList.find(q => q.IDUser === idUser);
-    if (!ql) { hienToast('Không tìm thấy thông tin quản lý.', 'error'); return; }
+    const q = danhSachQL.find(x => x.idUser === idUser);
+    if (!q) return;
 
-    document.getElementById('sua-iduser').value = ql.IDUser;
-    document.getElementById('sua-fullname').value = ql.FullName || '';
-    document.getElementById('sua-phone').value = ql.Phone || '';
-    document.getElementById('sua-email').value = ql.Email || '';
+    document.getElementById('sua-iduser').value = q.idUser;
+    document.getElementById('sua-fullname').value = q.fullName;
+    document.getElementById('sua-phone').value = q.phone || '';
+    document.getElementById('sua-email').value = q.email || '';
     document.getElementById('sua-password').value = '';
-    document.getElementById('sua-modal-sub').textContent = `Chỉnh sửa: @${ql.Username}`;
+
+    const sub = document.getElementById('sua-modal-sub');
+    if (sub) sub.textContent = `Chỉnh sửa: @${q.username}`;
 
     moModal('modal-sua-ql');
-    document.getElementById('sua-fullname')?.focus();
 }
 
 async function suaQuanLy() {
     const idUser = parseInt(document.getElementById('sua-iduser').value);
-    const fullName = document.getElementById('sua-fullname')?.value.trim();
-    const phone = document.getElementById('sua-phone')?.value.trim();
-    const email = document.getElementById('sua-email')?.value.trim() || null;
-    const newPass = document.getElementById('sua-password')?.value || null;
+    const fullName = val('sua-fullname');
+    const phone = val('sua-phone');
+    const email = val('sua-email');
+    const newPass = val('sua-password');
 
-    if (!fullName || !phone) {
-        hienToast('Họ tên và số điện thoại không được để trống.', 'error');
-        return;
-    }
-    if (newPass && newPass.length < 8) {
-        hienToast('Mật khẩu mới phải có ít nhất 8 ký tự.', 'error');
-        return;
-    }
+    if (!fullName || !phone) return showToast('Họ tên và số điện thoại là bắt buộc.', 'error');
+    if (newPass && newPass.length < 8) return showToast('Mật khẩu mới phải có ít nhất 8 ký tự.', 'error');
 
-    const btn = document.getElementById('btn-sua-luu');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-
+    setBtnLoading('btn-sua-luu', true);
     try {
-        const res = await fetch('/Admin/TaiKhoanQuanLy?handler=SuaTaiKhoan', {
+        const res = await fetch('/Admin/Taikhoanquanly?handler=SuaTaiKhoan', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'RequestVerificationToken': _getAntiForgeryToken(),
-            },
-            body: JSON.stringify({
-                IDUser: idUser,
-                FullName: fullName,
-                Phone: phone,
-                Email: email,
-                NewPassword: newPass,
-            }),
-        });
-
-        const data = await res.json();
-        hienToast(data.message, res.ok ? 'success' : 'error');
-        if (res.ok) {
-            dongModal('modal-sua-ql');
-            setTimeout(() => location.reload(), 1200);
-        }
-    } catch (err) {
-        console.error('[SuaTK]', err);
-        hienToast('Lỗi kết nối. Vui lòng thử lại.', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
-    }
-}
-
-// ────────────────────────────────────────────────────────────
-// KHÓA / MỞ KHÓA TÀI KHOẢN
-// ────────────────────────────────────────────────────────────
-/**
- * @param {number}  idUser
- * @param {string}  tenQL
- * @param {boolean} isLocked  true = đang muốn khóa, false = muốn mở
- */
-function khoaTaiKhoan(idUser, tenQL, isLocked) {
-    moConfirm({
-        icon: isLocked ? '🔒' : '🔓',
-        title: isLocked ? 'Khóa tài khoản?' : 'Mở khóa tài khoản?',
-        msg: isLocked
-            ? `Tài khoản của "${tenQL}" sẽ bị khóa và không thể đăng nhập.`
-            : `Tài khoản của "${tenQL}" sẽ được mở khóa trở lại.`,
-        btnClass: isLocked ? 'danger' : 'warning',
-        btnLabel: isLocked ? 'Khóa ngay' : 'Mở khóa',
-        onOk: async () => {
-            try {
-                const res = await fetch('/Admin/TaiKhoanQuanLy?handler=KhoaTaiKhoan', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'RequestVerificationToken': _getAntiForgeryToken(),
-                    },
-                    body: JSON.stringify({ IDUser: idUser, IsLocked: isLocked }),
-                });
-                const data = await res.json();
-                hienToast(data.message, res.ok ? 'success' : 'error');
-                if (res.ok) setTimeout(() => location.reload(), 1200);
-            } catch (err) {
-                console.error('[KhoaTK]', err);
-                hienToast('Lỗi kết nối.', 'error');
-            }
-        },
-    });
-}
-
-// ────────────────────────────────────────────────────────────
-// XÓA TÀI KHOẢN
-// ────────────────────────────────────────────────────────────
-function xoaQuanLy(idUser, tenQL) {
-    moConfirm({
-        icon: '🗑️',
-        title: 'Xóa tài khoản quản lý?',
-        msg: `Tài khoản "${tenQL}" và toàn bộ phân công phòng sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác!`,
-        btnClass: 'danger',
-        btnLabel: 'Xóa vĩnh viễn',
-        onOk: async () => {
-            try {
-                const res = await fetch('/Admin/TaiKhoanQuanLy?handler=XoaTaiKhoan', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'RequestVerificationToken': _getAntiForgeryToken(),
-                    },
-                    body: JSON.stringify({ IDUser: idUser }),
-                });
-                const data = await res.json();
-                hienToast(data.message, res.ok ? 'success' : 'error');
-                if (res.ok) setTimeout(() => location.reload(), 1200);
-            } catch (err) {
-                console.error('[XoaTK]', err);
-                hienToast('Lỗi kết nối.', 'error');
-            }
-        },
-    });
-}
-
-// ────────────────────────────────────────────────────────────
-// LƯU PHÂN QUYỀN
-// ────────────────────────────────────────────────────────────
-async function luuQuyen() {
-    if (!state.selectedId) { hienToast('Chưa chọn quản lý.', 'error'); return; }
-
-    const permissions = {};
-    PERMISSION_KEYS.forEach(key => {
-        const el = document.getElementById(`perm-${key}`);
-        permissions[key] = el ? el.checked : false;
-    });
-
-    const btn = document.getElementById('btn-luu-quyen');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-
-    try {
-        const res = await fetch('/Admin/TaiKhoanQuanLy?handler=LuuQuyen', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'RequestVerificationToken': _getAntiForgeryToken(),
-            },
-            body: JSON.stringify({ IDManager: state.selectedId, Permissions: permissions }),
+            headers: headers(),
+            body: JSON.stringify({ IDUser: idUser, FullName: fullName, Phone: phone, Email: email || null, NewPassword: newPass || null })
         });
         const data = await res.json();
-        hienToast(data.message, res.ok ? 'success' : 'error');
 
-        // Cập nhật state local
-        if (res.ok) {
-            const ql = state.quanLyList.find(q => q.IDUser === state.selectedId);
-            if (ql) ql.Permissions = permissions;
-        }
-    } catch (err) {
-        console.error('[LuuQuyen]', err);
-        hienToast('Lỗi kết nối.', 'error');
+        if (!res.ok) return showToast(data.message || 'Lỗi cập nhật.', 'error');
+
+        showToast(data.message || 'Đã cập nhật thành công.', 'success');
+        dongModal('modal-sua-ql');
+        await laiDanhSach();
+        if (idDangChon === idUser) chonQuanLy(idUser);
+    } catch {
+        showToast('Lỗi kết nối máy chủ.', 'error');
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save"></i> Lưu phân quyền';
+        setBtnLoading('btn-sua-luu', false);
     }
 }
 
-// ────────────────────────────────────────────────────────────
-// LƯU PHÂN CÔNG PHÒNG
-// ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// 7. KHÓA / MỞ KHÓA TÀI KHOẢN
+// ═══════════════════════════════════════════════════════════
+function khoaTaiKhoan(idUser, isCurrentlyActive) {
+    const action = isCurrentlyActive ? 'khóa' : 'mở khóa';
+    hienConfirm(
+        isCurrentlyActive ? '🔒 Khóa tài khoản?' : '🔓 Mở khóa tài khoản?',
+        `Bạn có chắc muốn ${action} tài khoản này không?`,
+        async () => {
+            try {
+                // isLocked=true → khóa (IsActive=0); isLocked=false → mở khóa (IsActive=1)
+                const res = await fetch('/Admin/Taikhoanquanly?handler=KhoaTaiKhoan', {
+                    method: 'POST',
+                    headers: headers(),
+                    body: JSON.stringify({ IDUser: idUser, IsLocked: isCurrentlyActive })
+                });
+                const data = await res.json();
+                if (!res.ok) return showToast(data.message || 'Lỗi thao tác.', 'error');
+
+                showToast(data.message, 'success');
+                await laiDanhSach();
+                if (idDangChon === idUser) chonQuanLy(idUser);
+            } catch {
+                showToast('Lỗi kết nối máy chủ.', 'error');
+            }
+        }
+    );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 8. XÓA TÀI KHOẢN
+// ═══════════════════════════════════════════════════════════
+function xoaTaiKhoan(idUser, tenQL) {
+    hienConfirm(
+        '🗑️ Xóa tài khoản?',
+        `Xóa tài khoản "<strong>${escHtml(tenQL)}</strong>"? Thao tác không thể hoàn tác.`,
+        async () => {
+            try {
+                const res = await fetch('/Admin/Taikhoanquanly?handler=XoaTaiKhoan', {
+                    method: 'POST',
+                    headers: headers(),
+                    body: JSON.stringify({ IDUser: idUser })
+                });
+                const data = await res.json();
+                if (!res.ok) return showToast(data.message || 'Lỗi xóa.', 'error');
+
+                showToast(data.message, 'success');
+                if (idDangChon === idUser) {
+                    idDangChon = null;
+                    resetPanelPhai();
+                }
+                await laiDanhSach();
+            } catch {
+                showToast('Lỗi kết nối máy chủ.', 'error');
+            }
+        }
+    );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 9. LƯU PHÂN QUYỀN
+// ═══════════════════════════════════════════════════════════
+async function luuPhanQuyen() {
+    if (!idDangChon) return showToast('Chưa chọn quản lý.', 'error');
+
+    const perms = {};
+    document.querySelectorAll('[id^="perm-"]').forEach(toggle => {
+        const key = toggle.id.replace('perm-', '');
+        perms[key] = toggle.checked;
+    });
+
+    setBtnLoading('btn-luu-quyen', true);
+    try {
+        const res = await fetch('/Admin/Taikhoanquanly?handler=LuuQuyen', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ IDManager: idDangChon, Permissions: perms })
+        });
+        const data = await res.json();
+        if (!res.ok) return showToast(data.message || 'Lỗi lưu quyền.', 'error');
+
+        showToast(data.message || 'Đã lưu phân quyền.', 'success');
+        // Cập nhật local
+        const q = danhSachQL.find(x => x.idUser === idDangChon);
+        if (q) q.permissions = { ...perms };
+    } catch {
+        showToast('Lỗi kết nối máy chủ.', 'error');
+    } finally {
+        setBtnLoading('btn-luu-quyen', false);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 10. LƯU PHÂN CÔNG PHÒNG
+// ═══════════════════════════════════════════════════════════
 async function luuPhanCong() {
-    if (!state.selectedId) { hienToast('Chưa chọn quản lý.', 'error'); return; }
+    if (!idDangChon) return showToast('Chưa chọn quản lý.', 'error');
 
-    const idPhongs = [];
-    document.querySelectorAll('.chk-phong:checked').forEach(cb => {
-        idPhongs.push(parseInt(cb.dataset.idphong));
-    });
+    const checked = [...document.querySelectorAll('#floor-groups-container input[type="checkbox"]:not(.chk-all-tang):checked')]
+        .map(cb => parseInt(cb.value));
 
-    const btn = document.getElementById('btn-phan-cong');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-
+    setBtnLoading('btn-phan-cong', true);
     try {
-        const res = await fetch('/Admin/TaiKhoanQuanLy?handler=PhanCongPhong', {
+        const res = await fetch('/Admin/Taikhoanquanly?handler=PhanCongPhong', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'RequestVerificationToken': _getAntiForgeryToken(),
-            },
-            body: JSON.stringify({ IDManager: state.selectedId, IDPhongs: idPhongs }),
+            headers: headers(),
+            body: JSON.stringify({ IDManager: idDangChon, IDPhongs: checked })
         });
         const data = await res.json();
-        hienToast(data.message, res.ok ? 'success' : 'error');
-        if (res.ok) setTimeout(() => location.reload(), 1200);
-    } catch (err) {
-        console.error('[PhanCong]', err);
-        hienToast('Lỗi kết nối.', 'error');
+        if (!res.ok) return showToast(data.message || 'Lỗi phân công.', 'error');
+
+        showToast(data.message || `Đã phân công ${checked.length} phòng.`, 'success');
+        await laiDanhSach();
+        chonQuanLy(idDangChon);
+    } catch {
+        showToast('Lỗi kết nối máy chủ.', 'error');
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check-circle"></i> Lưu phân công';
+        setBtnLoading('btn-phan-cong', false);
     }
 }
 
-// ────────────────────────────────────────────────────────────
-// TÌM KIẾM & LỌC
-// ────────────────────────────────────────────────────────────
-function timKiemQL(value) {
-    state.filterText = value.toLowerCase().trim();
-    apDungFilter();
-}
-
-function locTrangThai(value) {
-    state.filterStatus = value;
-    apDungFilter();
-}
-
-function apDungFilter() {
-    const rows = document.querySelectorAll('#tbody-quan-ly tr');
-    let visible = 0;
-
-    rows.forEach(tr => {
-        const name = (tr.dataset.name || '').toLowerCase();
-        const phone = (tr.dataset.phone || '').toLowerCase();
-        const status = (tr.dataset.status || '');
-
-        const matchText = !state.filterText || name.includes(state.filterText) || phone.includes(state.filterText);
-        const matchStatus = !state.filterStatus || status === state.filterStatus;
-
-        const show = matchText && matchStatus;
-        tr.style.display = show ? '' : 'none';
-        if (show) visible++;
-    });
-
-    const el = document.getElementById('pg-count');
-    if (el) el.textContent = visible;
-}
-
-// ────────────────────────────────────────────────────────────
-// CHECKBOX CHỌN TẤT CẢ
-// ────────────────────────────────────────────────────────────
-function chonTatCa(checked) {
-    document.querySelectorAll('.chk-row').forEach(cb => { cb.checked = checked; });
-}
-
-// ────────────────────────────────────────────────────────────
-// AJAX REFRESH DANH SÁCH (không reload trang)
-// ────────────────────────────────────────────────────────────
-async function taiLaiDanhSach() {
+// ═══════════════════════════════════════════════════════════
+// 11. TẢI LẠI DANH SÁCH (AJAX, không reload trang)
+// ═══════════════════════════════════════════════════════════
+async function laiDanhSach() {
     try {
-        const res = await fetch('/Admin/TaiKhoanQuanLy?handler=DanhSachQuanLy', {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const res = await fetch('/Admin/Taikhoanquanly?handler=DanhSachQuanLy');
         const data = await res.json();
-        // Map về đúng key Pascal để khớp với state
-        state.quanLyList = data.map(q => ({
-            IDUser: q.idUser,
-            FullName: q.fullName,
-            Username: q.username,
-            Phone: q.phone,
-            Email: q.email,
-            IsActive: q.isActive,
-            Permissions: q.permissions,
-            Phongs: (q.phongs || []).map(p => ({
-                IDPhong: p.IDPhong,
-                SoPhong: p.SoPhong,
-                Tang: p.Tang,
-                TrangThai: p.TrangThai,
-            })),
-        }));
-        hienToast('Đã làm mới danh sách.', 'info');
-    } catch (err) {
-        console.error('[TaiLai]', err);
-        hienToast('Không thể tải danh sách.', 'error');
+        if (res.ok) {
+            danhSachQL = data;
+            renderDanhSach(danhSachQL);
+            capNhatSoLieu();
+        }
+    } catch {
+        // Không làm gì — UI vẫn hiển thị dữ liệu cũ
     }
 }
 
-// ────────────────────────────────────────────────────────────
-// HELPER: CSRF Token (Razor Pages anti-forgery)
-// ────────────────────────────────────────────────────────────
-function _getAntiForgeryToken() {
-    const input = document.querySelector('input[name="__RequestVerificationToken"]');
-    return input ? input.value : '';
+function capNhatSoLieu() {
+    const el = {
+        tongQL: document.getElementById('stat-tong-ql'),
+        hoatDong: document.getElementById('stat-hoat-dong'),
+        chuaPC: document.getElementById('stat-chua-phan-cong')
+    };
+    if (el.tongQL) el.tongQL.textContent = danhSachQL.length;
+    if (el.hoatDong) el.hoatDong.textContent = danhSachQL.filter(q => q.isActive).length;
+    if (el.chuaPC) {
+        const assigned = new Set(danhSachQL.flatMap(q => (q.phongs || []).map(p => p.IDPhong)));
+        el.chuaPC.textContent = tatCaPhong.filter(p => !assigned.has(p.IDPhong)).length;
+    }
 }
+
+// ═══════════════════════════════════════════════════════════
+// 12. TÌM KIẾM
+// ═══════════════════════════════════════════════════════════
+function timKiem(keyword) {
+    const kw = (keyword || '').toLowerCase().trim();
+    const filtered = kw
+        ? danhSachQL.filter(q =>
+            q.fullName.toLowerCase().includes(kw) ||
+            q.username.toLowerCase().includes(kw) ||
+            (q.phone || '').includes(kw))
+        : danhSachQL;
+    renderDanhSach(filtered);
+}
+
+// ═══════════════════════════════════════════════════════════
+// 13. MODAL HELPERS
+// ═══════════════════════════════════════════════════════════
+function moModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'flex'; el.classList.add('hien'); }
+}
+
+function dongModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = ''; el.classList.remove('hien'); }
+}
+
+function dongModalNgoai(event, id) {
+    if (event.target === event.currentTarget) dongModal(id);
+}
+
+// ─── Confirm dialog ─────────────────────────────────────────
+let _confirmCb = null;
+
+function hienConfirm(title, msg, cb) {
+    _confirmCb = cb;
+    const el = {
+        overlay: document.getElementById('confirm-overlay'),
+        title: document.getElementById('confirm-title'),
+        msg: document.getElementById('confirm-msg'),
+        btnOk: document.getElementById('btn-confirm-ok')
+    };
+    if (el.title) el.title.textContent = title;
+    if (el.msg) el.msg.innerHTML = msg;
+    if (el.overlay) el.overlay.style.display = 'flex';
+    if (el.btnOk) {
+        el.btnOk.onclick = () => { dongConfirm(); _confirmCb && _confirmCb(); };
+    }
+}
+
+function dongConfirm() {
+    const el = document.getElementById('confirm-overlay');
+    if (el) el.style.display = '';
+    _confirmCb = null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 14. TOAST NOTIFICATION
+// ═══════════════════════════════════════════════════════════
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle';
+    toast.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('hien'));
+
+    setTimeout(() => {
+        toast.classList.remove('hien');
+        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    }, 3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// 15. TIỆN ÍCH
+// ═══════════════════════════════════════════════════════════
+function val(id) {
+    return (document.getElementById(id)?.value || '').trim();
+}
+
+function setValue(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+function clearForm(ids) {
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+function escHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function setBtnLoading(id, loading) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled = loading;
+    if (loading) {
+        btn.dataset.origHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    } else {
+        if (btn.dataset.origHtml) btn.innerHTML = btn.dataset.origHtml;
+    }
+}
+
+function resetPanelPhai() {
+    ['quan-ly-no-selection', 'pq-no-selection', 'phong-no-selection'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = '';
+    });
+    ['quan-ly-content', 'pq-content', 'phong-content'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+}
+
+function togglePass(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    const icon = btn.querySelector('i');
+    if (icon) icon.className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 16. KHỞI ĐỘNG
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    renderThongTinChuTro();
+    renderDanhSach(danhSachQL);
+    capNhatSoLieu();
+
+    // Thanh tìm kiếm (nếu có)
+    const searchInput = document.getElementById('input-tim-kiem');
+    if (searchInput) {
+        searchInput.addEventListener('input', e => timKiem(e.target.value));
+    }
+});

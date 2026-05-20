@@ -535,6 +535,19 @@
     </div>
   </div>
 <script>
+    async function SoPhong(){
+        try{
+        let respone = await fetch('api/ChuTro/TyLeLap');
+         const dulieu = respone.json();
+         console.log(dulieu);
+           if(respone.ok){
+               console.log("ok");
+           }
+        }catch(error){
+            alret("Lỗi kết nối");
+        }
+
+    }
     async function xuLyDangKy() {
     console.log("Hàm xuLyDangKy đã được kích hoạt!"); // Để kiểm tra xem nút có ăn hay không
 

@@ -40,14 +40,14 @@ namespace QuanLyNhaTro.Pages.Admin
             if (string.IsNullOrEmpty(chuoiId) || !int.TryParse(chuoiId, out int idUser))
             {
                 // Nếu không có claim hợp lệ thì chuyển về trang đăng nhập
-                return RedirectToPage("/DangNhap");
+                return RedirectToPage("/Index");
             }
 
             // Truy vấn ACCOUNT từ SQL Server qua EF Core
             var taiKhoan = _context.ACCOUNT.FirstOrDefault(a => a.IDUser == idUser);
             if (taiKhoan == null)
             {
-                return RedirectToPage("/DangNhap");
+                return RedirectToPage("/Index");
             }
 
             // Gán dữ liệu vào các thuộc tính để Razor render

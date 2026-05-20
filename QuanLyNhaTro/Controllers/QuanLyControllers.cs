@@ -1,16 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
-using System.Security.Claims;
+
 namespace QuanLyNhaTro.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
     public class QuanLyController : ControllerBase
     {
         private readonly QuanLyKhuNhaTro _context;
@@ -33,8 +28,6 @@ namespace QuanLyNhaTro.Controllers
                     dienTich = p.DienTich,
                     giaPhong = p.GiaPhongFix,
                     trangThai = p.TrangThai,
-
-                    // Lấy tên người thuê từ hợp đồng đang hiệu lực
                     tenNguoiThue = p.HopDongs
                         .Where(h => h.TrangThaiHD == "Đang hiệu lực")
                         .Select(h => h.Tenant.FullName)
@@ -46,36 +39,29 @@ namespace QuanLyNhaTro.Controllers
 
             return Ok(danhSach);
         }
+
         [HttpGet("ChiTietPhong/{id}")]
         public async Task<IActionResult> ChiTietPhong(int id)
         {
-            // Lấy thông tin phòng
             var phong = await _context.PHONG
                 .Where(p => p.IDPhong == id)
                 .FirstOrDefaultAsync();
 
             if (phong == null) return NotFound();
 
-            // Lấy hợp đồng đang hiệu lực → tìm người thuê
+            // Lấy hợp đồng đang hiệu lực
             var hopDong = await _context.HOPDONG
                 .Where(h => h.IDPhong == id && h.TrangThaiHD == "Đang hiệu lực")
-                .Include(h => h.Tenant) // ACCOUNT
+                .Include(h => h.Tenant)
                 .FirstOrDefaultAsync();
 
-            // Lấy thông tin chi tiết khách thuê (KHACH_THUE)
+            // ✅ SỬA LỖI: Khai báo và gán trực tiếp vào khachThue (trước đây gán vào ktInfo
+            //    nhưng không bao giờ gán cho khachThue khiến nguoiThue luôn trả về null)
             KHACH_THUE? khachThue = null;
             if (hopDong != null)
             {
-                var ktInfo = await _context.KHACH_THUE
+                khachThue = await _context.KHACH_THUE
                     .Where(k => k.IDUser == hopDong.IDUser)
-                    .Select(k => new {
-                        k.HoTen,
-                        k.SoDienThoai,
-                        k.SoCCCD,
-                        k.NgaySinh,
-                        k.GioiTinh,
-                        k.QueQuan
-                    })
                     .FirstOrDefaultAsync();
             }
 
@@ -91,7 +77,7 @@ namespace QuanLyNhaTro.Controllers
                 })
                 .ToListAsync();
 
-            // Lấy 5 sự cố / đơn dịch vụ gần nhất
+            // Lấy 5 đơn dịch vụ / sự cố gần nhất
             var suCos = await _context.DONDV
                 .Where(d => d.IDPhong == id)
                 .OrderByDescending(d => d.NgayTao)
@@ -103,7 +89,6 @@ namespace QuanLyNhaTro.Controllers
                 })
                 .ToListAsync();
 
-            // Tổng hợp response
             var result = new
             {
                 idPhong = phong.IDPhong,
@@ -114,10 +99,15 @@ namespace QuanLyNhaTro.Controllers
                 trangThai = phong.TrangThai,
                 moTa = phong.MoTa,
 
+                // ✅ Giờ khachThue được gán đúng → nguoiThue không còn null
                 nguoiThue = khachThue != null ? new
                 {
                     hoTen = khachThue.HoTen,
                     soDienThoai = khachThue.SoDienThoai,
+                    soCCCD = khachThue.SoCCCD,
+                    ngaySinh = khachThue.NgaySinh?.ToString("dd/MM/yyyy") ?? "—",
+                    gioiTinh = khachThue.GioiTinh,
+                    queQuan = khachThue.QueQuan,
                     ngayBatDau = hopDong!.NgayBatDau.ToString("dd/MM/yyyy"),
                     ngayKetThuc = hopDong.NgayKetThuc.HasValue
                                        ? hopDong.NgayKetThuc.Value.ToString("dd/MM/yyyy")
