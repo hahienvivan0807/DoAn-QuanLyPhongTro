@@ -8,3 +8,4 @@ Khái niệm đưa vào báo cáo: Rate Limiting là cơ chế giới hạn số
 Nếu vượt quá, hệ thống sẽ trả về lỗi HTTP 429 Too Many Requests, giúp chặn đứng các đợt càn quét tự động của botnet ở tầng ứng dụng.
 
 HTTP Security Headers
+Server Header Suppression (hoặc tiếng Việt: Ẩn thông tin Server)
