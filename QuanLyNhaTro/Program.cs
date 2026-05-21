@@ -70,7 +70,21 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
-
+//
+app.Use(async (context, next) =>
+{
+    var h = context.Response.Headers;
+    h.Append("X-Frame-Options", "DENY");
+    h.Append("X-Content-Type-Options", "nosniff");
+    h.Append("X-XSS-Protection", "1; mode=block");
+    h.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    h.Append("Content-Security-Policy",
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        "style-src  'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        "img-src    'self' data:;");
+    await next();
+});
 // ============================================================
 // VÙNG 2: CẤU HÌNH PIPELINE (MIDDLEWARE)
 // ============================================================

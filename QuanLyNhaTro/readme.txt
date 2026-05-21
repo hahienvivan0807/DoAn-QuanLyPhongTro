@@ -6,3 +6,5 @@ CHIẾN LƯỢC 1: Phòng chống ở Tầng Ứng dụng (Application Layer - C
 1. Cơ chế Rate Limiting (Giới hạn tần suất Request)
 Khái niệm đưa vào báo cáo: Rate Limiting là cơ chế giới hạn số lượng request tối đa mà một IP (hoặc một User) được phép gửi đến máy chủ trong một khoảng thời gian nhất định. 
 Nếu vượt quá, hệ thống sẽ trả về lỗi HTTP 429 Too Many Requests, giúp chặn đứng các đợt càn quét tự động của botnet ở tầng ứng dụng.
+
+HTTP Security Headers
