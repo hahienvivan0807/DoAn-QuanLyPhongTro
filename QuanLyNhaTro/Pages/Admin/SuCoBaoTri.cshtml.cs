@@ -7,6 +7,7 @@ using System.Security.Claims;
 
 namespace QuanLyNhaTro.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     /// <summary>
     /// Trang Sự Cố & Bảo Trì dành cho role Admin (Chủ Trọ).
     /// Bao gồm: xem danh sách, phân loại, xử lý, hoàn thành,

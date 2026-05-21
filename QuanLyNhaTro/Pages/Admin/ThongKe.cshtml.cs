@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using System.Security.Claims;
 
 namespace QuanLyNhaTro.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     // ================================================================
     // DTOs returned by the API endpoints (consumed by fetch() in JS)
     // ================================================================

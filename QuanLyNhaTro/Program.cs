@@ -1,7 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using QuanLyNhaTro.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuanLyNhaTro.Models;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,9 +12,27 @@ var builder = WebApplication.CreateBuilder(args);
 // VÙNG 1: ĐĂNG KÝ DỊCH VỤ (SERVICES)
 // ============================================================
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddFixedWindowLimiter(policyName: "fixed-ip", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 100;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 2;
+    });
+});
 // 1. Đăng ký Razor Pages và Controllers
-builder.Services.AddRazorPages();
-builder.Services.AddControllers();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.ConfigureFilter(new AutoValidateAntiforgeryTokenAttribute());
+
+
+});
+
+//giới hạn request
 
 // 2. Cấu hình Database
 var connectionString = builder.Configuration.GetConnectionString("QuanLyKhuNhaTro");
@@ -27,6 +48,8 @@ builder.Services.AddAuthentication("MyCookieAuth")
         options.AccessDeniedPath = "/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Luôn yêu cầu HTTPS
+        options.Cookie.SameSite = SameSiteMode.Lax;        // Hoặc Strict tùy vào yêu cầu UX
     });
 
 // 4. Cấu hình Phân quyền
@@ -61,6 +84,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 
 // THỨ TỰ CỰC KỲ QUAN TRỌNG: 
 app.UseSession(); // (MỚI THÊM - Phải đặt sau UseRouting và trước Authentication)
@@ -70,7 +94,7 @@ app.UseAuthorization();
 
 // Đăng ký các Endpoint
 app.MapStaticAssets();
-app.MapRazorPages().WithStaticAssets();
+app.MapRazorPages().WithStaticAssets().RequireRateLimiting("fixed-ip");
 app.MapControllers();
 
 // ============================================================

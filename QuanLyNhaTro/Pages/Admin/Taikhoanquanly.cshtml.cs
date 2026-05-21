@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
@@ -6,6 +7,7 @@ using System.Text.Json;
 
 namespace QuanLyNhaTro.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     /// <summary>
     /// Page back-end: Quản lý tài khoản Manager
     /// Bảng liên quan: ACCOUNT, PHONG, PHONG_MANAGER, ACCOUNT_PERMISSION

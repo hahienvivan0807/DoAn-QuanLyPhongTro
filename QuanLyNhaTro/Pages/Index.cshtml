@@ -534,20 +534,24 @@
 
     </div>
   </div>
+</div>
 <script>
     async function SoPhong(){
         try{
-        let respone = await fetch('api/ChuTro/TyLeLap');
-         const dulieu = respone.json();
-         console.log(dulieu);
-           if(respone.ok){
-               console.log("ok");
-           }
+            const response = await fetch('/api/ChuTro/TyLeLap');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`); 
+            }
+            const data = await response.json();
+            document.getElementById('so-phong').textContent = data.tongSoPhong;
         }catch(error){
-            alret("Lỗi kết nối");
+            console.error("Lỗi kết nối:", error);
+            document.getElementById('so-phong').textContent = "Lỗi";
         }
-
     }
+
+    // Gọi hàm khi trang tải
+    document.addEventListener('DOMContentLoaded', SoPhong);
     async function xuLyDangKy() {
     console.log("Hàm xuLyDangKy đã được kích hoạt!"); // Để kiểm tra xem nút có ăn hay không
 

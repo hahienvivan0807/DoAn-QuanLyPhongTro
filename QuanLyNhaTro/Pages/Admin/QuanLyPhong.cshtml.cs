@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using System.Text.Json;
 
 namespace QuanLyNhaTro.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     /// <summary>
     /// PageModel – Trang Quản lý phòng trọ
     /// Hỗ trợ: xem danh sách, thêm, sửa, xóa phòng (PHONG)
