@@ -51,8 +51,8 @@
     <style>
 
             /* =============================================
-                   BIẾN MÀU TOÀN CỤC — đồng bộ KhachThue.cshtml
-                ============================================= */
+                               BIẾN MÀU TOÀN CỤC — đồng bộ KhachThue.cshtml
+                            ============================================= */
             :root {
                 --mau-sidebar: #0d1b3e;
                 --mau-sidebar-dam: #091429;
@@ -76,8 +76,8 @@
             }
 
             /* =============================================
-                   RESET & CƠ BẢN
-                ============================================= */
+                               RESET & CƠ BẢN
+                            ============================================= */
             *, *::before, *::after {
                 margin: 0;
                 padding: 0;
@@ -94,8 +94,8 @@
             }
 
             /* =============================================
-                   SIDEBAR — giống KhachThue.cshtml
-                ============================================= */
+                               SIDEBAR — giống KhachThue.cshtml
+                            ============================================= */
             #thanh-sidebar {
                 width: 220px;
                 min-width: 220px;
@@ -277,8 +277,8 @@
                 }
 
             /* =============================================
-                   KHU VỰC CHÍNH
-                ============================================= */
+                               KHU VỰC CHÍNH
+                            ============================================= */
             #khu-vuc-chinh {
                 flex: 1;
                 display: flex;
@@ -445,8 +445,8 @@
             }
 
             /* =============================================
-                   BREADCRUMB + TIÊU ĐỀ TRANG
-                ============================================= */
+                               BREADCRUMB + TIÊU ĐỀ TRANG
+                            ============================================= */
             .page-heading {
                 display: flex;
                 align-items: flex-start;
@@ -508,8 +508,8 @@
             }
 
             /* =============================================
-                   LAYOUT 2 CỘT CHÍNH
-                ============================================= */
+                               LAYOUT 2 CỘT CHÍNH
+                            ============================================= */
             .tt-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
@@ -530,8 +530,8 @@
             }
 
             /* =============================================
-                   CARD CHUNG
-                ============================================= */
+                               CARD CHUNG
+                            ============================================= */
             .tt-card {
                 background: var(--mau-trang);
                 border-radius: 20px;
@@ -603,8 +603,8 @@
             }
 
             /* =============================================
-                   KHỐI 1 — CHI TIẾT HÓA ĐƠN
-                ============================================= */
+                               KHỐI 1 — CHI TIẾT HÓA ĐƠN
+                            ============================================= */
             .tt-invoice-body {
                 padding: 20px 24px;
                 flex: 1;
@@ -769,8 +769,8 @@
                 }
 
             /* =============================================
-                   KHỐI 2 — THANH TOÁN
-                ============================================= */
+                               KHỐI 2 — THANH TOÁN
+                            ============================================= */
             .tt-pay-body {
                 padding: 20px 24px;
                 flex: 1;
@@ -856,8 +856,8 @@
                 }
 
             /* =============================================
-                   MODAL THANH TOÁN NHANH — QR CODE
-                ============================================= */
+                               MODAL THANH TOÁN NHANH — QR CODE
+                            ============================================= */
             .qr-modal-overlay {
                 position: fixed;
                 inset: 0;
@@ -1019,17 +1019,17 @@
                 }
 
             /*
-                 * ═══════════════════════════════════════════════
-                 * [GHI CHÚ] ẢNH QR CODE CỦA QUẢN LÝ
-                 * ═══════════════════════════════════════════════
-                 * Razor: src="@@qrUrl"  (string lấy từ ACCOUNT.QR_Link)
-                 * SQL  : SELECT QR_Link FROM ACCOUNT WHERE IDUser = @@idManager
-                 *
-                 * Cách lưu QR lên SQL (xem hướng dẫn trong ThanhToan.cshtml.cs):
-                 *   1. Upload file ảnh QR → lưu vào wwwroot/uploads/qr/{IDUser}.png
-                 *   2. UPDATE ACCOUNT SET QR_Link = '/uploads/qr/{IDUser}.png' WHERE IDUser = @@id
-                 * ═══════════════════════════════════════════════
-                 */
+                             * ═══════════════════════════════════════════════
+                             * [GHI CHÚ] ẢNH QR CODE CỦA QUẢN LÝ
+                             * ═══════════════════════════════════════════════
+                             * Razor: src="@@qrUrl"  (string lấy từ ACCOUNT.QR_Link)
+                             * SQL  : SELECT QR_Link FROM ACCOUNT WHERE IDUser = @@idManager
+                             *
+                             * Cách lưu QR lên SQL (xem hướng dẫn trong ThanhToan.cshtml.cs):
+                             *   1. Upload file ảnh QR → lưu vào wwwroot/uploads/qr/{IDUser}.png
+                             *   2. UPDATE ACCOUNT SET QR_Link = '/uploads/qr/{IDUser}.png' WHERE IDUser = @@id
+                             * ═══════════════════════════════════════════════
+                             */
             #qr-img {
                 width: 160px; /* ← Giảm từ 200px → 160px */
                 height: 160px; /* ← Giảm từ 200px → 160px */
@@ -1217,8 +1217,8 @@
                 }
 
             /* =============================================
-                   VÙNG UPLOAD ẢNH BILL
-                ============================================= */
+                               VÙNG UPLOAD ẢNH BILL
+                            ============================================= */
             .tt-upload-zone {
                 border: 2px dashed #bfdbfe;
                 border-radius: 14px;
@@ -1356,8 +1356,8 @@
                     }
 
             /* =============================================
-                   TRẠNG THÁI THÀNH CÔNG (ẩn mặc định)
-                ============================================= */
+                               TRẠNG THÁI THÀNH CÔNG (ẩn mặc định)
+                            ============================================= */
             .tt-success {
                 display: none;
                 flex-direction: column;
@@ -1562,6 +1562,9 @@
                                 <div>
                                     <div class="tt-label-name">
                                         <i class="fas fa-home" style="color:#1a56db;"></i>Tiền phòng
+                                    </div>
+                                    <div class="tt-label-sub">
+                                        Giá cố định · @Model.GiaPhongCoDinh.ToString("N0") đ/tháng
                                     </div>
                                 </div>
                             </div>

@@ -58,6 +58,9 @@ namespace QuanLyNhaTro.Pages.KhachThue
         public string NganHang { get; set; } = "";
         public string SoTaiKhoan { get; set; } = "";
 
+        // ── Giá phòng cố định (từ PHONG.GiaPhongFix) ─────────────────
+        public decimal GiaPhongCoDinh { get; set; }
+
         // ── Đơn giá từ CONFIG_GIA ─────────────────────────────────────
         public decimal DonGiaDien { get; set; }
         public decimal DonGiaNuoc { get; set; }
@@ -117,6 +120,9 @@ namespace QuanLyNhaTro.Pages.KhachThue
 
             NganHang = "";  // TODO: QuanLy?.NganHang
             SoTaiKhoan = "";  // TODO: QuanLy?.SoTaiKhoan
+
+            // 4b. Lấy giá phòng cố định
+            GiaPhongCoDinh = hopDong.Phong?.GiaPhongFix ?? 0;
 
             // 5. Đơn giá điện/nước từ CONFIG_GIA
             var configDien = await _db.CONFIG_GIA

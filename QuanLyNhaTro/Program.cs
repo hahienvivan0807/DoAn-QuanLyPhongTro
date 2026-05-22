@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // VÙNG 1: ĐĂNG KÝ DỊCH VỤ (SERVICES)
 // ============================================================
 
+// Giới hạn request (Rate Limiting)
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -24,15 +25,13 @@ builder.Services.AddRateLimiter(options =>
         limiterOptions.QueueLimit = 2;
     });
 });
+
 // 1. Đăng ký Razor Pages và Controllers
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.ConfigureFilter(new AutoValidateAntiforgeryTokenAttribute());
-
-
 });
-
-//giới hạn request
+builder.Services.AddControllers();
 
 // 2. Cấu hình Database
 var connectionString = builder.Configuration.GetConnectionString("QuanLyKhuNhaTro");
@@ -52,7 +51,7 @@ builder.Services.AddAuthentication("MyCookieAuth")
         options.Cookie.SameSite = SameSiteMode.Lax;        // Hoặc Strict tùy vào yêu cầu UX
     });
 
-// 4. Cấu hình Phân quyền
+// 4. Cấu hình Phân quyền (Authorization)
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -60,7 +59,7 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
-// 5. CẤU HÌNH SESSION (MỚI THÊM)
+// 5. Cấu hình Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -68,14 +67,22 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;                // Bảo mật Cookie
     options.Cookie.IsEssential = true;             // Đánh dấu là Cookie thiết yếu
 });
+
 builder.Services.AddHttpContextAccessor();
 
+// Cấu hình Kestrel bảo mật hơn
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.AddServerHeader = false; // Ẩn server
+    options.AddServerHeader = false; // Ẩn thông tin Server header
 });
+
 var app = builder.Build();
-//
+
+// ============================================================
+// VÙNG 2: CẤU HÌNH PIPELINE (MIDDLEWARE)
+// ============================================================
+
+// 1. Custom Middleware: Thêm Security Headers & Bọc lỗi ngắt kết nối đột ngột
 app.Use(async (context, next) =>
 {
     var h = context.Response.Headers;
@@ -93,12 +100,19 @@ app.Use(async (context, next) =>
     h.Append("X-XSS-Protection", "1; mode=block");
     h.Append("Referrer-Policy", "strict-origin-when-cross-origin");
 
-    await next();
+    try
+    {
+        await next();
+    }
+    catch (Exception ex) when (ex is IOException || ex is OperationCanceledException)
+    {
+        // Bắt lỗi khi người dùng F5 hoặc tắt trình duyệt đột ngột (The request stream was aborted)
+        // Chỉ log thông báo nhẹ nhàng thay vì làm crash/văng lỗi hệ thống khi debug
+        Console.WriteLine($"[Thông báo] Kết nối bị ngắt bởi Client hoặc Timeout: {ex.Message}");
+    }
 });
-// ============================================================
-// VÙNG 2: CẤU HÌNH PIPELINE (MIDDLEWARE)
-// ============================================================
 
+// 2. Các Middleware chuẩn của hệ thống (Thứ tự cực kỳ quan trọng)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -107,16 +121,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseRateLimiter();
-
-// THỨ TỰ CỰC KỲ QUAN TRỌNG: 
-app.UseSession(); // (MỚI THÊM - Phải đặt sau UseRouting và trước Authentication)
-
+app.UseSession();        // Phải đặt sau UseRouting và trước UseAuthentication
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Đăng ký các Endpoint
+// 3. Đăng ký các Endpoint hiển thị giao diện / API
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets().RequireRateLimiting("fixed-ip");
 app.MapControllers();
