@@ -1958,6 +1958,97 @@
         padding: 6px 14px;
         border-radius: var(--radius-full);
         }
+        /* Nút filter phòng */
+        .btn-filter-phong {
+        padding: 5px 12px;
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--mau-trang);
+        color: var(--mau-chu-phu);
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+        }
+
+        .btn-filter-phong:hover {
+        border-color: #7c3aed;
+        color: #7c3aed;
+        }
+
+        .btn-filter-phong.active {
+        background: #ede9fe;
+        border-color: #7c3aed;
+        color: #5b21b6;
+        }
+
+        /* Card chọn phòng trong grid */
+        .phong-card {
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-md);
+        padding: 8px 10px;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+        position: relative;
+        }
+
+        .phong-card:hover:not(.disabled) {
+        border-color: #7c3aed;
+        background: #f5f3ff;
+        }
+
+        .phong-card.selected {
+        border-color: #7c3aed;
+        background: #ede9fe;
+        box-shadow: 0 0 0 2px rgba(124,58,237,0.2);
+        }
+
+        .phong-card.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: var(--mau-nen);
+        }
+
+        .phong-card .pc-so {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--mau-chu);
+        }
+
+        .phong-card .pc-tang {
+        font-size: 10.5px;
+        color: var(--mau-chu-phu);
+        }
+
+        .phong-card .pc-tt {
+        font-size: 10px;
+        font-weight: 700;
+        margin-top: 4px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+        }
+
+        .pc-tt.trong {
+        background: #ecfdf5;
+        color: #059669;
+        }
+
+        .pc-tt.da-thue {
+        background: #eff6ff;
+        color: #2563eb;
+        }
+
+        .pc-tt.sua-chua {
+        background: #fffbeb;
+        color: #d97706;
+        }
+
+        .phong-card.selected .pc-so {
+        color: #5b21b6;
+        }
     </style>
 </head>
 <body>
@@ -2580,10 +2671,41 @@
     </div>
     <div class="form-row">
         <label>Phòng phân công</label>
-        <select id="them-phong-phan-cong" class="form-input tql-filter-select"
-                style="width:100%;padding:9px 12px;">
-            <option value="0">— Không phân công lúc này —</option>
-        </select>
+                        <!-- Bộ lọc trạng thái phòng -->
+                        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                            <button type="button" class="btn-filter-phong active" data-filter=""
+                                    onclick="filterPhong(this,'')">
+                                Tất cả
+                            </button>
+                            <button type="button" class="btn-filter-phong" data-filter="Trống"
+                                    onclick="filterPhong(this,'Trống')">
+                                🟢 Trống
+                            </button>
+                            <button type="button" class="btn-filter-phong" data-filter="Đã thuê"
+                                    onclick="filterPhong(this,'Đã thuê')">
+                                🔵 Đang thuê
+                            </button>
+                            <button type="button" class="btn-filter-phong" data-filter="Đang sửa"
+                                    onclick="filterPhong(this,'Đang sửa')">
+                                🟡 Bảo trì
+                            </button>
+                        </div>
+
+                        <!-- Grid chọn phòng -->
+                        <div id="phong-grid-container" style="
+                            max-height:220px;overflow-y:auto;
+                            display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+                            padding:4px 0;">
+                            <div style="grid-column:1/-1;text-align:center;
+                                color:var(--mau-chu-phu);padding:20px;font-size:13px;">
+                                <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách phòng...
+                            </div>
+                        </div>
+                        <input type="hidden" id="them-phong-phan-cong" value="0" />
+                        <div id="phong-selected-label" style="
+                            margin-top:8px;font-size:12px;
+                            color:var(--mau-chu-phu);min-height:18px;">
+                        </div>
         <div class="form-hint">Quản lý sẽ được giao phòng này ngay sau khi tạo.</div>
     </div>
 

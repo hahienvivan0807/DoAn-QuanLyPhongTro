@@ -656,6 +656,164 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 function moModalDanhSachQuanLy() {
-    clearForm(['them-fullname', 'them-username', 'them-phone', 'them-email', 'them-password']);
+    // Reset hidden input & label
+    const inp = document.getElementById('them-phong-phan-cong');
+    const lbl = document.getElementById('phong-selected-label');
+    if (inp) inp.value = '0';
+    if (lbl) lbl.textContent = '';
+
+    // Reset filter về "Tất cả"
+    __filterHienTai = '';
+    document.querySelectorAll('.btn-filter-phong')
+        .forEach(b => b.classList.remove('active'));
+    const btnAll = document.querySelector('.btn-filter-phong[data-filter=""]');
+    if (btnAll) btnAll.classList.add('active');
+
+    // Load phòng từ API
+    loadDanhSachPhong();
+
+    // Clear form fields
+    clearForm(['them-fullname', 'them-username', 'them-phone',
+        'them-email', 'them-password']);
+
     moModal('modal-them-ql');
+}
+async function ThemQuanLy() {
+    const dulieu = {
+        username: document.getElementById('them-username')?.value.trim() || "",
+        passwords: document.getElementById('them-password')?.value || "",
+        fullName: document.getElementById('them-fullname')?.value.trim() || "",
+        phone: document.getElementById('them-phone')?.value.trim() || "",
+        email: document.getElementById('them-email')?.value.trim() || null,
+        iDPhongPhanCong: document.getElementById('them-phong-pc')?.value || null,
+        iDTenantHopDong: document.getElementById('them-tenant-id')?.value || null,
+        iDPhongHopDong: document.getElementById('them-phong-hd')?.value || null,
+        ngayBatDauHD: document.getElementById('them-ngay-bd')?.value || null,
+        seedKhachThue: document.getElementById('them-seed-kt')?.checked || false, // Checkbox dạng true/false
+        hoTenKhach: document.getElementById('them-kt-hoten')?.value.trim() || null,
+        soDienThoaiKhach: document.getElementById('them-kt-sdt')?.value.trim() || null,
+        soCCCDKhach: document.getElementById('them-kt-cccd')?.value.trim() || null
+    };
+ 
+}
+// ── Biến lưu toàn bộ phòng từ API ──────────────────────────
+let __danhSachPhongAPI = [];
+let __filterHienTai = '';
+
+// ── Gọi API load phòng ──────────────────────────────────────
+async function loadDanhSachPhong() {
+    const container = document.getElementById('phong-grid-container');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;
+                    color:var(--mau-chu-phu);padding:20px;font-size:13px;">
+            <i class="fas fa-spinner fa-spin"></i> Đang tải...
+        </div>`;
+
+    try {
+        const res = await fetch('/Admin/Taikhoanquanly?handler=DanhSachPhong', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        __danhSachPhongAPI = await res.json();
+        renderPhongGrid(__danhSachPhongAPI, __filterHienTai);
+
+    } catch (err) {
+        container.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;
+                        color:var(--mau-do);padding:20px;font-size:13px;">
+                <i class="fas fa-exclamation-circle"></i> Lỗi tải danh sách phòng.
+                <br><button onclick="loadDanhSachPhong()"
+                    style="margin-top:8px;padding:4px 12px;
+                           border:1px solid var(--mau-do);border-radius:6px;
+                           background:none;color:var(--mau-do);cursor:pointer;
+                           font-family:inherit;">
+                    Thử lại
+                </button>
+            </div>`;
+    }
+}
+
+// ── Render grid phòng (có filter) ───────────────────────────
+function renderPhongGrid(danhSach, filter) {
+    const container = document.getElementById('phong-grid-container');
+    if (!container) return;
+
+    const idDangChon = parseInt(
+        document.getElementById('them-phong-phan-cong')?.value || '0'
+    );
+
+    // Lọc theo trạng thái
+    const ds = filter
+        ? danhSach.filter(p => p.trangThai === filter)
+        : danhSach;
+
+    if (ds.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;
+                        color:var(--mau-chu-phu);padding:20px;font-size:13px;">
+                <i class="fas fa-door-closed"></i> Không có phòng nào.
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = ds.map(p => {
+        const disabled = p.trangThai !== 'Trống';
+        const selected = p.iDPhong === idDangChon;
+        const ttClass = p.trangThai === 'Trống' ? 'trong'
+            : p.trangThai === 'Đã thuê' ? 'da-thue'
+                : 'sua-chua';
+        const ttLabel = p.trangThai === 'Trống' ? '○ Trống'
+            : p.trangThai === 'Đã thuê' ? '● Đang thuê'
+                : '⚠ Bảo trì';
+
+        return `
+        <div class="phong-card ${disabled ? 'disabled' : ''} ${selected ? 'selected' : ''}"
+             data-id="${p.iDPhong}"
+             data-so="${p.soPhong}"
+             onclick="${disabled ? '' : `chonPhongCard(this,${p.iDPhong},'${p.soPhong}')`}"
+             title="${disabled ? p.trangThai + ' – không thể chọn' : 'Chọn P.' + p.soPhong}">
+            <div class="pc-so">P.${p.soPhong}</div>
+            <div class="pc-tang">Tầng ${p.tang}</div>
+            <div class="pc-tt ${ttClass}">${ttLabel}</div>
+        </div>`;
+    }).join('');
+}
+
+// ── Chọn một phòng card ─────────────────────────────────────
+function chonPhongCard(el, idPhong, soPhong) {
+    // Bỏ chọn card cũ
+    document.querySelectorAll('#phong-grid-container .phong-card.selected')
+        .forEach(c => c.classList.remove('selected'));
+
+    // Nếu click lại card đang chọn → bỏ chọn
+    const hiddenInput = document.getElementById('them-phong-phan-cong');
+    const label = document.getElementById('phong-selected-label');
+
+    if (parseInt(hiddenInput.value) === idPhong) {
+        hiddenInput.value = '0';
+        if (label) label.textContent = '';
+        return;
+    }
+
+    // Chọn mới
+    el.classList.add('selected');
+    hiddenInput.value = idPhong;
+    if (label) label.innerHTML =
+        `<i class="fas fa-check-circle" style="color:#7c3aed;"></i>
+         Đã chọn: <strong>Phòng ${soPhong}</strong>`;
+}
+
+// ── Bộ lọc trạng thái ───────────────────────────────────────
+function filterPhong(btn, trangThai) {
+    __filterHienTai = trangThai;
+
+    // Cập nhật style nút
+    document.querySelectorAll('.btn-filter-phong')
+        .forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    renderPhongGrid(__danhSachPhongAPI, trangThai);
 }

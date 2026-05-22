@@ -898,6 +898,45 @@ namespace QuanLyNhaTro.Pages.Admin
                 return StatusCode(500, new { message = "Lỗi hệ thống." });
             }
         }
+        public IActionResult OnGetDanhSachPhong(string? trangThai = null)
+        {
+            try
+            {
+                var list = new List<object>();
+                using var conn = new SqlConnection(ConnStr);
+                conn.Open();
 
+                var sql = @"
+            SELECT IDPhong, SoPhong, Tang, TrangThai, GiaPhongFix, DienTich
+            FROM   PHONG
+            WHERE  (@trangThai IS NULL OR TrangThai = @trangThai)
+            ORDER  BY Tang, SoPhong";
+
+                using var cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@trangThai",
+                    string.IsNullOrEmpty(trangThai) ? (object)DBNull.Value : trangThai);
+
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    list.Add(new
+                    {
+                        iDPhong = reader.GetInt32(0),
+                        soPhong = reader.GetString(1),
+                        tang = (int)reader.GetByte(2),
+                        trangThai = reader.GetString(3),
+                        giaPhongFix = reader.GetDecimal(4),
+                        dienTich = reader.IsDBNull(5) ? (decimal?)null : reader.GetDecimal(5)
+                    });
+                }
+
+                return new JsonResult(list);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi load danh sách phòng");
+                return StatusCode(500, new { message = "Lỗi hệ thống khi tải danh sách phòng." });
+            }
+        }
     }
 }
