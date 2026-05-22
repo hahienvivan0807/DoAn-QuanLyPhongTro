@@ -957,7 +957,7 @@
             <i class="fas fa-users"></i>
             <span>Người thuê</span>
         </a>
-        <a class="muc-menu" href="/Admin/HopDong">
+        <a class="muc-menu" href="/Admin/QuanLyHopDong">
             <i class="fas fa-file-contract"></i>
             <span>Hợp đồng</span>
             <span class="huy-hieu vang">2</span>
@@ -989,11 +989,11 @@
         <a class="muc-menu" href="/Admin/SuCoBaoTri">
             <i class="fas fa-tools"></i>
             <span>Sự cố / Bảo trì</span>
-            <span class="huy-hieu">3</span>
+            <span class="huy-hieu" id="huy-hieu-sua-chua">-</span>
         </a>
         <a class="muc-menu" href="/Admin/ThongKe">
             <i class="fas fa-chart-bar"></i>
-            <span>Báo cáo tài chính</span>
+            <span>Thống kê & Báo cáo</span>
         </a>
         <!-- MỤC CÀI ĐẶT – đang chọn -->
         <a class="muc-menu dang-chon" href="/Admin/CaiDatHT">
@@ -1289,6 +1289,15 @@
                 const headerTen     = document.getElementById('header-ten-chu');
                 if (headerVietTat) headerVietTat.textContent = viTat;
                 if (headerTen)     headerTen.textContent     = ten || user;
+            })();
+                        // ===== CẬP NHẬT HUY HIỆU SIDEBAR =====
+            (function() {
+              const chuaHoanThanh = document.querySelectorAll('.card-su-co[data-filter*="chua-hoan-thanh"]').length;
+              const el = document.getElementById('huy-hieu-sua-chua');
+              if (el) {
+                el.textContent = chuaHoanThanh > 0 ? chuaHoanThanh : '';
+                el.style.display = chuaHoanThanh > 0 ? '' : 'none';
+              }
             })();
 
             // ===========================================================

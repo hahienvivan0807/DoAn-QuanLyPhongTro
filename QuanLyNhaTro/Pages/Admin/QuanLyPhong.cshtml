@@ -1592,7 +1592,7 @@
         </div>
         <div class="muc-menu" onclick="chuyenMenu('bao-cao', this)">
             <i class="fas fa-chart-bar"></i>
-            <span>Báo cáo tài chính</span>
+            <span>Thống kê & Báo cáo</span>
         </div>
         <div class="muc-menu" onclick="chuyenMenu('cai-dat', this)">
             <i class="fas fa-cog"></i>
@@ -2165,11 +2165,17 @@
         }
 
         // ── LỌC DANH SÁCH PHÒNG ──
+        // ── LỌC DANH SÁCH PHÒNG ──
         function locDanhSachPhong() {
         const tuKhoa = document.getElementById('tim-phong-input').value.toLowerCase().trim();
         const tt     = document.getElementById('loc-trang-thai').value;
         const tang   = document.getElementById('loc-tang').value;
-        const rows   = document.querySelectorAll('#tbody-phong tr');
+        const rows   = Array.from(document.querySelectorAll('#tbody-phong tr'));
+
+        // Bước 1: Hiện toàn bộ (xóa filter phân trang), giữ display=none của lọc sẽ set lại
+        rows.forEach(row => { delete row.dataset.phanTrang; row.style.display = ''; });
+
+        // Bước 2: Áp dụng bộ lọc tìm kiếm
         let soHienThi = 0;
         rows.forEach(row => {
         const soPhong   = row.dataset.soPhong || '';
@@ -2178,18 +2184,96 @@
         const khopTu    = !tuKhoa || soPhong.includes(tuKhoa);
         const khopTT    = !tt     || trangThai === tt;
         const khopTang  = !tang   || tangRow === tang;
-        if (khopTu && khopTT && khopTang) { row.style.display = ''; soHienThi++; }
+        if (khopTu && khopTT && khopTang) { soHienThi++; }
         else row.style.display = 'none';
         });
+
         document.getElementById('so-ket-qua').textContent = soHienThi + ' phòng';
         document.getElementById('bang-rong').style.display = soHienThi === 0 ? 'block' : 'none';
+
+        // Bước 3: Cập nhật cache rows đã lọc rồi reset về trang 1
+        rowsLocGlobal = rows.filter(r => r.style.display !== 'none');
+        denTrang(1);
         }
 
         // ── PHÂN TRANG ──
+        // rowsLocGlobal: cache danh sách rows qua bộ lọc (không ẩn bởi phân trang)
         let trangHienTai = 1;
         const soPhongMotTrang = @Model.SoPhongMotTrang;
+        let rowsLocGlobal = [];   // được set bởi locDanhSachPhong() hoặc khi init
+
         function chuyenTrang(buoc) { denTrang(trangHienTai + buoc); }
-        function denTrang(trang) { trangHienTai = trang; }
+
+        function denTrang(trang) {
+        // rowsLocGlobal phải được cập nhật trước khi gọi hàm này.
+        // Nếu chưa có (lần đầu), lấy toàn bộ rows.
+        if (rowsLocGlobal.length === 0) {
+        rowsLocGlobal = Array.from(document.querySelectorAll('#tbody-phong tr'));
+        }
+
+        const tongTrang = Math.max(1, Math.ceil(rowsLocGlobal.length / soPhongMotTrang));
+        trangHienTai = Math.max(1, Math.min(trang, tongTrang));
+
+        const batDau = (trangHienTai - 1) * soPhongMotTrang;
+        const ketThuc = batDau + soPhongMotTrang;
+
+        // Ẩn toàn bộ rows (kể cả không trong bộ lọc)
+        document.querySelectorAll('#tbody-phong tr').forEach(r => r.style.display = 'none');
+
+        // Hiện đúng rows của trang hiện tại
+        rowsLocGlobal.forEach((row, idx) => {
+        row.style.display = (idx >= batDau && idx < ketThuc) ? '' : 'none';
+        });
+
+        // Cập nhật text info
+        const soHienThiTrang = Math.min(soPhongMotTrang, rowsLocGlobal.length - batDau);
+        const tuSo = rowsLocGlobal.length === 0 ? 0 : batDau + 1;
+        const denSo = batDau + soHienThiTrang;
+        document.getElementById('phan-trang-info').textContent =
+        `Hiển thị ${tuSo} – ${denSo} / ${rowsLocGlobal.length} phòng`;
+
+        // Cập nhật nút số trang: xóa cũ rồi tạo mới
+        const nhom = document.getElementById('nhom-nut-trang');
+        nhom.querySelectorAll(':not(#nut-trang-truoc):not(#nut-trang-tiep)').forEach(el => el.remove());
+
+        const nutTiep = document.getElementById('nut-trang-tiep');
+        phanTrangSo(trangHienTai, tongTrang).forEach(item => {
+        if (item === '...') {
+        const span = document.createElement('span');
+        span.textContent = '…';
+        span.style.cssText = 'padding:0 4px;color:var(--mau-chu-phu);font-size:13px;align-self:center;';
+        nhom.insertBefore(span, nutTiep);
+        } else {
+        const btn = document.createElement('button');
+        btn.className = 'nut-trang' + (item === trangHienTai ? ' hien-tai' : '');
+        btn.textContent = item;
+        btn.onclick = () => denTrang(item);
+        nhom.insertBefore(btn, nutTiep);
+        }
+        });
+
+        // Trạng thái nút prev / next
+        document.getElementById('nut-trang-truoc').disabled = trangHienTai <= 1;
+        document.getElementById('nut-trang-tiep').disabled  = trangHienTai >= tongTrang;
+        }
+
+        // Sinh danh sách số trang có dấu "..."
+        function phanTrangSo(hienTai, tongTrang) {
+        if (tongTrang <= 7) return Array.from({length: tongTrang}, (_, i) => i + 1);
+        const ds = [];
+        if (hienTai <= 4) {
+        for (let i = 1; i <= 5; i++) ds.push(i);
+        ds.push('...'); ds.push(tongTrang);
+        } else if (hienTai >= tongTrang - 3) {
+        ds.push(1); ds.push('...');
+        for (let i = tongTrang - 4; i <= tongTrang; i++) ds.push(i);
+        } else {
+        ds.push(1); ds.push('...');
+        ds.push(hienTai - 1); ds.push(hienTai); ds.push(hienTai + 1);
+        ds.push('...'); ds.push(tongTrang);
+        }
+        return ds;
+        }
 
         // ── CHỌN TRẠNG THÁI MODAL ──
         function chonTrangThai(gt, loai) {
@@ -2490,6 +2574,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
         HienThiProfile();
+        rowsLocGlobal = Array.from(document.querySelectorAll('#tbody-phong tr'));
+        denTrang(1);  // Khởi tạo phân trang khi tải trang
         });
     </script>
 

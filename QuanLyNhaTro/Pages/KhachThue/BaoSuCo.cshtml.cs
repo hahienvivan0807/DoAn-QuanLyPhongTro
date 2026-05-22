@@ -125,13 +125,18 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (!int.TryParse(idUserStr, out int idUser))
                 return new JsonResult(new { success = false, message = "Chưa đăng nhập" });
 
-            var loai = Request.Form["loai"].ToString();     // "dich-vu" | "hu-hong"
-            var idPhongStr = loai == "dich-vu"
-                                ? Request.Form["PhongDichVu"].ToString()
-                                : Request.Form["PhongHuHong"].ToString();
+            // ── Lấy IDPhong trực tiếp từ DB theo IDUser (không tin form) ──
+            var hopDong = await _db.HOPDONG
+                .Include(h => h.Phong)
+                .Where(h => h.IDUser == idUser && h.TrangThaiHD == "Đang hiệu lực")
+                .FirstOrDefaultAsync();
 
-            if (!int.TryParse(idPhongStr, out int idPhong))
-                return new JsonResult(new { success = false, message = "Phòng không hợp lệ" });
+            if (hopDong == null)
+                return new JsonResult(new { success = false, message = "Không tìm thấy phòng đang thuê" });
+
+            int idPhong = hopDong.IDPhong;
+
+            var loai = Request.Form["loai"].ToString();     // "dich-vu" | "hu-hong"
 
             // ── Xử lý upload ảnh ──────────────────────────────────────
             // Ảnh lưu tại: wwwroot/uploads/su-co/{IDUser}_{timestamp}_{filename}

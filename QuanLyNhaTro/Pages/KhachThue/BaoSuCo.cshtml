@@ -780,24 +780,14 @@
             ========================================= -->
             <div class="phan-form hien" id="form-dich-vu">
 
-              <!-- Số phòng: load từ PHONG join HOPDONG theo IDUser đang đăng nhập -->
+              <!-- Số phòng: cố định theo phòng đang thuê của khách -->
               <div class="hang-form-2">
                 <div class="nhom-truong">
                   <label class="nhan-truong">Số phòng <span class="bat-buoc">*</span></label>
-                  <select class="truong-nhap" id="phong-dich-vu" name="PhongDichVu">
-                    <option value="">-- Chọn phòng --</option>
-                    @foreach (var phong in Model.DanhSachPhong)
-                    {
-                      if (phong.IDPhong == Model.IDPhongHienTai)
-                      {
-                        <option value="@phong.IDPhong" selected="selected">Phòng @phong.SoPhong</option>
-                      }
-                      else
-                      {
-                        <option value="@phong.IDPhong">Phòng @phong.SoPhong</option>
-                      }
-                    }
-                  </select>
+                  <input type="text" class="truong-nhap" id="phong-dich-vu-hien-thi"
+                    value="Phòng @Model.SoPhongHienTai" readonly
+                    style="background:#f8fafc;color:var(--mau-chu);cursor:not-allowed;font-weight:600;" />
+                  <input type="hidden" id="phong-dich-vu" name="PhongDichVu" value="@Model.IDPhongHienTai" />
                 </div>
                 <div class="nhom-truong">
                   <label class="nhan-truong">Ngày xảy ra <span class="bat-buoc">*</span></label>
@@ -909,24 +899,14 @@
             ========================================= -->
             <div class="phan-form" id="form-hu-hong">
 
-              <!-- Số phòng & ngày -->
+              <!-- Số phòng: cố định theo phòng đang thuê của khách -->
               <div class="hang-form-2">
                 <div class="nhom-truong">
                   <label class="nhan-truong">Số phòng <span class="bat-buoc">*</span></label>
-                  <select class="truong-nhap" id="phong-hu-hong" name="PhongHuHong">
-                    <option value="">-- Chọn phòng --</option>
-                    @foreach (var phong in Model.DanhSachPhong)
-                    {
-                      if (phong.IDPhong == Model.IDPhongHienTai)
-                      {
-                        <option value="@phong.IDPhong" selected="selected">Phòng @phong.SoPhong</option>
-                      }
-                      else
-                      {
-                        <option value="@phong.IDPhong">Phòng @phong.SoPhong</option>
-                      }
-                    }
-                  </select>
+                  <input type="text" class="truong-nhap" id="phong-hu-hong-hien-thi"
+                    value="Phòng @Model.SoPhongHienTai" readonly
+                    style="background:#f8fafc;color:var(--mau-chu);cursor:not-allowed;font-weight:600;" />
+                  <input type="hidden" id="phong-hu-hong" name="PhongHuHong" value="@Model.IDPhongHienTai" />
                 </div>
                 <div class="nhom-truong">
                   <label class="nhan-truong">Ngày phát hiện <span class="bat-buoc">*</span></label>
