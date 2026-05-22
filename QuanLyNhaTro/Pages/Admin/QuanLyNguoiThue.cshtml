@@ -1277,14 +1277,22 @@
                         <div class="nt-err" id="err-ngay-vao-o"></div>
                     </div>
 
-                    <div class="nt-field">
-                        <label class="nt-lbl">Phòng <span class="req">*</span></label>
-                        <select class="nt-inp" id="inp-id-phong" onchange="ntXemTruocPhong(this.value)">
-                            <option value="">-- Chọn phòng trống --</option>
-                        </select>
-                        <div class="nt-err" id="err-id-phong"></div>
-                        <span class="nt-hint">Chỉ hiện phòng đang trống</span>
+                <div class="nt-field">
+                    <label class="nt-lbl">Phòng <span class="req">*</span></label>
+
+                    <!-- Hidden actual value -->
+                    <input type="hidden" id="inp-id-phong" />
+
+                    <!-- Clickable display box -->
+                    <div class="nt-inp" id="phong-display-box"
+                         style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; user-select:none;"
+                         onclick="ntMoPickerPhong()">
+                        <span id="phong-display-text" style="color:var(--mau-chu-phu);">-- Chọn phòng --</span>
+                        <i class="fas fa-chevron-down" style="font-size:10px; color:var(--mau-chu-phu);"></i>
                     </div>
+                    <div class="nt-err" id="err-id-phong"></div>
+                    <span class="nt-hint">Lọc theo trạng thái phòng</span>
+                </div>
 
                     <div class="nt-field">
                         <label class="nt-lbl">Tiền cọc ban đầu</label>

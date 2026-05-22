@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="/css/ChuTro.css" />
     <!-- Javascript (giữ nguyên như ChuTro.cshtml) -->
+    <script src="/js/ChuTro/ChuTro-CauHinhGia.js"></script>
     <script src="/js/ChuTro/ChuTro-ThongBao.js"></script>
     <script src="/js/ChuTro/ChuTro-core.js"></script>
     <script src="/js/ChuTro/ChuTro-quanLy.js"></script>
@@ -1784,12 +1785,23 @@
                         </div>
 
                         <div class="fg2" id="chg-dv-form">
-                            <div class="field">
-                                <label class="f-lbl">Mã dịch vụ <span class="req">*</span></label>
-                                <input class="inp" type="text" id="dv-ma"
-                                       placeholder="VD: DIEN, NUOC, INET..." />
-                                <div class="f-note">Mã định danh, không dấu cách, không dấu</div>
-                            </div>
+                                <div class="field">
+                                    <label class="f-lbl">Mã dịch vụ <span class="req">*</span></label>
+                                    <div style="display:flex; gap:0; position:relative;">
+                                        <input class="inp" type="text" id="dv-ma"
+                                               placeholder="VD: DIEN, NUOC..."
+                                               style="border-radius:8px 0 0 8px; border-right:none;" readonly />
+                                        <button type="button" onclick="dvMaMoPopup()"
+                                                style="padding:0 14px; border:1.5px solid var(--mau-vien); border-left:none;
+                                                       border-radius:0 8px 8px 0; background:var(--page-accent); color:#fff;
+                                                       cursor:pointer; font-size:12px; font-weight:700; font-family:inherit;
+                                                       display:flex; align-items:center; gap:6px; white-space:nowrap;
+                                                       transition:background .15s;">
+                                            <i class="fas fa-database"></i> Chọn mã
+                                        </button>
+                                    </div>
+                                    <div class="f-note">Nhấn "Chọn mã" để chọn từ danh sách dịch vụ trong hệ thống.</div>
+                                </div>
                             <div class="field">
                                 <label class="f-lbl">Tên dịch vụ <span class="req">*</span></label>
                                 <input class="inp" type="text" id="dv-ten"
@@ -1825,7 +1837,7 @@
                                         onclick="document.getElementById('dv-ma').value='';document.getElementById('dv-ten').value='';document.getElementById('dv-gia').value='';document.getElementById('dv-donvi').value='';">
                                     Xóa trắng
                                 </button>
-                                <button class="btn-confirm-chg" id="chg-btn-submit" onclick="chgSubmit()">
+                                <button class="btn-confirm-chg" id="chg-btn-submit" onclick="luuDichVu()">
                                     <i class="fas fa-check"></i>
                                     <span id="chg-btn-label">Lưu dịch vụ</span>
                                 </button>
@@ -2169,6 +2181,67 @@
         }
         });
     </script>
+    <!--Các mã dịch vụ-->
+    <div id="dvma-overlay"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+        z-index:9999; align-items:flex-start; justify-content:center; padding-top:80px;"
+         onclick="if(event.target===this) dvMaDongPopup()">
 
+        <div style="width:440px; background:#fff; border-radius:14px;
+            border:1.5px solid var(--page-accent);
+            box-shadow:0 12px 40px rgba(8,145,178,.22); overflow:hidden;">
+
+            <!-- Header -->
+            <div style="background:var(--page-accent); padding:14px 18px;
+                display:flex; align-items:center; justify-content:space-between;">
+                <span style="color:#fff; font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-database"></i> Danh sách mã dịch vụ
+                    <span id="dvma-count"
+                          style="background:rgba(255,255,255,.22); color:#fff; font-size:10px;
+                    font-weight:700; padding:2px 8px; border-radius:99px;"></span>
+                </span>
+                <button onclick="dvMaDongPopup()"
+                        style="background:rgba(255,255,255,.2); border:none; color:#fff;
+                    width:28px; height:28px; border-radius:6px; cursor:pointer;
+                    font-size:14px; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Search -->
+            <div style="padding:10px 14px; border-bottom:1px solid var(--mau-vien);
+                background:var(--mau-nen); display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-search" style="color:var(--page-accent); font-size:13px;"></i>
+                <input type="text" id="dvma-search"
+                       placeholder="Tìm mã hoặc tên dịch vụ..."
+                       oninput="dvMaLoc(this.value)"
+                       style="border:none; background:none; outline:none; font-size:13px;
+                width:100%; font-family:inherit; color:var(--mau-chu);" />
+            </div>
+
+            <!-- List -->
+            <div id="dvma-list"
+                 style="max-height:260px; overflow-y:auto; padding:6px;"></div>
+
+            <!-- Footer -->
+            <div style="padding:10px 14px; border-top:1px solid var(--mau-vien);
+                background:var(--mau-nen); display:flex; justify-content:flex-end; gap:8px;">
+                <button onclick="dvMaDongPopup()"
+                        style="padding:8px 16px; border:1.5px solid var(--mau-vien); background:none;
+                    border-radius:7px; font-size:12px; font-weight:700;
+                    color:var(--mau-chu-phu); cursor:pointer; font-family:inherit;">
+                    Huỷ
+                </button>
+                <button id="dvma-btn-ok" onclick="dvMaXacNhan()" disabled
+                        style="padding:8px 20px; border:none; background:var(--page-accent); color:#fff;
+                    border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;
+                    display:flex; align-items:center; gap:6px; font-family:inherit; opacity:.5;">
+                    <i class="fas fa-check"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+<!--Thông báo-->
+    <div class="toast-container" id="toastContainer"></div>
 </body>
 </html>

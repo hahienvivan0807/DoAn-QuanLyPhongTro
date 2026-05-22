@@ -39,6 +39,20 @@ namespace QuanLyNhaTro.Controllers
 
             public int ChiSoDien { get; set; }
             public int ChiSoNuoc { get; set; }
+            public string? SoCCCD { get; set; }
+            public DateTime? NgaySinh { get; set; }
+            public string? GioiTinh { get; set; }
+            public string? QueQuan { get; set; }
+            public string? DiaChiThuongTru { get; set; }
+            public string? GhiChu { get; set; }
+            public string? NgheNghiep { get; set; }
+            public string? TenLienHeKhan { get; set; }
+            public string? SdtKhan { get; set; }
+            public string? TinhThanh { get; set; }
+            public string? NoiCapCCCD { get; set; }
+            public DateTime? NgayCapCCCD { get; set; }
+            public string? AnhChanDung { get; set; }
+            public int IDPhong { get; set; } 
         }
         [HttpPost("them-nguoi-thue")]
         public async Task<IActionResult> ThemNguoiThue([FromBody] NguoiThueRequest request)
@@ -107,19 +121,21 @@ namespace QuanLyNhaTro.Controllers
                 await _context.SaveChangesAsync();
 
                 // 3. INSERT HOPDONG
-                var newHopDong = new HOPDONG
+                var newKhachThue = new KHACH_THUE
                 {
-                    IDUser = newAccount.IDUser,    
-                    IDPhong = phong.IDPhong,     
-                    NgayBatDau = request.NgayBatDau,
-                    NgayKetThuc = request.NgayKetThuc,
-                    DienDauKy = request.ChiSoDien,
-                    NuocDauKy = request.ChiSoNuoc,
-                    TrangThaiHD = "Đang hiệu lực"
+                    IDUser = newAccount.IDUser,
+                    HoTen = request.HoTen,
+                    SoCCCD = request.SoCCCD,
+                    NgaySinh = request.NgaySinh,
+                    GioiTinh = request.GioiTinh,
+                    SoDienThoai = request.SoDienThoai,
+                    QueQuan = request.QueQuan,
+                    DiaChiThuongTru = request.DiaChiThuongTru,
+                    GhiChu = request.GhiChu,
+                    AnhChanDung = request.AnhChanDung,
+                    NgayVaoO = request.NgayBatDau,
                 };
-                _context.HOPDONG.Add(newHopDong);
                 await _context.SaveChangesAsync();
-
                 await transaction.CommitAsync();
 
                 return Ok(new { message = "Thêm người thuê thành công!", idUser = newAccount.IDUser });
