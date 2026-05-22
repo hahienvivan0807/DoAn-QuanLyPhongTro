@@ -276,7 +276,16 @@ function xacNhanDangXuat() {
         window.location.href = '/Index'; // đổi route khi làm BE
     }
 }
+function chgDong() {
+    dongModal('modal-cau-hinh-gia-v2');
+}
 
+// Đóng khi click ra ngoài
+function chgDongNgoai(event) {
+    if (event.target.id === 'modal-cau-hinh-gia-v2') {
+        chgDong();
+    }
+}
 
 /* ============================================================
    12. INIT

@@ -22,12 +22,6 @@ function xuatBaoCao() {
 }
 
 // ── Mở / Đóng modal config giá v2 ──
-window.chgDong = () =>
-    document.getElementById('modal-cau-hinh-gia-v2').classList.remove('hien');
-
-window.chgDongNgoai = (e) => {
-    if (e.target.id === 'modal-cau-hinh-gia-v2') chgDong();
-};
 
 // ── Chuyển tab (CHỈ 1 lần khai báo) ──
 window.chgSwitch = function (tab) {
