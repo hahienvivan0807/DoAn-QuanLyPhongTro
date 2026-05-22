@@ -93,7 +93,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hệ Thống Quản Lý – Tài Khoản Quản Lý</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link ref="stylesheet" href="/css/ChuTro.css" />
+    <script src="~/js/ChuTro/ChuTro-quanLy.js"></script>
     <style>
+
             /* ==========================================================
                                IMPORT FONT
                             ========================================================= */
@@ -1856,6 +1859,105 @@
                     grid-template-columns: 1fr;
                 }
             }
+        .them-section-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 11.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: #5b21b6;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1.5px solid #ede9fe;
+        }
+
+        .them-section-label i {
+        font-size: 12px;
+        opacity: 0.8;
+        }
+
+        .them-optional-tag {
+        margin-left: auto;
+        font-size: 9.5px;
+        font-weight: 700;
+        background: #ede9fe;
+        color: #6d28d9;
+        border-radius: var(--radius-full);
+        padding: 2px 8px;
+        letter-spacing: 0.3px;
+        text-transform: none;
+        }
+
+        .them-kt-info-box {
+        background: #f5f3ff;
+        border: 1px solid #ede9fe;
+        border-radius: var(--radius-md);
+        padding: 10px 14px;
+        font-size: 12.5px;
+        color: var(--mau-chu);
+        margin-bottom: 10px;
+        min-height: 36px;
+        line-height: 1.6;
+        }
+
+        .them-seed-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--mau-chu);
+        cursor: pointer;
+        padding: 6px 0;
+        }
+
+        .them-tab {
+        padding: 10px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--mau-chu-phu);
+        cursor: pointer;
+        border-bottom: 2.5px solid transparent;
+        margin-bottom: -1.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+        white-space: nowrap;
+        }
+
+        .them-tab.them-tab-on {
+        color: #7c3aed;
+        border-bottom-color: #7c3aed;
+        }
+
+        .them-tab i {
+        font-size: 12px;
+        }
+
+        .them-panel {
+        display: none;
+        padding: 18px 22px 10px;
+        }
+
+        .them-panel.them-panel-on {
+        display: block;
+        }
+
+        .them-perm-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ede9fe;
+        border: 1px solid #d8b4fe;
+        color: #5b21b6;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: var(--radius-full);
+        }
     </style>
 </head>
 <body>
@@ -2353,56 +2455,197 @@
      MODAL: THÊM QUẢN LÝ
 ============================================================ -->
     <div class="lop-phu-modal" id="modal-them-ql" onclick="dongModalNgoai(event,'modal-them-ql')">
-        <div class="hop-modal">
+        <div class="hop-modal" style="max-width:620px;">
+            <!-- Header -->
             <div class="modal-header-purple">
                 <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
                     <div class="mh-icon"><i class="fas fa-user-plus"></i></div>
                     <div>
                         <div class="mh-title">Thêm tài khoản quản lý</div>
-                        <div class="mh-sub">Tạo tài khoản mới với quyền Manager</div>
+                        <div class="mh-sub">Tạo tài khoản Manager – tùy chọn phân phòng & hợp đồng</div>
                     </div>
                 </div>
                 <button class="mh-close" onclick="dongModal('modal-them-ql')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="form-2col">
-                    <div class="form-row">
-                        <label>Họ và tên <span class="req">*</span></label>
-                        <input type="text" id="them-fullname" class="form-input" placeholder="Nguyễn Văn A" />
-                    </div>
-                    <div class="form-row">
-                        <label>Username <span class="req">*</span></label>
-                        <input type="text" id="them-username" class="form-input" placeholder="nguyenvana" />
-                    </div>
+            <div style="display:flex;border-bottom:1.5px solid var(--mau-vien);padding:0 20px;background:var(--mau-nen-card);gap:4px;" id="them-tabs">
+                <div class="them-tab them-tab-on" onclick="moTabThem(0)">
+                    <i class="fas fa-user-circle"></i> Tài khoản
                 </div>
-                <div class="form-2col">
-                    <div class="form-row">
-                        <label>Số điện thoại <span class="req">*</span></label>
-                        <input type="tel" id="them-phone" class="form-input" placeholder="09xxxxxxxx" />
-                    </div>
-                    <div class="form-row">
-                        <label>Email</label>
-                        <input type="email" id="them-email" class="form-input" placeholder="email@example.com" />
-                    </div>
+                <div class="them-tab" onclick="moTabThem(1)">
+                    <i class="fas fa-id-card"></i> Hồ sơ cá nhân
                 </div>
-                <div class="form-row">
-                    <label>Mật khẩu <span class="req">*</span></label>
-                    <div class="pass-wrap">
-                        <input type="password" id="them-password" class="form-input" placeholder="Tối thiểu 8 ký tự" />
-                        <button type="button" class="btn-toggle-pass" onclick="togglePass('them-password', this)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="form-hint">Mật khẩu phải có ít nhất 8 ký tự.</div>
+                <div class="them-tab" onclick="moTabThem(2)">
+                    <i class="fas fa-file-contract"></i> Hợp đồng &amp; Phòng
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-huy" onclick="dongModal('modal-them-ql')">Hủy</button>
-                <button class="btn-luu-modal" id="btn-them-luu" onclick="themQuanLy()">
-                    <i class="fas fa-user-plus"></i> Tạo tài khoản
-                </button>
+
+            <div class="modal-body" style="padding:20px 24px 8px;">
+
+                <div class="them-panel them-panel-on" id="them-panel-0">
+    <div class="them-section-label"><i class="fas fa-user-circle"></i> Thông tin đăng nhập</div>
+    <div class="form-2col">
+        <div class="form-row">
+            <label>Họ và tên <span class="req">*</span></label>
+            <input type="text" id="them-fullname" class="form-input" placeholder="Nguyễn Văn A" autocomplete="off" />
+        </div>
+        <div class="form-row">
+            <label>Username <span class="req">*</span></label>
+            <input type="text" id="them-username" class="form-input" placeholder="nguyenvana" autocomplete="off" />
+        </div>
+    </div>
+    <div class="form-2col">
+        <div class="form-row">
+            <label>Số điện thoại <span class="req">*</span></label>
+            <input type="tel" id="them-phone" class="form-input" placeholder="09xxxxxxxx" />
+        </div>
+        <div class="form-row">
+            <label>Gmail</label>
+            <input type="email" id="them-email" class="form-input" placeholder="email@gmail.com" />
+        </div>
+    </div>
+    <div class="form-row">
+        <label>Mật khẩu <span class="req">*</span></label>
+        <div class="pass-wrap">
+            <input type="password" id="them-password" class="form-input"
+                   placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" />
+            <button type="button" class="btn-toggle-pass" onclick="togglePass('them-password',this)">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+        <div class="form-hint">Tối thiểu 8 ký tự.</div>
+    </div>
+
+    <div class="them-section-label" style="margin-top:14px;">
+        <i class="fas fa-shield-alt"></i> Phân quyền
+    </div>
+    <div class="form-row">
+        <label>Vai trò</label>
+        <div style="margin-top:4px;">
+            <span class="them-perm-badge">
+                <i class="fas fa-user-shield"></i> Manager – mặc định, không thay đổi
+            </span>
+        </div>
+        <div class="form-hint">Tài khoản quản lý luôn có vai trò Manager.</div>
+    </div>
+</div>
+
+<!-- PANEL 2: HỒ SƠ -->
+<div class="them-panel" id="them-panel-1">
+    <div class="them-section-label"><i class="fas fa-id-card"></i> Thông tin cá nhân</div>
+    <div class="form-2col">
+        <div class="form-row">
+            <label>Số CCCD <span class="req">*</span></label>
+            <input type="text" id="them-cccd" class="form-input"
+                   placeholder="012xxxxxxxxx" maxlength="12" />
+        </div>
+        <div class="form-row">
+            <label>Ngày sinh</label>
+            <input type="date" id="them-ngaysinh" class="form-input" />
+        </div>
+    </div>
+    <div class="form-2col">
+        <div class="form-row">
+            <label>Giới tính</label>
+            <select id="them-gioitinh" class="form-input tql-filter-select" style="width:100%;padding:9px 12px;">
+                <option value="">— Chọn —</option>
+                <option>Nam</option>
+                <option>Nữ</option>
+                <option>Khác</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label>Quê quán</label>
+            <input type="text" id="them-quequan" class="form-input" placeholder="Tỉnh / thành phố" />
+        </div>
+    </div>
+    <div class="form-row">
+        <label>Địa chỉ thường chú</label>
+        <input type="text" id="them-diachi" class="form-input"
+               placeholder="Số nhà, đường, phường/xã, quận/huyện..." />
+    </div>
+    <div class="form-row">
+        <label>Ghi chú</label>
+        <textarea id="them-ghichu" class="form-input" rows="3"
+                  placeholder="Thông tin bổ sung..." style="resize:vertical;"></textarea>
+    </div>
+</div>
+
+<!-- PANEL 3: HỢP ĐỒNG & PHÒNG -->
+<div class="them-panel" id="them-panel-2">
+    <div class="them-section-label">
+        <i class="fas fa-door-open"></i> Phân công phòng
+        <span class="them-optional-tag">Tùy chọn</span>
+    </div>
+    <div class="form-row">
+        <label>Phòng phân công</label>
+        <select id="them-phong-phan-cong" class="form-input tql-filter-select"
+                style="width:100%;padding:9px 12px;">
+            <option value="0">— Không phân công lúc này —</option>
+        </select>
+        <div class="form-hint">Quản lý sẽ được giao phòng này ngay sau khi tạo.</div>
+    </div>
+
+    <div class="them-section-label" style="margin-top:14px;">
+        <i class="fas fa-file-contract"></i> Hợp đồng ban đầu
+        <span class="them-optional-tag">Tùy chọn</span>
+    </div>
+    <div class="form-row">
+        <label>Phòng hợp đồng</label>
+        <select id="them-phong-hd" class="form-input tql-filter-select"
+                style="width:100%;padding:9px 12px;">
+            <option value="0">— Chọn phòng —</option>
+        </select>
+    </div>
+    <div class="form-2col">
+        <div class="form-row">
+            <label>Ngày bắt đầu</label>
+            <input type="date" id="them-ngay-bd-hd" class="form-input" />
+        </div>
+        <div class="form-row">
+            <label>Ngày kết thúc</label>
+            <input type="date" id="them-ngay-kt-hd" class="form-input" />
+        </div>
+    </div>
+    <div class="form-hint" style="margin-bottom:14px;">Để trống nếu chưa cần tạo hợp đồng.</div>
+
+    <div class="them-section-label">
+        <i class="fas fa-tachometer-alt"></i> Chỉ số đầu kỳ &amp; Cọc
+        <span class="them-optional-tag">Tùy chọn</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="form-row">
+            <label>Điện đầu kỳ (kWh)</label>
+            <input type="number" id="them-dien-dau-ky" class="form-input" placeholder="0" min="0" />
+        </div>
+        <div class="form-row">
+            <label>Nước đầu kỳ (m³)</label>
+            <input type="number" id="them-nuoc-dau-ky" class="form-input" placeholder="0" min="0" />
+        </div>
+        <div class="form-row">
+            <label>Tiền cọc (VNĐ)</label>
+            <input type="number" id="them-tien-coc" class="form-input" placeholder="0" min="0" />
+        </div>
+    </div>
+</div>
+            </div><!-- /modal-body -->
+
+            <div class="modal-footer" style="justify-content:space-between;">
+                <div style="display:flex;gap:6px;align-items:center;" id="them-step-dots">
+                    <div style="width:18px;height:7px;border-radius:4px;background:#7c3aed;" id="them-dot-0"></div>
+                    <div style="width:7px;height:7px;border-radius:50%;background:var(--mau-vien);" id="them-dot-1"></div>
+                    <div style="width:7px;height:7px;border-radius:50%;background:var(--mau-vien);" id="them-dot-2"></div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn-huy" id="btn-them-back" style="display:none;"
+                            onclick="moTabThem(window.__themTab-1)">
+                        ← Quay lại
+                    </button>
+                    <button class="btn-luu-modal" id="btn-them-next" onclick="tiepTabThem()">
+                        Tiếp theo <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2478,13 +2721,37 @@
     <div id="toast-container"></div>
 
     <script>
+  window.__themTab = 0;
+function moTabThem(i) {
+    const n = 3;
+    for (let j = 0; j < n; j++) {
+        document.getElementById('them-panel-' + j)?.classList.toggle('them-panel-on', j === i);
+        document.querySelectorAll('#them-tabs .them-tab')[j]?.classList.toggle('them-tab-on', j === i);
+        const dot = document.getElementById('them-dot-' + j);
+        if (dot) {
+            dot.style.width = j === i ? '18px' : '7px';
+            dot.style.borderRadius = j === i ? '4px' : '50%';
+            dot.style.background = j === i ? '#7c3aed' : 'var(--mau-vien)';
+        }
+    }
+    window.__themTab = i;
+    document.getElementById('btn-them-back').style.display = i > 0 ? '' : 'none';
+    const nb = document.getElementById('btn-them-next');
+    nb.innerHTML = i === n - 1
+        ? '<i class="fas fa-user-plus"></i> Tạo tài khoản'
+        : 'Tiếp theo <i class="fas fa-arrow-right"></i>';
+}
+function tiepTabThem() {
+    if (window.__themTab < 2) moTabThem(window.__themTab + 1);
+    else themQuanLyFull(); // gọi hàm lưu hiện có
+}
             // Toggle sidebar
             function dongMoSidebar() {
               const sb = document.getElementById('thanh-sidebar');
               sb.classList.toggle('an');
             }
     </script>
-    <script src="~/js/ChuTro/ChuTro-quanLy.js"></script>
-
+    <!--Thông báo-->
+    <div class="toast-container" id="toastContainer"></div>
 </body>
 </html>

@@ -79,7 +79,31 @@ namespace QuanLyNhaTro.Pages.Admin
             string? Email,
             string Roles = "Manager"
         );
+        public record TaoQuanLyFullDto(
+    // ── ACCOUNT fields ──────────────────────────────────
+    string Username,
+    string Passwords,
+    string FullName,
+    string Phone,
+    string? Email,
 
+    // ── Phân công phòng ngay lúc tạo (tùy chọn) ────────
+    // Nếu IDPhongPhanCong > 0 → insert PHONG_MANAGER
+    int IDPhongPhanCong,
+
+    // ── Tạo hợp đồng sơ bộ (tùy chọn) ──────────────────
+    // Chỉ tạo khi IDTenantHopDong > 0 VÀ IDPhongHopDong > 0
+    int IDTenantHopDong,
+    int IDPhongHopDong,
+    DateTime? NgayBatDauHD,
+
+    // ── Hồ sơ KhachThue seed (tùy chọn) ─────────────────
+    // Chỉ insert khi SeedKhachThue = true
+    bool SeedKhachThue,
+    string? HoTenKhach,
+    string? SoDienThoaiKhach,
+    string? SoCCCDKhach
+);
         public record SuaTaiKhoanDto(
             int IDUser,
             string FullName,
@@ -263,7 +287,217 @@ namespace QuanLyNhaTro.Pages.Admin
 
             return [.. dict.Values];
         }
+        // ─── Tạo tài khoản Manager đầy đủ (ACCOUNT + PHONG_MANAGER tùy chọn + HOPDONG tùy chọn + KHACH_THUE tùy chọn) ───
+        public IActionResult OnPostTaoQuanLyFull([FromBody] TaoQuanLyFullDto dto)
+        {
+            // ── 1. Validate bắt buộc ──────────────────────────────────────────
+            if (string.IsNullOrWhiteSpace(dto.Username))
+                return BadRequest(new { message = "Username không được để trống." });
+            if (string.IsNullOrWhiteSpace(dto.Passwords) || dto.Passwords.Length < 8)
+                return BadRequest(new { message = "Mật khẩu phải có ít nhất 8 ký tự." });
+            if (string.IsNullOrWhiteSpace(dto.FullName))
+                return BadRequest(new { message = "Họ tên không được để trống." });
+            if (string.IsNullOrWhiteSpace(dto.Phone))
+                return BadRequest(new { message = "Số điện thoại không được để trống." });
 
+            // Validate hợp đồng: nếu cung cấp một nửa thì báo lỗi
+            bool taoHD = dto.IDTenantHopDong > 0 && dto.IDPhongHopDong > 0;
+            if ((dto.IDTenantHopDong > 0) != (dto.IDPhongHopDong > 0))
+                return BadRequest(new { message = "Vui lòng cung cấp đầy đủ cả Người thuê lẫn Phòng để tạo hợp đồng." });
+
+            try
+            {
+                using var conn = new SqlConnection(ConnStr);
+                conn.Open();
+                using var tran = conn.BeginTransaction();
+
+                try
+                {
+                    // ── 2. Kiểm tra username trùng ────────────────────────────
+                    using (var chk = new SqlCommand(
+                        "SELECT COUNT(1) FROM ACCOUNT WHERE Username = @u", conn, tran))
+                    {
+                        chk.Parameters.AddWithValue("@u", dto.Username.Trim());
+                        if ((int)chk.ExecuteScalar()! > 0)
+                        {
+                            tran.Rollback();
+                            return BadRequest(new { message = $"Username '@{dto.Username}' đã tồn tại." });
+                        }
+                    }
+
+                    // ── 3. Kiểm tra IDTenant có tồn tại không (nếu tạo HĐ) ───
+                    if (taoHD)
+                    {
+                        using var chkTenant = new SqlCommand(
+                            "SELECT COUNT(1) FROM ACCOUNT WHERE IDUser = @id AND Roles = 'Tenant'", conn, tran);
+                        chkTenant.Parameters.AddWithValue("@id", dto.IDTenantHopDong);
+                        if ((int)chkTenant.ExecuteScalar()! == 0)
+                        {
+                            tran.Rollback();
+                            return BadRequest(new { message = "Người thuê được chọn không tồn tại trong hệ thống." });
+                        }
+
+                        using var chkPhongHD = new SqlCommand(
+                            "SELECT COUNT(1) FROM PHONG WHERE IDPhong = @id", conn, tran);
+                        chkPhongHD.Parameters.AddWithValue("@id", dto.IDPhongHopDong);
+                        if ((int)chkPhongHD.ExecuteScalar()! == 0)
+                        {
+                            tran.Rollback();
+                            return BadRequest(new { message = "Phòng được chọn cho hợp đồng không tồn tại." });
+                        }
+                    }
+
+                    // ── 4. Kiểm tra IDPhong phân công có tồn tại không ────────
+                    if (dto.IDPhongPhanCong > 0)
+                    {
+                        using var chkPhong = new SqlCommand(
+                            "SELECT COUNT(1) FROM PHONG WHERE IDPhong = @id", conn, tran);
+                        chkPhong.Parameters.AddWithValue("@id", dto.IDPhongPhanCong);
+                        if ((int)chkPhong.ExecuteScalar()! == 0)
+                        {
+                            tran.Rollback();
+                            return BadRequest(new { message = "Phòng phân công không tồn tại." });
+                        }
+                    }
+
+                    // ── 5. Hash mật khẩu và insert ACCOUNT ───────────────────
+                    var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Passwords);
+
+                    const string sqlInsertAccount = @"
+                INSERT INTO ACCOUNT
+                    (Username, Passwords, FullName, Phone, Email, Roles, IsActive, CreatedAt, UpdatedAt)
+                OUTPUT INSERTED.IDUser
+                VALUES
+                    (@username, @pwd, @fullname, @phone, @email, 'Manager', 1, GETDATE(), GETDATE())";
+
+                    int newManagerId;
+                    using (var cmd = new SqlCommand(sqlInsertAccount, conn, tran))
+                    {
+                        cmd.Parameters.AddWithValue("@username", dto.Username.Trim());
+                        cmd.Parameters.AddWithValue("@pwd", passwordHash);
+                        cmd.Parameters.AddWithValue("@fullname", dto.FullName.Trim());
+                        cmd.Parameters.AddWithValue("@phone", dto.Phone.Trim());
+                        cmd.Parameters.AddWithValue("@email", (object?)dto.Email?.Trim() ?? DBNull.Value);
+                        newManagerId = (int)cmd.ExecuteScalar()!;
+                    }
+
+                    // ── 6. Seed quyền mặc định = false ───────────────────────
+                    if (BangTonTai(conn, "ACCOUNT_PERMISSION"))
+                    {
+                        var permKeys = new[] { "tao-hd", "huy-hd", "thu-hd", "dien-nuoc", "sua-chua", "thong-bao", "khach-thue" };
+                        foreach (var key in permKeys)
+                        {
+                            using var ins = new SqlCommand(@"
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ACCOUNT_PERMISSION
+                            WHERE IDManager = @m AND PermissionKey = @k
+                        )
+                        INSERT INTO ACCOUNT_PERMISSION (IDManager, PermissionKey, IsGranted)
+                        VALUES (@m, @k, 0)", conn, tran);
+                            ins.Parameters.AddWithValue("@m", newManagerId);
+                            ins.Parameters.AddWithValue("@k", key);
+                            ins.ExecuteNonQuery();
+                        }
+                    }
+
+                    // ── 7. Phân công phòng (tùy chọn) ────────────────────────
+                    if (dto.IDPhongPhanCong > 0)
+                    {
+                        using var cmdPM = new SqlCommand(@"
+                    IF EXISTS (
+                        SELECT 1 FROM PHONG_MANAGER
+                        WHERE IDPhong = @p AND IDManager = @m
+                    )
+                        UPDATE PHONG_MANAGER
+                        SET    IsActive = 1, NgayPhanCong = GETDATE()
+                        WHERE  IDPhong = @p AND IDManager = @m
+                    ELSE
+                        INSERT INTO PHONG_MANAGER (IDPhong, IDManager, IsActive, NgayPhanCong)
+                        VALUES (@p, @m, 1, GETDATE())", conn, tran);
+                        cmdPM.Parameters.AddWithValue("@p", dto.IDPhongPhanCong);
+                        cmdPM.Parameters.AddWithValue("@m", newManagerId);
+                        cmdPM.ExecuteNonQuery();
+                    }
+
+                    // ── 8. Tạo hợp đồng sơ bộ (tùy chọn) ────────────────────
+                    // Chỉ insert khi caller cung cấp đủ IDTenant + IDPhong
+                    if (taoHD)
+                    {
+                        var ngayBD = dto.NgayBatDauHD ?? DateTime.Today;
+
+                        using var cmdHD = new SqlCommand(@"
+                    INSERT INTO HOPDONG
+                        (IDUser, IDPhong, IDManager, NgayBatDau,
+                         DienDauKy, NuocDauKy, TienCocBanDau,
+                         TrangThaiHD, CreatedAt, UpdatedAt)
+                    VALUES
+                        (@tenant, @phong, @mgr, @ngaybd,
+                         0, 0, 0,
+                         N'Đang hiệu lực', GETDATE(), GETDATE())", conn, tran);
+                        cmdHD.Parameters.AddWithValue("@tenant", dto.IDTenantHopDong);
+                        cmdHD.Parameters.AddWithValue("@phong", dto.IDPhongHopDong);
+                        cmdHD.Parameters.AddWithValue("@mgr", newManagerId);
+                        cmdHD.Parameters.AddWithValue("@ngaybd", ngayBD);
+                        cmdHD.ExecuteNonQuery();
+
+                        // Cập nhật trạng thái phòng → "Đã thuê"
+                        using var cmdUpdatePhong = new SqlCommand(@"
+                    UPDATE PHONG SET TrangThai = N'Đã thuê'
+                    WHERE IDPhong = @id", conn, tran);
+                        cmdUpdatePhong.Parameters.AddWithValue("@id", dto.IDPhongHopDong);
+                        cmdUpdatePhong.ExecuteNonQuery();
+                    }
+
+                    // ── 9. Seed hồ sơ KhachThue (tùy chọn) ───────────────────
+                    // Chỉ tạo khi SeedKhachThue = true VÀ IDTenantHopDong được cung cấp
+                    if (dto.SeedKhachThue && dto.IDTenantHopDong > 0
+                        && !string.IsNullOrWhiteSpace(dto.HoTenKhach))
+                    {
+                        // Tránh tạo trùng hồ sơ cho cùng một IDUser
+                        using var chkKT = new SqlCommand(
+                            "SELECT COUNT(1) FROM KHACH_THUE WHERE IDUser = @id", conn, tran);
+                        chkKT.Parameters.AddWithValue("@id", dto.IDTenantHopDong);
+                        bool profileExists = (int)chkKT.ExecuteScalar()! > 0;
+
+                        if (!profileExists)
+                        {
+                            using var cmdKT = new SqlCommand(@"
+                        INSERT INTO KHACH_THUE
+                            (IDUser, HoTen, SoDienThoai, SoCCCD, NgayVaoO)
+                        VALUES
+                            (@uid, @hoten, @sdt, @cccd, GETDATE())", conn, tran);
+                            cmdKT.Parameters.AddWithValue("@uid", dto.IDTenantHopDong);
+                            cmdKT.Parameters.AddWithValue("@hoten", dto.HoTenKhach.Trim());
+                            cmdKT.Parameters.AddWithValue("@sdt", (object?)dto.SoDienThoaiKhach?.Trim() ?? DBNull.Value);
+                            cmdKT.Parameters.AddWithValue("@cccd", (object?)dto.SoCCCDKhach?.Trim() ?? DBNull.Value);
+                            cmdKT.ExecuteNonQuery();
+                        }
+                    }
+
+                    tran.Commit();
+
+                    // ── 10. Trả về kết quả ────────────────────────────────────
+                    return new JsonResult(new
+                    {
+                        message = $"Tạo tài khoản @{dto.Username} thành công!",
+                        idUser = newManagerId,
+                        taoHD = taoHD,
+                        phanCong = dto.IDPhongPhanCong > 0,
+                        seedKT = dto.SeedKhachThue && dto.IDTenantHopDong > 0
+                    });
+                }
+                catch
+                {
+                    tran.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi tạo quản lý đầy đủ: {Msg}", ex.Message);
+                return StatusCode(500, new { message = "Lỗi hệ thống khi tạo tài khoản." });
+            }
+        }
         /// <summary>Kiểm tra bảng có tồn tại trong schema hiện tại không</summary>
         private static bool BangTonTai(SqlConnection conn, string tenBang)
         {
@@ -625,5 +859,45 @@ namespace QuanLyNhaTro.Pages.Admin
                 return StatusCode(500, new { message = "Lỗi hệ thống." });
             }
         }
+        public IActionResult OnGetDanhSachTenant()
+        {
+            try
+            {
+                var list = new List<object>();
+                using var conn = new SqlConnection(ConnStr);
+                conn.Open();
+
+                const string sql = @"
+            SELECT a.IDUser, a.FullName, a.Phone,
+                   kt.HoTen, kt.SoCCCD, kt.SoDienThoai
+            FROM   ACCOUNT a
+            LEFT JOIN KHACH_THUE kt ON kt.IDUser = a.IDUser
+            WHERE  a.Roles = 'Tenant' AND a.IsActive = 1
+            ORDER  BY a.FullName";
+
+                using var cmd = new SqlCommand(sql, conn);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    list.Add(new
+                    {
+                        idUser = reader.GetInt32(0),
+                        fullName = reader.GetString(1),
+                        phone = reader.GetString(2),
+                        hoTenKT = reader.IsDBNull(3) ? null : reader.GetString(3),
+                        soCCCD = reader.IsDBNull(4) ? null : reader.GetString(4),
+                        sdtKT = reader.IsDBNull(5) ? null : reader.GetString(5)
+                    });
+                }
+
+                return new JsonResult(list);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi load danh sách Tenant");
+                return StatusCode(500, new { message = "Lỗi hệ thống." });
+            }
+        }
+
     }
 }

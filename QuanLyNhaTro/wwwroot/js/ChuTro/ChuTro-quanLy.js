@@ -655,3 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.addEventListener('input', e => timKiem(e.target.value));
     }
 });
+function moModalDanhSachQuanLy() {
+    clearForm(['them-fullname', 'them-username', 'them-phone', 'them-email', 'them-password']);
+    moModal('modal-them-ql');
+}
