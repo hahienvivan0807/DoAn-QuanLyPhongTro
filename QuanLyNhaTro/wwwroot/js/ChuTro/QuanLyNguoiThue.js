@@ -226,81 +226,6 @@ async function ntTaiDanhSachPhong() {
     }
 }
 
-/**
- * Lưu người thuê (Thêm mới hoặc Cập nhật)
- * POST /api/nguoithue        → Thêm mới
- * PUT  /api/nguoithue/{id}   → Cập nhật
- */
-async function ntLuuNguoiThue() {
-    if (!ntValidate()) return;
-
-    const mode = document.getElementById('nt-modal-mode').value;
-    const id = document.getElementById('inp-id-khach-thue').value;
-    const idUser = document.getElementById('inp-id-user').value;
-    const payload = ntLayPayload();
-
-    const btnSubmit = document.getElementById('nt-btn-submit');
-    btnSubmit.disabled = true;
-    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-
-    try {
-        if (mode === 'them') {
-            // ── Thêm mới (giữ nguyên mock hoặc fetch thật) ──
-            // const res = await fetch('/api/nguoithue', { method:'POST', ... });
-            await new Promise(r => setTimeout(r, 800));
-            const mock = { ...payload, IDKhachThue: Date.now(), TrangThai: 'dang-o' };
-            NT.duLieu.unshift(mock);
-            hienToast(`Đã thêm người thuê "${payload.HoTen}"!`, 'success');
-
-        } else {
-            // ── Cập nhật ──
-            const trangThaiMoi = document.getElementById('inp-trang-thai').value;
-            const trangThaiCu = NT.duLieu.find(x => x.IDKhachThue == id)?.TrangThai;
-            const doiTrangThai = trangThaiMoi !== trangThaiCu;
-
-            // Nếu đổi sang "Rời đi" → gọi API cập nhật IsActive + PHONG + HOPDONG
-            if (doiTrangThai && trangThaiMoi === 'da-roi') {
-                const resTraPhong = await fetch(
-                    `/api/ChuTroQuanLyNguoiThue/tra-phong/${idUser}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ GhiChu: payload.GhiChu })
-                });
-                if (!resTraPhong.ok) throw new Error('Lỗi khi cập nhật trạng thái rời đi');
-            }
-
-            // Nếu đổi lại sang "Đang ở" → bật lại IsActive
-            if (doiTrangThai && trangThaiMoi === 'dang-o') {
-                const resKhoiPhuc = await fetch(
-                    `/api/ChuTroQuanLyNguoiThue/khoi-phuc/${idUser}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                if (!resKhoiPhuc.ok) throw new Error('Lỗi khi khôi phục trạng thái');
-            }
-
-            // Cập nhật thông tin cơ bản
-            // const res = await fetch(`/api/nguoithue/${id}`, { method:'PUT', ... });
-            await new Promise(r => setTimeout(r, 600));
-
-            const idx = NT.duLieu.findIndex(x => x.IDKhachThue == id);
-            if (idx > -1) Object.assign(NT.duLieu[idx], { ...payload, TrangThai: trangThaiMoi });
-            hienToast(`Đã cập nhật thông tin "${payload.HoTen}"!`, 'success');
-        }
-
-        ntDongModal();
-        ntCapNhatThongKe();
-        ntLocDuLieu();
-
-    } catch (e) {
-        console.error('ntLuuNguoiThue:', e);
-        hienToast(e.message || 'Lỗi lưu dữ liệu!', 'error');
-    } finally {
-        btnSubmit.disabled = false;
-        const label = mode === 'them' ? 'Thêm người thuê' : 'Lưu thay đổi';
-        btnSubmit.innerHTML = `<i class="fas fa-check"></i> <span id="nt-btn-submit-label">${label}</span>`;
-    }
-}
 
 /**
  * Xác nhận trả phòng / xóa người thuê
@@ -1405,3 +1330,348 @@ window.ntXoaTimKiem = ntXoaTimKiem;
 window.ntXemTruocAnh = ntXemTruocAnh;
 window.ntTogglePassword = ntTogglePassword;
 window.ntCapNhatRoomPreview = ntCapNhatRoomPreview;
+/* ============================================================
+   ROOM PICKER — Biến trạng thái
+============================================================ */
+let _pickerPhongs = [];        // cache toàn bộ phòng từ API
+let _pickerDaChon = null;      // { IDPhong, SoPhong, Tang, TrangThai, GiaPhongFix }
+
+/* Mở picker */
+async function ntMoPickerPhong() {
+    document.getElementById('nt-picker-overlay').classList.add('mo');
+    document.getElementById('picker-search-inp').value = '';
+
+    if (_pickerPhongs.length === 0) {
+        await _pickerTaiPhong();
+    } else {
+        ntPickerLoc();
+    }
+}
+
+/* Đóng picker */
+function ntDongPickerPhong(e) {
+    if (e && e.target !== document.getElementById('nt-picker-overlay')) return;
+    document.getElementById('nt-picker-overlay').classList.remove('mo');
+}
+
+/* Gọi API lấy danh sách phòng */
+async function _pickerTaiPhong() {
+    const loading = document.getElementById('picker-loading');
+    const grid = document.getElementById('picker-grid');
+    const empty = document.getElementById('picker-empty');
+
+    loading.style.display = 'flex';
+    grid.style.display = 'none';
+    empty.style.display = 'none';
+
+    try {
+        const res = await fetch('/api/ChuTro/DanhSachPhong');
+        const data = await res.json();
+        _pickerPhongs = data;
+        console.log('API response:', data[0]);
+        ntPickerLoc();
+    } catch (err) {
+        loading.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:var(--mau-do)"></i> Không tải được danh sách phòng';
+    }
+}
+
+/* Lọc + render cards */
+function ntPickerLoc() {
+    const keyword = (document.getElementById('picker-search-inp').value || '').toLowerCase().trim();
+    const ttFilter = document.getElementById('picker-filter-trang-thai').value;
+
+    const filtered = _pickerPhongs.filter(p => {
+        const matchTT = !ttFilter || p.trangThai === ttFilter;
+        const matchKey = !keyword || (p.soPhong || '').toLowerCase().includes(keyword)
+            || String(p.tang || '').includes(keyword);
+        return matchTT && matchKey;
+    });
+
+    _pickerRender(filtered);
+}
+
+/* Render grid cards */
+function _pickerRender(list) {
+    const loading = document.getElementById('picker-loading');
+    const grid = document.getElementById('picker-grid');
+    const empty = document.getElementById('picker-empty');
+
+    loading.style.display = 'none';
+
+    if (list.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+
+    empty.style.display = 'none';
+    grid.style.display = 'grid';
+
+    grid.innerHTML = list.map(p => {
+        const isSelected = _pickerDaChon && _pickerDaChon.IDPhong === p.idPhong;
+        const badgeClass = {
+            'Trống': 'rp-badge-trong',
+            'Đã thuê': 'rp-badge-datthue',
+            'Đang sửa': 'rp-badge-suachua'
+        }[p.trangThai] || 'rp-badge-trong';
+
+        const disabled = p.trangThai !== 'Trống' ? 'disabled' : '';
+
+        return `
+        <div class="rp-card ${isSelected ? 'selected' : ''} ${disabled}"
+             onclick="_pickerChonPhong(${p.idPhong}, '${p.soPhong}', ${p.tang}, '${p.trangThai}', ${p.giaPhongFix})">
+            <div class="rp-check"><i class="fas fa-check"></i></div>
+            <div class="rp-so-phong">P.${p.soPhong}</div>
+            <div class="rp-tang">Tầng ${p.tang}</div>
+            <span class="rp-badge ${badgeClass}">${p.trangThai}</span>
+            <div class="rp-gia">${_fmtTien(p.giaPhongFix)}/tháng</div>
+        </div>`;
+    }).join('');
+}
+
+/* Chọn phòng → cập nhật form */
+function _pickerChonPhong(id, soPhong, tang, trangThai, gia) {
+    _pickerDaChon = {
+        IDPhong: id, SoPhong: soPhong, Tang: tang,
+        TrangThai: trangThai, GiaPhongFix: gia
+    };
+
+    document.getElementById('inp-id-phong').value = id;
+    document.getElementById('phong-display-text').textContent = `Phòng ${soPhong} — Tầng ${tang}`;
+    document.getElementById('phong-display-text').style.color = 'var(--mau-chu)';
+    document.getElementById('err-id-phong').textContent = '';
+
+    _pickerHienThiPreview(soPhong, tang, trangThai, gia);
+    document.getElementById('nt-picker-overlay').classList.remove('mo');
+
+    _pickerRender(_pickerPhongs.filter(p => {
+        const ttFilter = document.getElementById('picker-filter-trang-thai').value;
+        return !ttFilter || p.trangThai === ttFilter;
+    }));
+}
+
+/* Hiện preview phòng đã chọn trong tab 3 */
+function _pickerHienThiPreview(soPhong, tang, trangThai, gia) {
+    const preview = document.getElementById('nt-room-preview');
+    const body = document.getElementById('nt-rp-body');
+
+    body.innerHTML = `
+        <div><div class="nt-rp-key">Số phòng</div><div class="nt-rp-val">Phòng ${soPhong}</div></div>
+        <div><div class="nt-rp-key">Tầng</div><div class="nt-rp-val">Tầng ${tang}</div></div>
+        <div><div class="nt-rp-key">Trạng thái</div><div class="nt-rp-val">${trangThai}</div></div>
+        <div><div class="nt-rp-key">Giá thuê</div><div class="nt-rp-val">${_fmtTien(gia)}/tháng</div></div>
+    `;
+    preview.style.display = 'block';
+}
+function ntLayDuLieuForm() {
+    const get = id => (document.getElementById(id)?.value || '').trim();
+
+    const duLieu = {
+        // ── Tab 1: Thông tin cơ bản ──
+        HoTen: get('inp-ho-ten'),
+        SoDienThoai: get('inp-so-dien-thoai').replace(/\s/g, ''),
+        Email: get('inp-email'),
+        NgaySinh: get('inp-ngay-sinh') || null,
+        GioiTinh: get('inp-gioi-tinh') || null,
+        SoCCCD: get('inp-so-cccd'),
+        NgayCapCCCD: get('inp-ngay-cap-cccd') || null,
+        NoiCapCCCD: get('inp-noi-cap-cccd'),
+        NgheNghiep: get('inp-nghe-nghiep'),
+        LienHeKhan: get('inp-lien-he-khan'),
+        SDTKhan: get('inp-sdt-khan'),
+
+        // ── Tab 2: Cư trú & Tài khoản ──
+        DiaChi: get('inp-dia-chi'),
+        TinhThanh: get('inp-tinh-thanh'),
+        QueQuan: get('inp-que-quan'),
+        GhiChu: get('inp-ghi-chu'),
+        Username: get('inp-username'),
+        Password: get('inp-password') || null,
+
+        // ── Tab 3: Phòng & Hợp đồng ──
+        NgayVaoO: get('inp-ngay-vao-o') || null,
+        IDPhong: parseInt(get('inp-id-phong')) || null,
+        TienCoc: parseFloat(get('inp-tien-coc')) || 0,
+        NgayKetThuc: get('inp-ngay-ket-thuc') || null,
+        DienDauKy: parseInt(get('inp-dien-dau-ky')) || 0,
+        NuocDauKy: parseInt(get('inp-nuoc-dau-ky')) || 0,
+        GhiChuHD: get('inp-ghi-chu-hd'),
+
+        // ── Ảnh (base64 nếu có) ──
+        AnhChanDung: (function () {
+            const img = document.querySelector('#nt-avatar-preview img');
+            return img ? img.src : null;
+        })(),
+    };
+
+    return duLieu;
+}
+function ntValidateDuLieu(duLieu, mode) {
+    let ok = true;
+
+    // Helper
+    const setErr = (id, msg) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = msg;
+    };
+    const clearErr = (...ids) => ids.forEach(id => setErr(id, ''));
+    const goTab = tabId => ntChuyenTabById(tabId);
+
+    // Reset tất cả lỗi
+    clearErr(
+        'err-ho-ten', 'err-so-dien-thoai', 'err-email',
+        'err-so-cccd', 'err-username', 'err-password',
+        'err-ngay-vao-o', 'err-id-phong'
+    );
+
+    // ══════════════════════════════════════════
+    // TAB 1 — Thông tin cơ bản
+    // ══════════════════════════════════════════
+
+    // Họ tên: bắt buộc, chỉ chữ và khoảng trắng
+    if (!duLieu.HoTen) {
+        setErr('err-ho-ten', 'Họ tên không được để trống');
+        goTab('tab-co-ban'); ok = false;
+    } else if (!/^[\p{L}\s]+$/u.test(duLieu.HoTen)) {
+        setErr('err-ho-ten', 'Họ tên không được chứa số hoặc ký tự đặc biệt');
+        goTab('tab-co-ban'); ok = false;
+    } else if (duLieu.HoTen.length < 2 || duLieu.HoTen.length > 100) {
+        setErr('err-ho-ten', 'Họ tên phải từ 2 đến 100 ký tự');
+        goTab('tab-co-ban'); ok = false;
+    }
+
+    // Số điện thoại: bắt buộc, 10 số, bắt đầu bằng 0
+    if (!duLieu.SoDienThoai) {
+        setErr('err-so-dien-thoai', 'Số điện thoại không được để trống');
+        goTab('tab-co-ban'); ok = false;
+    } else if (!/^0[0-9]{9}$/.test(duLieu.SoDienThoai)) {
+        setErr('err-so-dien-thoai', 'Số điện thoại phải là 10 chữ số, bắt đầu bằng 0');
+        goTab('tab-co-ban'); ok = false;
+    }
+
+    // Email: không bắt buộc nhưng nếu nhập phải đúng định dạng
+    if (duLieu.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(duLieu.Email)) {
+        setErr('err-email', 'Email không đúng định dạng');
+        goTab('tab-co-ban'); ok = false;
+    }
+
+    // CCCD: không bắt buộc, nếu nhập phải là 9 hoặc 12 số
+    if (duLieu.SoCCCD && !/^[0-9]{9}$|^[0-9]{12}$/.test(duLieu.SoCCCD)) {
+        setErr('err-so-cccd', 'CCCD phải là 9 hoặc 12 chữ số');
+        goTab('tab-co-ban'); ok = false;
+    }
+
+    // ══════════════════════════════════════════
+    // TAB 2 — Tài khoản
+    // ══════════════════════════════════════════
+
+    // Username: bắt buộc, chỉ a-z, 0-9, tối đa 50 ký tự
+    if (!duLieu.Username) {
+        setErr('err-username', 'Tên đăng nhập không được để trống');
+        goTab('tab-cu-tru'); ok = false;
+    } else if (!/^[a-zA-Z0-9_]{3,50}$/.test(duLieu.Username)) {
+        setErr('err-username', 'Username chỉ gồm chữ, số, gạch dưới (3–50 ký tự)');
+        goTab('tab-cu-tru'); ok = false;
+    }
+
+    // Password: bắt buộc khi thêm mới
+    if (mode === 'them') {
+        if (!duLieu.Password) {
+            setErr('err-password', 'Mật khẩu không được để trống');
+            goTab('tab-cu-tru'); ok = false;
+        } else if (duLieu.Password.length < 6) {
+            setErr('err-password', 'Mật khẩu tối thiểu 6 ký tự');
+            goTab('tab-cu-tru'); ok = false;
+        } else if (duLieu.Password.length > 100) {
+            setErr('err-password', 'Mật khẩu không được quá 100 ký tự');
+            goTab('tab-cu-tru'); ok = false;
+        }
+    }
+
+    // ══════════════════════════════════════════
+    // TAB 3 — Phòng & Hợp đồng (chỉ khi thêm mới)
+    // ══════════════════════════════════════════
+    if (mode === 'them') {
+
+        // Ngày vào ở: bắt buộc, không được là tương lai quá 1 năm
+        if (!duLieu.NgayVaoO) {
+            setErr('err-ngay-vao-o', 'Vui lòng chọn ngày vào ở');
+            goTab('tab-phong'); ok = false;
+        } else {
+            const ngayVao = new Date(duLieu.NgayVaoO);
+            const maxNgay = new Date();
+            maxNgay.setFullYear(maxNgay.getFullYear() + 1);
+            if (ngayVao > maxNgay) {
+                setErr('err-ngay-vao-o', 'Ngày vào ở không được quá 1 năm trong tương lai');
+                goTab('tab-phong'); ok = false;
+            }
+        }
+
+        // Phòng: bắt buộc
+        if (!duLieu.IDPhong) {
+            setErr('err-id-phong', 'Vui lòng chọn phòng');
+            goTab('tab-phong'); ok = false;
+        }
+
+        // Ngày kết thúc: nếu có thì phải sau ngày vào ở
+        if (duLieu.NgayKetThuc && duLieu.NgayVaoO) {
+            if (new Date(duLieu.NgayKetThuc) <= new Date(duLieu.NgayVaoO)) {
+                setErr('err-ngay-vao-o', 'Ngày hết hạn HĐ phải sau ngày vào ở');
+                goTab('tab-phong'); ok = false;
+            }
+        }
+
+        // Tiền cọc: không âm
+        if (duLieu.TienCoc < 0) {
+            goTab('tab-phong'); ok = false;
+        }
+    }
+
+    return ok;
+}
+/* Format tiền */
+function _fmtTien(val) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+}
+async function ntLuuNguoiThue() {
+    const mode = document.getElementById('nt-modal-mode').value;
+    const duLieu = ntLayDuLieuForm();
+
+    if (!ntValidateDuLieu(duLieu, mode)) return;
+
+    const btn = document.getElementById('nt-btn-submit');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+
+    try {
+        const res = await fetch('/api/ChuTroThemNguoiThue/them-nguoi-thue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(duLieu)
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            hienToast(result.message || 'Lỗi không xác định', 'error');
+            return;
+        }
+
+        hienToast(`Đã thêm người thuê "${duLieu.HoTen}" thành công!`, 'success');
+        ntDongModal();
+
+        // Làm mới picker (phòng vừa chọn không còn trống)
+        _pickerPhongs = [];
+        _pickerDaChon = null;
+
+        // Tải lại danh sách
+        await ntTaiDuLieu();
+
+    } catch (e) {
+        hienToast('Lỗi kết nối máy chủ!', 'error');
+        console.error(e);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> <span id="nt-btn-submit-label">Thêm người thuê</span>';
+    }
+}

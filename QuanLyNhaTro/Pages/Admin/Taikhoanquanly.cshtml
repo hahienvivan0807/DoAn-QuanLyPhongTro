@@ -28,7 +28,6 @@
                     new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
     ))
 </script>
-<script src="~/js/ChuTro/ChuTro-core.js"></script>
 
 @* Anti-forgery token dùng cho AJAX POST *@
 @Html.AntiForgeryToken()
@@ -93,8 +92,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hệ Thống Quản Lý – Tài Khoản Quản Lý</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link ref="stylesheet" href="/css/ChuTro.css" />
-    <script src="~/js/ChuTro/ChuTro-quanLy.js"></script>
+    <link rel="stylesheet" href="/css/ChuTro.css" />
+    <script src="/js/ChuTro/ChuTro-core.js" defer></script>
+    <script src="/js/ChuTro/ChuTro-quanLy.js" defer></script>
     <style>
 
             /* ==========================================================
@@ -2666,11 +2666,11 @@
 <!-- PANEL 3: HỢP ĐỒNG & PHÒNG -->
 <div class="them-panel" id="them-panel-2">
     <div class="them-section-label">
-        <i class="fas fa-door-open"></i> Phân công phòng
+        <i class="fas fa-door-open"></i> Thiết lập hợp đồng & Phòng
         <span class="them-optional-tag">Tùy chọn</span>
     </div>
     <div class="form-row">
-        <label>Phòng phân công</label>
+        <label>CHỌN PHÒNG</label>
                         <!-- Bộ lọc trạng thái phòng -->
                         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
                             <button type="button" class="btn-filter-phong active" data-filter=""
@@ -2709,17 +2709,6 @@
         <div class="form-hint">Quản lý sẽ được giao phòng này ngay sau khi tạo.</div>
     </div>
 
-    <div class="them-section-label" style="margin-top:14px;">
-        <i class="fas fa-file-contract"></i> Hợp đồng ban đầu
-        <span class="them-optional-tag">Tùy chọn</span>
-    </div>
-    <div class="form-row">
-        <label>Phòng hợp đồng</label>
-        <select id="them-phong-hd" class="form-input tql-filter-select"
-                style="width:100%;padding:9px 12px;">
-            <option value="0">— Chọn phòng —</option>
-        </select>
-    </div>
     <div class="form-2col">
         <div class="form-row">
             <label>Ngày bắt đầu</label>
@@ -2840,7 +2829,7 @@
     </div>
 
     <!-- Toast container -->
-    <div id="toast-container"></div>
+    <div class="toast-container" id="toastContainer"></div>
 
     <script>
   window.__themTab = 0;
@@ -2874,6 +2863,6 @@ function tiepTabThem() {
             }
     </script>
     <!--Thông báo-->
-    <div class="toast-container" id="toastContainer"></div>
+    <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;"></div>
 </body>
 </html>

@@ -473,7 +473,12 @@ async function loadDanhSachNguoiThue() {
         const res = await fetch('/api/ChuTro/danh-sach-nguoi-thue');
         const data = await res.json();
         danhSachNguoiThue = data;
-        renderDanhSachNguoiThue(danhSachNguoiThue);
+        renderDanhSachNguoiThue(danhSachNguoiThue); // cũ - render modal
+
+        // ✅ THÊM DÒNG NÀY - render bảng trang QuanLyNguoiThue
+        if (typeof ntNhanDuLieu === 'function') {
+            ntNhanDuLieu(data);
+        }
     } catch (err) {
         console.error('Lỗi load danh sách người thuê:', err);
     }

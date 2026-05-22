@@ -23,19 +23,36 @@ namespace QuanLyNhaTro.Controllers
             _context = context;
             _configuration = configuration;
         }
-        public class TaoTaiKhoangRequest
+        public class TaoTaiKhoanRequest
         {
-            public string Username { get; set; }
-            public string Passwords { get; set; }
+            // --- Tab 1: Tài khoản ---
             public string FullName { get; set; }
+            public string Username { get; set; }
             public string Phone { get; set; }
-            public string Roles { get; set; }
+            public string Email { get; set; }
+            public string Password { get; set; } // Đã sửa từ "Passwords" thành "Password" giống JS
+
+            // --- Tab 2: Hồ sơ cá nhân ---
+            public string CCCD { get; set; }
+            public string NgaySinh { get; set; } // Nhận chuỗi dạng "YYYY-MM-DD" từ HTML5 date
+            public string GioiTinh { get; set; }
+            public string QueQuan { get; set; }
+            public string DiaChiThuongTru { get; set; }
+            public string GhiChu { get; set; }
+
+            // --- Tab 3: Hợp đồng & Phòng ---
+            public int IDPhong { get; set; }
+            public string NgayBatDauHD { get; set; }
+            public string NgayKetThucHD { get; set; }
+            public int DienDauKy { get; set; }
+            public int NuocDauKy { get; set; }
+            public decimal TienCoc { get; set; } // Kiểu decimal đồng bộ với dữ liệu tiền tệ trong SQL
         }
         [HttpPost("tao-tai-khoan")]
-        public async Task<IActionResult> TaoTaiKhoan([FromBody] TaoTaiKhoangRequest request)
+        public async Task<IActionResult> TaoTaiKhoan([FromBody] TaoTaiKhoanRequest request)
         {
             //Kiểm tra input rỗng
-            if(string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Passwords) || string.IsNullOrWhiteSpace(request.Phone) || string.IsNullOrWhiteSpace(request.FullName))
+            if(string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Phone) || string.IsNullOrWhiteSpace(request.FullName))
             {
                 return BadRequest(new { message = "Không được phép bỏ trống!" });
             }
@@ -73,17 +90,48 @@ namespace QuanLyNhaTro.Controllers
                 return BadRequest(new { message = "Tên đăng nhập hoặc đã tồn tại" });
             }
 
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Passwords);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             var NewUser = new ACCOUNT {
                 Username = request.Username,
                 FullName = request.FullName,
                 Passwords = passwordHash,
                 Phone = request.Phone,
-                Roles = request.Roles,
+                Roles = "Manager",
+                Email = request.Email,
                 QR_Link = "abc",
                 CreatedAt = DateTime.Now
             };
             _context.Add(NewUser);
+            await _context.SaveChangesAsync();
+            var newHopDong = new HOPDONG
+            {
+                IDUser = NewUser.IDUser,
+                IDPhong = request.IDPhong,
+                NgayBatDau = DateTime.Parse(request.NgayBatDauHD),
+                NgayKetThuc = DateTime.Parse(request.NgayKetThucHD),
+                DienDauKy = request.DienDauKy,
+                NuocDauKy = request.NuocDauKy,
+                TrangThaiHD = "Đang hiệu lực"
+            };
+            _context.Add(newHopDong);
+            await _context.SaveChangesAsync();
+            var newKhachThue = new KHACH_THUE
+            {
+                IDUser = NewUser.IDUser,
+                SoCCCD = request.CCCD,
+                HoTen = request.FullName,
+                NgaySinh = DateTime.Parse(request.NgaySinh),
+                GioiTinh = request.GioiTinh,
+                QueQuan = request.QueQuan,
+                DiaChiThuongTru = request.DiaChiThuongTru,
+                GhiChu = request.GhiChu
+            };
+            _context.Add(newKhachThue);
+            var phong = _context.PHONG.FirstOrDefault(p => p.IDPhong == request.IDPhong);
+            if (phong != null)
+            {
+                phong.TrangThai = "Đã thuê";
+            }
             await _context.SaveChangesAsync();
             return Ok(new { message = "Tạo tài khoản thành công" });
         }
@@ -189,7 +237,8 @@ namespace QuanLyNhaTro.Controllers
              .ThenBy(u => u.SoPhong)
              .Select(u => new
             {
-                u.IDPhong,
+                 u.soluong,
+                 u.IDPhong,
                 u.SoPhong,
                 u.Tang,
                 u.DienTich,

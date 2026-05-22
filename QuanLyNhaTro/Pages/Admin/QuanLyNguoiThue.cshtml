@@ -654,6 +654,29 @@
       .nt-modal { max-height: 95vh; }
       .nt-page-header { flex-direction: column; align-items: flex-start; }
     }
+    /* =========================================================
+   ROOM PICKER — Card phòng
+========================================================= */
+.rp-card {
+  border: 2px solid var(--mau-vien); border-radius: var(--radius-md);
+  padding: 14px 12px; cursor: pointer; background: var(--mau-trang);
+  transition: all 0.18s; text-align: center; position: relative;
+}
+.rp-card:hover { border-color: #06b6d4; box-shadow: 0 4px 14px rgba(6,182,212,0.14); transform: translateY(-2px); }
+.rp-card.selected { border-color: #059669; background: #ecfdf5; }
+.rp-card.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+.rp-so-phong { font-family: 'Lexend', sans-serif; font-size: 18px; font-weight: 900; color: var(--mau-chu); }
+.rp-tang { font-size: 11px; color: var(--mau-chu-phu); margin: 2px 0 8px; }
+.rp-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; }
+.rp-badge-trong { background: #ecfdf5; color: #059669; border: 1px solid rgba(5,150,105,0.2); }
+.rp-badge-datthue { background: #eff6ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.18); }
+.rp-badge-suachua { background: #fef3c7; color: #b45309; border: 1px solid rgba(180,83,9,0.18); }
+.rp-gia { font-size: 12px; font-weight: 700; color: var(--mau-chu-de); margin-top: 7px; }
+.rp-check { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px;
+  background: #059669; border-radius: 50%; display: none; align-items: center;
+  justify-content: center; color: #fff; font-size: 9px; }
+.rp-card.selected .rp-check { display: flex; }
   </style>
 </head>
 <body>
@@ -1492,6 +1515,67 @@
     }
   }
 </script>
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: CHỌN PHÒNG (ROOM PICKER)
+════════════════════════════════════════════════════════════ -->
+<div class="nt-overlay" id="nt-picker-overlay" onclick="ntDongPickerPhong(event)">
+    <div class="nt-modal" id="nt-picker-box" style="max-width:580px;">
+
+        <div class="nt-modal-hd">
+            <div class="nt-modal-hd-left">
+                <div class="nt-modal-hd-icon" style="background:linear-gradient(135deg,#059669,#34d399);">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <div>
+                    <h3 class="nt-modal-title">Chọn phòng</h3>
+                    <p class="nt-modal-sub">Lọc và chọn phòng cho người thuê</p>
+                </div>
+            </div>
+            <button class="nt-modal-close-btn" onclick="ntDongPickerPhong()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Toolbar lọc -->
+        <div style="padding:12px 20px; border-bottom:1px solid var(--mau-vien); display:flex; gap:10px; flex-wrap:wrap; background:#fafbfd;">
+            <!-- Tìm kiếm -->
+            <div class="nt-search-box" style="flex:1; min-width:160px; max-width:none;">
+                <i class="fas fa-search nt-search-ico"></i>
+                <input type="text" id="picker-search-inp" class="nt-search-inp"
+                       placeholder="Tìm số phòng, tầng..." oninput="ntPickerLoc()" />
+            </div>
+            <!-- Lọc trạng thái -->
+            <div class="nt-select-wrap">
+                <i class="fas fa-circle-dot nt-sel-ico"></i>
+                <select class="nt-select" id="picker-filter-trang-thai" onchange="ntPickerLoc()" style="min-width:150px;">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Trống" selected>Phòng trống</option>
+                    <option value="Đã thuê">Đã thuê</option>
+                    <option value="Đang sửa">Đang sửa chữa</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Danh sách phòng -->
+        <div class="nt-modal-body" style="padding:14px 16px;">
+            <div id="picker-loading" style="display:flex;align-items:center;gap:10px;padding:32px;justify-content:center;color:var(--mau-chu-phu);font-size:13px;">
+                <div class="nt-spinner"></div> Đang tải...
+            </div>
+            <div id="picker-grid" style="display:none; display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:10px;"></div>
+            <div id="picker-empty" style="display:none; text-align:center; padding:40px 16px; color:var(--mau-chu-phu);">
+                <div style="font-size:36px; margin-bottom:10px;"><i class="fas fa-door-closed"></i></div>
+                <div style="font-weight:700; font-size:13.5px; color:var(--mau-chu); margin-bottom:4px;">Không tìm thấy phòng</div>
+                <div style="font-size:12px;">Thử thay đổi bộ lọc trạng thái</div>
+            </div>
+        </div>
+
+        <div class="nt-modal-ft" style="justify-content:flex-end;">
+            <button class="nt-btn-cancel" onclick="ntDongPickerPhong()">
+                <i class="fas fa-times"></i> Đóng
+            </button>
+        </div>
+    </div>
+</div>
 @await Html.PartialAsync("ModalChung")
 </body>
 </html>

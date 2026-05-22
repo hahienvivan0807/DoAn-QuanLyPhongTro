@@ -678,23 +678,59 @@ function moModalDanhSachQuanLy() {
 
     moModal('modal-them-ql');
 }
-async function ThemQuanLy() {
+// ── Hàm gom nhóm dữ liệu và gửi lên Server tạo tài khoản ──
+async function themQuanLyFull() {
+
     const dulieu = {
-        username: document.getElementById('them-username')?.value.trim() || "",
-        passwords: document.getElementById('them-password')?.value || "",
-        fullName: document.getElementById('them-fullname')?.value.trim() || "",
-        phone: document.getElementById('them-phone')?.value.trim() || "",
-        email: document.getElementById('them-email')?.value.trim() || null,
-        iDPhongPhanCong: document.getElementById('them-phong-pc')?.value || null,
-        iDTenantHopDong: document.getElementById('them-tenant-id')?.value || null,
-        iDPhongHopDong: document.getElementById('them-phong-hd')?.value || null,
-        ngayBatDauHD: document.getElementById('them-ngay-bd')?.value || null,
-        seedKhachThue: document.getElementById('them-seed-kt')?.checked || false, // Checkbox dạng true/false
-        hoTenKhach: document.getElementById('them-kt-hoten')?.value.trim() || null,
-        soDienThoaiKhach: document.getElementById('them-kt-sdt')?.value.trim() || null,
-        soCCCDKhach: document.getElementById('them-kt-cccd')?.value.trim() || null
+        // --- Tab 1: Tài khoản ---
+        FullName: document.getElementById('them-fullname')?.value.trim(),
+        Username: document.getElementById('them-username')?.value.trim(),
+        Phone: document.getElementById('them-phone')?.value.trim(),
+        Email: document.getElementById('them-email')?.value.trim(),
+        Password: document.getElementById('them-password')?.value.trim(),
+
+        // --- Tab 2: Hồ sơ cá nhân ---
+        CCCD: document.getElementById('them-cccd')?.value.trim(),
+        NgaySinh: document.getElementById('them-ngaysinh')?.value,
+        GioiTinh: document.getElementById('them-gioitinh')?.value,
+        QueQuan: document.getElementById('them-quequan')?.value.trim(),
+        DiaChiThuongTru: document.getElementById('them-diachi')?.value.trim(),
+        GhiChu: document.getElementById('them-ghichu')?.value.trim(),
+
+        // --- Tab 3: Hợp đồng & Phòng ---
+        // Lấy ID phòng từ input hidden (như bạn đã code ở hàm chonPhongCard)
+        IDPhong: parseInt(document.getElementById('them-phong-phan-cong')?.value || '0'),
+
+        NgayBatDauHD: document.getElementById('them-ngay-bd-hd')?.value,
+        NgayKetThucHD: document.getElementById('them-ngay-kt-hd')?.value,
+
+        DienDauKy: parseInt(document.getElementById('them-dien-dau-ky')?.value || '0'),
+        NuocDauKy: parseInt(document.getElementById('them-nuoc-dau-ky')?.value || '0'),
+        TienCoc: parseFloat(document.getElementById('them-tien-coc')?.value || '0')
     };
- 
+
+    console.log("📦 Toàn bộ dulieu đã được gom nhóm chuẩn bị gửi:", dulieu);
+
+    if (!dulieu.FullName || !dulieu.Username || !dulieu.Phone || !dulieu.Password || !dulieu.CCCD) {
+        alert("Vui lòng điền đầy đủ thông tin bắt buộc ở tất cả các tab (Tài khoản, Hồ sơ cá nhân, Hợp đồng & Phòng).");
+        return;
+    }
+
+    try {
+        const respone = await fetch('/api/ChuTro/tao-tai-khoan', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify(dulieu)
+        });
+        let data = await respone.json();
+        if (respone.ok) {
+            alert(data.message || "Tạo tài khoản thành công!");
+        } else {
+            alert(data.message || "Lỗi khi tạo tài khoản. Vui lòng thử lại.");
+        }
+    } catch (error) {
+        alert("Lỗi kết nối máy chủ. Vui lòng kiểm tra lại.");
+    }
 }
 // ── Biến lưu toàn bộ phòng từ API ──────────────────────────
 let __danhSachPhongAPI = [];
