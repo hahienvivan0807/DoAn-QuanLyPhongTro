@@ -8,10 +8,7 @@ using System.Text.Json;
 namespace QuanLyNhaTro.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
-    /// <summary>
-    /// Page back-end: Quản lý tài khoản Manager
-    /// Bảng liên quan: ACCOUNT, PHONG, PHONG_MANAGER, ACCOUNT_PERMISSION
-    /// </summary>
+
     public class TaiKhoanQuanLyModel : PageModel
     {
         // ─── DI ───────────────────────────────────────────────────────
@@ -165,7 +162,6 @@ namespace QuanLyNhaTro.Pages.Admin
         // TRUY VẤN DB — LẤY DỮ LIỆU
         // ═══════════════════════════════════════════════════════════════
 
-        /// <summary>Lấy toàn bộ phòng từ bảng PHONG</summary>
         private List<PhongInfo> LayTatCaPhong()
         {
             var list = new List<PhongInfo>();
@@ -193,10 +189,7 @@ namespace QuanLyNhaTro.Pages.Admin
             return list;
         }
 
-        /// <summary>
-        /// Lấy danh sách Manager từ ACCOUNT + phòng phân công từ PHONG_MANAGER
-        /// + quyền từ ACCOUNT_PERMISSION (nếu bảng tồn tại).
-        /// </summary>
+
         private List<QuanLyViewModel> LayDanhSachQuanLy(List<PhongInfo> tatCaPhong)
         {
             var dict = new Dictionary<int, QuanLyViewModel>();

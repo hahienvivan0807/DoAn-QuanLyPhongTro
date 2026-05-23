@@ -8,10 +8,6 @@ using System.Text.Json;
 namespace QuanLyNhaTro.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
-    /// <summary>
-    /// PageModel – Trang Quản lý phòng trọ
-    /// Hỗ trợ: xem danh sách, thêm, sửa, xóa phòng (PHONG)
-    /// </summary>
     public class QuanLyPhongModel : PageModel
     {
         // ── Dependency Injection ──────────────────────────────────────

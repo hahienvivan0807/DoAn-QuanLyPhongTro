@@ -7,10 +7,7 @@ using System.Security.Claims;
 
 namespace QuanLyNhaTro.Pages.Admin
 {
-    // ================================================================
-    // PAGE MODEL – CÀI ĐẶT HỆ THỐNG
-    // Yêu cầu đăng nhập, chỉ Admin và Manager được vào
-    // ================================================================
+
     [Authorize(Roles = "Admin,Manager")]
     public class CaiDatModel : PageModel
     {

@@ -172,19 +172,7 @@ namespace QuanLyNhaTro.Pages.Admin
             return new JsonResult(new { success = true });
         }
 
-        // ================================================================
-        // HANDLER: ẨN VÀO KHO (Soft Archive)
-        // POST /Admin/SuCoBaoTri?handler=Archive&idDon={id}
-        //
-        // Chiến lược: đặt IsArchived = true trên bảng DONDV.
-        // Không xóa dữ liệu, chỉ ẩn khỏi danh sách chính.
-        //
-        // Nếu chưa có migration cho IsArchived, thay dòng:
-        //   don.IsArchived = true;
-        // bằng:
-        //   don.TrangThai_DV = "Lưu trữ";
-        // và cập nhật filter trong View cho phù hợp.
-        // ================================================================
+
         public async Task<IActionResult> OnPostArchiveAsync(int idDon)
         {
             if (!User.IsInRole("Admin")) return Forbid();
@@ -229,32 +217,3 @@ namespace QuanLyNhaTro.Pages.Admin
 }
 
 
-/*
- * ====================================================================
- *  MIGRATION INSTRUCTIONS
- * ====================================================================
- *
- *  Bước 1 – Thêm property vào model DONDV trong QuanLyKhuNhaTro.cs:
- *
- *      // Trong class DONDV – thêm sau UpdatedAt
- *      public bool IsArchived { get; set; } = false;
- *
- *  Bước 2 – Thêm cấu hình trong OnModelCreating (optional, nếu muốn default):
- *
- *      modelBuilder.Entity<DONDV>(entity =>
- *      {
- *          // ...existing config...
- *          entity.Property(e => e.IsArchived).HasDefaultValue(false);
- *      });
- *
- *  Bước 3 – Tạo và chạy migration:
- *
- *      dotnet ef migrations add AddIsArchivedToDONDV
- *      dotnet ef database update
- *
- *  Câu SQL tương đương (nếu chạy thẳng trên DB):
- *
- *      ALTER TABLE DONDV ADD IsArchived BIT NOT NULL DEFAULT 0;
- *
- * ====================================================================
- */

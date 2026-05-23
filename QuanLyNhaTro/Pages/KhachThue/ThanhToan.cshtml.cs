@@ -28,33 +28,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
         public ACCOUNT? ChuTro { get; set; }
 
 
-        /*
-         * ═══════════════════════════════════════════════════════════════
-         * [GHI CHÚ] THÔNG TIN NGÂN HÀNG CỦA QUẢN LÝ
-         * ───────────────────────────────────────────────────────────────
-         * Hiện tại bảng ACCOUNT chỉ có cột QR_Link (ảnh QR).
-         * Để hiển thị tên ngân hàng & số tài khoản, bạn cần 1 trong 2 cách:
-         *
-         * CÁCH 1 — Thêm cột trực tiếp vào bảng ACCOUNT (đơn giản nhất):
-         *   ALTER TABLE ACCOUNT ADD NganHang    NVARCHAR(100) NULL;
-         *   ALTER TABLE ACCOUNT ADD SoTaiKhoan  NVARCHAR(50)  NULL;
-         *   Sau đó thêm property vào class ACCOUNT:
-         *     public string? NganHang   { get; set; }
-         *     public string? SoTaiKhoan { get; set; }
-         *   Và đọc bên dưới: NganHang = QuanLy?.NganHang ?? ""
-         *
-         * CÁCH 2 — Tạo bảng riêng THONGTIN_NGAN_HANG (khuyến nghị nếu sau này
-         *          hỗ trợ nhiều tài khoản):
-         *   CREATE TABLE THONGTIN_NGAN_HANG (
-         *     ID          INT PRIMARY KEY IDENTITY,
-         *     IDManager   INT NOT NULL REFERENCES ACCOUNT(IDUser),
-         *     NganHang    NVARCHAR(100) NOT NULL,
-         *     SoTaiKhoan  NVARCHAR(50)  NOT NULL,
-         *     ChuTaiKhoan NVARCHAR(100) NOT NULL,
-         *     IsDefault   BIT DEFAULT 1
-         *   );
-         * ═══════════════════════════════════════════════════════════════
-         */
+
         public string NganHang { get; set; } = "";
         public string SoTaiKhoan { get; set; } = "";
 
@@ -141,12 +115,12 @@ namespace QuanLyNhaTro.Pages.KhachThue
         }
 
 
-        // ════════════════════════════════════════════════════════════════
-        // POST — Gửi xác nhận thanh toán (upload ảnh bill)
-        // ════════════════════════════════════════════════════════════════
+
+       
+       
         /*
          * ═══════════════════════════════════════════════════════════════
-         * [GHI CHÚ] UPLOAD ẢNH BILL CHUYỂN KHOẢN
+         *  UPLOAD ẢNH BILL CHUYỂN KHOẢN
          * ───────────────────────────────────────────────────────────────
          * Luồng hoạt động:
          *   1. Người dùng chọn ảnh → JS preview (client-side, không cần server)
@@ -174,9 +148,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
          *
          * Thư mục lưu file:
          *   wwwroot/uploads/bills/{IDHDThang}_{yyyyMMddHHmmss}.jpg
-         * ═══════════════════════════════════════════════════════════════
-         *
-         * ═══════════════════════════════════════════════════════════════
+         
+
          * [GHI CHÚ] UPLOAD ẢNH QR CODE CỦA QUẢN LÝ
          * ───────────────────────────────────────────────────────────────
          * Thực hiện ở trang quản lý (Manager), KHÔNG phải trang khách thuê.
@@ -231,7 +204,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 await BillImage.CopyToAsync(stream);
 
             // Cập nhật DB
-            //   SQL tương đương:
             //     UPDATE HDTHANG
             //     SET AnhChuyenKhoan = @duongDan,
             //         TrangThai_TT   = 'Chờ duyệt',
