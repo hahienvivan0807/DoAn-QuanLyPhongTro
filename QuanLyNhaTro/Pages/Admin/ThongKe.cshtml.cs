@@ -72,22 +72,15 @@ namespace QuanLyNhaTro.Pages.Admin
             _logger = logger;
         }
 
-        // ── The page itself has no server-side @Model.xxx bindings (all data
-        //    is loaded via JavaScript fetch()), so OnGetAsync only needs to
-        //    ensure the user is authenticated. ──────────────────────────────
+
 
         public IActionResult OnGet()
         {
-            // Optional: redirect to login if not authenticated
-            // if (!User.Identity?.IsAuthenticated ?? true)
-            //     return RedirectToPage("/Account/Login");
+ 
             return Page();
         }
 
-        // ================================================================
-        // API: GET /api/thongke/admin-info
-        // Called by: taiThongTinAdmin() in JS
-        // ================================================================
+
         public async Task<IActionResult> OnGetAdminInfoAsync()
         {
             try
@@ -130,12 +123,7 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ================================================================
-        // API: GET /api/thongke/tong-quan
-        // Called by: taiDuLieu() → fetch('/api/thongke/tong-quan')
-        // Returns the single THONGKE_TONG row (ID = 1).
-        // If the snapshot table is empty we compute live figures on the fly.
-        // ================================================================
+
         public async Task<IActionResult> OnGetTongQuanAsync()
         {
             try
@@ -177,12 +165,7 @@ namespace QuanLyNhaTro.Pages.Admin
             }
         }
 
-        // ================================================================
-        // API: GET /api/thongke/doanh-thu?nam={year}
-        // Called by: taiDuLieu() → fetch(`/api/thongke/doanh-thu?nam=${nam}`)
-        // Returns list of THONGKE_DOANHTHU_THANG for the given year.
-        // Falls back to computing from HDTHANG if the snapshot table is empty.
-        // ================================================================
+
         public async Task<IActionResult> OnGetDoanhThuAsync([FromQuery] int nam = 0)
         {
             try
@@ -223,13 +206,10 @@ namespace QuanLyNhaTro.Pages.Admin
         }
 
         // ================================================================
-        // PRIVATE HELPERS
+        // PRIVATE 
         // ================================================================
 
-        /// <summary>
-        /// Compute live KPI figures directly from the source tables.
-        /// Used when THONGKE_TONG has not been populated yet.
-        /// </summary>
+
         private async Task<TongQuanDto> ComputeLiveTongQuanAsync()
         {
             var now = DateTime.Now;
@@ -293,7 +273,6 @@ namespace QuanLyNhaTro.Pages.Admin
             };
         }
 
-        /// <summary>Total revenue for a KyThanhToan period string (MM/yyyy).</summary>
         private async Task<decimal> RevenueForPeriod(string ky)
         {
             return await _db.HDTHANG.AsNoTracking()
@@ -302,14 +281,9 @@ namespace QuanLyNhaTro.Pages.Admin
                 .SumAsync(h => (decimal?)h.TongCong) ?? 0;
         }
 
-        /// <summary>
-        /// Aggregate monthly revenue from HDTHANG for a given year.
-        /// Used as fallback when THONGKE_DOANHTHU_THANG is empty.
-        /// </summary>
         private async Task<List<DoanhThuThangDto>> ComputeDoanhThuFromHdThangAsync(int nam)
         {
-            // Pull only rows belonging to the requested year
-            // KyThanhToan format: "MM/yyyy"
+       
             var suffix = $"/{nam}";
 
             var allRows = await _db.HDTHANG
@@ -317,11 +291,10 @@ namespace QuanLyNhaTro.Pages.Admin
                 .Where(h => h.KyThanhToan != null && h.KyThanhToan.EndsWith(suffix))
                 .ToListAsync();
 
-            // Group by month
             var grouped = allRows
                 .GroupBy(h =>
                 {
-                    // Parse "MM/yyyy" → month number
+                 
                     if (h.KyThanhToan != null
                         && int.TryParse(h.KyThanhToan.Split('/')[0], out int m))
                         return m;
@@ -343,7 +316,7 @@ namespace QuanLyNhaTro.Pages.Admin
                         TongTienDV = paid.Sum(h => (h.TienDV ?? 0) + (h.TienNoDV ?? 0)),
                         TongCong = paid.Sum(h => h.TongCong),
                         SoHoaDonDaDong = paid.Count(h => h.TrangThai_TT == "Đã hoàn thành"),
-                        ChiPhiThang = 0   // No expense data in HDTHANG; default 0
+                        ChiPhiThang = 0 
                     };
                 })
                 .ToList();

@@ -33,7 +33,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
         public int SuCoDangXuLy { get; set; }
         public int SuCoHoanTat { get; set; }
 
-        // ── Lịch sử báo cáo (5 cái mới nhất) ─────────────────────────
+        // ──-Lịch sử báo cáo  ─────────────────────────
         // Lấy từ DONDV WHERE IDUser = IDKhach ORDER BY NgayTao DESC TAKE 5
         public List<DONDV> LichSuBaoCao { get; set; } = new();
 
@@ -222,89 +222,3 @@ namespace QuanLyNhaTro.Pages.KhachThue
     }
 }
 
-
-/*
-═══════════════════════════════════════════════════════════════════════════════
-  GHI CHÚ: UPLOAD ẢNH & SQL
-═══════════════════════════════════════════════════════════════════════════════
-
-  1. CỘT AnhBienLai (DONDV) HIỆN TẠI
-  ─────────────────────────────────
-  Cột AnhBienLai VARCHAR(255) chỉ đủ cho 1 ảnh.
-  Nếu muốn lưu nhiều ảnh (nối | ), chạy migration sau:
-
-      ALTER TABLE DONDV ALTER COLUMN AnhBienLai NVARCHAR(2000);
-
-  Hoặc, cách chuẩn hơn, tạo bảng riêng:
-
-      CREATE TABLE DONDV_ANH (
-          IDAnh       INT PRIMARY KEY IDENTITY,
-          IDDonDV     INT NOT NULL REFERENCES DONDV(IDDonDV) ON DELETE CASCADE,
-          DuongDan    NVARCHAR(500) NOT NULL,   -- /uploads/su-co/filename.jpg
-          NgayTao     DATETIME2 DEFAULT GETUTCDATE()
-      );
-      CREATE INDEX IX_DONDV_ANH_IDDonDV ON DONDV_ANH(IDDonDV);
-
-  Sau đó thêm vào model:
-      // Trong DONDV:
-      public virtual ICollection<DONDV_ANH> DanhSachAnh { get; set; } = new List<DONDV_ANH>();
-
-  Và lưu trong handler:
-      foreach (var path in anhPaths)
-          _db.DONDV_ANH.Add(new DONDV_ANH { IDDonDV = don.IDDonDV, DuongDan = path });
-      await _db.SaveChangesAsync();
-
-
-  2. CỘT QR_Link (ACCOUNT) — ẢNH MÃ QR CHỦ TRỌ
-  ────────────────────────────────────────────
-  Cột ACCOUNT.QR_Link VARCHAR(255) đã có sẵn, dùng để lưu đường dẫn ảnh QR
-  chuyển khoản của Quản lý / Chủ trọ.
-
-  ► Trong trang Thanh toán (ThanhToan.cshtml), hiển thị QR:
-      <img src="@Model.ThongTinQuanLy.QR_Link" alt="Mã QR chuyển khoản" />
-
-  ► Upload QR (từ trang Admin / Quản lý):
-      a. Thêm input:
-          <input type="file" name="FileQR" accept="image/*" />
-
-      b. Trong handler OnPostCapNhatQR():
-          var file    = Request.Form.Files["FileQR"];
-          var fileName = $"qr_{idManager}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.jpg";
-          var savePath = Path.Combine(_env.WebRootPath, "uploads", "qr", fileName);
-          Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
-          using var stream = System.IO.File.Create(savePath);
-          await file.CopyToAsync(stream);
-
-          var acc = await _db.ACCOUNT.FindAsync(idManager);
-          acc!.QR_Link  = $"/uploads/qr/{fileName}";
-          acc.UpdatedAt = DateTime.UtcNow;
-          await _db.SaveChangesAsync();
-
-  ► SQL thủ công (nếu không qua UI):
-      UPDATE ACCOUNT
-      SET QR_Link = '/uploads/qr/qr_manager1.jpg', UpdatedAt = GETUTCDATE()
-      WHERE IDUser = <IDManager> AND Roles IN ('Admin','Manager');
-
-
-  3. CẤU HÌNH wwwroot uploads trong Program.cs
-  ─────────────────────────────────────────────
-      app.UseStaticFiles();   // đã có, giữ nguyên
-
-  Thư mục cần tạo (hoặc tạo tự động trong code):
-      wwwroot/
-        uploads/
-          su-co/    ← ảnh sự cố (DONDV.AnhBienLai)
-          qr/       ← ảnh QR chủ trọ (ACCOUNT.QR_Link)
-
-
-  4. GIỚI HẠN KÍCH THƯỚC FILE (appsettings / Program.cs)
-  ────────────────────────────────────────────────────
-      // Program.cs
-      builder.Services.Configure<FormOptions>(options => {
-          options.MultipartBodyLengthLimit = 25 * 1024 * 1024; // 25MB tổng
-      });
-      builder.WebHost.ConfigureKestrel(k =>
-          k.Limits.MaxRequestBodySize = 25 * 1024 * 1024);
-
-═══════════════════════════════════════════════════════════════════════════════
-*/

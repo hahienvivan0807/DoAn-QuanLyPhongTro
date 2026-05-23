@@ -10,7 +10,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
     {
         public string NoiDung { get; set; } = "";
         public string ThoiGian { get; set; } = "";
-        public string LoaiDot { get; set; } = "nd-blue"; // nd-blue | nd-amber | nd-green | nd-red
+        public string LoaiDot { get; set; } = "nd-blue"; 
     }
 
     public class KhachThueModel : PageModel

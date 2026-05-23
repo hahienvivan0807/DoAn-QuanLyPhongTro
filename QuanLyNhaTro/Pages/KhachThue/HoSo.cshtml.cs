@@ -61,9 +61,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 HoTen= KhachThue.FullName;
                 Phone = KhachThue.Phone;
                 Email = KhachThue.Email;
-                // Nếu ACCOUNT có các field mở rộng, map ở đây:
-                //NgaySinh = KhachThue.NgaySinh;
-                //GioiTinh = KhachThue.GioiTinh;
+
             }
 
             // Lấy thông tin chỉ đọc từ bảng KHACH_THUE
@@ -84,7 +82,6 @@ namespace QuanLyNhaTro.Pages.KhachThue
 
             Phong = HopDong?.Phong;
 
-            // Mini stats
             if (HopDong != null)
             {
                 SoThangThue = (int)((DateTime.Today - HopDong.NgayBatDau).Days / 30.44);
