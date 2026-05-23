@@ -70,10 +70,6 @@ function showToast(title, message = '', type = 'info', duration = 3500) {
     }, duration);
 }
 
-/**
- * Alias tương thích ngược — giữ nguyên để code cũ không bị vỡ.
- * Mapping: 'thanh-cong' → success | 'loi' → fail | 'canh-bao' → warn | 'info' → info
- */
 function hienThongBao(noiDung, loai = 'info') {
     const map = {
         'thanh-cong': 'success',
@@ -133,11 +129,6 @@ function dongModalNhapNgoai(event, idModal) {
     if (event.target.id === idModal) dongModal(idModal);
 }
 
-
-/* ============================================================
-   4. SIDEBAR TOGGLE
-   Giữ nguyên từ code cũ.
-============================================================ */
 function dongMoSidebar() {
     document.getElementById('thanh-sidebar').classList.toggle('an');
 }
@@ -159,7 +150,7 @@ function luuTaiKhoanQuanLy() {
     dongModal('modal-tai-khoan-quan-ly');
 }
 
-// Placeholder người thuê — giữ nguyên từ code cũ
+// Placeholder người thuê
 function moChinhSuaNguoiThue() {
     if (typeof nguoiThueHienTai === 'undefined' || !nguoiThueHienTai) return;
     alert('Chức năng chỉnh sửa người thuê "' + nguoiThueHienTai.hoTen + '" sẽ được tích hợp với backend.');
@@ -291,7 +282,7 @@ function chgDongNgoai(event) {
    12. INIT
 ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-    // Các hàm API chỉ chạy khi trang có element tương ứng
+
     HienThiProfile();
     HienThiTyLeLapDay();
     TyLeDoanhThu();

@@ -1565,7 +1565,6 @@ function ntValidateDuLieu(duLieu, mode) {
     // TAB 2 — Tài khoản
     // ══════════════════════════════════════════
 
-    // Username: bắt buộc, chỉ a-z, 0-9, tối đa 50 ký tự
     if (!duLieu.Username) {
         setErr('err-username', 'Tên đăng nhập không được để trống');
         goTab('tab-cu-tru'); ok = false;

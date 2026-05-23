@@ -7,14 +7,7 @@
         });
 
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-        // HopDongController trả về flat object đã đúng shape:
-        // { contractId, contractCode, tenantName, tenantPhone, tenantEmail,
-        //   roomName, roomId, tenantId, startDate, endDate,
-        //   monthlyRent, deposit, note, status }
         const data = await resp.json();
-
-        // Dùng thẳng – không cần normalize thêm
         allContracts = data;
 
         handleSearch();

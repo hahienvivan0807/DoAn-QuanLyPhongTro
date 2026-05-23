@@ -54,14 +54,11 @@ namespace QuanLyNhaTro.Pages
         {
             NamBieuDo = DateTime.Now.Year;
 
-            // Tên người dùng từ Claims
             var claim = User.FindFirst("FullName") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Name);
             if (claim != null) TenNguoiDung = claim.Value;
 
-            // Thống kê tổng quan
             ThongKeTong = await _db.THONGKE_TONG.FirstOrDefaultAsync() ?? new THONGKE_TONG();
 
-            // Doanh thu 12 tháng của năm hiện tại
             var doanhThuNam = await _db.THONGKE_DOANHTHU_THANG
                 .Where(x => x.Nam == NamBieuDo)
                 .ToListAsync();
@@ -182,12 +179,9 @@ namespace QuanLyNhaTro.Pages
             }
 
             // 4. Kiểm tra mật khẩu cũ
-            //    - Thử SHA-256 trước (chuẩn lưu trữ)
-            //    - Fallback plain text cho tài khoản legacy chưa được hash
             var hashedOld = HashPassword(oldPassword);
-            bool isMatch = user.Passwords == hashedOld       // SHA-256 hex (chuẩn)
-                        || user.Passwords == oldPassword;    // plain text (legacy)
-
+            bool isMatch = user.Passwords == hashedOld
+                        || user.Passwords == oldPassword;
             if (!isMatch)
             {
                 TempData["ErrorMessage"] = "Mật khẩu hiện tại không đúng.";
@@ -217,7 +211,7 @@ namespace QuanLyNhaTro.Pages
         {
             using var sha256 = SHA256.Create();
             var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToHexString(bytes).ToLower(); // vd: "a3f1c2..."
+            return Convert.ToHexString(bytes).ToLower();
         }
     }
 

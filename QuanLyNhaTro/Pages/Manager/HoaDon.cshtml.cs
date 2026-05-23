@@ -60,15 +60,12 @@ namespace QuanLyNhaTro.Pages.Manager
         public List<HoaDonThangViewModel> DanhSachHoaDon { get; set; } = new();
         public string DanhSachHoaDonJson { get; set; } = "[]";
 
-        // Task 2 – DONDV đang chờ quản lý xác nhận (khách đã upload ảnh biên lai)
         public List<HoaDonDichVuViewModel> DanhSachDonDVChoXacNhan { get; set; } = new();
         public string DanhSachDonDVChoXacNhanJson { get; set; } = "[]";
 
-        // Thống kê – chỉ dựa trên HDTHANG; DV được cộng thêm qua JS sau khi fetch
         public int TongHoaDon => DanhSachHoaDon.Count;
         public int SoQuaHan => DanhSachHoaDon.Count(h => h.TrangThai == "qua-han");
         public int SoSapDen => DanhSachHoaDon.Count(h => h.TrangThai == "sap-den");
-        // Include both HDTHANG and DONDV pending items
         public int SoChoXacNhan => DanhSachHoaDon.Count(h => h.TrangThai == "cho-xac-nhan")
                                  + DanhSachDonDVChoXacNhan.Count;
         public int SoHoanThanh => DanhSachHoaDon.Count(h => h.TrangThai == "hoan-thanh");
@@ -79,12 +76,8 @@ namespace QuanLyNhaTro.Pages.Manager
         [BindProperty(SupportsGet = true)]
         public string KyXem { get; set; } = DateTime.Now.ToString("MM/yyyy");
 
-        // ================================================================
-        // ON GET – lấy thông tin manager từ SQL qua Claims
-        // ================================================================
         public async Task OnGetAsync()
         {
-            // ── Lấy IDUser từ Claim (được ghi khi đăng nhập) ─────────
             var idStr = User.FindFirst("IDUser")?.Value
                      ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
@@ -162,24 +155,23 @@ namespace QuanLyNhaTro.Pages.Manager
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
-            // ── Task 2: Query DONDV where guest uploaded receipt, waiting approval ─
             var donDVChoXacNhan = await _db.DONDV
                 .Where(d => d.TrangThai_DV == "Chờ duyệt" && d.AnhBienLai != null)
                 .Include(d => d.Phong)
-                .Include(d => d.Tenant)   // ← đúng tên navigation property trong model
+                .Include(d => d.Tenant)
                 .ToListAsync();
 
             DanhSachDonDVChoXacNhan = donDVChoXacNhan.Select(d => new HoaDonDichVuViewModel
             {
                 Id = d.IDDonDV,
                 SoPhong = d.Phong.SoPhong,
-                TenNguoiThue = d.Tenant?.FullName ?? "—",   // ← Tenant, không phải User
+                TenNguoiThue = d.Tenant?.FullName ?? "—",   
                 TrangThai = "cho-xac-nhan",
                 LoaiDV = d.LoaiDV,
-                HanNop = d.NgayHetHan?.ToString("dd/MM/yyyy") ?? "—",  // ← NgayHetHan là DateTime?
-                NgayNop = d.UpdatedAt.ToString("dd/MM/yyyy HH:mm"),     // ← UpdatedAt là DateTime (không nullable)
+                HanNop = d.NgayHetHan?.ToString("dd/MM/yyyy") ?? "—", 
+                NgayNop = d.UpdatedAt.ToString("dd/MM/yyyy HH:mm"),
                 TongTien = d.TongTien,
-                SoDienThoai = d.Tenant?.Phone ?? "",         // ← Tenant, không phải User
+                SoDienThoai = d.Tenant?.Phone ?? "",
                 AnhBienLai = d.AnhBienLai,
                 GhiChu = d.GhiChuXuLy,
             }).ToList();
@@ -198,7 +190,6 @@ namespace QuanLyNhaTro.Pages.Manager
             var hd = await _db.HDTHANG.FindAsync(req.Id);
             if (hd == null) return NotFound();
 
-            // Guard: chỉ xác nhận khi đang "Chờ duyệt", không cho xác nhận lại đơn đã xong
             if (hd.TrangThai_TT == "Đã hoàn thành")
                 return BadRequest(new { message = "Hóa đơn đã được thanh toán trước đó." });
 
@@ -258,7 +249,6 @@ namespace QuanLyNhaTro.Pages.Manager
             hd.TrangThai_TT = "Đã hoàn thành";
             hd.NgayDuyet = DateTime.Now;
             hd.IDManagerDuyet = idManager > 0 ? idManager : null;
-            // "Thu tiền mặt" – đồng nhất với Controller và check h.ghiChu === 'Thu tiền mặt' ở frontend
             hd.GhiChuDuyet = "Thu tiền mặt";
             hd.UpdatedAt = DateTime.Now;
 

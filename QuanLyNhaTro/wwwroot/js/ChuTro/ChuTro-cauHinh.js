@@ -3,7 +3,7 @@ let chgActiveTab = 'dv';
 let chgSelectedRoomId = null;
 let chgRoomFilter = 'all';
 
-// ── Các hàm modal cũ (giữ lại) ──
+// ── Các hàm modal cũ──
 function luuCauHinhGia() {
     hienThongBao('Đã cập nhật bảng giá thuê mặc định!', 'thanh-cong');
     dongModal('modal-cau-hinh-gia');
@@ -145,7 +145,6 @@ function chgSubmitDichVu() {
         showToast('warn', 'Thiếu thông tin', 'Vui lòng điền đầy đủ thông tin dịch vụ!');
         return;
     }
-    // TODO: fetch POST /api/CauHinh/them-dich-vu
     showToast('success', 'Đã lưu', `Cập nhật dịch vụ "${ten}" thành công!`);
 }
 

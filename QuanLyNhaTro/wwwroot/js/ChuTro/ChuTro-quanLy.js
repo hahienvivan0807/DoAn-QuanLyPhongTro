@@ -367,7 +367,6 @@ function khoaTaiKhoan(idUser, isCurrentlyActive) {
         `Bạn có chắc muốn ${action} tài khoản này không?`,
         async () => {
             try {
-                // isLocked=true → khóa (IsActive=0); isLocked=false → mở khóa (IsActive=1)
                 const res = await fetch('/Admin/Taikhoanquanly?handler=KhoaTaiKhoan', {
                     method: 'POST',
                     headers: headers(),

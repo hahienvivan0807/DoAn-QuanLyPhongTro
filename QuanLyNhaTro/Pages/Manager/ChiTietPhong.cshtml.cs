@@ -54,7 +54,6 @@ namespace QuanLyNhaTro.Pages
                 return RedirectToPage("/Index");
             }
 
-            // Chuyển ID từ chuỗi sang số nguyên để dùng cho Database
             int idUser = int.Parse(userIdClaim);
 
             var fullNameClaim = User.FindFirst("FullName")?.Value;
@@ -64,21 +63,19 @@ namespace QuanLyNhaTro.Pages
                 .AsNoTracking()
                 .FirstOrDefaultAsync(a => a.IDUser == idUser);
 
-            // 3. Lấy danh sách phòng và sắp xếp
+
             var phongs = await _db.PHONG
                 .AsNoTracking()
                 .OrderBy(p => p.Tang)
                 .ThenBy(p => p.SoPhong)
                 .ToListAsync();
 
-            // 4. Lấy tất cả hợp đồng đang hiệu lực kèm thông tin khách thuê (Tenant)
             var hopDongs = await _db.HOPDONG
                 .AsNoTracking()
                 .Include(hd => hd.Tenant)
                 .Where(hd => hd.TrangThaiHD == "Đang hiệu lực")
                 .ToListAsync();
 
-            // Tạo Dictionary để tra cứu nhanh Hợp đồng theo IDPhong
             var hopDongDict = hopDongs
                 .GroupBy(hd => hd.IDPhong)
                 .ToDictionary(g => g.Key, g => g.First());

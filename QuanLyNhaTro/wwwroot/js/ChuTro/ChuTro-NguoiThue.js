@@ -143,7 +143,6 @@ function renderRooms() {
 }
 
 
-// ✅ Tách riêng hàm xử lý click
 /* ---- CHỌN PHÒNG ---- */
 function handleSelectRoom(el) {
     if (el.dataset.locked === 'true') return;

@@ -1,7 +1,6 @@
 ﻿let _dvmaDangChon = null;
 let _dvmaDsCache = [];
 
-// Mở popup + fetch từ API
 async function dvMaMoPopup() {
     const overlay = document.getElementById('dvma-overlay');
     overlay.style.display = 'flex';
@@ -19,8 +18,8 @@ async function dvMaMoPopup() {
         try {
             const res = await fetch('/api/ChuTroDichVu/danh-sach-dich-vu');
             const data = await res.json();
-            _dvmaDsCache = data;          // ← lưu vào cache
-            dvMaRender(_dvmaDsCache);     // ← render lên list
+            _dvmaDsCache = data;          // lưu vào cache
+            dvMaRender(_dvmaDsCache);     // render lên list
         } catch {
             document.getElementById('dvma-list').innerHTML =
                 '<div style="text-align:center;padding:24px;color:#ef4444;">Lỗi tải dữ liệu!</div>';
@@ -98,7 +97,6 @@ function dvMaXacNhan() {
     document.getElementById('dv-gia').value = dv.donGia;
     document.getElementById('dv-donvi').value = dv.donVi;
 
-    // Đổi label nút submit sang "Cập nhật"
     const lbl = document.getElementById('chg-btn-label');
     if (lbl) lbl.textContent = 'Cập nhật dịch vụ';
 
@@ -141,7 +139,6 @@ async function luuDichVu() {
 
         _dvmaDsCache = [];
 
-        // Reset form
         document.getElementById('dv-ma').value = '';
         document.getElementById('dv-ten').value = '';
         document.getElementById('dv-gia').value = '';
@@ -220,7 +217,6 @@ async function chgLoadDichVu() {
     }
 }
 
-// Khi bấm nút Sửa → điền thẳng vào form
 function chgChonDeSua(ma, ten, gia, donvi) {
     document.getElementById('dv-ma').value = ma;
     document.getElementById('dv-ten').value = ten;
@@ -234,5 +230,5 @@ function chgChonDeSua(ma, ten, gia, donvi) {
     document.getElementById('chg-dv-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// Tự động load khi trang mở
+
 document.addEventListener('DOMContentLoaded', chgLoadDichVu);

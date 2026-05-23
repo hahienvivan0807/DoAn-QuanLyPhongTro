@@ -19,7 +19,7 @@ namespace QuanLyNhaTro.Pages.Manager
         public string TrangThai_DV { get; set; } = "";
         public string? GhiChuXuLy { get; set; }
         public DateTime NgayTao { get; set; }
-        public string? AnhChuyenKhoan { get; set; } // Ảnh chuyển khoản do khách gửi
+        public string? AnhChuyenKhoan { get; set; }
     }
 
     // =====================================================================
@@ -450,7 +450,6 @@ namespace QuanLyNhaTro.Pages.Manager
                             P("@TongNo", phong.TongNo),
                             P("@IDHD", idHD));
                     }
-                    // Nếu chưa có HDTHANG tháng này → sẽ được cộng khi tạo HD
 
                     // Đánh dấu các đơn DV đã được cộng nợ
                     foreach (var idDon in phong.IDDons)

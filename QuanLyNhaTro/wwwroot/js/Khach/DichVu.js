@@ -29,13 +29,13 @@ function dongMoSidebar() { document.getElementById('thanh-sidebar').classList.to
      → polling bắt → hiện nút Xác nhận nhận hàng + Thanh toán
 ============================================= */
 let gsDaDat = false;
-let gsDaCoGia = false;      // quản lý đã xác nhận + báo giá GS
+let gsDaCoGia = false;     
 let gsTienThanhToan = 0;
 let gsDonId = null;
 
 let nuocDaDat = false;
-let nuocDaGiao = false;     // quản lý đã giao nước
-let nuocDaXacNhan = false;  // khách xác nhận đã nhận
+let nuocDaGiao = false;     
+let nuocDaXacNhan = false;  
 let nuocTienThanhToan = 0;
 let nuocDonId = null;
 
@@ -52,7 +52,6 @@ function batDauPolling() {
             if (!res.ok) return;
             const data = await res.json();
 
-            // ── Giặt sấy ──
             if (data.giatSay) {
                 const don = data.giatSay;
                 gsDonId = don.id;
@@ -63,7 +62,6 @@ function batDauPolling() {
                     _quanLyGuiGiaGS(don.tongTien);
                 }
             } else if (gsDaDat) {
-                // Đơn đã biến mất (Thành công / Đã hủy) → reset card
                 resetCardGS();
             }
 
@@ -83,17 +81,15 @@ function batDauPolling() {
                     _quanLyDaGiaoNuoc();
                 }
             } else if (nuocDaDat) {
-                // Đơn đã biến mất → reset card
                 resetCardNuoc();
             }
 
-            // Dừng polling nếu không còn đơn nào đang chờ phản hồi
             const conDangCho = (gsDaDat && !gsDaCoGia) || (nuocDaDat && !nuocDaGiao);
             if (!conDangCho) {
                 clearInterval(pollingTimer);
                 pollingTimer = null;
             }
-        } catch (e) { /* bỏ qua lỗi mạng */ }
+        } catch (e) { }
     }, 8000);
 }
 
@@ -253,7 +249,6 @@ async function guiDonGS() {
 
     if (!loai) { alert('Vui lòng chọn loại dịch vụ!'); return; }
 
-    // Ẩn nút, hiện chờ
     document.getElementById('gs-btn-group').style.display = 'none';
     document.getElementById('gs-waiting').classList.add('hien');
     capNhatBadgeGS('pending', 'Chờ nhận đồ');
@@ -277,11 +272,9 @@ async function guiDonGS() {
         const data = await safeJson(res);
         gsDonId = data.id;
 
-        // Bắt đầu polling chờ quản lý báo giá
         batDauPolling();
     } catch (err) {
         alert('Gửi đơn thất bại: ' + err.message);
-        // Rollback UI
         gsDaDat = false;
         document.getElementById('gs-btn-group').style.display = '';
         document.getElementById('gs-waiting').classList.remove('hien');
