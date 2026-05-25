@@ -677,7 +677,98 @@
   background: #059669; border-radius: 50%; display: none; align-items: center;
   justify-content: center; color: #fff; font-size: 9px; }
 .rp-card.selected .rp-check { display: flex; }
-/**/
+.nt-row-ghep td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed rgba(124,58,237,0.12);
+}
+.nt-row-main + .nt-row-ghep td:first-child {
+    border-top: none;
+}
+/* =========================================================
+   NGƯỜI Ở GHÉP — Scoped styles (og- prefix)
+========================================================= */
+
+/* Step indicator */
+.og-step {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; min-width: 90px; position: relative; z-index: 1;
+}
+.og-step-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--mau-vien); color: var(--mau-chu-phu);
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--mau-vien); transition: all 0.25s;
+}
+.og-step-label {
+  font-size: 10.5px; font-weight: 600; color: var(--mau-chu-phu);
+  white-space: nowrap; transition: color 0.25s;
+}
+.og-step.active .og-step-circle {
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  border-color: #7c3aed; color: #fff;
+  box-shadow: 0 3px 10px rgba(124,58,237,0.35);
+}
+.og-step.active .og-step-label { color: #7c3aed; }
+.og-step.done .og-step-circle {
+  background: #059669; border-color: #059669; color: #fff;
+}
+.og-step.done .og-step-label { color: #059669; }
+.og-step-line {
+  flex: 1; height: 2px; background: var(--mau-vien);
+  align-self: flex-start; margin-top: 13px; min-width: 30px;
+  transition: background 0.25s;
+}
+.og-step-line.done { background: #059669; }
+
+/* Step panels */
+.og-buoc { animation: ogFadeIn 0.22s ease; }
+@@keyframes ogFadeIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Next button — purple variant */
+.og-btn-next {
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 9px 22px; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  box-shadow: 0 4px 12px rgba(124,58,237,0.28);
+  transition: all 0.16s;
+}
+.og-btn-next:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(124,58,237,0.42);
+}
+.og-btn-next:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* Occupant row */
+.og-occupant-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; background: var(--mau-nen);
+  border-radius: var(--radius-sm); border: 1px solid var(--mau-vien);
+  font-size: 12.5px;
+}
+.og-occupant-ava {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.og-occupant-name { font-weight: 700; color: var(--mau-chu); }
+.og-occupant-room { font-size: 11px; color: var(--mau-chu-phu); }
+
+/* Preview grid item */
+.og-preview-item { }
+.og-preview-key {
+  font-size: 10px; color: var(--mau-chu-phu);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  font-weight: 700; margin-bottom: 2px;
+}
+.og-preview-val { font-size: 13px; font-weight: 700; color: var(--mau-chu); }
   </style>
 </head>
 <body>
@@ -876,10 +967,19 @@
                     <p class="nt-page-desc">Toàn bộ khách thuê đang ở và đã rời đi trong hệ thống</p>
                 </div>
             </div>
-            <button class="nt-btn-primary" onclick="ntMoModalThem()">
-                <i class="fas fa-plus"></i>
-                Thêm người thuê
-            </button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="nt-btn-primary" onclick="ntMoModalThem()">
+                    <i class="fas fa-plus"></i>
+                    Thêm người thuê
+                </button>
+                <button class="nt-btn-primary" id="btn-them-o-ghep"
+                        onclick="oGhep.moModal()"
+                        style="background:linear-gradient(135deg,#7c3aed,#9333ea);
+                               box-shadow:0 4px 14px rgba(124,58,237,0.32);">
+                    <i class="fas fa-user-plus"></i>
+                    Thêm người ở ghép
+                </button>
+            </div>
         </div>
 
         <!-- PHẦN 2 — 4 KPI CARDS -->
@@ -968,6 +1068,14 @@
                         <option value="Nam">Nam</option>
                         <option value="Nữ">Nữ</option>
                         <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <div class="nt-select-wrap">
+                    <i class="fas fa-user-friends nt-sel-ico"></i>
+                    <select class="nt-select" id="nt-filter-nguoi-ghep" onchange="ntLocDuLieu()">
+                        <option value="">Tất cả loại</option>
+                        <option value="co-ghep">Có người ở ghép</option>
+                        <option value="khong-ghep">Không có người ghép</option>
                     </select>
                 </div>
                 <button class="nt-btn-reset" onclick="ntDatLaiLoc()" title="Đặt lại bộ lọc">
@@ -1576,6 +1684,355 @@
             </button>
         </div>
     </div>
+</div>
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: THÊM NGƯỜI Ở GHÉP
+     Scoped under window.oGhep namespace — no global conflicts
+════════════════════════════════════════════════════════════ -->
+<div class="nt-overlay" id="og-modal-overlay" onclick="oGhep.dongNeuClick(event)">
+  <div class="nt-modal" id="og-modal-box" style="max-width:700px;">
+
+    <!-- Header -->
+    <div class="nt-modal-hd">
+      <div class="nt-modal-hd-left">
+        <div class="nt-modal-hd-icon" style="background:linear-gradient(135deg,#7c3aed,#9333ea);">
+          <i class="fas fa-user-friends"></i>
+        </div>
+        <div>
+          <h3 class="nt-modal-title">Thêm người ở ghép</h3>
+          <p class="nt-modal-sub" id="og-modal-mo-ta">Thêm thành viên vào phòng đang thuê</p>
+        </div>
+      </div>
+      <button class="nt-modal-close-btn" onclick="oGhep.dongModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Steps indicator -->
+    <div id="og-steps-bar" style="display:flex;align-items:center;gap:0;padding:12px 24px;
+         background:#fafbfd;border-bottom:1px solid var(--mau-vien);flex-shrink:0;">
+      <div class="og-step active" id="og-step-1-dot">
+        <div class="og-step-circle">1</div>
+        <span class="og-step-label">Chọn phòng</span>
+      </div>
+      <div class="og-step-line"></div>
+      <div class="og-step" id="og-step-2-dot">
+        <div class="og-step-circle">2</div>
+        <span class="og-step-label">Thông tin tài khoản</span>
+      </div>
+      <div class="og-step-line"></div>
+      <div class="og-step" id="og-step-3-dot">
+        <div class="og-step-circle">3</div>
+        <span class="og-step-label">Thông tin cá nhân</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="nt-modal-body" id="og-modal-body">
+
+      <!-- ── BƯỚC 1: CHỌN PHÒNG ── -->
+      <div id="og-buoc-1" class="og-buoc active">
+
+        <!-- Selected room display -->
+        <div style="margin-bottom:16px;">
+          <label class="nt-lbl">Phòng đã thuê <span class="req" style="color:var(--mau-do);">*</span></label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="nt-inp" id="og-phong-display"
+                 style="flex:1;display:flex;align-items:center;justify-content:space-between;
+                        cursor:pointer;user-select:none;background:var(--mau-nen);"
+                 onclick="oGhep.moPickerPhong()">
+              <span id="og-phong-display-text" style="color:var(--mau-chu-phu);">-- Chọn phòng đang thuê --</span>
+              <i class="fas fa-search" style="font-size:12px;color:var(--mau-chu-phu);"></i>
+            </div>
+            <button type="button" class="nt-btn-upload" onclick="oGhep.moPickerPhong()"
+                    style="white-space:nowrap;flex-shrink:0;">
+              <i class="fas fa-door-open"></i> Chọn phòng
+            </button>
+          </div>
+          <div class="nt-err" id="og-err-phong"></div>
+          <input type="hidden" id="og-inp-id-phong" />
+        </div>
+
+        <!-- Room info preview (shown after selection) -->
+        <div id="og-phong-preview" style="display:none;margin-bottom:16px;">
+          <div style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(147,51,234,0.04));
+                      border:1.5px solid rgba(124,58,237,0.18);border-radius:var(--radius-md);
+                      padding:14px 16px;">
+            <div style="font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;
+                        letter-spacing:0.7px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-door-open"></i> Thông tin phòng đã chọn
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="og-phong-preview-grid">
+              <!-- filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Current occupants list -->
+        <div id="og-occupants-wrap" style="display:none;">
+          <div style="font-size:11.5px;font-weight:800;color:var(--mau-chu-phu);
+                      text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;
+                      display:flex;align-items:center;gap:6px;">
+            <i class="fas fa-users" style="color:#0891b2;"></i> Người đang ở trong phòng
+          </div>
+          <div id="og-occupants-list"
+               style="display:flex;flex-direction:column;gap:8px;">
+            <!-- filled by JS -->
+          </div>
+        </div>
+
+      </div><!-- /og-buoc-1 -->
+
+      <!-- ── BƯỚC 2: THÔNG TIN TÀI KHOẢN ── -->
+      <div id="og-buoc-2" class="og-buoc" style="display:none;">
+        <div class="nt-section-divider full" style="margin-bottom:16px;">
+          <i class="fas fa-key"></i> Thông tin tài khoản đăng nhập
+        </div>
+        <div class="nt-form-grid">
+
+          <div class="nt-field full">
+            <label class="nt-lbl">Họ và tên <span class="req" style="color:var(--mau-do);">*</span></label>
+            <input class="nt-inp" type="text" id="og-inp-ho-ten"
+                   placeholder="VD: Nguyễn Thị Mai" maxlength="100" />
+            <div class="nt-err" id="og-err-ho-ten"></div>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Tên đăng nhập <span class="req" style="color:var(--mau-do);">*</span></label>
+            <div class="nt-inp-icon-wrap">
+              <i class="fas fa-at"></i>
+              <input class="nt-inp" type="text" id="og-inp-username"
+                     placeholder="VD: nguyenthimai" maxlength="50" />
+            </div>
+            <div class="nt-err" id="og-err-username"></div>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Mật khẩu <span class="req" style="color:var(--mau-do);">*</span></label>
+            <div class="nt-inp-icon-wrap" style="position:relative;">
+              <i class="fas fa-lock"></i>
+              <input class="nt-inp" type="password" id="og-inp-password"
+                     placeholder="Tối thiểu 6 ký tự" maxlength="100" />
+              <button type="button" class="nt-pw-toggle"
+                      onclick="oGhep.togglePw('og-inp-password',this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="nt-err" id="og-err-password"></div>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Vai trò</label>
+            <div class="nt-inp-icon-wrap">
+              <i class="fas fa-shield-alt"></i>
+              <input class="nt-inp" type="text" id="og-inp-role"
+                     value="Người thuê (Tenant)" disabled readonly
+                     style="opacity:0.5;cursor:not-allowed;background:var(--mau-nen);color:var(--mau-chu-phu);" />
+            </div>
+            <span class="nt-hint">Vai trò mặc định, không thể thay đổi</span>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Số điện thoại <span class="req" style="color:var(--mau-do);">*</span></label>
+            <div class="nt-inp-icon-wrap">
+              <i class="fas fa-phone"></i>
+              <input class="nt-inp" type="tel" id="og-inp-sdt"
+                     placeholder="0912 345 678" maxlength="15" />
+            </div>
+            <div class="nt-err" id="og-err-sdt"></div>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Email</label>
+            <div class="nt-inp-icon-wrap">
+              <i class="fas fa-envelope"></i>
+              <input class="nt-inp" type="email" id="og-inp-email"
+                     placeholder="VD: email@gmail.com" maxlength="100" />
+            </div>
+            <div class="nt-err" id="og-err-email"></div>
+          </div>
+
+        </div>
+      </div><!-- /og-buoc-2 -->
+
+      <!-- ── BƯỚC 3: THÔNG TIN CÁ NHÂN ── -->
+      <div id="og-buoc-3" class="og-buoc" style="display:none;">
+        <div class="nt-section-divider full" style="margin-bottom:16px;">
+          <i class="fas fa-id-card"></i> Thông tin cá nhân
+        </div>
+        <div class="nt-form-grid">
+
+          <div class="nt-field">
+            <label class="nt-lbl">Số CCCD / CMND</label>
+            <div class="nt-inp-icon-wrap">
+              <i class="fas fa-id-card"></i>
+              <input class="nt-inp" type="text" id="og-inp-cccd"
+                     placeholder="VD: 079123456789" maxlength="20" />
+            </div>
+            <div class="nt-err" id="og-err-cccd"></div>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Ngày sinh</label>
+            <div class="nt-inp-icon-wrap">
+              <i class="fas fa-birthday-cake"></i>
+              <input class="nt-inp" type="date" id="og-inp-ngay-sinh" />
+            </div>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Giới tính</label>
+            <select class="nt-inp" id="og-inp-gioi-tinh">
+              <option value="">-- Chọn giới tính --</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Quê quán</label>
+            <input class="nt-inp" type="text" id="og-inp-que-quan"
+                   placeholder="VD: An Giang" maxlength="200" />
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Ngày vào ở <span class="req" style="color:var(--mau-do);">*</span></label>
+            <div class="nt-inp-icon-wrap">
+              <i class="fas fa-calendar-check"></i>
+              <input class="nt-inp" type="date" id="og-inp-ngay-vao" />
+            </div>
+            <div class="nt-err" id="og-err-ngay-vao"></div>
+          </div>
+
+          <div class="nt-field">
+            <label class="nt-lbl">Quan hệ với chủ phòng</label>
+            <select class="nt-inp" id="og-inp-quan-he">
+              <option value="">-- Chọn quan hệ --</option>
+              <option value="Bạn bè">Bạn bè</option>
+              <option value="Anh/Em">Anh / Em</option>
+              <option value="Vợ/Chồng">Vợ / Chồng</option>
+              <option value="Đồng nghiệp">Đồng nghiệp</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
+
+          <div class="nt-field full">
+            <label class="nt-lbl">Ghi chú</label>
+            <textarea class="nt-inp" id="og-inp-ghi-chu" rows="2"
+                      placeholder="Ghi chú thêm về người ở ghép..."
+                      maxlength="500"></textarea>
+          </div>
+
+        </div>
+      </div><!-- /og-buoc-3 -->
+
+    </div><!-- /og-modal-body -->
+
+    <!-- Footer -->
+    <div class="nt-modal-ft">
+      <div class="nt-ft-note">
+        <span id="og-step-label-ft" style="color:var(--mau-chu-phu);font-size:12px;">
+          Bước 1 / 3 — Chọn phòng
+        </span>
+      </div>
+      <div class="nt-ft-btns">
+        <button class="nt-btn-cancel" onclick="oGhep.dongModal()">
+          <i class="fas fa-times"></i> Hủy
+        </button>
+        <button class="nt-btn-cancel" id="og-btn-back"
+                onclick="oGhep.buocTruoc()" style="display:none;">
+          <i class="fas fa-arrow-left"></i> Quay lại
+        </button>
+        <button class="og-btn-next" id="og-btn-next" onclick="oGhep.buocTiep()">
+          Tiếp theo <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="nt-btn-submit" id="og-btn-submit"
+                onclick="oGhep.luuNguoiOGhep()" style="display:none;
+                background:linear-gradient(135deg,#7c3aed,#9333ea);
+                box-shadow:0 4px 12px rgba(124,58,237,0.28);">
+          <i class="fas fa-check"></i> Thêm người ở ghép
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /og-modal-overlay -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: ROOM PICKER cho người ở ghép
+════════════════════════════════════════════════════════════ -->
+<div class="nt-overlay" id="og-picker-overlay" onclick="oGhep.dongPickerNeuClick(event)">
+  <div class="nt-modal" id="og-picker-box" style="max-width:620px;">
+
+    <div class="nt-modal-hd">
+      <div class="nt-modal-hd-left">
+        <div class="nt-modal-hd-icon"
+             style="background:linear-gradient(135deg,#7c3aed,#9333ea);">
+          <i class="fas fa-door-open"></i>
+        </div>
+        <div>
+          <h3 class="nt-modal-title">Chọn phòng đang thuê</h3>
+          <p class="nt-modal-sub">Chọn phòng cần thêm người ở ghép</p>
+        </div>
+      </div>
+      <button class="nt-modal-close-btn" onclick="oGhep.dongPicker()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Picker toolbar -->
+    <div style="padding:12px 20px;border-bottom:1px solid var(--mau-vien);
+                display:flex;gap:10px;flex-wrap:wrap;background:#fafbfd;flex-shrink:0;">
+      <div class="nt-search-box" style="flex:1;min-width:160px;max-width:none;">
+        <i class="fas fa-search nt-search-ico"></i>
+        <input type="text" id="og-picker-search" class="nt-search-inp"
+               placeholder="Tìm số phòng..." oninput="oGhep.locPicker()" />
+      </div>
+      <div class="nt-select-wrap">
+        <i class="fas fa-circle-dot nt-sel-ico"></i>
+        <select class="nt-select" id="og-picker-filter-tt"
+                onchange="oGhep.locPicker()" style="min-width:160px;">
+          <option value="">Tất cả trạng thái</option>
+          <option value="Trống">Phòng trống</option>
+          <option value="Đã thuê" selected>Đang có người thuê</option>
+          <option value="Đang sửa">Đang sửa chữa</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Picker content -->
+    <div class="nt-modal-body" style="padding:14px 16px;">
+      <div id="og-picker-loading"
+           style="display:flex;align-items:center;gap:10px;padding:32px;
+                  justify-content:center;color:var(--mau-chu-phu);font-size:13px;">
+        <div class="nt-spinner"></div> Đang tải...
+      </div>
+
+      <!-- Room grid -->
+      <div id="og-picker-grid"
+           style="display:none;display:grid;
+                  grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;">
+      </div>
+
+      <!-- Empty state -->
+      <div id="og-picker-empty" style="display:none;text-align:center;
+           padding:40px 16px;color:var(--mau-chu-phu);">
+        <div style="font-size:36px;margin-bottom:10px;"><i class="fas fa-door-closed"></i></div>
+        <div style="font-weight:700;font-size:13.5px;color:var(--mau-chu);margin-bottom:4px;">
+          Không tìm thấy phòng
+        </div>
+        <div style="font-size:12px;">Thử thay đổi bộ lọc trạng thái</div>
+      </div>
+    </div>
+
+    <div class="nt-modal-ft" style="justify-content:flex-end;">
+      <button class="nt-btn-cancel" onclick="oGhep.dongPicker()">
+        <i class="fas fa-times"></i> Đóng
+      </button>
+    </div>
+  </div>
 </div>
 @await Html.PartialAsync("ModalChung")
 </body>

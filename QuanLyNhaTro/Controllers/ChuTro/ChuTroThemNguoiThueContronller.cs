@@ -1,4 +1,5 @@
-﻿using BCrypt.Net;
+﻿using Azure.Core;
+using BCrypt.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -179,6 +180,17 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 // 4. UPDATE PHONG → Đã thuê
                 phong.TrangThai = "Đã thuê";
 
+                var newNguoiOGhep = new HOPDONG_KHACHO
+                {
+                    IDHopDong = newHopDong.IDHopDong,
+                    IDUser = newAccount.IDUser,
+                    HoTen = newAccount.FullName.Trim(),
+                    SoCCCD = req.SoCCCD?.Trim(),
+                    SoDienThoai = req.SoDienThoai.Trim(),
+                    NgayVao = DateTime.Now,
+                    NgaySinh = req.NgaySinh,
+                    GhiChu = req.GhiChu
+                };
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -199,7 +211,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
         public async Task<IActionResult> UpdateUser([FromBody] ResetPasswordRequest request)
         {
             var user = await _context.ACCOUNT.FirstOrDefaultAsync(u => u.Phone == request.SDTKhach);
-            if(user == null)
+            if (user == null)
             {
                 return BadRequest(new { message = "Không tồn tại số điện thoại" });
             }
@@ -247,6 +259,98 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             {
                 success = true,
                 message = $"Đã trả phòng thành công cho {hopDong.Tenant.FullName}"
+            });
+        }
+        public class NguoiOGhepRequest
+        {
+            // --- Phòng ---
+            public int? IDPhong { get; set; }
+
+            // --- Account ---
+            public string HoTen { get; set; }
+            public string Username { get; set; }
+            public string Passwords { get; set; }
+            public string Phone { get; set; }
+            public string Email { get; set; }
+            public string Roles { get; set; } = "Tenant";
+
+            public string SoCCCD { get; set; }
+
+            public DateTime? NgaySinh { get; set; }
+
+            public string GioiTinh { get; set; }
+            public string QueQuan { get; set; }
+
+            public DateTime? NgayVaoO { get; set; }
+            public string QuanHe { get; set; }
+            public string GhiChu { get; set; }
+        }
+        [HttpPost("them-nguoi-o-ghep")]
+        public async Task<IActionResult> ThemNguoiOGhep([FromBody] NguoiOGhepRequest request)
+        {
+            if (request.IDPhong == null || request.IDPhong <= 0)
+                return BadRequest(new { message = "Vui lòng chọn phòng hợp lệ" });
+            var phong = await _context.PHONG.FindAsync(request.IDPhong.Value);
+            if (phong == null)
+                return NotFound(new { message = "Phòng không tồn tại" });
+            if (phong.TrangThai != "Đã thuê")
+                return BadRequest(new { message = "Chỉ có thể thêm người ở ghép vào phòng đã có người thuê" });
+            var hopDongHienTai = await _context.HOPDONG
+                .Where(h => h.IDPhong == request.IDPhong && h.TrangThaiHD == "Đang hiệu lực")
+                .FirstOrDefaultAsync();
+            if (hopDongHienTai == null)
+                return BadRequest(new { message = "Không tìm thấy hợp đồng đang hiệu lực cho phòng này" });
+            // Tạo tài khoản mới cho người ở ghép
+            var newAccount = new ACCOUNT
+            {
+                FullName = request.HoTen.Trim(),
+                Username = request.Username.Trim(),
+                Passwords = BCrypt.Net.BCrypt.HashPassword(request.Passwords),
+                Phone = request.Phone.Trim(),
+                Email = request.Email.Trim(),
+                Roles = request.Roles,
+                QR_Link = "",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
+            _context.ACCOUNT.Add(newAccount);
+            await _context.SaveChangesAsync();
+            // Tạo khách thuê mới cho người ở ghép
+            var newKhachThue = new KHACH_THUE
+            {
+                IDUser = newAccount.IDUser,
+                HoTen = request.HoTen.Trim(),
+                SoDienThoai = request.Phone.Trim(),
+                SoCCCD = request.SoCCCD.Trim(),
+                NgaySinh = request.NgaySinh,
+                GioiTinh = request.GioiTinh,
+                QueQuan = request.QueQuan.Trim(),
+                DiaChiThuongTru = "",
+                GhiChu = $"Người ở ghép, quan hệ: {request.QuanHe}. {request.GhiChu}",
+                AnhChanDung = null,
+                NgayVaoO = request.NgayVaoO ?? DateTime.Now
+            };
+            _context.KHACH_THUE.Add(newKhachThue);
+            await _context.SaveChangesAsync();
+            var newNguoiOGhep = new HOPDONG_KHACHO
+            {
+                IDHopDong = hopDongHienTai.IDHopDong,
+                IDUser = newAccount.IDUser,
+                HoTen= request.HoTen.Trim(),
+                SoCCCD= request.SoCCCD.Trim(),
+                SoDienThoai = request.Phone.Trim(),
+                QuanHe =  request.QuanHe,
+                NgayVao = request.NgayVaoO ?? DateTime.Now,
+                NgaySinh = request.NgaySinh,
+                GhiChu = request.GhiChu
+            };
+            _context.HOPDONG_KHACHO.Add(newNguoiOGhep);
+            await _context.SaveChangesAsync();
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã thêm người ở ghép thành công cho phòng {phong.SoPhong}"
             });
         }
     }

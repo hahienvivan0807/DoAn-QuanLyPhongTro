@@ -187,6 +187,8 @@ async function ntTaiDuLieu() {
 
                 // Trạng thái hiển thị
                 TrangThai: hd.trangThaiHD === 'Đang hiệu lực' ? 'dang-o' : 'da-roi',
+
+                NguoiOGhep: hd.nguoiOGhep || [],
             }));
 
             ntCapNhatThongKe();
@@ -276,6 +278,7 @@ function ntLocDuLieu() {
     const phong = document.getElementById('nt-filter-phong')?.value || '';
     const trangThai = document.getElementById('nt-filter-trang-thai')?.value || '';
     const gioiTinh = document.getElementById('nt-filter-gioi-tinh')?.value || '';
+    const nguoiGhep = document.getElementById('nt-filter-nguoi-ghep')?.value || '';
 
     // Show/hide clear button
     const btnClear = document.getElementById('nt-btn-clear-search');
@@ -295,6 +298,8 @@ function ntLocDuLieu() {
     if (phong) ket = ket.filter(x => x.SoPhong === phong);
     if (trangThai) ket = ket.filter(x => x.TrangThai === trangThai);
     if (gioiTinh) ket = ket.filter(x => x.GioiTinh === gioiTinh);
+    if (nguoiGhep === 'co-ghep') ket = ket.filter(x => x.NguoiOGhep?.length > 0);
+    if (nguoiGhep === 'khong-ghep') ket = ket.filter(x => !x.NguoiOGhep?.length);
 
     // Sắp xếp
     ket.sort((a, b) => {
@@ -336,6 +341,7 @@ function ntDatLaiLoc() {
     document.getElementById('nt-filter-phong').value = '';
     document.getElementById('nt-filter-trang-thai').value = '';
     document.getElementById('nt-filter-gioi-tinh').value = '';
+    document.getElementById('nt-filter-nguoi-ghep').value = '';
     ntLocDuLieu();
 }
 
@@ -374,85 +380,173 @@ function ntRenderBang() {
     if (empty) empty.style.display = 'none';
 
     const start = (NT.trangHienTai - 1) * NT.soTrangMoiTrang;
+    let html = '';
 
-    tbody.innerHTML = trang.map((x, i) => {
+    trang.forEach((x, i) => {
+        // ── Contract deadline cell (reused logic) ──
         const soNgay = x.SoNgayConLai;
         let hdHtml = '<span class="nt-hd-unlimited">Không thời hạn</span>';
         if (x.NgayKetThuc) {
             if (soNgay !== null && soNgay <= 30 && soNgay >= 0) {
                 hdHtml = `<div class="nt-hd-cell nt-hd-warning">${ntDinhDangNgay(x.NgayKetThuc)}</div>
-                      <div class="nt-date-diff">Còn ${soNgay} ngày</div>`;
+                          <div class="nt-date-diff">Còn ${soNgay} ngày</div>`;
             } else if (soNgay !== null && soNgay < 0) {
                 hdHtml = `<div class="nt-hd-cell nt-hd-expired">${ntDinhDangNgay(x.NgayKetThuc)}</div>
-                      <div class="nt-date-diff">Đã hết hạn</div>`;
+                          <div class="nt-date-diff">Đã hết hạn</div>`;
             } else {
                 hdHtml = `<div class="nt-hd-cell nt-hd-normal">${ntDinhDangNgay(x.NgayKetThuc)}</div>`;
             }
         }
 
-        return `
-    <tr>
-      <td class="nt-col-stt">
-        <span class="nt-stt-num">${start + i + 1}</span>
-      </td>
-      <td class="nt-col-khach">
-        <div class="nt-khach-cell">
-          <div class="nt-avatar">
-            ${x.AnhChanDung
-                ? `<img src="${ntEscape(x.AnhChanDung)}" alt="${ntEscape(x.HoTen)}">`
+        // ── Main tenant row ──
+        html += `
+        <tr class="nt-row-main">
+            <td class="nt-col-stt">
+                <span class="nt-stt-num">${start + i + 1}</span>
+            </td>
+            <td class="nt-col-khach">
+                <div class="nt-khach-cell">
+                    <div class="nt-avatar">
+                        ${x.AnhChanDung
+                ? `<img src="${ntEscape(x.AnhChanDung)}" alt="">`
                 : ntLayChuCai(x.HoTen)}
-          </div>
-          <div>
-            <div class="nt-khach-name">${ntEscape(x.HoTen)}</div>
-            <div class="nt-khach-cccd">
-              <i class="fas fa-id-card" style="font-size:9px;"></i>
-              ${ntEscape(x.SoCCCD || '—')}
-            </div>
-          </div>
-        </div>
-      </td>
-      <td class="nt-col-phong">
-        <span class="nt-phong-tag">
-          <i class="fas fa-door-open" style="font-size:10px;"></i>
-          ${ntEscape(x.SoPhong || '—')}
-        </span>
-      </td>
-      <td class="nt-col-lienhe">
-        <div class="nt-lienhe-row">
-          <div class="nt-lienhe-phone">
-            <i class="fas fa-phone"></i>
-            ${ntEscape(x.SoDienThoai || '—')}
-          </div>
-          <div class="nt-lienhe-email">${ntEscape(x.Email || '')}</div>
-        </div>
-      </td>
-      <td class="nt-col-ngayvao">
-        <div class="nt-date-cell">${ntDinhDangNgay(x.NgayVaoO)}</div>
-      </td>
-      <td class="nt-col-coc">
-        <span class="nt-coc-val">${x.TienCoc ? ntDinhDangTien(x.TienCoc) : '—'}</span>
-      </td>
-      <td class="nt-col-hd">${hdHtml}</td>
-      <td class="nt-col-trangthai">${ntBadgeTrangThai(x.TrangThai)}</td>
-      <td class="nt-col-action">
-        <div class="nt-action-row">
-          <button class="nt-act nt-act-view" title="Xem chi tiết"
-                  onclick="ntXemChiTiet(${x.IDKhachThue})">
-            <i class="fas fa-eye"></i>
-          </button>
-          <button class="nt-act nt-act-edit" title="Chỉnh sửa"
-                  onclick="ntMoModalSua(${x.IDKhachThue})">
-            <i class="fas fa-pen"></i>
-          </button>
-          ${x.TrangThai === 'dang-o' ? `
-          <button class="nt-act nt-act-del" title="Trả phòng"
-                  onclick="ntMoModalXoa(${x.IDKhachThue})">
-            <i class="fas fa-sign-out-alt"></i>
-          </button>` : ''}
-        </div>
-      </td>
-    </tr>`;
-    }).join('');
+                    </div>
+                    <div>
+                        <div class="nt-khach-name">${ntEscape(x.HoTen)}</div>
+                        <div class="nt-khach-cccd">
+                            <i class="fas fa-id-card" style="font-size:9px;"></i>
+                            ${ntEscape(x.SoCCCD || '—')}
+                        </div>
+                        ${x.NguoiOGhep?.length > 0 ? `
+                        <div style="font-size:10px;color:#7c3aed;margin-top:3px;font-weight:700;">
+                            <i class="fas fa-user-friends" style="font-size:9px;"></i>
+                            +${x.NguoiOGhep.length} người ở ghép
+                        </div>` : ''}
+                    </div>
+                </div>
+            </td>
+            <td class="nt-col-phong">
+                <span class="nt-phong-tag">
+                    <i class="fas fa-door-open" style="font-size:10px;"></i>
+                    ${ntEscape(x.SoPhong || '—')}
+                </span>
+            </td>
+            <td class="nt-col-lienhe">
+                <div class="nt-lienhe-row">
+                    <div class="nt-lienhe-phone">
+                        <i class="fas fa-phone"></i>
+                        ${ntEscape(x.SoDienThoai || '—')}
+                    </div>
+                    <div class="nt-lienhe-email">${ntEscape(x.Email || '')}</div>
+                </div>
+            </td>
+            <td class="nt-col-ngayvao">
+                <div class="nt-date-cell">${ntDinhDangNgay(x.NgayVaoO)}</div>
+            </td>
+            <td class="nt-col-coc">
+                <span class="nt-coc-val">${x.TienCoc ? ntDinhDangTien(x.TienCoc) : '—'}</span>
+            </td>
+            <td class="nt-col-hd">${hdHtml}</td>
+            <td class="nt-col-trangthai">${ntBadgeTrangThai(x.TrangThai)}</td>
+            <td class="nt-col-action">
+                <div class="nt-action-row">
+                    <button class="nt-act nt-act-view" title="Xem chi tiết"
+                            onclick="ntXemChiTiet(${x.IDKhachThue})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="nt-act nt-act-edit" title="Chỉnh sửa"
+                            onclick="ntMoModalSua(${x.IDKhachThue})">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    ${x.TrangThai === 'dang-o' ? `
+                    <button class="nt-act nt-act-del" title="Trả phòng"
+                            onclick="ntMoModalXoa(${x.IDKhachThue})">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>` : ''}
+                </div>
+            </td>
+        </tr>`;
+
+        // ── Co-tenant rows ──
+        (x.NguoiOGhep || []).forEach(ko => {
+            html += `
+            <tr class="nt-row-ghep" style="background:linear-gradient(90deg,rgba(124,58,237,0.035),transparent);">
+                <td class="nt-col-stt">
+                    <div style="width:26px;height:26px;background:rgba(124,58,237,0.1);
+                                border-radius:50%;display:inline-flex;align-items:center;
+                                justify-content:center;">
+                        <i class="fas fa-user-friends" style="font-size:9px;color:#7c3aed;"></i>
+                    </div>
+                </td>
+                <td class="nt-col-khach">
+                    <div class="nt-khach-cell" style="padding-left:14px;border-left:2px solid rgba(124,58,237,0.25);">
+                        <div class="nt-avatar" style="width:32px;height:32px;font-size:12px;
+                                    background:linear-gradient(135deg,#7c3aed,#9333ea);">
+                            ${ntLayChuCai(ko.hoTen)}
+                        </div>
+                        <div>
+                            <div class="nt-khach-name" style="font-size:12.5px;">
+                                ${ntEscape(ko.hoTen)}
+                            </div>
+                            <div class="nt-khach-cccd">
+                                <i class="fas fa-id-card" style="font-size:9px;"></i>
+                                ${ntEscape(ko.soCCCD || '—')}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="nt-col-phong">
+                    <span class="nt-phong-tag" style="background:rgba(124,58,237,0.08);
+                                color:#7c3aed;border-color:rgba(124,58,237,0.2);">
+                        <i class="fas fa-door-open" style="font-size:10px;"></i>
+                        ${ntEscape(x.SoPhong || '—')}
+                    </span>
+                </td>
+                <td class="nt-col-lienhe">
+                    <div class="nt-lienhe-row">
+                        <div class="nt-lienhe-phone">
+                            <i class="fas fa-phone"></i>
+                            ${ntEscape(ko.soDienThoai || '—')}
+                        </div>
+                        ${ko.quanHe ? `<div class="nt-lienhe-email">${ntEscape(ko.quanHe)}</div>` : ''}
+                    </div>
+                </td>
+                <td class="nt-col-ngayvao">
+                    <div class="nt-date-cell">${ntDinhDangNgay(ko.ngayVao)}</div>
+                </td>
+                <td class="nt-col-coc">
+                    <span style="color:var(--mau-chu-phu);font-size:11.5px;font-style:italic;">—</span>
+                </td>
+                <td class="nt-col-hd">
+                    <span style="display:inline-flex;align-items:center;gap:5px;
+                                 padding:4px 10px;border-radius:var(--radius-full);
+                                 font-size:11.5px;font-weight:700;
+                                 background:rgba(124,58,237,0.1);color:#7c3aed;
+                                 border:1px solid rgba(124,58,237,0.2);">
+                        <i class="fas fa-user-friends" style="font-size:10px;"></i>
+                        Người ở ghép
+                    </span>
+                </td>
+                <td class="nt-col-trangthai">
+                    <span class="nt-badge" style="background:rgba(124,58,237,0.1);
+                                color:#7c3aed;border:1px solid rgba(124,58,237,0.2);">
+                        <span class="nt-badge-dot"></span> Đang ở ghép
+                    </span>
+                </td>
+                <td class="nt-col-action">
+                    <div class="nt-action-row">
+                        <button class="nt-act nt-act-view" title="Xem chi tiết"
+                                style="background:rgba(124,58,237,0.1);color:#7c3aed;"
+                                onclick="ntXemChiTietGhep(${ko.idKhachO}, ${x.IDKhachThue})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+    });
+
+    tbody.innerHTML = html;
 }
 
 /** Render lưới- */
@@ -945,11 +1039,125 @@ function ntXemChiTiet(id) {
         <div class="nt-detail-val" style="font-weight:400;">${ntEscape(item.GhiChuHD)}</div>
       </div>` : ''}
     </div>
+    ${item.NguoiOGhep && item.NguoiOGhep.length > 0 ? `
+    <div class="nt-detail-sec" style="margin-top:12px;">
+        <i class="fas fa-user-friends"></i> Người ở ghép (${item.NguoiOGhep.length})
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+        ${item.NguoiOGhep.map(ko => `
+        <div style="display:flex;align-items:center;gap:12px;
+                    background:var(--mau-nen);border-radius:var(--radius-sm);
+                    padding:10px 13px;border:1px solid var(--mau-vien);">
+            <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;
+                        background:linear-gradient(135deg,#7c3aed,#9333ea);
+                        display:flex;align-items:center;justify-content:center;
+                        color:#fff;font-size:14px;font-weight:800;">
+                ${ntLayChuCai(ko.hoTen)}
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:13.5px;color:var(--mau-chu);
+                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    ${ntEscape(ko.hoTen)}
+                </div>
+                <div style="font-size:11.5px;color:var(--mau-chu-phu);margin-top:2px;">
+                    ${ntEscape(ko.soDienThoai || '—')}
+                    ${ko.quanHe ? ` · ${ntEscape(ko.quanHe)}` : ''}
+                    · Vào: ${ntDinhDangNgay(ko.ngayVao)}
+                </div>
+            </div>
+            ${ko.isChinhChu ? `
+            <span style="font-size:10px;background:#fef3c7;color:#b45309;
+                         padding:2px 8px;border-radius:99px;font-weight:700;
+                         flex-shrink:0;white-space:nowrap;">
+                Chính chủ
+            </span>` : ''}
+        </div>`).join('')}
+    </div>` : ''}
     `;
 
     ntMoOverlay('nt-detail-overlay');
 }
+function ntXemChiTietGhep(idKhachO, idChuPhong) {
+    // Find the parent contract to get room info
+    const chuPhong = NT.duLieu.find(x => x.IDKhachThue === idChuPhong);
+    const ko = chuPhong?.NguoiOGhep?.find(k => k.idKhachO === idKhachO);
+    if (!ko || !chuPhong) return;
 
+    document.getElementById('nt-detail-mo-ta').textContent = `Người ở ghép — Phòng ${chuPhong.SoPhong}`;
+
+    // Hide edit button — co-tenants edited separately
+    const btnSua = document.getElementById('nt-detail-btn-sua');
+    if (btnSua) btnSua.style.display = 'none';
+
+    const body = document.getElementById('nt-detail-body');
+    body.innerHTML = `
+    <div class="nt-detail-hero" style="background:rgba(124,58,237,0.06);
+         border:1.5px solid rgba(124,58,237,0.15);">
+        <div class="nt-detail-ava"
+             style="background:linear-gradient(135deg,#7c3aed,#9333ea);">
+            ${ntLayChuCai(ko.hoTen)}
+        </div>
+        <div>
+            <div class="nt-detail-name">${ntEscape(ko.hoTen)}</div>
+            <div class="nt-detail-sub">
+                <span style="display:inline-flex;align-items:center;gap:5px;
+                             background:rgba(124,58,237,0.1);color:#7c3aed;
+                             padding:3px 10px;border-radius:99px;
+                             font-size:11px;font-weight:700;">
+                    <i class="fas fa-user-friends" style="font-size:9px;"></i>
+                    Người ở ghép · Phòng ${ntEscape(chuPhong.SoPhong)}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="nt-detail-sec">
+        <i class="fas fa-id-card"></i> Thông tin cá nhân
+    </div>
+    <div class="nt-detail-grid">
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Họ và tên</div>
+            <div class="nt-detail-val">${ntEscape(ko.hoTen || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Số điện thoại</div>
+            <div class="nt-detail-val">${ntEscape(ko.soDienThoai || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Số CCCD</div>
+            <div class="nt-detail-val">${ntEscape(ko.soCCCD || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Ngày sinh</div>
+            <div class="nt-detail-val">${ntDinhDangNgay(ko.ngaySinh) || '—'}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Giới tính</div>
+            <div class="nt-detail-val">${ntEscape(ko.gioiTinh || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Quan hệ với chủ phòng</div>
+            <div class="nt-detail-val">${ntEscape(ko.quanHe || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Ngày vào ở</div>
+            <div class="nt-detail-val">${ntDinhDangNgay(ko.ngayVao) || '—'}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Chủ phòng</div>
+            <div class="nt-detail-val">${ntEscape(chuPhong.HoTen)}</div>
+        </div>
+        ${ko.ghiChu ? `
+        <div class="nt-detail-item full">
+            <div class="nt-detail-key">Ghi chú</div>
+            <div class="nt-detail-val" style="font-weight:400;">${ntEscape(ko.ghiChu)}</div>
+        </div>` : ''}
+    </div>`;
+
+    ntMoOverlay('nt-detail-overlay');
+}
+
+window.ntXemChiTietGhep = ntXemChiTietGhep;
 function ntDongModalDetail(e) {
     // ✅ Dùng đúng id có trong HTML
     if (e && e.target !== document.getElementById('nt-detail-overlay')) return;
@@ -1729,3 +1937,417 @@ async function ntLuuNguoiThue() {
         btn.innerHTML = '<i class="fas fa-check"></i> <span id="nt-btn-submit-label">Thêm người thuê</span>';
     }
 }
+(function () {
+    'use strict';
+
+    const _S = {
+        buocHienTai: 1,
+        phongDaChon: null,
+        danhSachPhong: [],
+        dangTai: false,
+    };
+
+    function _escape(s) {
+        return String(s || '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function _fmtTien(v) {
+        return new Intl.NumberFormat('vi-VN').format(v || 0) + 'đ';
+    }
+    function _getChuCai(ten) {
+        if (!ten) return '?';
+        const parts = String(ten).trim().split(/\s+/);
+        return (parts[parts.length - 1]?.[0] || '?').toUpperCase();
+    }
+    function _getEl(id) { return document.getElementById(id); }
+    function _setErr(id, msg) { const el = _getEl(id); if (el) el.textContent = msg; }
+    function _clearErrs() {
+        ['og-err-phong', 'og-err-ho-ten', 'og-err-username',
+            'og-err-password', 'og-err-sdt', 'og-err-email',
+            'og-err-cccd', 'og-err-ngay-vao'].forEach(id => _setErr(id, ''));
+    }
+
+    function _capNhatBuoc(buoc) {
+        _S.buocHienTai = buoc;
+        [1, 2, 3].forEach(b => {
+            const el = _getEl(`og-buoc-${b}`);
+            if (el) el.style.display = b === buoc ? 'block' : 'none';
+        });
+        [1, 2, 3].forEach(b => {
+            const dot = _getEl(`og-step-${b}-dot`);
+            if (!dot) return;
+            dot.classList.remove('active', 'done');
+            if (b < buoc) dot.classList.add('done');
+            if (b === buoc) dot.classList.add('active');
+        });
+        document.querySelectorAll('.og-step-line').forEach((line, i) => {
+            line.classList.toggle('done', (i + 1) < buoc);
+        });
+        const labels = ['', 'Bước 1 / 3 — Chọn phòng',
+            'Bước 2 / 3 — Thông tin tài khoản',
+            'Bước 3 / 3 — Thông tin cá nhân'];
+        const ft = _getEl('og-step-label-ft');
+        if (ft) ft.textContent = labels[buoc] || '';
+        const btnBack = _getEl('og-btn-back');
+        const btnNext = _getEl('og-btn-next');
+        const btnSubmit = _getEl('og-btn-submit');
+        if (btnBack) btnBack.style.display = buoc > 1 ? '' : 'none';
+        if (btnNext) btnNext.style.display = buoc < 3 ? '' : 'none';
+        if (btnSubmit) btnSubmit.style.display = buoc === 3 ? '' : 'none';
+    }
+
+    /* ── Room card renderer ── */
+    function _renderPickerGrid(list) {
+        const loading = _getEl('og-picker-loading');
+        const grid = _getEl('og-picker-grid');
+        const empty = _getEl('og-picker-empty');
+
+        if (loading) loading.style.display = 'none';
+
+        if (!list.length) {
+            if (grid) grid.style.display = 'none';
+            if (empty) empty.style.display = 'block';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+        if (grid) grid.style.display = 'grid';
+
+        const badgeCls = {
+            'Trống': 'rp-badge-trong',
+            'Đã thuê': 'rp-badge-datthue',
+            'Đang sửa': 'rp-badge-suachua',
+        };
+
+        grid.innerHTML = list.map(p => {
+            const isSelected = _S.phongDaChon && _S.phongDaChon.idPhong === p.idPhong;
+            const tenChu = p.hopDong?.tenChuPhong || '—';
+            const soNguoi = p.hopDong?.soNguoiOHienTai ?? 0;
+
+            return `
+            <div class="rp-card ${isSelected ? 'selected' : ''}"
+                 onclick="oGhep._chonPhong(${p.idPhong})">
+              <div class="rp-check"><i class="fas fa-check"></i></div>
+              <div class="rp-so-phong">P.${_escape(p.soPhong)}</div>
+              <div class="rp-tang">Khu ${_escape(String(p.khu))}</div>
+              <span class="rp-badge ${badgeCls[p.trangThai] || 'rp-badge-trong'}">
+                ${_escape(p.trangThai)}
+              </span>
+              <div class="rp-gia">${_fmtTien(p.giaPhongFix)}/tháng</div>
+
+              <!-- Tên chủ phòng (new) -->
+              <div style="margin-top:6px;padding-top:6px;
+                          border-top:1px solid var(--mau-vien);
+                          font-size:11px;color:var(--mau-chu);
+                          font-weight:700;white-space:nowrap;
+                          overflow:hidden;text-overflow:ellipsis;"
+                   title="${_escape(tenChu)}">
+                <i class="fas fa-user" style="font-size:9px;
+                   color:#0891b2;margin-right:3px;"></i>
+                ${_escape(tenChu)}
+              </div>
+
+              ${soNguoi > 0 ? `
+              <div style="font-size:10.5px;color:#0891b2;margin-top:3px;">
+                <i class="fas fa-users" style="font-size:9px;"></i>
+                ${soNguoi} người đang ở
+              </div>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    /* ── Public API ── */
+    const pub = {
+
+        moModal() {
+            _clearErrs();
+            _S.buocHienTai = 1;
+            _S.phongDaChon = null;
+            this._resetForm();
+            _capNhatBuoc(1);
+            const overlay = _getEl('og-modal-overlay');
+            if (overlay) overlay.classList.add('mo');
+            document.body.style.overflow = 'hidden';
+        },
+
+        dongModal() {
+            const overlay = _getEl('og-modal-overlay');
+            if (overlay) overlay.classList.remove('mo');
+            document.body.style.overflow = '';
+        },
+
+        dongNeuClick(e) {
+            if (e && e.target === _getEl('og-modal-overlay')) this.dongModal();
+        },
+
+        /* Gọi API thật, lấy phòng đang thuê kèm tên chủ phòng */
+        async moPickerPhong() {
+            const overlay = _getEl('og-picker-overlay');
+            if (overlay) overlay.classList.add('mo');
+
+            _getEl('og-picker-search').value = '';
+            _getEl('og-picker-filter-tt').value = 'Đã thuê';
+
+            // Nếu đã có cache, chỉ lọc lại
+            if (_S.danhSachPhong.length > 0) {
+                this.locPicker();
+                return;
+            }
+
+            // Hiện loading
+            const loading = _getEl('og-picker-loading');
+            const grid = _getEl('og-picker-grid');
+            const empty = _getEl('og-picker-empty');
+            if (loading) loading.style.display = 'flex';
+            if (grid) grid.style.display = 'none';
+            if (empty) empty.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/ChuTroQuanLyNguoiThue/ds-phong-dang-thue');
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.message || 'Lỗi API');
+
+                _S.danhSachPhong = data.danhSach;
+                this.locPicker();
+            } catch (err) {
+                console.error('[oGhep] moPickerPhong:', err);
+                if (loading) loading.innerHTML =
+                    '<i class="fas fa-exclamation-triangle" style="color:var(--mau-do);margin-right:6px;"></i>' +
+                    'Không tải được danh sách phòng';
+                if (typeof hienToast === 'function')
+                    hienToast('Lỗi tải danh sách phòng: ' + err.message, 'error');
+            }
+        },
+
+        dongPicker() {
+            const overlay = _getEl('og-picker-overlay');
+            if (overlay) overlay.classList.remove('mo');
+        },
+
+        dongPickerNeuClick(e) {
+            if (e && e.target === _getEl('og-picker-overlay')) this.dongPicker();
+        },
+
+        locPicker() {
+            const keyword = (_getEl('og-picker-search')?.value || '').toLowerCase().trim();
+            const tt = _getEl('og-picker-filter-tt')?.value || '';
+
+            const filtered = _S.danhSachPhong.filter(p => {
+                const matchTT = !tt || p.trangThai === tt;
+                const matchKey = !keyword
+                    || String(p.soPhong).toLowerCase().includes(keyword)
+                    || String(p.khu).includes(keyword)
+                    || (p.hopDong?.tenChuPhong || '').toLowerCase().includes(keyword);
+                return matchTT && matchKey;
+            });
+            _renderPickerGrid(filtered);
+        },
+
+        _chonPhong(idPhong) {
+            const phong = _S.danhSachPhong.find(p => p.idPhong === idPhong);
+            if (!phong) return;
+
+            _S.phongDaChon = phong;
+
+            const inp = _getEl('og-inp-id-phong');
+            if (inp) inp.value = idPhong;
+
+            const tenChu = phong.hopDong?.tenChuPhong || '—';
+            const txt = _getEl('og-phong-display-text');
+            if (txt) {
+                txt.textContent = `Phòng ${phong.soPhong} — Khu ${phong.khu}`;
+                txt.style.color = 'var(--mau-chu)';
+            }
+            _setErr('og-err-phong', '');
+
+            // Preview
+            const preview = _getEl('og-phong-preview');
+            const pgrid = _getEl('og-phong-preview-grid');
+            if (preview && pgrid) {
+                pgrid.innerHTML = [
+                    { k: 'Số phòng', v: `Phòng ${phong.soPhong}` },
+                    { k: 'Khu', v: `Khu ${phong.khu}` },
+                    { k: 'Chủ phòng', v: tenChu },
+                    { k: 'Giá thuê', v: `${_fmtTien(phong.giaPhongFix)}/tháng` },
+                    { k: 'Đang ở', v: `${phong.hopDong?.soNguoiOHienTai ?? 0} người` },
+                ].map(item => `
+                    <div class="og-preview-item">
+                      <div class="og-preview-key">${item.k}</div>
+                      <div class="og-preview-val">${_escape(item.v)}</div>
+                    </div>`).join('');
+                preview.style.display = 'block';
+            }
+
+            // Occupants list
+            const wrap = _getEl('og-occupants-wrap');
+            const list = _getEl('og-occupants-list');
+            const nguoiO = phong.hopDong?.nguoiO || [];
+            if (wrap && list && nguoiO.length > 0) {
+                list.innerHTML = nguoiO.map(n => `
+                    <div class="og-occupant-row">
+                      <div class="og-occupant-ava"
+                           style="${n.isChinhChu
+                        ? 'background:linear-gradient(135deg,var(--mau-chu-de),var(--mau-chu-de-sang));'
+                        : ''}">
+                        ${_getChuCai(n.hoTen)}
+                      </div>
+                      <div style="flex:1;min-width:0;">
+                        <div class="og-occupant-name">
+                          ${_escape(n.hoTen)}
+                          ${n.isChinhChu
+                        ? `<span style="font-size:9.5px;background:#fef3c7;color:#b45309;
+                                             padding:1px 6px;border-radius:99px;font-weight:700;
+                                             margin-left:5px;">Chủ phòng</span>`
+                        : ''}
+                        </div>
+                        <div class="og-occupant-room">
+                          ${_escape(n.soDienThoai || '—')}
+                        </div>
+                      </div>
+                    </div>`).join('');
+                wrap.style.display = 'block';
+            } else {
+                if (wrap) wrap.style.display = 'none';
+            }
+
+            // Re-render để cập nhật trạng thái selected
+            this.locPicker();
+            this.dongPicker();
+        },
+
+        _validateBuoc(buoc) {
+            _clearErrs();
+            let ok = true;
+            if (buoc === 1) {
+                if (!_getEl('og-inp-id-phong')?.value) {
+                    _setErr('og-err-phong', 'Vui lòng chọn phòng');
+                    ok = false;
+                }
+            }
+            if (buoc === 2) {
+                const hoTen = (_getEl('og-inp-ho-ten')?.value || '').trim();
+                const uname = (_getEl('og-inp-username')?.value || '').trim();
+                const pwd = (_getEl('og-inp-password')?.value || '').trim();
+                const sdt = (_getEl('og-inp-sdt')?.value || '').replace(/\s/g, '');
+                const email = (_getEl('og-inp-email')?.value || '').trim();
+                if (!hoTen) { _setErr('og-err-ho-ten', 'Họ tên không được để trống'); ok = false; }
+                if (!uname) { _setErr('og-err-username', 'Tên đăng nhập không được để trống'); ok = false; }
+                else if (!/^[a-zA-Z0-9_]{3,50}$/.test(uname)) {
+                    _setErr('og-err-username', 'Username chỉ gồm chữ, số, gạch dưới (3–50 ký tự)');
+                    ok = false;
+                }
+                if (!pwd) { _setErr('og-err-password', 'Mật khẩu không được để trống'); ok = false; }
+                else if (pwd.length < 6) { _setErr('og-err-password', 'Mật khẩu tối thiểu 6 ký tự'); ok = false; }
+                if (!sdt) { _setErr('og-err-sdt', 'Số điện thoại không được để trống'); ok = false; }
+                else if (!/^0[0-9]{9}$/.test(sdt)) {
+                    _setErr('og-err-sdt', 'Số điện thoại phải 10 chữ số, bắt đầu bằng 0');
+                    ok = false;
+                }
+                if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    _setErr('og-err-email', 'Email không đúng định dạng');
+                    ok = false;
+                }
+            }
+            if (buoc === 3) {
+                const ngayVao = (_getEl('og-inp-ngay-vao')?.value || '').trim();
+                const cccd = (_getEl('og-inp-cccd')?.value || '').trim();
+                if (!ngayVao) { _setErr('og-err-ngay-vao', 'Vui lòng chọn ngày vào ở'); ok = false; }
+                if (cccd && !/^[0-9]{9}$|^[0-9]{12}$/.test(cccd)) {
+                    _setErr('og-err-cccd', 'CCCD phải là 9 hoặc 12 chữ số');
+                    ok = false;
+                }
+            }
+            return ok;
+        },
+
+        buocTiep() { if (!this._validateBuoc(_S.buocHienTai)) return; if (_S.buocHienTai < 3) _capNhatBuoc(_S.buocHienTai + 1); },
+        buocTruoc() { if (_S.buocHienTai > 1) _capNhatBuoc(_S.buocHienTai - 1); },
+
+        togglePw(inputId, btn) {
+            const inp = _getEl(inputId);
+            if (!inp) return;
+            const hidden = inp.type === 'password';
+            inp.type = hidden ? 'text' : 'password';
+            const icon = btn.querySelector('i');
+            if (icon) icon.className = hidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+        },
+
+        async luuNguoiOGhep() {
+            if (!this._validateBuoc(3)) return;
+            const btn = _getEl('og-btn-submit');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...'; }
+
+            const payload = {
+                IDPhong: parseInt(_getEl('og-inp-id-phong')?.value) || null,
+                HoTen: (_getEl('og-inp-ho-ten')?.value || '').trim(),
+                Username: (_getEl('og-inp-username')?.value || '').trim(),
+                Passwords: (_getEl('og-inp-password')?.value || '').trim(),
+                Phone: (_getEl('og-inp-sdt')?.value || '').replace(/\s/g, ''),
+                Email: (_getEl('og-inp-email')?.value || '').trim() || null,
+                Roles: 'Tenant',
+                SoCCCD: (_getEl('og-inp-cccd')?.value || '').trim(),
+                NgaySinh: _getEl('og-inp-ngay-sinh')?.value || null,
+                GioiTinh: _getEl('og-inp-gioi-tinh')?.value || null,
+                QueQuan: (_getEl('og-inp-que-quan')?.value || '').trim(),
+                NgayVaoO: _getEl('og-inp-ngay-vao')?.value || null,
+                QuanHe: _getEl('og-inp-quan-he')?.value || null,
+                GhiChu: (_getEl('og-inp-ghi-chu')?.value || '').trim(),
+            };
+
+            try {
+                const response = await fetch('/api/ChuTroThemNguoiThue/them-nguoi-o-ghep', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${layToken()}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Lỗi không xác định');
+
+                if (typeof hienToast === 'function')
+                    hienToast(`Đã thêm người ở ghép "${payload.HoTen}" vào phòng ${_S.phongDaChon?.soPhong} thành công!`, 'success');
+
+                this.dongModal();
+                // Xóa cache để lần sau load lại
+                _S.danhSachPhong = [];
+                _S.phongDaChon = null;
+
+                if (typeof ntTaiDuLieu === 'function') ntTaiDuLieu();
+
+            } catch (e) {
+                if (typeof hienToast === 'function') hienToast('Lỗi: ' + e.message, 'error');
+                console.error('[oGhep] luuNguoiOGhep:', e);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Thêm người ở ghép';
+                }
+            }
+        },
+
+        _resetForm() {
+            ['og-inp-id-phong', 'og-inp-ho-ten', 'og-inp-username', 'og-inp-password',
+                'og-inp-sdt', 'og-inp-email', 'og-inp-cccd', 'og-inp-ngay-sinh',
+                'og-inp-que-quan', 'og-inp-ngay-vao', 'og-inp-ghi-chu']
+                .forEach(id => { const el = _getEl(id); if (el) el.value = ''; });
+            ['og-inp-gioi-tinh', 'og-inp-quan-he']
+                .forEach(id => { const el = _getEl(id); if (el) el.selectedIndex = 0; });
+
+            const txt = _getEl('og-phong-display-text');
+            if (txt) { txt.textContent = '-- Chọn phòng đang thuê --'; txt.style.color = 'var(--mau-chu-phu)'; }
+            const preview = _getEl('og-phong-preview');
+            if (preview) preview.style.display = 'none';
+            const wrap = _getEl('og-occupants-wrap');
+            if (wrap) wrap.style.display = 'none';
+            const ngayVao = _getEl('og-inp-ngay-vao');
+            if (ngayVao) ngayVao.value = new Date().toISOString().split('T')[0];
+            _clearErrs();
+            _S.phongDaChon = null;
+        },
+    };
+
+    window.oGhep = pub;
+})();

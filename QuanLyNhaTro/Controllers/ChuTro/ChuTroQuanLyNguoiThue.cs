@@ -24,7 +24,6 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 .OrderByDescending(hd => hd.NgayBatDau)
                 .Select(hd => new
                 {
-                    // HOPDONG fields
                     hd.IDHopDong,
                     hd.IDUser,
                     hd.IDPhong,
@@ -36,17 +35,13 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     hd.DienDauKy,
                     hd.NuocDauKy,
 
-                    // ACCOUNT fields
                     TenKhachThue = hd.Tenant.FullName,
                     SoDienThoai = hd.Tenant.Phone,
                     Email = hd.Tenant.Email,
                     Username = hd.Tenant.Username,
                     IsActive = hd.Tenant.IsActive,
-
-                    // PHONG fields
                     SoPhong = hd.Phong.SoPhong,
 
-                    // KHACH_THUE fields — join qua IDUser-
                     KhachThue = _context.KHACH_THUE
                         .Where(kt => kt.IDUser == hd.IDUser)
                         .Select(kt => new {
@@ -63,6 +58,25 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                             kt.NgayVaoO,
                         })
                         .FirstOrDefault(),
+
+                    // ── THÊM MỚI: Danh sách người ở ghép ──
+                    NguoiOGhep = hd.KhachO
+                        .Where(ko => ko.NgayRa == null && ko.IsChinhChu == false)
+                        .Select(ko => new {
+                            ko.IDKhachO,
+                            ko.IDUser,
+                            ko.HoTen,
+                            ko.SoCCCD,
+                            ko.NgaySinh,
+                            ko.GioiTinh,
+                            ko.SoDienThoai,
+                            ko.QuanHe,
+                            ko.IsChinhChu,
+                            ko.NgayVao,
+                            ko.NgayRa,
+                            ko.GhiChu,
+                        })
+                        .ToList(),
 
                     SoNgayConLai = hd.NgayKetThuc.HasValue
                         ? (int?)EF.Functions.DateDiffDay(DateTime.UtcNow, hd.NgayKetThuc.Value)
@@ -201,6 +215,52 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 return NotFound(new { success = false });
 
             return Ok(new { success = true, username = acc.Username, email = acc.Email });
+        }
+        [HttpGet("ds-phong-dang-thue")]
+        public async Task<IActionResult> GetPhongDangThue()
+        {
+            var dsPhong = await _context.PHONG
+                .AsNoTracking()
+                .Where(p => p.TrangThai == "Đã thuê")
+                .OrderBy(p => p.Khu)
+                .ThenBy(p => p.SoPhong)
+                .Select(p => new
+                {
+                    p.IDPhong,
+                    p.SoPhong,
+                    p.Khu,
+                    p.DienTich,
+                    p.GiaPhongFix,
+                    p.TrangThai,
+                    p.soluong,
+
+                    // Lấy hợp đồng đang hiệu lực, kèm danh sách người ở
+                    HopDong = p.HopDongs
+                        .Where(hd => hd.TrangThaiHD == "Đang hiệu lực")
+                        .OrderByDescending(hd => hd.NgayBatDau)
+                        .Select(hd => new
+                        {
+                            hd.IDHopDong,
+                            TenChuPhong = hd.Tenant.FullName,
+                            SdtChuPhong = hd.Tenant.Phone,
+                            SoNguoiOHienTai = hd.KhachO
+                                .Count(ko => ko.NgayRa == null),
+                            NguoiO = hd.KhachO
+                                .Where(ko => ko.NgayRa == null)
+                                .Select(ko => new
+                                {
+                                    ko.IDKhachO,
+                                    ko.HoTen,
+                                    ko.SoDienThoai,
+                                    ko.IsChinhChu
+                                })
+                                .ToList()
+                        })
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, danhSach = dsPhong });
         }
     }
 }
