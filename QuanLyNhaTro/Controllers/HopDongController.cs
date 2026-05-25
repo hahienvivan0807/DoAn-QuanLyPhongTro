@@ -16,7 +16,7 @@ namespace QuanLyNhaTro.Controllers.Api
         }
 
         // ================================================================
-        // Helper: Tính trạng thái hiển thị từ TrangThaiHD + ngày kết thúc
+        // HELPER: Tính trạng thái hiển thị (JS-friendly)
         // ================================================================
         private static string TinhTrangThai(string trangThaiHD, DateTime? ngayKetThuc)
         {
@@ -34,7 +34,7 @@ namespace QuanLyNhaTro.Controllers.Api
 
         // ================================================================
         // GET /api/HopDong/danh-sach-hop-dong
-        // Trả về toàn bộ hợp đồng kèm thông tin phòng + người thuê
+        // Trả về danh sách hợp đồng – khớp 100% với fetchContracts() trong JS
         // ================================================================
         [HttpGet("danh-sach-hop-dong")]
         public async Task<IActionResult> DanhSachHopDong()
@@ -56,14 +56,14 @@ namespace QuanLyNhaTro.Controllers.Api
                     tenantId = hd.IDUser,
                     startDate = hd.NgayBatDau,
                     endDate = hd.NgayKetThuc,
-                    monthlyRent = hd.Phong.GiaPhongFix,
+                    // FIX 1: trả về giá chốt cứng lúc ký, KHÔNG lấy từ PHONG nữa
+                    monthlyRent = hd.GiaThueChot,
                     deposit = hd.TienCocBanDau,
                     trangThaiHD = hd.TrangThaiHD,
                     note = hd.GhiChu,
                 })
                 .ToListAsync();
 
-            // Gắn status JS-friendly sau khi query
             var result = list.Select(hd => new
             {
                 hd.contractId,
@@ -87,7 +87,7 @@ namespace QuanLyNhaTro.Controllers.Api
 
         // ================================================================
         // GET /api/HopDong/chi-tiet/{id}
-        // Trả về chi tiết 1 hợp đồng (kèm CCCD, email từ KHACH_THUE)
+        // Chi tiết 1 hợp đồng – dùng cho openDetailModal() và openEditModal()
         // ================================================================
         [HttpGet("chi-tiet/{id:int}")]
         public async Task<IActionResult> ChiTiet(int id)
@@ -100,10 +100,28 @@ namespace QuanLyNhaTro.Controllers.Api
 
             if (hd == null) return NotFound(new { message = "Không tìm thấy hợp đồng" });
 
-            // Lấy thêm CCCD từ bảng KHACH_THUE nếu có
             var khachThue = await _db.KHACH_THUE
                 .AsNoTracking()
                 .FirstOrDefaultAsync(k => k.IDUser == hd.IDUser);
+
+            // FIX 2: Đếm số người đang ở ghép hiện tại
+            var soKhachGhep = await _db.HOPDONG_KHACHO
+                .CountAsync(k => k.IDHopDong == id && k.NgayRa == null);
+
+            // FIX 4: Danh sách dịch vụ đang dùng
+            var dichVu = await _db.HOPDONG_DICHVU
+                .Where(dv => dv.IDHopDong == id && dv.TrangThai == "Đang dùng")
+                .Select(dv => new
+                {
+                    dv.IDHDDichVu,
+                    dv.MaDichVu,
+                    dv.TenDichVu,
+                    dv.DonGiaChot,
+                    dv.DonVi,
+                    dv.SoLuong,
+                    tongTien = dv.DonGiaChot * dv.SoLuong,
+                })
+                .ToListAsync();
 
             return Ok(new
             {
@@ -118,17 +136,26 @@ namespace QuanLyNhaTro.Controllers.Api
                 tenantId = hd.IDUser,
                 startDate = hd.NgayBatDau.ToString("yyyy-MM-dd"),
                 endDate = hd.NgayKetThuc?.ToString("yyyy-MM-dd"),
-                monthlyRent = hd.Phong.GiaPhongFix,
+                // FIX 1: giá chốt cứng lúc ký
+                monthlyRent = hd.GiaThueChot,
                 deposit = hd.TienCocBanDau,
                 note = hd.GhiChu,
                 paymentCycle = "Hàng tháng",
                 status = TinhTrangThai(hd.TrangThaiHD, hd.NgayKetThuc),
+                // FIX 2: số người ở ghép
+                soKhachGhep,
+                // FIX 4: dịch vụ đang dùng
+                dichVu,
+                // FIX 3: thông tin thanh lý (nếu đã kết thúc)
+                ngayThanhLy = hd.NgayThanhLy?.ToString("yyyy-MM-dd"),
+                tienCocHoanTra = hd.TienCocHoanTra,
+                lyDoKetThuc = hd.LyDoKetThuc,
             });
         }
 
         // ================================================================
         // POST /api/HopDong/them-hop-dong
-        // Tạo hợp đồng mới
+        // Tạo hợp đồng mới – khớp với createContract() trong JS
         // ================================================================
         [HttpPost("them-hop-dong")]
         public async Task<IActionResult> ThemHopDong([FromBody] HopDongRequest req)
@@ -136,21 +163,22 @@ namespace QuanLyNhaTro.Controllers.Api
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Kiểm tra phòng tồn tại
             var phong = await _db.PHONG.FindAsync(req.RoomId);
             if (phong == null)
                 return BadRequest(new { message = "Phòng không tồn tại" });
 
-            // Kiểm tra người thuê tồn tại
             var tenant = await _db.ACCOUNT.FindAsync(req.TenantId);
             if (tenant == null)
                 return BadRequest(new { message = "Người thuê không tồn tại" });
 
-            // Kiểm tra phòng đã có hợp đồng đang hiệu lực chưa
             var hopDongHienTai = await _db.HOPDONG
                 .AnyAsync(h => h.IDPhong == req.RoomId && h.TrangThaiHD == "Đang hiệu lực");
             if (hopDongHienTai)
                 return BadRequest(new { message = "Phòng này đang có hợp đồng hiệu lực" });
+
+            // FIX 1: Snapshot giá tại thời điểm ký – KHÔNG phụ thuộc PHONG sau này
+            // Ưu tiên giá từ form (monthlyRent), fallback về GiaPhongFix
+            var giaThueChot = req.MonthlyRent > 0 ? req.MonthlyRent : phong.GiaPhongFix;
 
             var hopDong = new HOPDONG
             {
@@ -159,6 +187,7 @@ namespace QuanLyNhaTro.Controllers.Api
                 NgayBatDau = req.StartDate,
                 NgayKetThuc = req.EndDate,
                 TienCocBanDau = req.Deposit,
+                GiaThueChot = giaThueChot,   // FIX 1
                 TrangThaiHD = "Đang hiệu lực",
                 GhiChu = req.Note,
                 CreatedAt = DateTime.UtcNow,
@@ -166,8 +195,27 @@ namespace QuanLyNhaTro.Controllers.Api
             };
 
             _db.HOPDONG.Add(hopDong);
+            await _db.SaveChangesAsync(); // SaveChanges để lấy IDHopDong
 
-            // Cập nhật trạng thái phòng → Đã thuê
+            // FIX 2: Tự động thêm người đại diện vào HOPDONG_KHACHO
+            var khachThue = await _db.KHACH_THUE
+                .AsNoTracking()
+                .FirstOrDefaultAsync(k => k.IDUser == req.TenantId);
+
+            _db.HOPDONG_KHACHO.Add(new HOPDONG_KHACHO
+            {
+                IDHopDong = hopDong.IDHopDong,
+                IDUser = req.TenantId,
+                HoTen = tenant.FullName,
+                SoCCCD = khachThue?.SoCCCD,
+                SoDienThoai = tenant.Phone,
+                QuanHe = "Đại diện",
+                IsChinhChu = true,
+                NgayVao = req.StartDate,
+                CreatedAt = DateTime.UtcNow,
+            });
+
+            // Cập nhật trạng thái phòng
             phong.TrangThai = "Đã thuê";
 
             await _db.SaveChangesAsync();
@@ -182,7 +230,7 @@ namespace QuanLyNhaTro.Controllers.Api
 
         // ================================================================
         // PUT /api/HopDong/cap-nhat/{id}
-        // Cập nhật hợp đồng
+        // Cập nhật thông tin hợp đồng – khớp với updateContract() trong JS
         // ================================================================
         [HttpPut("cap-nhat/{id:int}")]
         public async Task<IActionResult> CapNhat(int id, [FromBody] HopDongRequest req)
@@ -196,62 +244,14 @@ namespace QuanLyNhaTro.Controllers.Api
             hd.GhiChu = req.Note;
             hd.UpdatedAt = DateTime.UtcNow;
 
-            // Map status từ JS về TrangThaiHD
-            hd.TrangThaiHD = req.Status switch
-            {
-                "settled" => "Đã kết thúc",
-                "expired" => "Đã hết hạn",
-                _ => "Đang hiệu lực",
-            };
+            // FIX 1: Chỉ cập nhật GiaThueChot nếu người dùng truyền lên (> 0)
+            // Không ghi đè snapshot cũ nếu form không truyền giá mới
+            if (req.MonthlyRent > 0)
+                hd.GiaThueChot = req.MonthlyRent;
 
             await _db.SaveChangesAsync();
 
             return Ok(new { message = "Cập nhật hợp đồng thành công" });
         }
-
-        // ================================================================
-        // DELETE /api/HopDong/xoa/{id}
-        // Xóa (thanh lý) hợp đồng – chuyển trạng thái, không xóa vật lý
-        // ================================================================
-        [HttpDelete("xoa/{id:int}")]
-        public async Task<IActionResult> Xoa(int id)
-        {
-            var hd = await _db.HOPDONG
-                .Include(h => h.Phong)
-                .FirstOrDefaultAsync(h => h.IDHopDong == id);
-
-            if (hd == null) return NotFound(new { message = "Không tìm thấy hợp đồng" });
-
-            // Soft delete: đổi trạng thái thay vì xóa thật
-            hd.TrangThaiHD = "Đã hủy";
-            hd.NgayKetThuc = DateTime.Today;
-            hd.UpdatedAt = DateTime.UtcNow;
-
-            // Trả phòng về trống nếu không còn HĐ nào hiệu lực
-            var conHdKhac = await _db.HOPDONG
-                .AnyAsync(h => h.IDPhong == hd.IDPhong
-                            && h.IDHopDong != id
-                            && h.TrangThaiHD == "Đang hiệu lực");
-            if (!conHdKhac)
-                hd.Phong.TrangThai = "Trống";
-
-            await _db.SaveChangesAsync();
-
-            return Ok(new { message = "Đã hủy hợp đồng thành công" });
-        }
-    }
-
-    // ================================================================
-    // DTO – Request body cho thêm / cập nhật
-    // ================================================================
-    public class HopDongRequest
-    {
-        public int TenantId { get; set; }
-        public int RoomId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public decimal Deposit { get; set; }
-        public string? Note { get; set; }
-        public string? Status { get; set; }
     }
 }

@@ -104,7 +104,7 @@ namespace QuanLyNhaTro.Models
         [StringLength(10)]
         public string SoPhong { get; set; } = null!;
 
-        public byte Tang { get; set; } = 1;
+        public byte Khu { get; set; } = 1;
         public int soluong { get; set; }
 
         [Column(TypeName = "decimal(6, 2)")]
@@ -204,6 +204,25 @@ namespace QuanLyNhaTro.Models
 
         public DateTime UpdatedAt { get; set; }
 
+        // ── FIX 1: Giá thuê chốt cứng tại thời điểm ký ─────────────
+        // Snapshot từ PHONG.GiaPhongFix, không thay đổi khi phòng tăng giá
+        [Required]
+        [Column(TypeName = "decimal(15, 2)")]
+        public decimal GiaThueChot { get; set; } = 0;
+
+        // ── FIX 3: Thông tin thanh lý hợp đồng ──────────────────────
+        [Column(TypeName = "date")]
+        public DateTime? NgayThanhLy { get; set; }
+
+        [Column(TypeName = "decimal(15, 2)")]
+        public decimal? TienCocHoanTra { get; set; }
+
+        [StringLength(500)]
+        public string? LyDoKetThuc { get; set; }
+
+        public int? IDManagerThanhLy { get; set; }
+
+        // Navigation Properties
         [ForeignKey("IDUser")]
         public virtual ACCOUNT Tenant { get; set; } = null!;
 
@@ -212,6 +231,15 @@ namespace QuanLyNhaTro.Models
 
         [ForeignKey("IDManager")]
         public virtual ACCOUNT? Manager { get; set; }
+
+        [ForeignKey("IDManagerThanhLy")]
+        public virtual ACCOUNT? ManagerThanhLy { get; set; }
+
+        // FIX 2: Danh sách người ở ghép
+        public virtual ICollection<HOPDONG_KHACHO> KhachO { get; set; } = new List<HOPDONG_KHACHO>();
+
+        // FIX 4: Danh sách dịch vụ đăng ký
+        public virtual ICollection<HOPDONG_DICHVU> DichVus { get; set; } = new List<HOPDONG_DICHVU>();
     }
 
     // ================================================================
@@ -629,6 +657,124 @@ namespace QuanLyNhaTro.Models
     }
 
     // ================================================================
+    // 14. HOPDONG_KHACHO — Danh sách người ở ghép trong hợp đồng
+    // FIX 2: Thay thế việc chỉ lưu 1 IDUser trên HOPDONG
+    // ================================================================
+    [Table("HOPDONG_KHACHO")]
+    public class HOPDONG_KHACHO
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int IDKhachO { get; set; }
+
+        [Required]
+        public int IDHopDong { get; set; }
+
+        [Required]
+        public int IDUser { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string HoTen { get; set; } = null!;
+
+        [StringLength(15)]
+        public string? SoCCCD { get; set; }
+
+        [Column(TypeName = "date")]
+        public DateTime? NgaySinh { get; set; }
+
+        [StringLength(10)]
+        public string? GioiTinh { get; set; }
+
+        [StringLength(15)]
+        public string? SoDienThoai { get; set; }
+
+        /// <summary>Đại diện | Vợ/Chồng | Anh/Em | Bạn bè...</summary>
+        [StringLength(50)]
+        public string? QuanHe { get; set; }
+
+        /// <summary>true = người đại diện ký hợp đồng. Mỗi HĐ có đúng 1 chính chủ.</summary>
+        public bool IsChinhChu { get; set; } = false;
+
+        [Required]
+        [Column(TypeName = "date")]
+        public DateTime NgayVao { get; set; }
+
+        /// <summary>NULL = đang ở, có giá trị = đã rời phòng</summary>
+        [Column(TypeName = "date")]
+        public DateTime? NgayRa { get; set; }
+
+        [StringLength(200)]
+        public string? GhiChu { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        // Navigation Properties
+        [ForeignKey("IDHopDong")]
+        public virtual HOPDONG HopDong { get; set; } = null!;
+
+        [ForeignKey("IDUser")]
+        public virtual ACCOUNT Account { get; set; } = null!;
+    }
+
+    // ================================================================
+    // 15. HOPDONG_DICHVU — Dịch vụ cố định hàng tháng theo hợp đồng
+    // FIX 4: Gửi xe, rác, wifi... snapshot giá tại thời điểm đăng ký
+    // ================================================================
+    [Table("HOPDONG_DICHVU")]
+    public class HOPDONG_DICHVU
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int IDHDDichVu { get; set; }
+
+        [Required]
+        public int IDHopDong { get; set; }
+
+        [Required]
+        [StringLength(30)]
+        public string MaDichVu { get; set; } = null!;
+
+        /// <summary>Snapshot tên dịch vụ tại thời điểm đăng ký</summary>
+        [Required]
+        [StringLength(50)]
+        public string TenDichVu { get; set; } = null!;
+
+        /// <summary>Snapshot đơn giá tại thời điểm đăng ký — không đổi khi CONFIG_GIA thay đổi</summary>
+        [Required]
+        [Column(TypeName = "decimal(15, 2)")]
+        public decimal DonGiaChot { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string DonVi { get; set; } = null!;
+
+        public int SoLuong { get; set; } = 1;
+
+        /// <summary>Đang dùng | Đã hủy</summary>
+        [Required]
+        [StringLength(20)]
+        public string TrangThai { get; set; } = "Đang dùng";
+
+        [Required]
+        [Column(TypeName = "date")]
+        public DateTime NgayDangKy { get; set; }
+
+        [Column(TypeName = "date")]
+        public DateTime? NgayHuy { get; set; }
+
+        [StringLength(200)]
+        public string? GhiChu { get; set; }
+
+        // Navigation Properties
+        [ForeignKey("IDHopDong")]
+        public virtual HOPDONG HopDong { get; set; } = null!;
+
+        [ForeignKey("MaDichVu")]
+        public virtual CONFIG_GIA ConfigGia { get; set; } = null!;
+    }
+
+    // ================================================================
     // DbContext
     // ================================================================
     public class QuanLyKhuNhaTro : DbContext
@@ -654,6 +800,8 @@ namespace QuanLyNhaTro.Models
         public DbSet<THONGKE_TONG> THONGKE_TONG { get; set; }
         public DbSet<THONGKE_DOANHTHU_THANG> THONGKE_DOANHTHU_THANG { get; set; }
         public DbSet<KHACH_THUE> KHACH_THUE { get; set; }
+        public DbSet<HOPDONG_KHACHO> HOPDONG_KHACHO { get; set; }   // FIX 2
+        public DbSet<HOPDONG_DICHVU> HOPDONG_DICHVU { get; set; }   // FIX 4
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -717,6 +865,7 @@ namespace QuanLyNhaTro.Models
                 entity.HasIndex(e => e.TrangThaiHD);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.GiaThueChot).HasDefaultValue(0m);
 
                 entity.HasOne(e => e.Tenant)
                       .WithMany(a => a.HopDongTenants)
@@ -732,6 +881,74 @@ namespace QuanLyNhaTro.Models
                       .WithMany(a => a.HopDongManagers)
                       .HasForeignKey(e => e.IDManager)
                       .OnDelete(DeleteBehavior.SetNull);
+
+                // FIX 3: Manager xác nhận thanh lý
+                entity.HasOne(e => e.ManagerThanhLy)
+                      .WithMany()
+                      .HasForeignKey(e => e.IDManagerThanhLy)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                // CHECK constraints
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_HOPDONG_GiaThueChot", "[GiaThueChot] > 0");
+                    t.HasCheckConstraint("CK_HOPDONG_TienCocHoanTra", "[TienCocHoanTra] IS NULL OR [TienCocHoanTra] <= [TienCocBanDau]");
+                    t.HasCheckConstraint("CK_HOPDONG_NgayThanhLy", "[NgayThanhLy] IS NULL OR [NgayThanhLy] >= [NgayBatDau]");
+                });
+            });
+
+            // ── HOPDONG_KHACHO ───────────────────────────────────────
+            modelBuilder.Entity<HOPDONG_KHACHO>(entity =>
+            {
+                entity.HasIndex(e => e.IDHopDong);
+                entity.HasIndex(e => new { e.IDHopDong, e.SoCCCD }).IsUnique();
+                entity.Property(e => e.IsChinhChu).HasDefaultValue(false);
+                entity.Property(e => e.NgayVao).HasDefaultValueSql("CAST(GETDATE() AS DATE)");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+
+                // Filtered unique index: mỗi HĐ chỉ có 1 chính chủ
+                // (Được tạo trực tiếp trong SQL migration, EF chỉ cần biết để không conflict)
+                entity.HasIndex(e => e.IDHopDong)
+                      .HasFilter("[IsChinhChu] = 1")
+                      .IsUnique()
+                      .HasDatabaseName("UQ_KHACHO_ChinhChu");
+
+                entity.HasOne(e => e.HopDong)
+                      .WithMany(h => h.KhachO)
+                      .HasForeignKey(e => e.IDHopDong)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Account)
+                      .WithMany()
+                      .HasForeignKey(e => e.IDUser)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── HOPDONG_DICHVU ───────────────────────────────────────
+            modelBuilder.Entity<HOPDONG_DICHVU>(entity =>
+            {
+                entity.HasIndex(e => new { e.IDHopDong, e.TrangThai });
+                entity.HasIndex(e => new { e.IDHopDong, e.MaDichVu, e.TrangThai }).IsUnique();
+                entity.Property(e => e.SoLuong).HasDefaultValue(1);
+                entity.Property(e => e.TrangThai).HasDefaultValue("Đang dùng");
+                entity.Property(e => e.NgayDangKy).HasDefaultValueSql("CAST(GETDATE() AS DATE)");
+
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_HDDV_TrangThai", "[TrangThai] IN (N'Đang dùng', N'Đã hủy')");
+                    t.HasCheckConstraint("CK_HDDV_SoLuong", "[SoLuong] >= 1");
+                });
+
+                entity.HasOne(e => e.HopDong)
+                      .WithMany(h => h.DichVus)
+                      .HasForeignKey(e => e.IDHopDong)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ConfigGia)
+                      .WithMany()
+                      .HasForeignKey(e => e.MaDichVu)
+                      .HasPrincipalKey(c => c.MaDichVu)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ── DONDV ────────────────────────────────────────────────
@@ -863,5 +1080,43 @@ namespace QuanLyNhaTro.Models
                       .OnDelete(DeleteBehavior.Restrict);
             });
         }
+    }
+
+    // ================================================================
+    // DTO — HopDongRequest
+    // Dùng cho: POST /api/HopDong/them-hop-dong
+    //           PUT  /api/HopDong/cap-nhat/{id}
+    // ================================================================
+    public class HopDongRequest
+    {
+        /// <summary>IDUser của người thuê (ACCOUNT.IDUser với Roles = 'Tenant')</summary>
+        [Required(ErrorMessage = "Vui lòng chọn người thuê")]
+        public int TenantId { get; set; }
+
+        /// <summary>IDPhong của phòng muốn ký hợp đồng</summary>
+        [Required(ErrorMessage = "Vui lòng chọn phòng")]
+        public int RoomId { get; set; }
+
+        /// <summary>Ngày bắt đầu hợp đồng</summary>
+        [Required(ErrorMessage = "Vui lòng nhập ngày bắt đầu")]
+        public DateTime StartDate { get; set; }
+
+        /// <summary>Ngày kết thúc hợp đồng (null = hợp đồng không thời hạn)</summary>
+        public DateTime? EndDate { get; set; }
+
+        /// <summary>Tiền cọc ban đầu. Mặc định 0 nếu không truyền.</summary>
+        [Range(0, double.MaxValue, ErrorMessage = "Tiền cọc không hợp lệ")]
+        public decimal Deposit { get; set; } = 0;
+
+        /// <summary>
+        /// Giá thuê chốt lúc ký hợp đồng (snapshot).
+        /// Nếu = 0, server sẽ tự lấy PHONG.GiaPhongFix làm giá mặc định.
+        /// </summary>
+        [Range(0, double.MaxValue, ErrorMessage = "Giá thuê không hợp lệ")]
+        public decimal MonthlyRent { get; set; } = 0;
+
+        /// <summary>Ghi chú nội bộ cho hợp đồng</summary>
+        [StringLength(500, ErrorMessage = "Ghi chú tối đa 500 ký tự")]
+        public string? Note { get; set; }
     }
 }

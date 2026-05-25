@@ -238,7 +238,7 @@
       padding: 11px 15px;
       border-radius: 8px;
       font-size: 13px;
-      display: none;               /* JS sẽ set display:'flex' */
+      display: none;              
       margin-bottom: 16px;
       align-items: center;
       gap: 8px;
@@ -449,12 +449,6 @@
         <p class="form-desc">Nhập thông tin để truy cập bảng điều khiển quản lý.</p>
       </div>
 
-      <!--
-        THÔNG BÁO — id="thong-bao" (khớp với hàm hienThiThongBao trong Login.js)
-        Cấu trúc bên trong: .thong-bao-icon + .thong-bao-text (bắt buộc đúng class)
-        JS sẽ set: el.className = 'thong-bao loi|thanh-cong|canh-bao'
-                   el.style.display = 'flex'
-      -->
       <div class="thong-bao" id="thong-bao" role="alert">
         <span class="thong-bao-icon">
           <svg viewBox="0 0 24 24"></svg>

@@ -56,7 +56,7 @@ namespace QuanLyNhaTro.Pages.Admin
                 .Include(p => p.HopDongs
                     .Where(hd => hd.TrangThaiHD == "Đang hiệu lực"))
                     .ThenInclude(hd => hd.Tenant)
-                .OrderBy(p => p.Tang)
+                .OrderBy(p => p.Khu)
                 .ThenBy(p => p.SoPhong)
                 .ToListAsync();
 
@@ -65,7 +65,7 @@ namespace QuanLyNhaTro.Pages.Admin
             SoPhongTrong = DanhSachPhong.Count(p => p.TrangThai == "Trống");
             SoPhongDaThue = DanhSachPhong.Count(p => p.TrangThai == "Đã thuê");
             SoPhongDangSua = DanhSachPhong.Count(p => p.TrangThai == "Đang sửa");
-            SoTangToiDa = DanhSachPhong.Any() ? (int)DanhSachPhong.Max(p => p.Tang) : 1;
+            SoTangToiDa = DanhSachPhong.Any() ? (int)DanhSachPhong.Max(p => p.Khu) : 1;
 
             // Serialize dữ liệu cho JavaScript (chỉ gửi các trường cần thiết, không serialize navigation property vòng)
             DanhSachPhongJson = JsonSerializer.Serialize(
@@ -77,7 +77,7 @@ namespace QuanLyNhaTro.Pages.Admin
                     {
                         idPhong = p.IDPhong,
                         soPhong = p.SoPhong,
-                        tang = (int)p.Tang,
+                        tang = (int)p.Khu,
                         soLuong = p.soluong,
                         dienTich = p.DienTich,
                         giaPhongFix = p.GiaPhongFix,
@@ -121,7 +121,7 @@ namespace QuanLyNhaTro.Pages.Admin
             var phongMoi = new PHONG
             {
                 SoPhong = dto.SoPhong.Trim(),
-                Tang = (byte)Math.Clamp(dto.Tang, 1, 20),
+                Khu = (byte)Math.Clamp(dto.Tang, 1, 20),
                 soluong = Math.Max(0, dto.SoLuong),
                 DienTich = dto.DienTich,
                 GiaPhongFix = dto.GiaPhongFix,
@@ -190,7 +190,7 @@ namespace QuanLyNhaTro.Pages.Admin
 
             // Cập nhật các trường theo model PHONG
             phong.SoPhong = dto.SoPhong.Trim();
-            phong.Tang = (byte)Math.Clamp(dto.Tang, 1, 20);
+            phong.Khu = (byte)Math.Clamp(dto.Tang, 1, 20);
             phong.soluong = Math.Max(0, dto.SoLuong);
             phong.DienTich = dto.DienTich;
             phong.GiaPhongFix = dto.GiaPhongFix;

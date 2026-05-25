@@ -92,8 +92,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
             .FirstOrDefaultAsync()
             ?? new ACCOUNT { FullName = "Trần Minh Quân", Phone = "0900111222" };
 
-            NganHang = "";  // TODO: QuanLy?.NganHang
-            SoTaiKhoan = "";  // TODO: QuanLy?.SoTaiKhoan
+            NganHang = "";  
+            SoTaiKhoan = "";  
 
             // 4b. Lấy giá phòng cố định
             GiaPhongCoDinh = hopDong.Phong?.GiaPhongFix ?? 0;

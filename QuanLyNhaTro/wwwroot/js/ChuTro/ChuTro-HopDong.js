@@ -1,7 +1,43 @@
-﻿async function fetchContracts() {
+﻿// ================================================================
+// API BASE – Endpoint thực tế khớp với HopDongController
+// ================================================================
+const API_BASE = '/api/HopDong';
+
+// ================================================================
+// STATE
+// ================================================================
+let allContracts = [];   // toàn bộ data sau khi fetch
+let filtered = [];       // sau filter/search
+let currentPage = 1;
+const PAGE_SIZE = 10;
+let sortKey = 'startDate';
+let sortAsc = false;
+let currentView = 'table';
+let deleteTarget = null;
+let toastTimer;
+
+// ================================================================
+// INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    fetchContracts();
+
+    // Đóng modal khi click overlay
+    document.getElementById('contractModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+    document.getElementById('confirmOverlay').addEventListener('click', function (e) {
+        if (e.target === this) closeConfirm();
+    });
+});
+
+// ================================================================
+// API – LẤY DANH SÁCH HỢP ĐỒNG
+// ================================================================
+async function fetchContracts() {
     showTableLoading();
     try {
-        const resp = await fetch(`/api/HopDong/danh-sach-hop-dong`, {
+        const resp = await fetch(`${API_BASE}/danh-sach-hop-dong`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -19,9 +55,9 @@
         showTableError('Không thể tải dữ liệu. Vui lòng thử lại.');
     }
 }
+
 function populateRoomFilter(contracts) {
     const roomSel = document.getElementById('roomFilter');
-    // Xóa option cũ (trừ "Tất cả phòng")
     while (roomSel.options.length > 1) roomSel.remove(1);
 
     [...new Set(contracts.map(c => c.roomName))]
@@ -33,55 +69,18 @@ function populateRoomFilter(contracts) {
             roomSel.appendChild(opt);
         });
 }
-// ================================================================
-// API BASE – Endpoint thực tế khớp với HopDongController
-// ================================================================
-const API_BASE = '/api/HopDong';
-
-// ================================================================
-// STATE
-// ================================================================
-let allContracts = [];   // toàn bộ data sau khi fetch
-let filtered = [];   // sau filter/search
-let currentPage = 1;
-const PAGE_SIZE = 10;
-let sortKey = 'startDate';
-let sortAsc = false;
-let currentView = 'table';
-let deleteTarget = null;
-let toastTimer;
-
-// ================================================================
-// INIT
-// ================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    fetchContracts();
-});
-
-// ================================================================
-// API – LẤY DANH SÁCH HỢP ĐỒNG
-// Endpoint trả về JSON array:
-// [{ contractId, contractCode, tenantName, tenantPhone, roomName,
-//    startDate, endDate, monthlyRent, status, note, ... }, ...]
-// ================================================================
 
 // ================================================================
 // API – LẤY CHI TIẾT HỢP ĐỒNG
-// Ưu tiên lấy từ allContracts (đã normalize sẵn).
-// Nếu không tìm thấy (trường hợp hiếm), thử gọi API thực tế.
+// FIX: Luôn gọi API để lấy đủ dữ liệu chi tiết
+// (tenantIdCard, soKhachGhep, dichVu, ngayThanhLy, ...)
 // ================================================================
 async function fetchContractDetail(id) {
-    // 1. Tìm trong cache local trước – không cần network
-    const local = allContracts.find(c => String(c.contractId) === String(id));
-    if (local) return local;
-
-    // 2. Fallback: gọi API thực nếu cache chưa có
     try {
-        const resp = await fetch(`/api/HopDong/chi-tiet/${id}`, {
+        const resp = await fetch(`${API_BASE}/chi-tiet/${id}`, {
             headers: { 'Content-Type': 'application/json' }
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        // API trả về đúng shape rồi, dùng thẳng
         return await resp.json();
     } catch (err) {
         showToast('Không thể tải chi tiết hợp đồng', 'error');
@@ -91,10 +90,9 @@ async function fetchContractDetail(id) {
 
 // ================================================================
 // API – TẠO HỢP ĐỒNG MỚI
-// POST /api/contracts
 // ================================================================
 async function createContract(formData) {
-    const resp = await fetch(`/api/HopDong/them-hop-dong`, {
+    const resp = await fetch(`${API_BASE}/them-hop-dong`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -111,10 +109,9 @@ async function createContract(formData) {
 
 // ================================================================
 // API – CẬP NHẬT HỢP ĐỒNG
-// PUT /api/contracts/{id}
 // ================================================================
 async function updateContract(id, formData) {
-    const resp = await fetch(`/api/HopDong/cap-nhat/${id}`, {
+    const resp = await fetch(`${API_BASE}/cap-nhat/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -131,14 +128,17 @@ async function updateContract(id, formData) {
 
 // ================================================================
 // API – XÓA HỢP ĐỒNG
-// DELETE /api/contracts/{id}
+// FIX: endpoint khớp với Controller (cần thêm DELETE xoa/{id} ở C#)
 // ================================================================
 async function deleteContract(id) {
-    const resp = await fetch(`/api/HopDong/xoa/${id}`, {
+    const resp = await fetch(`${API_BASE}/xoa/${id}`, {
         method: 'DELETE',
         headers: { 'RequestVerificationToken': getAntiForgeryToken() }
     });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.message || `HTTP ${resp.status}`);
+    }
     return true;
 }
 
@@ -211,34 +211,34 @@ function renderTable(page) {
         return;
     }
     tbody.innerHTML = page.map(c => `
-            <tr>
-                <td><a class="contract-id" onclick="openDetailModal('${c.contractId}')">${esc(c.contractCode)}</a></td>
-                <td>
-                    <div class="tenant-info">
-                        <div class="avatar">${(c.tenantName || '?')[0].toUpperCase()}</div>
-                        <div>
-                            <div class="tenant-name">${esc(c.tenantName)}</div>
-                            <div class="tenant-phone">${esc(c.tenantPhone || '')}</div>
-                        </div>
+        <tr>
+            <td><a class="contract-id" onclick="openDetailModal('${c.contractId}')">${esc(c.contractCode)}</a></td>
+            <td>
+                <div class="tenant-info">
+                    <div class="avatar">${(c.tenantName || '?')[0].toUpperCase()}</div>
+                    <div>
+                        <div class="tenant-name">${esc(c.tenantName)}</div>
+                        <div class="tenant-phone">${esc(c.tenantPhone || '')}</div>
                     </div>
-                </td>
-                <td><span class="room-badge">${esc(c.roomName)}</span></td>
-                <td class="date-cell">${formatDate(c.startDate)}</td>
-                <td class="date-cell">
-                    ${formatDate(c.endDate)}
-                    ${daysLeft(c.endDate, c.status)}
-                </td>
-                <td class="date-cell">${formatMoney(c.monthlyRent)}</td>
-                <td>${statusBadge(c.status)}</td>
-                <td>
-                    <div class="action-btns" style="justify-content:center">
-                        <button class="btn-icon btn-view" title="Xem chi tiết" onclick="openDetailModal('${c.contractId}')">👁</button>
-                        <button class="btn-icon btn-edit" title="Chỉnh sửa"  onclick="openEditModal('${c.contractId}')">✏️</button>
-                        <button class="btn-icon btn-del"  title="Xóa"        onclick="confirmDelete('${c.contractId}','${esc(c.contractCode)}')">🗑</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+                </div>
+            </td>
+            <td><span class="room-badge">${esc(c.roomName)}</span></td>
+            <td class="date-cell">${formatDate(c.startDate)}</td>
+            <td class="date-cell">
+                ${formatDate(c.endDate)}
+                ${daysLeft(c.endDate, c.status)}
+            </td>
+            <td class="date-cell">${formatMoney(c.monthlyRent)}</td>
+            <td>${statusBadge(c.status)}</td>
+            <td>
+                <div class="action-btns" style="justify-content:center">
+                    <button class="btn-icon btn-view" title="Xem chi tiết" onclick="openDetailModal('${c.contractId}')">👁</button>
+                    <button class="btn-icon btn-edit" title="Chỉnh sửa"  onclick="openEditModal('${c.contractId}')">✏️</button>
+                    <button class="btn-icon btn-del"  title="Xóa"        onclick="confirmDelete('${c.contractId}','${esc(c.contractCode)}')">🗑</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
 }
 
 function renderGrid(page) {
@@ -248,24 +248,24 @@ function renderGrid(page) {
         return;
     }
     grid.innerHTML = page.map(c => `
-            <div class="contract-card" onclick="openDetailModal('${c.contractId}')">
-                <div class="cc-top">
-                    <span class="cc-id">${esc(c.contractCode)}</span>
-                    ${statusBadge(c.status)}
-                </div>
-                <div class="cc-tenant">${esc(c.tenantName)}</div>
-                <div class="cc-phone">${esc(c.tenantPhone || '')}</div>
-                <hr class="cc-divider"/>
-                <div class="cc-row"><span class="label">Phòng</span><span class="value">${esc(c.roomName)}</span></div>
-                <div class="cc-row"><span class="label">Bắt đầu</span><span class="value">${formatDate(c.startDate)}</span></div>
-                <div class="cc-row"><span class="label">Kết thúc</span><span class="value">${formatDate(c.endDate)}</span></div>
-                <div class="cc-row"><span class="label">Tiền thuê</span><span class="value" style="color:var(--primary)">${formatMoney(c.monthlyRent)}</span></div>
-                <div class="cc-actions" onclick="event.stopPropagation()">
-                    <button class="cc-btn cc-btn-edit" onclick="openEditModal('${c.contractId}')">✏️ Sửa</button>
-                    <button class="cc-btn cc-btn-del"  onclick="confirmDelete('${c.contractId}','${esc(c.contractCode)}')">🗑 Xóa</button>
-                </div>
+        <div class="contract-card" onclick="openDetailModal('${c.contractId}')">
+            <div class="cc-top">
+                <span class="cc-id">${esc(c.contractCode)}</span>
+                ${statusBadge(c.status)}
             </div>
-        `).join('');
+            <div class="cc-tenant">${esc(c.tenantName)}</div>
+            <div class="cc-phone">${esc(c.tenantPhone || '')}</div>
+            <hr class="cc-divider"/>
+            <div class="cc-row"><span class="label">Phòng</span><span class="value">${esc(c.roomName)}</span></div>
+            <div class="cc-row"><span class="label">Bắt đầu</span><span class="value">${formatDate(c.startDate)}</span></div>
+            <div class="cc-row"><span class="label">Kết thúc</span><span class="value">${formatDate(c.endDate)}</span></div>
+            <div class="cc-row"><span class="label">Tiền thuê</span><span class="value" style="color:var(--primary)">${formatMoney(c.monthlyRent)}</span></div>
+            <div class="cc-actions" onclick="event.stopPropagation()">
+                <button class="cc-btn cc-btn-edit" onclick="openEditModal('${c.contractId}')">✏️ Sửa</button>
+                <button class="cc-btn cc-btn-del"  onclick="confirmDelete('${c.contractId}','${esc(c.contractCode)}')">🗑 Xóa</button>
+            </div>
+        </div>
+    `).join('');
 }
 
 function renderPagination(total, totalPages) {
@@ -324,91 +324,137 @@ async function openDetailModal(id) {
     const c = await fetchContractDetail(id);
     if (!c) { closeModal(); return; }
 
-    // ──────────────────────────────────────────────────
-    // Dữ liệu từ API – mỗi {{Field}} ánh xạ sang c.field
-    // ──────────────────────────────────────────────────
+    // FIX: Hiển thị đầy đủ dữ liệu từ API chi tiết
     document.getElementById('modalBody').innerHTML = `
-            <p class="modal-section-title">Thông tin Hợp đồng</p>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Mã hợp đồng</label>
-                    <div class="val"><!-- {{ContractCode}} --> ${esc(c.contractCode)}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Trạng thái</label>
-                    <div class="val">${statusBadge(c.status)}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Ngày bắt đầu</label>
-                    <div class="val"><!-- {{StartDate}} --> ${formatDate(c.startDate)}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Ngày kết thúc</label>
-                    <div class="val"><!-- {{EndDate}} --> ${formatDate(c.endDate)}</div>
-                </div>
+        <p class="modal-section-title">Thông tin Hợp đồng</p>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Mã hợp đồng</label>
+                <div class="val">${esc(c.contractCode)}</div>
             </div>
-
-            <p class="modal-section-title">Thông tin Khách thuê</p>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Họ và tên</label>
-                    <div class="val"><!-- {{TenantName}} --> ${esc(c.tenantName)}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Số điện thoại</label>
-                    <div class="val"><!-- {{TenantPhone}} --> ${esc(c.tenantPhone || '—')}</div>
-                </div>
-                <div class="detail-item">
-                    <label>CCCD / CMND</label>
-                    <div class="val"><!-- {{TenantIdCard}} --> ${esc(c.tenantIdCard || '—')}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Email</label>
-                    <div class="val"><!-- {{TenantEmail}} --> ${esc(c.tenantEmail || '—')}</div>
-                </div>
+            <div class="detail-item">
+                <label>Trạng thái</label>
+                <div class="val">${statusBadge(c.status)}</div>
             </div>
-
-            <p class="modal-section-title">Thông tin Phòng & Tài chính</p>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Phòng</label>
-                    <div class="val"><!-- {{RoomName}} --> ${esc(c.roomName)}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Tiền thuê / tháng</label>
-                    <div class="val highlight"><!-- {{MonthlyRent}} --> ${formatMoney(c.monthlyRent)}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Tiền đặt cọc</label>
-                    <div class="val"><!-- {{Deposit}} --> ${formatMoney(c.deposit)}</div>
-                </div>
-                <div class="detail-item">
-                    <label>Chu kỳ thanh toán</label>
-                    <div class="val"><!-- {{PaymentCycle}} --> ${esc(c.paymentCycle || 'Hàng tháng')}</div>
-                </div>
+            <div class="detail-item">
+                <label>Ngày bắt đầu</label>
+                <div class="val">${formatDate(c.startDate)}</div>
             </div>
+            <div class="detail-item">
+                <label>Ngày kết thúc</label>
+                <div class="val">${formatDate(c.endDate)} ${daysLeft(c.endDate, c.status)}</div>
+            </div>
+        </div>
 
-            ${c.note ? `
-            <p class="modal-section-title">Ghi chú</p>
-            <div style="background:var(--gray-soft);border-radius:var(--radius-sm);padding:12px 14px;font-size:13.5px;color:var(--text-mid)">
-                <!-- {{Note}} --> ${esc(c.note)}
-            </div>` : ''}
-        `;
+        <p class="modal-section-title">Thông tin Khách thuê</p>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Họ và tên</label>
+                <div class="val">${esc(c.tenantName)}</div>
+            </div>
+            <div class="detail-item">
+                <label>Số điện thoại</label>
+                <div class="val">${esc(c.tenantPhone || '—')}</div>
+            </div>
+            <div class="detail-item">
+                <label>CCCD / CMND</label>
+                <div class="val">${esc(c.tenantIdCard || '—')}</div>
+            </div>
+            <div class="detail-item">
+                <label>Email</label>
+                <div class="val">${esc(c.tenantEmail || '—')}</div>
+            </div>
+        </div>
+
+        <p class="modal-section-title">Thông tin Phòng & Tài chính</p>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Phòng</label>
+                <div class="val">${esc(c.roomName)}</div>
+            </div>
+            <div class="detail-item">
+                <label>Tiền thuê / tháng</label>
+                <div class="val highlight">${formatMoney(c.monthlyRent)}</div>
+            </div>
+            <div class="detail-item">
+                <label>Tiền đặt cọc</label>
+                <div class="val">${formatMoney(c.deposit)}</div>
+            </div>
+            <div class="detail-item">
+                <label>Chu kỳ thanh toán</label>
+                <div class="val">${esc(c.paymentCycle || 'Hàng tháng')}</div>
+            </div>
+            <div class="detail-item">
+                <label>Số người ở ghép</label>
+                <div class="val">${c.soKhachGhep ?? 0} người</div>
+            </div>
+        </div>
+
+        ${c.dichVu && c.dichVu.length > 0 ? `
+        <p class="modal-section-title">Dịch vụ đang sử dụng</p>
+        <div style="overflow-x:auto;margin-bottom:22px">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead>
+                    <tr style="background:var(--gray-soft);border-bottom:1.5px solid var(--border)">
+                        <th style="padding:8px 12px;text-align:left;font-weight:700;color:var(--text-mid)">Dịch vụ</th>
+                        <th style="padding:8px 12px;text-align:right;font-weight:700;color:var(--text-mid)">Đơn giá</th>
+                        <th style="padding:8px 12px;text-align:center;font-weight:700;color:var(--text-mid)">SL</th>
+                        <th style="padding:8px 12px;text-align:right;font-weight:700;color:var(--text-mid)">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${c.dichVu.map(dv => `
+                        <tr style="border-bottom:1px solid var(--border)">
+                            <td style="padding:9px 12px">${esc(dv.tenDichVu)}</td>
+                            <td style="padding:9px 12px;text-align:right">${formatMoney(dv.donGiaChot)} / ${esc(dv.donVi || '')}</td>
+                            <td style="padding:9px 12px;text-align:center">${dv.soLuong}</td>
+                            <td style="padding:9px 12px;text-align:right;font-weight:600;color:var(--primary)">${formatMoney(dv.tongTien)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        ` : ''}
+
+        ${c.note ? `
+        <p class="modal-section-title">Ghi chú</p>
+        <div style="background:var(--gray-soft);border-radius:var(--radius-sm);padding:12px 14px;font-size:13.5px;color:var(--text-mid);margin-bottom:22px">
+            ${esc(c.note)}
+        </div>` : ''}
+
+        ${c.status === 'settled' && (c.ngayThanhLy || c.lyDoKetThuc) ? `
+        <p class="modal-section-title">Thông tin thanh lý</p>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Ngày thanh lý</label>
+                <div class="val">${formatDate(c.ngayThanhLy) || '—'}</div>
+            </div>
+            <div class="detail-item">
+                <label>Tiền cọc hoàn trả</label>
+                <div class="val">${formatMoney(c.tienCocHoanTra)}</div>
+            </div>
+            <div class="detail-item" style="grid-column:1/-1">
+                <label>Lý do kết thúc</label>
+                <div class="val">${esc(c.lyDoKetThuc || '—')}</div>
+            </div>
+        </div>
+        ` : ''}
+    `;
 
     document.getElementById('modalFoot').innerHTML = `
-            <button class="btn-danger"       onclick="confirmDelete('${c.contractId}','${esc(c.contractCode)}');closeModal()">🗑 Xóa</button>
-            <button class="btn-secondary"    onclick="closeModal()">Đóng</button>
-            <button class="btn-primary-gold" onclick="openEditModal('${c.contractId}')">✏️ Chỉnh sửa</button>
-        `;
+        <button class="btn-danger"       onclick="confirmDelete('${c.contractId}','${esc(c.contractCode)}');closeModal()">🗑 Xóa</button>
+        <button class="btn-secondary"    onclick="closeModal()">Đóng</button>
+        <button class="btn-primary-gold" onclick="openEditModal('${c.contractId}')">✏️ Chỉnh sửa</button>
+    `;
 }
 
 function openAddModal() {
     document.getElementById('modalTitle').textContent = '➕ Thêm Hợp đồng mới';
     document.getElementById('modalBody').innerHTML = renderContractForm(null);
     document.getElementById('modalFoot').innerHTML = `
-            <button class="btn-secondary"    onclick="closeModal()">Hủy</button>
-            <button class="btn-primary-gold" onclick="submitContractForm(null)">💾 Lưu hợp đồng</button>
-        `;
+        <button class="btn-secondary"    onclick="closeModal()">Hủy</button>
+        <button class="btn-primary-gold" onclick="submitContractForm(null)">💾 Lưu hợp đồng</button>
+    `;
     openModal();
 }
 
@@ -423,97 +469,191 @@ async function openEditModal(id) {
 
     document.getElementById('modalBody').innerHTML = renderContractForm(c);
     document.getElementById('modalFoot').innerHTML = `
-            <button class="btn-secondary"    onclick="closeModal()">Hủy</button>
-            <button class="btn-primary-gold" onclick="submitContractForm('${c.contractId}')">💾 Cập nhật</button>
-        `;
+        <button class="btn-secondary"    onclick="closeModal()">Hủy</button>
+        <button class="btn-primary-gold" onclick="submitContractForm('${c.contractId}')">💾 Cập nhật</button>
+    `;
 }
 
-// Form template – dùng cho cả thêm & sửa
+// ================================================================
+// FORM TEMPLATE – dùng cho cả thêm & sửa
+// FIX: Bỏ field "Trạng thái" vì server tự tính, không nhận từ form
+// FIX: Thay input text bằng <select> cho Khách thuê & Phòng
+// ================================================================
 function renderContractForm(c) {
     const v = (field, def = '') => c ? (c[field] ?? def) : def;
     const inputStyle = `style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;outline:none;box-sizing:border-box;font-family:var(--font)"`;
     const labelStyle = `style="display:block;font-size:12px;color:var(--text-light);margin-bottom:4px;font-weight:600"`;
 
     return `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-            <!-- {{TenantId}} – Gắn với người thuê trong DB -->
-            <div style="grid-column:1/-1">
-                <label ${labelStyle}>Khách thuê *</label>
-                <input id="f_tenantId" placeholder="Tìm khách thuê..." value="${esc(v('tenantName'))}" ${inputStyle}
-                    data-id="${v('tenantId')}" />
-                <!-- TODO: Gắn autocomplete từ /api/tenants/search -->
-            </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
 
-            <!-- {{RoomId}} -->
-            <div>
-                <label ${labelStyle}>Phòng *</label>
-                <input id="f_roomId" placeholder="Chọn phòng..." value="${esc(v('roomName'))}" ${inputStyle}
-                    data-id="${v('roomId')}" />
-            </div>
-
-            <!-- {{ContractCode}} -->
-            <div>
-                <label ${labelStyle}>Mã hợp đồng</label>
-                <input id="f_contractCode" value="${esc(v('contractCode'))}" placeholder="Tự sinh nếu để trống" ${inputStyle} />
-            </div>
-
-            <!-- {{StartDate}} -->
-            <div>
-                <label ${labelStyle}>Ngày bắt đầu *</label>
-                <input id="f_startDate" type="date" value="${v('startDate', '').slice(0, 10)}" ${inputStyle} />
-            </div>
-
-            <!-- {{EndDate}} -->
-            <div>
-                <label ${labelStyle}>Ngày kết thúc *</label>
-                <input id="f_endDate" type="date" value="${v('endDate', '').slice(0, 10)}" ${inputStyle} />
-            </div>
-
-            <!-- {{MonthlyRent}} -->
-            <div>
-                <label ${labelStyle}>Tiền thuê / tháng (VNĐ) *</label>
-                <input id="f_monthlyRent" type="number" value="${v('monthlyRent', 0)}" ${inputStyle} min="0" step="100000" />
-            </div>
-
-            <!-- {{Deposit}} -->
-            <div>
-                <label ${labelStyle}>Tiền đặt cọc (VNĐ)</label>
-                <input id="f_deposit" type="number" value="${v('deposit', 0)}" ${inputStyle} min="0" step="100000" />
-            </div>
-
-            <!-- {{Status}} -->
-            <div>
-                <label ${labelStyle}>Trạng thái</label>
-                <select id="f_status" ${inputStyle} style="padding:9px 12px;width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;background:#fff;box-sizing:border-box">
-                    <option value="active"   ${v('status') === 'active' ? 'selected' : ''}>✅ Đang hiệu lực</option>
-                    <option value="expiring" ${v('status') === 'expiring' ? 'selected' : ''}>⏳ Sắp hết hạn</option>
-                    <option value="expired"  ${v('status') === 'expired' ? 'selected' : ''}>🔴 Đã hết hạn</option>
-                    <option value="settled"  ${v('status') === 'settled' ? 'selected' : ''}>⚪ Đã thanh lý</option>
-                </select>
-            </div>
-
-            <!-- {{Note}} -->
-            <div style="grid-column:1/-1">
-                <label ${labelStyle}>Ghi chú</label>
-                <textarea id="f_note" rows="3" placeholder="Điều khoản đặc biệt, ghi chú thêm..." ${inputStyle}
-                    style="resize:vertical;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;outline:none;box-sizing:border-box;font-family:var(--font)"
-                >${esc(v('note'))}</textarea>
+        <!-- Khách thuê – autocomplete / select -->
+        <div style="grid-column:1/-1">
+            <label ${labelStyle}>Khách thuê *</label>
+            <div style="position:relative">
+                <input id="f_tenantSearch"
+                    placeholder="Nhập tên hoặc SĐT để tìm khách thuê..."
+                    value="${esc(v('tenantName'))}"
+                    ${inputStyle}
+                    autocomplete="off"
+                    oninput="searchTenant(this.value)" />
+                <input type="hidden" id="f_tenantId" value="${v('tenantId')}" />
+                <div id="tenantDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);z-index:999;max-height:200px;overflow-y:auto;box-shadow:var(--shadow-md)"></div>
             </div>
         </div>
-        `;
+
+        <!-- Phòng – select từ API -->
+        <div>
+            <label ${labelStyle}>Phòng *</label>
+            <select id="f_roomId" ${inputStyle} style="padding:9px 12px;width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;background:#fff;box-sizing:border-box"
+                onchange="onRoomChange(this)">
+                <option value="">-- Chọn phòng --</option>
+            </select>
+        </div>
+
+        <!-- Mã hợp đồng (chỉ đọc khi sửa) -->
+        <div>
+            <label ${labelStyle}>Mã hợp đồng</label>
+            <input id="f_contractCode" value="${esc(v('contractCode'))}"
+                placeholder="Tự sinh nếu để trống"
+                ${c ? 'readonly style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;outline:none;box-sizing:border-box;font-family:var(--font);background:var(--gray-soft);color:var(--text-light)"' : inputStyle} />
+        </div>
+
+        <!-- Ngày bắt đầu -->
+        <div>
+            <label ${labelStyle}>Ngày bắt đầu *</label>
+            <input id="f_startDate" type="date" value="${v('startDate', '').slice(0, 10)}" ${inputStyle} />
+        </div>
+
+        <!-- Ngày kết thúc -->
+        <div>
+            <label ${labelStyle}>Ngày kết thúc</label>
+            <input id="f_endDate" type="date" value="${v('endDate', '').slice(0, 10)}" ${inputStyle} />
+        </div>
+
+        <!-- Tiền thuê / tháng -->
+        <div>
+            <label ${labelStyle}>Tiền thuê / tháng (VNĐ) *</label>
+            <input id="f_monthlyRent" type="number" value="${v('monthlyRent', 0)}" ${inputStyle} min="0" step="100000" />
+        </div>
+
+        <!-- Tiền đặt cọc -->
+        <div>
+            <label ${labelStyle}>Tiền đặt cọc (VNĐ)</label>
+            <input id="f_deposit" type="number" value="${v('deposit', 0)}" ${inputStyle} min="0" step="100000" />
+        </div>
+
+        <!-- Ghi chú -->
+        <div style="grid-column:1/-1">
+            <label ${labelStyle}>Ghi chú</label>
+            <textarea id="f_note" rows="3" placeholder="Điều khoản đặc biệt, ghi chú thêm..." ${inputStyle}
+                style="resize:vertical;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;outline:none;box-sizing:border-box;font-family:var(--font)"
+            >${esc(v('note'))}</textarea>
+        </div>
+    </div>
+    `;
 }
 
+// Gọi sau khi renderContractForm để load danh sách phòng
+document.addEventListener('DOMContentLoaded', () => {
+    // sẽ gọi loadRoomOptions() khi modal mở
+});
+
+async function loadRoomOptions(selectedRoomId) {
+    try {
+        const sel = document.getElementById('f_roomId');
+        if (!sel) return;
+        const resp = await fetch('/api/Phong/danh-sach-phong-trong');
+        if (!resp.ok) return;
+        const rooms = await resp.json();
+        rooms.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id || r.roomId || r.idPhong;
+            opt.textContent = r.soPhong || r.roomName || r.name;
+            if (String(opt.value) === String(selectedRoomId)) opt.selected = true;
+            sel.appendChild(opt);
+        });
+        // Nếu đang sửa, thêm option phòng hiện tại nếu chưa có trong danh sách trống
+        if (selectedRoomId && !rooms.find(r => String(r.id || r.roomId || r.idPhong) === String(selectedRoomId))) {
+            const c = allContracts.find(x => String(x.roomId) === String(selectedRoomId));
+            if (c) {
+                const opt = document.createElement('option');
+                opt.value = selectedRoomId;
+                opt.textContent = c.roomName + ' (đang dùng)';
+                opt.selected = true;
+                sel.appendChild(opt);
+            }
+        }
+    } catch (e) {
+        console.warn('loadRoomOptions error:', e);
+    }
+}
+
+function onRoomChange(sel) {
+    // Có thể tự động điền giá phòng nếu cần
+}
+
+// Autocomplete tìm khách thuê
+let tenantSearchTimer;
+async function searchTenant(q) {
+    clearTimeout(tenantSearchTimer);
+    const dropdown = document.getElementById('tenantDropdown');
+    if (!q || q.length < 2) { dropdown.style.display = 'none'; return; }
+
+    tenantSearchTimer = setTimeout(async () => {
+        try {
+            const resp = await fetch(`/api/KhachThue/tim-kiem?q=${encodeURIComponent(q)}`);
+            if (!resp.ok) return;
+            const list = await resp.json();
+            if (!list.length) { dropdown.style.display = 'none'; return; }
+
+            dropdown.innerHTML = list.map(t => `
+                <div onclick="selectTenant(${t.id || t.idUser},'${esc(t.fullName || t.hoTen)}','${esc(t.phone || t.soDienThoai || '')}')"
+                    style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)"
+                    onmouseover="this.style.background='var(--gray-soft)'"
+                    onmouseout="this.style.background=''">
+                    <strong>${esc(t.fullName || t.hoTen)}</strong>
+                    <span style="color:var(--text-light);font-size:11.5px;margin-left:8px">${esc(t.phone || t.soDienThoai || '')}</span>
+                </div>
+            `).join('');
+            dropdown.style.display = 'block';
+        } catch (e) {
+            console.warn('searchTenant error:', e);
+        }
+    }, 300);
+}
+
+function selectTenant(id, name, phone) {
+    document.getElementById('f_tenantSearch').value = name;
+    document.getElementById('f_tenantId').value = id;
+    document.getElementById('tenantDropdown').style.display = 'none';
+}
+
+// ================================================================
+// SUBMIT FORM
+// FIX: Bỏ field "status" – server tự tính dựa vào ngày
+// FIX: Lấy tenantId từ hidden input, roomId từ <select>
+// ================================================================
 async function submitContractForm(id) {
+    const tenantId = document.getElementById('f_tenantId')?.value;
+    const roomId = document.getElementById('f_roomId')?.value;
+    const startDate = document.getElementById('f_startDate')?.value;
+    const monthlyRent = parseFloat(document.getElementById('f_monthlyRent')?.value || 0);
+
+    // Validate phía client
+    if (!tenantId) { showToast('❌ Vui lòng chọn khách thuê', 'error'); return; }
+    if (!roomId) { showToast('❌ Vui lòng chọn phòng', 'error'); return; }
+    if (!startDate) { showToast('❌ Vui lòng nhập ngày bắt đầu', 'error'); return; }
+    if (monthlyRent <= 0) { showToast('❌ Tiền thuê phải lớn hơn 0', 'error'); return; }
+
     const payload = {
-        tenantId: document.getElementById('f_tenantId')?.dataset.id,
-        roomId: document.getElementById('f_roomId')?.dataset.id,
-        contractCode: document.getElementById('f_contractCode')?.value,
-        startDate: document.getElementById('f_startDate')?.value,
-        endDate: document.getElementById('f_endDate')?.value,
-        monthlyRent: parseFloat(document.getElementById('f_monthlyRent')?.value || 0),
+        tenantId: parseInt(tenantId),
+        roomId: parseInt(roomId),
+        startDate,
+        endDate: document.getElementById('f_endDate')?.value || null,
+        monthlyRent,
         deposit: parseFloat(document.getElementById('f_deposit')?.value || 0),
-        status: document.getElementById('f_status')?.value,
-        note: document.getElementById('f_note')?.value,
+        note: document.getElementById('f_note')?.value || '',
     };
 
     try {
@@ -525,7 +665,7 @@ async function submitContractForm(id) {
             showToast('✅ Tạo hợp đồng thành công!', 'success');
         }
         closeModal();
-        fetchContracts(); // refresh list
+        fetchContracts();
     } catch (err) {
         showToast('❌ ' + err.message, 'error');
     }
@@ -560,16 +700,19 @@ function closeConfirm() {
 // ================================================================
 // MODAL HELPERS
 // ================================================================
-function openModal() { document.getElementById('contractModal').classList.add('open'); }
+function openModal() {
+    document.getElementById('contractModal').classList.add('open');
+    // Load room options sau khi form đã render
+    setTimeout(() => {
+        const sel = document.getElementById('f_roomId');
+        if (sel && sel.options.length <= 1) {
+            const hiddenTenantId = document.getElementById('f_tenantId')?.value;
+            const currentRoomId = allContracts.find(c => String(c.tenantId) === String(hiddenTenantId))?.roomId;
+            loadRoomOptions(currentRoomId || sel.dataset?.selectedId);
+        }
+    }, 50);
+}
 function closeModal() { document.getElementById('contractModal').classList.remove('open'); }
-
-// Close on overlay click
-document.getElementById('contractModal').addEventListener('click', function (e) {
-    if (e.target === this) closeModal();
-});
-document.getElementById('confirmOverlay').addEventListener('click', function (e) {
-    if (e.target === this) closeConfirm();
-});
 
 // ================================================================
 // LOADING / ERROR STATES
@@ -589,7 +732,6 @@ function showTableError(msg) {
 // ================================================================
 // TOAST
 // ================================================================
-
 function showToast(msg, type = '') {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -622,6 +764,7 @@ function formatMoney(n) {
 
 function daysLeft(endDate, status) {
     if (status === 'settled' || status === 'expired') return '';
+    if (!endDate) return '';
     const diff = Math.ceil((new Date(endDate) - new Date()) / 864e5);
     if (diff < 0) return `<small style="color:var(--red)">Đã quá hạn</small>`;
     if (diff <= 30) return `<small style="color:#f57c00">Còn ${diff} ngày</small>`;
@@ -642,4 +785,3 @@ function statusBadge(s) {
 function getAntiForgeryToken() {
     return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
 }
-
