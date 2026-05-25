@@ -432,7 +432,6 @@
                 align-items: start;
             }
 
-            /* ====================== CARD FORM ====================== */
             .card-form {
                 background: var(--mau-trang);
                 border-radius: 16px;
@@ -475,6 +474,117 @@
 
             .card-form-body {
                 padding: 22px;
+            }
+
+            /* ====================== CARD TỔNG QUAN CHỈ ĐỌC ====================== */
+            .card-tong-quan {
+                background: var(--mau-trang);
+                border-radius: 16px;
+                box-shadow: var(--bong-card);
+                border: 1px solid var(--mau-vien);
+                overflow: hidden;
+                margin-bottom: 28px;
+            }
+
+            .card-tong-quan-header {
+                padding: 18px 22px;
+                border-bottom: 1px solid var(--mau-vien);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: linear-gradient(135deg, var(--mau-xanh-nhat) 0%, var(--mau-trang) 100%);
+            }
+
+                .card-tong-quan-header h3 {
+                    font-size: 15px;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: 9px;
+                    color: var(--mau-chu);
+                }
+
+                    .card-tong-quan-header h3 i {
+                        color: var(--mau-chu-de);
+                        font-size: 15px;
+                    }
+
+                .card-tong-quan-header .nhan-tu-dong {
+                    font-size: 11px;
+                    color: var(--mau-chu-phu);
+                    background: var(--mau-trang);
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    border: 1px solid var(--mau-vien);
+                }
+
+            .card-tong-quan-body {
+                padding: 22px;
+            }
+
+            /* Nhóm tiêu đề trong card tổng quan */
+            .nhan-nhom-tq {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                color: var(--mau-chu-de);
+                text-transform: uppercase;
+                margin-bottom: 12px;
+                margin-top: 20px;
+                padding-bottom: 6px;
+                border-bottom: 1px dashed var(--mau-xanh-trung);
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+
+                .nhan-nhom-tq:first-child {
+                    margin-top: 0;
+                }
+
+            /* Grid các mini-card */
+            .luoi-mini-card {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 12px;
+            }
+
+            .mini-card {
+                background: var(--mau-xanh-nhat);
+                border: 1px solid var(--mau-xanh-trung);
+                border-radius: 12px;
+                padding: 14px 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .mini-card-nhan {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--mau-chu-phu);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .mini-card-gia-tri {
+                font-size: 20px;
+                font-weight: 800;
+                color: var(--mau-chu-de);
+                line-height: 1.2;
+            }
+
+                .mini-card-gia-tri.mau-xanh {
+                    color: #15803d;
+                }
+
+                .mini-card-gia-tri.mau-do {
+                    color: #dc2626;
+                }
+
+            .mini-card-don-vi {
+                font-size: 11px;
+                color: var(--mau-chu-phu);
             }
 
             /* ====================== FORM GROUPS ====================== */
@@ -546,6 +656,13 @@
 
                 .truong-nhap.don-vi {
                     padding-right: 36px;
+                }
+
+                /* Trường chỉ đọc — nền xám nhạt */
+                .truong-nhap[readonly] {
+                    background: #f8fafc;
+                    color: var(--mau-chu-phu);
+                    cursor: default;
                 }
 
             .wrapper-don-vi {
@@ -767,6 +884,10 @@
                 .luoi-input.ba-cot {
                     grid-template-columns: 1fr 1fr;
                 }
+
+                .luoi-mini-card {
+                    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                }
             }
 
             @@media (max-width: 768px) {
@@ -900,14 +1021,8 @@
                 <div style="font-size:12px;color:var(--mau-chu-phu);display:flex;align-items:center;gap:6px;">
                     <i class="fas fa-clock" style="color:var(--mau-chu-de);"></i>
                     Cập nhật lần cuối:
-                    @if (Model.ThongKeTong?.NgayCapNhat != default)
-                    {
-                        @Model.ThongKeTong.NgayCapNhat.ToString("HH:mm dd/MM/yyyy")
-                    }
-                    else
-                    {
-                        <span>Chưa có dữ liệu</span>
-                    }
+                    @* Dữ liệu tính trực tiếp từ DB, hiển thị thời điểm tải trang *@
+                    <span>@DateTime.Now.ToString("HH:mm dd/MM/yyyy")</span>
                 </div>
             </div>
 
@@ -933,136 +1048,125 @@
                 </div>
             }
 
-            <!-- ====== LƯỚI 2 CỘT: FORM 1 + FORM 2 ====== -->
-            <div class="luoi-form">
-
-                <!-- ========== FORM 1: CẬP NHẬT THONGKE_TONG ========== -->
-                <div class="card-form">
-                    <div class="card-form-header">
-                        <h3><i class="fas fa-tachometer-alt"></i> Thống Kê Tổng Quan</h3>
-                        <span class="nhan-cap-nhat">ID = 1 (Snapshot)</span>
-                    </div>
-                    <div class="card-form-body">
-                        <form method="post" asp-page-handler="UpdateTong">
-                            @Html.AntiForgeryToken()
-
-                            <!-- Nhóm: Phòng -->
-                            <div class="nhan-nhom-form">
-                                <i class="fas fa-door-open"></i> Trạng thái phòng
-                            </div>
-                            <div class="nhom-form luoi-input ba-cot">
-                                <div>
-                                    <label for="TongInput_TongSoPhong">Tổng số phòng</label>
-                                    <input id="TongInput_TongSoPhong" name="TongInput.TongSoPhong"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.TongSoPhong" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_PhongDangThue">Đang thuê</label>
-                                    <input id="TongInput_PhongDangThue" name="TongInput.PhongDangThue"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.PhongDangThue" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_PhongConTrong">Còn trống</label>
-                                    <input id="TongInput_PhongConTrong" name="TongInput.PhongConTrong"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.PhongConTrong" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_PhongDangSua">Đang sửa</label>
-                                    <input id="TongInput_PhongDangSua" name="TongInput.PhongDangSua"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.PhongDangSua" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_TiLeLapDay">Tỉ lệ lấp đầy (%)</label>
-                                    <div class="wrapper-don-vi">
-                                        <input id="TongInput_TiLeLapDay" name="TongInput.TiLeLapDay"
-                                               type="number" min="0" max="100" step="0.01" class="truong-nhap don-vi"
-                                               value="@Model.TongInput.TiLeLapDay" />
-                                        <span class="don-vi-hien-thi">%</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Nhóm: Doanh thu -->
-                            <div class="nhan-nhom-form">
-                                <i class="fas fa-money-bill-wave"></i> Doanh thu
-                            </div>
-                            <div class="nhom-form luoi-input">
-                                <div>
-                                    <label for="TongInput_DoanhThuThangNay">DT tháng này (₫)</label>
-                                    <div class="wrapper-don-vi">
-                                        <input id="TongInput_DoanhThuThangNay" name="TongInput.DoanhThuThangNay"
-                                               type="number" min="0" step="1000" class="truong-nhap don-vi"
-                                               value="@Model.TongInput.DoanhThuThangNay" />
-                                        <span class="don-vi-hien-thi">₫</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="TongInput_DoanhThuThangTruoc">DT tháng trước (₫)</label>
-                                    <div class="wrapper-don-vi">
-                                        <input id="TongInput_DoanhThuThangTruoc" name="TongInput.DoanhThuThangTruoc"
-                                               type="number" min="0" step="1000" class="truong-nhap don-vi"
-                                               value="@Model.TongInput.DoanhThuThangTruoc" />
-                                        <span class="don-vi-hien-thi">₫</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="TongInput_TangTruongDoanhThu">Tăng trưởng (%)</label>
-                                    <div class="wrapper-don-vi">
-                                        <input id="TongInput_TangTruongDoanhThu" name="TongInput.TangTruongDoanhThu"
-                                               type="number" step="0.01" class="truong-nhap don-vi"
-                                               value="@Model.TongInput.TangTruongDoanhThu" />
-                                        <span class="don-vi-hien-thi">%</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Nhóm: Hóa đơn & Đơn DV -->
-                            <div class="nhan-nhom-form">
-                                <i class="fas fa-file-invoice"></i> Hóa đơn & Đơn dịch vụ
-                            </div>
-                            <div class="nhom-form luoi-input ba-cot">
-                                <div>
-                                    <label for="TongInput_HoaDonChuaDong">HĐ chưa đóng</label>
-                                    <input id="TongInput_HoaDonChuaDong" name="TongInput.HoaDonChuaDong"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.HoaDonChuaDong" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_HoaDonSapDenHan">HĐ sắp đến hạn</label>
-                                    <input id="TongInput_HoaDonSapDenHan" name="TongInput.HoaDonSapDenHan"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.HoaDonSapDenHan" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_HoaDonQuaHan">HĐ quá hạn</label>
-                                    <input id="TongInput_HoaDonQuaHan" name="TongInput.HoaDonQuaHan"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.HoaDonQuaHan" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_DonDVChoXuLy">Đơn DV chờ xử lý</label>
-                                    <input id="TongInput_DonDVChoXuLy" name="TongInput.DonDVChoXuLy"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.DonDVChoXuLy" />
-                                </div>
-                                <div>
-                                    <label for="TongInput_DonDVKhanCap">Đơn DV khẩn cấp</label>
-                                    <input id="TongInput_DonDVKhanCap" name="TongInput.DonDVKhanCap"
-                                           type="number" min="0" class="truong-nhap"
-                                           value="@Model.TongInput.DonDVKhanCap" />
-                                </div>
-                            </div>
-
-                            <button type="submit" class="nut-submit chinh">
-                                <i class="fas fa-save"></i> Lưu Thống Kê Tổng Quan
-                            </button>
-                        </form>
-                    </div>
+            <!-- ====== CARD THỐNG KÊ TỔNG QUAN (CHỈ ĐỌC) ====== -->
+            <div class="card-tong-quan">
+                <div class="card-tong-quan-header">
+                    <h3><i class="fas fa-tachometer-alt"></i> Thống Kê Tổng Quan</h3>
+                    <span class="nhan-tu-dong">Tự động từ DB</span>
                 </div>
+                <div class="card-tong-quan-body">
+
+                    <!-- Nhóm: Phòng -->
+                    <div class="nhan-nhom-tq">
+                        <i class="fas fa-door-open"></i> Trạng thái phòng
+                    </div>
+                    <div class="luoi-mini-card">
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Tổng số phòng</div>
+                            <div class="mini-card-gia-tri">@Model.TongSoPhong</div>
+                            <div class="mini-card-don-vi">phòng</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Đang thuê</div>
+                            <div class="mini-card-gia-tri">@Model.PhongDangThue</div>
+                            <div class="mini-card-don-vi">phòng</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Còn trống</div>
+                            <div class="mini-card-gia-tri">@Model.PhongConTrong</div>
+                            <div class="mini-card-don-vi">phòng</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Đang sửa</div>
+                            <div class="mini-card-gia-tri">@Model.PhongDangSua</div>
+                            <div class="mini-card-don-vi">phòng</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Tỉ lệ lấp đầy</div>
+                            <div class="mini-card-gia-tri">@Model.TiLeLapDay.ToString("N2")</div>
+                            <div class="mini-card-don-vi">%</div>
+                        </div>
+                    </div>
+
+                    <!-- Nhóm: Doanh thu -->
+                    <div class="nhan-nhom-tq">
+                        <i class="fas fa-money-bill-wave"></i> Doanh thu
+                    </div>
+                    <div class="luoi-mini-card">
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">DT tháng này</div>
+                            <div class="mini-card-gia-tri">@Model.DoanhThuThangNay.ToString("N0")</div>
+                            <div class="mini-card-don-vi">₫</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">DT tháng trước</div>
+                            <div class="mini-card-gia-tri">@Model.DoanhThuThangTruoc.ToString("N0")</div>
+                            <div class="mini-card-don-vi">₫</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Tăng trưởng</div>
+                            @{
+                                /* Màu xanh nếu >= 0, đỏ nếu < 0; hiển thị dấu +/- */
+                                var ttClass = Model.TangTruongDoanhThu >= 0 ? "mau-xanh" : "mau-do";
+                                var ttDau = Model.TangTruongDoanhThu >= 0 ? "+" : "";
+                            }
+                            <div class="mini-card-gia-tri @ttClass">@(ttDau)@Model.TangTruongDoanhThu.ToString("N2")</div>
+                            <div class="mini-card-don-vi">%</div>
+                        </div>
+                    </div>
+
+                    <!-- Nhóm: Hóa đơn -->
+                    <div class="nhan-nhom-tq">
+                        <i class="fas fa-file-invoice"></i> Hóa đơn
+                    </div>
+                    <div class="luoi-mini-card">
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Chưa đóng</div>
+                            <div class="mini-card-gia-tri">@Model.HoaDonChuaDong</div>
+                            <div class="mini-card-don-vi">hóa đơn</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Sắp đến hạn</div>
+                            <div class="mini-card-gia-tri">@Model.HoaDonSapDenHan</div>
+                            <div class="mini-card-don-vi">hóa đơn</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Quá hạn</div>
+                            @{
+                                /* Màu đỏ nếu > 0 */
+                                var hdqhClass = Model.HoaDonQuaHan > 0 ? "mau-do" : "";
+                            }
+                            <div class="mini-card-gia-tri @hdqhClass">@Model.HoaDonQuaHan</div>
+                            <div class="mini-card-don-vi">hóa đơn</div>
+                        </div>
+                    </div>
+
+                    <!-- Nhóm: Dịch vụ -->
+                    <div class="nhan-nhom-tq">
+                        <i class="fas fa-tools"></i> Đơn dịch vụ
+                    </div>
+                    <div class="luoi-mini-card">
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Chờ xử lý</div>
+                            <div class="mini-card-gia-tri">@Model.DonDVChoXuLy</div>
+                            <div class="mini-card-don-vi">đơn</div>
+                        </div>
+                        <div class="mini-card">
+                            <div class="mini-card-nhan">Khẩn cấp</div>
+                            @{
+                                /* Màu đỏ nếu > 0 */
+                                var dvkcClass = Model.DonDVKhanCap > 0 ? "mau-do" : "";
+                            }
+                            <div class="mini-card-gia-tri @dvkcClass">@Model.DonDVKhanCap</div>
+                            <div class="mini-card-don-vi">đơn</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Kết thúc card tổng quan -->
+            <!-- ====== LƯỚI 1 CỘT: FORM 2 ====== -->
+            <div class="luoi-form">
 
                 <!-- ========== FORM 2: THÊM/CẬP NHẬT THONGKE_DOANHTHU_THANG ========== -->
                 <div class="card-form">
@@ -1103,7 +1207,7 @@
                                 </div>
                             </div>
 
-                            <!-- Nhóm: Chi tiết doanh thu -->
+                            <!-- Nhóm: Chi tiết doanh thu — readonly, tính sẵn từ HDTHANG -->
                             <div class="nhan-nhom-form">
                                 <i class="fas fa-coins"></i> Chi tiết doanh thu
                             </div>
@@ -1113,6 +1217,7 @@
                                     <div class="wrapper-don-vi">
                                         <input id="DoanhThuThangInput_TongTienPhong" name="DoanhThuThangInput.TongTienPhong"
                                                type="number" min="0" step="1000" class="truong-nhap don-vi"
+                                               readonly
                                                value="@Model.DoanhThuThangInput.TongTienPhong" />
                                         <span class="don-vi-hien-thi">₫</span>
                                     </div>
@@ -1122,6 +1227,7 @@
                                     <div class="wrapper-don-vi">
                                         <input id="DoanhThuThangInput_TongTienDien" name="DoanhThuThangInput.TongTienDien"
                                                type="number" min="0" step="1000" class="truong-nhap don-vi"
+                                               readonly
                                                value="@Model.DoanhThuThangInput.TongTienDien" />
                                         <span class="don-vi-hien-thi">₫</span>
                                     </div>
@@ -1131,6 +1237,7 @@
                                     <div class="wrapper-don-vi">
                                         <input id="DoanhThuThangInput_TongTienNuoc" name="DoanhThuThangInput.TongTienNuoc"
                                                type="number" min="0" step="1000" class="truong-nhap don-vi"
+                                               readonly
                                                value="@Model.DoanhThuThangInput.TongTienNuoc" />
                                         <span class="don-vi-hien-thi">₫</span>
                                     </div>
@@ -1140,13 +1247,14 @@
                                     <div class="wrapper-don-vi">
                                         <input id="DoanhThuThangInput_TongTienDV" name="DoanhThuThangInput.TongTienDV"
                                                type="number" min="0" step="1000" class="truong-nhap don-vi"
+                                               readonly
                                                value="@Model.DoanhThuThangInput.TongTienDV" />
                                         <span class="don-vi-hien-thi">₫</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Nhóm: Tổng kết -->
+                            <!-- Nhóm: Tổng kết — TongCong và SoHoaDonDaDong readonly, ChiPhiThang nhập tay -->
                             <div class="nhan-nhom-form">
                                 <i class="fas fa-calculator"></i> Tổng kết tháng
                             </div>
@@ -1156,6 +1264,7 @@
                                     <div class="wrapper-don-vi">
                                         <input id="DoanhThuThangInput_TongCong" name="DoanhThuThangInput.TongCong"
                                                type="number" min="0" step="1000" class="truong-nhap don-vi"
+                                               readonly
                                                value="@Model.DoanhThuThangInput.TongCong" />
                                         <span class="don-vi-hien-thi">₫</span>
                                     </div>
@@ -1164,6 +1273,7 @@
                                     <label for="DoanhThuThangInput_SoHoaDonDaDong">Số HĐ đã đóng</label>
                                     <input id="DoanhThuThangInput_SoHoaDonDaDong" name="DoanhThuThangInput.SoHoaDonDaDong"
                                            type="number" min="0" class="truong-nhap"
+                                           readonly
                                            value="@Model.DoanhThuThangInput.SoHoaDonDaDong" />
                                 </div>
                                 <div>
@@ -1177,20 +1287,14 @@
                                 </div>
                             </div>
 
-                            <!-- Gợi ý tự tính tổng -->
+                            <!-- Gợi ý -->
                             <div style="background:var(--mau-xanh-nhat);border:1px solid var(--mau-xanh-trung);
                                 border-radius:10px;padding:10px 14px;font-size:12px;
                                 color:var(--mau-chu-de);margin-top:6px;display:flex;align-items:center;gap:8px;">
                                 <i class="fas fa-info-circle"></i>
                                 <span>
-                                    Gợi ý: Bấm nút để tự tính &ldquo;Tổng cộng&rdquo; từ 4 khoản trên.
-                                    <button type="button" onclick="tuTinhTong()"
-                                            style="margin-left:8px;font-size:11px;font-weight:700;
-                                        color:var(--mau-chu-de);background:var(--mau-xanh-trung);
-                                        border:1px solid var(--mau-chu-de-sang);border-radius:6px;
-                                        padding:3px 10px;cursor:pointer;">
-                                        <i class="fas fa-magic"></i> Tự tính
-                                    </button>
+                                    Các ô tiền phòng, điện, nước, dịch vụ, tổng cộng và số HĐ đã đóng được tính sẵn từ hóa đơn tháng này.
+                                    Chỉ nhập tay ô <strong>Chi phí tháng</strong> rồi bấm lưu.
                                 </span>
                             </div>
 
@@ -1234,7 +1338,7 @@
                                         <td>
                                             <span class="chip-thang">
                                                 <i class="fas fa-calendar-alt" style="font-size:10px;"></i>
-                                                T@row.Thang/@row.Nam
+                                                T@(row.Thang)/@(row.Nam)
                                             </span>
                                         </td>
                                         <td class="so-tien">@row.TongTienPhong.ToString("N0")₫</td>
@@ -1255,7 +1359,7 @@
                                         </td>
                                         <td>
                                             <form method="post" asp-page-handler="DeleteDoanhThu"
-                                                  onsubmit="return confirm('Xóa dữ liệu tháng @row.Thang/@row.Nam?');">
+                                                  onsubmit="return confirm('Xóa dữ liệu tháng @(row.Thang)/@(row.Nam)?');">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@row.IDThongKe" />
                                                 <button type="submit" class="nut-xoa">
@@ -1296,22 +1400,6 @@
             // Tự động ẩn alert sau 6 giây
             setTimeout(() => dongAlert('alert-success'), 6000);
             setTimeout(() => dongAlert('alert-error'), 8000);
-
-            // ====== Tự tính tổng cộng ======
-            function tuTinhTong() {
-                const phong  = parseFloat(document.getElementById('DoanhThuThangInput_TongTienPhong').value) || 0;
-                const dien   = parseFloat(document.getElementById('DoanhThuThangInput_TongTienDien').value)  || 0;
-                const nuoc   = parseFloat(document.getElementById('DoanhThuThangInput_TongTienNuoc').value)  || 0;
-                const dv     = parseFloat(document.getElementById('DoanhThuThangInput_TongTienDV').value)    || 0;
-                const tongEl = document.getElementById('DoanhThuThangInput_TongCong');
-                tongEl.value = phong + dien + nuoc + dv;
-                tongEl.style.borderColor = '#1a56db';
-                tongEl.style.background  = '#eff6ff';
-                setTimeout(() => {
-                    tongEl.style.borderColor = '';
-                    tongEl.style.background  = '';
-                }, 1500);
-            }
 
             // ====== Sidebar / Chuyển trang ======
             function dongMoSidebar() {

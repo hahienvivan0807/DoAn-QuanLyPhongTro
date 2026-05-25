@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Security.Claims;
 
 namespace QuanLyNhaTro.Pages.Manager
 {
     // =====================================================================
     // DTO: Đơn dịch vụ (DONDV) dùng để hiển thị trên UI
     // =====================================================================
+
     public class DonDichVuViewModel
     {
         public int IDDonDV { get; set; }
@@ -61,6 +63,7 @@ namespace QuanLyNhaTro.Pages.Manager
         private string ConnStr => _cfg.GetConnectionString("QuanLyKhuNhaTro")!;
 
         public QuanLyDichVuModel(IConfiguration cfg) => _cfg = cfg;
+        public string ChucVu { get; set; } = "Manager";
 
         // ---------- Thông tin header (lấy từ Session / Identity) ----------
         public string TenNguoiDung { get; set; } = "Quản lý";
@@ -88,9 +91,24 @@ namespace QuanLyNhaTro.Pages.Manager
         // =====================================================================
         // GET
         // =====================================================================
-        public void OnGet()
+        public async Task OnGetAsync()
         {
-            LoadAll();
+            var claim = User.FindFirst("FullName") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Name);
+            if (claim != null) TenNguoiDung = claim.Value;
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            if (roleClaim != null) ChucVu = roleClaim.Value switch
+            {
+                "Admin" => "Quản trị viên",
+                "Manager" => "Quản lý",
+                "Staff" => "Nhân viên",
+                _ => roleClaim.Value
+            };
+
+            // Lấy idManager từ Claims để truyền vào LoadAllAsync
+            var idManagerStr = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(idManagerStr, out int idManager);
+            await LoadAllAsync(idManager);
         }
 
         // =====================================================================
@@ -103,6 +121,18 @@ namespace QuanLyNhaTro.Pages.Manager
             try
             {
                 using var conn = OpenConn();
+                // Kiểm tra quyền: phòng của đơn có thuộc danh sách phân công không
+                var idMgrStr1 = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr1, out int idMgr1);
+                var phong1 = LayPhongDuocPhanCong(conn, idMgr1);
+                if (!phong1.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
+
                 // 1) Lấy IDUser và thông tin đơn
                 int idUser = GetIDUserFromDon(conn, idDonDV);
                 string soPhong = GetSoPhongFromDon(conn, idDonDV);
@@ -167,6 +197,17 @@ namespace QuanLyNhaTro.Pages.Manager
             try
             {
                 using var conn = OpenConn();
+                // Kiểm tra quyền
+                var idMgrStr2 = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr2, out int idMgr2);
+                var phong2 = LayPhongDuocPhanCong(conn, idMgr2);
+                if (!phong2.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
                 int idUser = GetIDUserFromDon(conn, idDonDV);
                 string soPhong = GetSoPhongFromDon(conn, idDonDV);
 
@@ -203,6 +244,17 @@ namespace QuanLyNhaTro.Pages.Manager
             try
             {
                 using var conn = OpenConn();
+                // Kiểm tra quyền
+                var idMgrStr3 = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr3, out int idMgr3);
+                var phong3 = LayPhongDuocPhanCong(conn, idMgr3);
+                if (!phong3.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
                 int idUser = GetIDUserFromDon(conn, idDonDV);
                 string soPhong = GetSoPhongFromDon(conn, idDonDV);
 
@@ -243,6 +295,17 @@ namespace QuanLyNhaTro.Pages.Manager
             try
             {
                 using var conn = OpenConn();
+                // Kiểm tra quyền
+                var idMgrStr4 = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr4, out int idMgr4);
+                var phong4 = LayPhongDuocPhanCong(conn, idMgr4);
+                if (!phong4.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
                 int idUser = GetIDUserFromDon(conn, idDonDV);
                 string soPhong = GetSoPhongFromDon(conn, idDonDV);
 
@@ -283,6 +346,17 @@ namespace QuanLyNhaTro.Pages.Manager
             try
             {
                 using var conn = OpenConn();
+                // Kiểm tra quyền
+                var idMgrStr5 = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr5, out int idMgr5);
+                var phong5 = LayPhongDuocPhanCong(conn, idMgr5);
+                if (!phong5.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
                 string soPhong = GetSoPhongFromDon(conn, idDonDV);
                 ExecNonQuery(conn, @"
                     UPDATE dbo.DONDV
@@ -313,6 +387,17 @@ namespace QuanLyNhaTro.Pages.Manager
             try
             {
                 using var conn = OpenConn();
+                // Kiểm tra quyền: phòng của bản ghi điện nước có thuộc phân công không
+                var idMgrStr6 = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr6, out int idMgr6);
+                var phong6 = LayPhongDuocPhanCong(conn, idMgr6);
+                if (!phong6.Contains(GetIDPhongFromDienNuoc(conn, idGhiNhan)))
+                {
+                    ThongBao = "Không có quyền duyệt bản ghi này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
                 byte trangThai = chapNhan ? (byte)1 : (byte)2;
 
                 // Lấy IDPhong để gửi thông báo
@@ -370,30 +455,39 @@ namespace QuanLyNhaTro.Pages.Manager
 
         // =====================================================================
         // HANDLER: Cộng tất cả nợ DV vào hóa đơn tháng hiện tại
-        //
-        //   Logic:
-        //   1. Tìm tất cả đơn DV ở trạng thái "Chờ thanh toán" đã quá hạn
-        //      (NgayHoanThanh IS NULL AND NgayXuLy < ngày hiện tại - X ngày ân hạn)
-        //   2. Với mỗi phòng, cộng TongTien vào HDTHANG.TienNoDV của kỳ tháng hiện tại
-        //   3. Cập nhật TongCong của hóa đơn
-        //   4. Đánh dấu DuocCongVaoTro = 1 trên HDTHANG
-        //   5. (Tùy chọn) Hủy đơn DV sau khi đã cộng nợ
+        //   (chỉ các phòng được phân công cho Manager này)
         // =====================================================================
         public IActionResult OnPostChuyenNoDVVaoHD()
         {
             try
             {
                 using var conn = OpenConn();
+
+                // Kiểm tra phân công — chỉ cộng nợ các phòng thuộc Manager này
+                var idMgrStrCN = User.FindFirst("IDUser")?.Value
+                              ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStrCN, out int idMgrCN);
+                var phongCN = LayPhongDuocPhanCong(conn, idMgrCN);
+                if (!phongCN.Any())
+                {
+                    ThongBao = "Bạn chưa được phân công quản lý phòng nào.";
+                    LoaiThongBao = "warning";
+                    return RedirectToPage();
+                }
+
                 string kyThanhToan = DateTime.Now.ToString("MM/yyyy");
 
-                // Lấy danh sách đơn DV "Chờ thanh toán" chưa được cộng
-                // (Dùng NgayXuLy <= hôm qua để cho ân hạn 1 ngày)
-                const string sqlLayNo = @"
+                // Lấy danh sách đơn DV "Chờ thanh toán" chưa được cộng,
+                // chỉ trong các phòng được phân công
+                using var cmdLayNo = new SqlCommand("", conn);
+                var inClauseCN = TaoInClause(phongCN, cmdLayNo, "pcn");
+                cmdLayNo.CommandText = $@"
                     SELECT d.IDDonDV, d.IDPhong, d.TongTien
                     FROM dbo.DONDV d
                     WHERE d.TrangThai_DV = N'Chờ thanh toán'
                       AND d.NgayXuLy IS NOT NULL
                       AND d.NgayXuLy < CAST(GETDATE() AS date)
+                      AND d.IDPhong IN ({inClauseCN})
                       AND NOT EXISTS (
                           SELECT 1 FROM dbo.DONDV d2
                           WHERE d2.IDDonDV = d.IDDonDV
@@ -401,8 +495,7 @@ namespace QuanLyNhaTro.Pages.Manager
                       )";
 
                 var danhSachNo = new List<(int IDDonDV, int IDPhong, decimal TongTien)>();
-                using (var cmd = new SqlCommand(sqlLayNo, conn))
-                using (var r = cmd.ExecuteReader())
+                using (var r = cmdLayNo.ExecuteReader())
                 {
                     while (r.Read())
                         danhSachNo.Add((r.GetInt32(0), r.GetInt32(1), r.GetDecimal(2)));
@@ -516,44 +609,55 @@ namespace QuanLyNhaTro.Pages.Manager
         }
 
         // =====================================================================
-        // LOAD ALL — tải toàn bộ dữ liệu một lần
+        // LOAD ALL ASYNC — tải toàn bộ dữ liệu một lần, filter theo phòng phân công
         // =====================================================================
-        private void LoadAll()
+        private async Task LoadAllAsync(int idManager)
         {
             try
             {
-                using var conn = OpenConn();
+                using var conn = new SqlConnection(ConnStr);
+                await conn.OpenAsync();
 
                 // ── Thông tin admin (từ session trong thực tế; để mock ở đây)
                 TenNguoiDung = HttpContext.Session.GetString("FullName") ?? "Quản lý";
 
-                // ── Thông báo chưa đọc
-                SoThongBaoChuaDoc = ScalarInt(conn,
-                    "SELECT COUNT(*) FROM dbo.THONGBAO WHERE DaDoc = 0");
+                // Data isolation: chỉ xử lý phòng được phân công cho Manager này
+                var phongDuocPhanCong = await LayPhongDuocPhanCongAsync(conn, idManager);
+                if (!phongDuocPhanCong.Any())
+                {
+                    // Manager chưa được phân công phòng nào → trả về tập rỗng
+                    return;
+                }
 
-                // ── Đơn nước bình
-                DanhSachDonNuoc = LayDanhSachDon(conn, "Nước bình");
+                // ── Thông báo chưa đọc
+                using (var cmd = new SqlCommand(
+                    "SELECT COUNT(*) FROM dbo.THONGBAO WHERE DaDoc = 0", conn))
+                {
+                    var v = await cmd.ExecuteScalarAsync();
+                    SoThongBaoChuaDoc = v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
+                }
+
+                // ── Đơn nước bình (chỉ các phòng được phân công)
+                DanhSachDonNuoc = await LayDanhSachDonAsync(conn, "Nước bình", phongDuocPhanCong);
                 SoDonNuocChoBinhChoXuLy = DanhSachDonNuoc.Count(d => d.TrangThai_DV == "Chờ xử lý");
 
-
-                // ── Đơn giặt sấy
-                DanhSachDonGiatSay = LayDanhSachDon(conn, "Giặt sấy");
+                // ── Đơn giặt sấy (chỉ các phòng được phân công)
+                DanhSachDonGiatSay = await LayDanhSachDonAsync(conn, "Giặt sấy", phongDuocPhanCong);
                 SoDonGiatSayChoXuLy = DanhSachDonGiatSay.Count(d => d.TrangThai_DV == "Chờ xử lý" || d.TrangThai_DV == "Đang xử lý");
-
 
                 // Tổng đơn chờ xử lý (cho badge sidebar)
                 SoDonChoXuLy = SoDonNuocChoBinhChoXuLy + SoDonGiatSayChoXuLy;
 
-                // ── Nợ dịch vụ (đơn "Chờ thanh toán" đã qua ngày xử lý)
-                DanhSachNoDV = LayDanhSachNoDV(conn);
+                // ── Nợ dịch vụ (chỉ các phòng được phân công)
+                DanhSachNoDV = await LayDanhSachNoDVAsync(conn, phongDuocPhanCong);
                 SoPhongNoDV = DanhSachNoDV.Select(d => d.SoPhong).Distinct().Count();
                 TongTienNoDV = DanhSachNoDV.Sum(d => d.TongTien);
 
-                // ── Điện nước
-                DanhSachDienNuoc = LayDanhSachDienNuoc(conn);
+                // ── Điện nước (chỉ các phòng được phân công)
+                DanhSachDienNuoc = await LayDanhSachDienNuocAsync(conn, phongDuocPhanCong);
                 SoDienNuocChoDuyet = DanhSachDienNuoc.Count(d => d.TrangThaiDuyet == 0);
 
-                // ── Config giá
+                // ── Config giá (không phụ thuộc phòng — giữ nguyên)
                 DanhSachConfig = LayDanhSachConfig(conn);
             }
             catch (Exception ex)
@@ -563,11 +667,15 @@ namespace QuanLyNhaTro.Pages.Manager
             }
         }
 
-        // ── Lấy danh sách đơn DV theo loại ──────────────────────────────────
-        private List<DonDichVuViewModel> LayDanhSachDon(SqlConnection conn, string loai)
+        // ── Lấy danh sách đơn DV theo loại (async + filter phòng) ───────────
+        private async Task<List<DonDichVuViewModel>> LayDanhSachDonAsync(
+            SqlConnection conn, string loai, List<int> phongDuocPhanCong)
         {
             var list = new List<DonDichVuViewModel>();
-            const string sql = @"
+            // Tạo IN clause theo danh sách phòng được phân công
+            using var cmd = new SqlCommand("", conn);
+            var inClause = TaoInClause(phongDuocPhanCong, cmd, "pdpc");
+            cmd.CommandText = $@"
                 SELECT d.IDDonDV, p.SoPhong,
                        ISNULL(kt.HoTen, a.FullName) AS TenKhach,
                        d.LoaiDV, d.NoiDung, d.TongTien, d.TrangThai_DV,
@@ -579,6 +687,7 @@ namespace QuanLyNhaTro.Pages.Manager
                 LEFT JOIN dbo.KHACH_THUE kt ON kt.IDUser = d.IDUser
                 WHERE d.LoaiDV = @Loai
                   AND d.TrangThai_DV NOT IN (N'Đã hủy')
+                  AND d.IDPhong IN ({inClause})
                 ORDER BY
                     CASE d.TrangThai_DV
                         WHEN N'Chờ xử lý'    THEN 0
@@ -586,10 +695,9 @@ namespace QuanLyNhaTro.Pages.Manager
                         WHEN N'Chờ thanh toán' THEN 1
                         ELSE 2
                     END, d.NgayTao DESC";
-            using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@Loai", loai);
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
+            using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync())
                 list.Add(new DonDichVuViewModel
                 {
                     IDDonDV = r.GetInt32(0),
@@ -607,10 +715,13 @@ namespace QuanLyNhaTro.Pages.Manager
         }
 
         // ── Đơn DV đang "Chờ thanh toán" & đã quá ngày xử lý → coi là nợ ──
-        private List<DonDichVuViewModel> LayDanhSachNoDV(SqlConnection conn)
+        private async Task<List<DonDichVuViewModel>> LayDanhSachNoDVAsync(
+            SqlConnection conn, List<int> phongDuocPhanCong)
         {
             var list = new List<DonDichVuViewModel>();
-            const string sql = @"
+            using var cmd = new SqlCommand("", conn);
+            var inClause = TaoInClause(phongDuocPhanCong, cmd, "pno");
+            cmd.CommandText = $@"
                 SELECT d.IDDonDV, p.SoPhong,
                        ISNULL(kt.HoTen, a.FullName) AS TenKhach,
                        d.LoaiDV, d.NoiDung, d.TongTien, d.TrangThai_DV,
@@ -623,10 +734,10 @@ namespace QuanLyNhaTro.Pages.Manager
                   AND d.NgayXuLy IS NOT NULL
                   AND d.NgayXuLy < CAST(GETDATE() AS date)
                   AND d.GhiChuXuLy NOT LIKE N'%[CONGNO:%'
+                  AND d.IDPhong IN ({inClause})
                 ORDER BY d.NgayTao";
-            using var cmd = new SqlCommand(sql, conn);
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
+            using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync())
                 list.Add(new DonDichVuViewModel
                 {
                     IDDonDV = r.GetInt32(0),
@@ -642,22 +753,25 @@ namespace QuanLyNhaTro.Pages.Manager
             return list;
         }
 
-        // ── Điện nước ────────────────────────────────────────────────────────
-        private List<DienNuocViewModel> LayDanhSachDienNuoc(SqlConnection conn)
+        // ── Điện nước (async + filter phòng) ─────────────────────────────────
+        private async Task<List<DienNuocViewModel>> LayDanhSachDienNuocAsync(
+            SqlConnection conn, List<int> phongDuocPhanCong)
         {
             var list = new List<DienNuocViewModel>();
-            const string sql = @"
+            using var cmd = new SqlCommand("", conn);
+            var inClause = TaoInClause(phongDuocPhanCong, cmd, "pdn");
+            cmd.CommandText = $@"
                 SELECT dn.IDGhiNhan, p.SoPhong, dn.KyGhiNhan,
                        dn.SoDienMoi, dn.SoDienCu, dn.SoNuocMoi, dn.SoNuocCu,
                        dn.AnhChupDongHo, dn.TrangThaiDuyet, dn.NgayGhi
                 FROM dbo.DIENNUOC dn
                 JOIN dbo.PHONG p ON p.IDPhong = dn.IDPhong
+                WHERE dn.IDPhong IN ({inClause})
                 ORDER BY
                     CASE dn.TrangThaiDuyet WHEN 0 THEN 0 ELSE 1 END,
                     dn.NgayGhi DESC";
-            using var cmd = new SqlCommand(sql, conn);
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
+            using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync())
                 list.Add(new DienNuocViewModel
                 {
                     IDGhiNhan = r.GetInt32(0),
@@ -761,6 +875,7 @@ namespace QuanLyNhaTro.Pages.Manager
                 P("@NoiDung", noiDung),
                 P("@LoaiTB", loaiTB));
         }
+
         public IActionResult OnPostChangePasswordAsync(
     string oldPassword, string newPassword, string confirmPassword)
         {
@@ -841,6 +956,64 @@ namespace QuanLyNhaTro.Pages.Manager
             using var sha256 = System.Security.Cryptography.SHA256.Create();
             var bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             return Convert.ToHexString(bytes).ToLower();
+        }
+
+        // =====================================================================
+        // HELPER: Lấy danh sách IDPhong được phân công cho Manager hiện tại (async)
+        // =====================================================================
+        private static async Task<List<int>> LayPhongDuocPhanCongAsync(SqlConnection conn, int idManager)
+        {
+            var list = new List<int>();
+            using var cmd = new SqlCommand(
+                "SELECT IDPhong FROM dbo.PHONG_MANAGER WHERE IDManager = @ID AND IsActive = 1", conn);
+            cmd.Parameters.AddWithValue("@ID", idManager);
+            using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync()) list.Add(r.GetInt32(0));
+            return list;
+        }
+
+        // Phiên bản đồng bộ dùng trong POST handlers
+        private static List<int> LayPhongDuocPhanCong(SqlConnection conn, int idManager)
+        {
+            var list = new List<int>();
+            using var cmd = new SqlCommand(
+                "SELECT IDPhong FROM dbo.PHONG_MANAGER WHERE IDManager = @ID AND IsActive = 1", conn);
+            cmd.Parameters.AddWithValue("@ID", idManager);
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) list.Add(r.GetInt32(0));
+            return list;
+        }
+
+        // ── Lấy IDPhong của một đơn dịch vụ (DONDV) ─────────────────────────
+        private static int GetIDPhongFromDon(SqlConnection conn, int idDonDV)
+        {
+            using var cmd = new SqlCommand(
+                "SELECT IDPhong FROM dbo.DONDV WHERE IDDonDV = @ID", conn);
+            cmd.Parameters.AddWithValue("@ID", idDonDV);
+            var v = cmd.ExecuteScalar();
+            return v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
+        }
+
+        // ── Lấy IDPhong từ bảng DIENNUOC ─────────────────────────────────────
+        private static int GetIDPhongFromDienNuoc(SqlConnection conn, int idGhiNhan)
+        {
+            using var cmd = new SqlCommand(
+                "SELECT IDPhong FROM dbo.DIENNUOC WHERE IDGhiNhan = @ID", conn);
+            cmd.Parameters.AddWithValue("@ID", idGhiNhan);
+            var v = cmd.ExecuteScalar();
+            return v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
+        }
+
+        // ── Tạo chuỗi IN clause an toàn từ danh sách int (tránh SQL injection) ─
+        private static string TaoInClause(List<int> ids, SqlCommand cmd, string prefix)
+        {
+            if (!ids.Any()) return "-1"; // Không có phòng nào → không khớp kết quả nào
+            var pNames = ids.Select((id, i) => {
+                var p = $"@{prefix}{i}";
+                cmd.Parameters.AddWithValue(p, id);
+                return p;
+            });
+            return string.Join(",", pNames);
         }
     }
 }

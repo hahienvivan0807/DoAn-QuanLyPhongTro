@@ -1537,10 +1537,10 @@
                         font-family:inherit;transition:background 0.2s;"
                             onmouseover="this.style.background='var(--mau-xanh-nhat)'"
                             onmouseout="this.style.background='none'">
-                        <div class="anh-dai-dien">@(Model.TenNguoiDung?.Length > 0 ? Model.TenNguoiDung[0].ToString().ToUpper() : "A")</div>
+                        <div class="anh-dai-dien">@(fullName?.Length > 0 ? fullName[0].ToString().ToUpper() : "A")</div>
                         <div>
-                            <div class="ten">@Model.TenNguoiDung</div>
-                            <div class="chuc-vu">Quản lý</div>
+                            <div class="ten">@fullName</div>
+                            <div class="chuc-vu">@role</div>
                         </div>
                         <i class="fas fa-chevron-down" id="mgrChevron"
                            style="font-size:11px;color:var(--mau-chu-phu);margin-left:4px;transition:transform 0.2s;"></i>
@@ -1548,13 +1548,13 @@
 
                     <div class="mgr-dropdown" id="mgrDropdown">
                         <div class="mgr-dd-header">
-                            <div class="mgr-dd-avatar">@(Model.TenNguoiDung?.Length > 0 ? Model.TenNguoiDung[0].ToString().ToUpper() : "A")</div>
+                            <div class="mgr-dd-avatar">@(fullName?.Length > 0 ? fullName[0].ToString().ToUpper() : "A")</div>
                             <div>
-                                <div class="mgr-dd-name">@Model.TenNguoiDung</div>
-                                <div class="mgr-dd-sub" id="mgr-dd-email">Đang tải...</div>
+                                <div class="mgr-dd-name">@fullName</div>
+                                <div class="mgr-dd-sub" id="mgr-dd-email">@role</div>
                                 <span class="mgr-dd-badge">
                                     <i class="fas fa-user-shield" style="font-size:8px;"></i>
-                                    Quản lý
+                                    @role
                                 </span>
                             </div>
                         </div>
@@ -2570,7 +2570,7 @@
     // ===== ĐỒNG BỘ BADGE SIDEBAR =====
     (async function loadBadgeSidebar() {
     try {
-    const res = await fetch('/Api/BadgeCounts');
+    const res = await fetch('/Api/BadgeCounts?scopeManager=true');
     if (!res.ok) return;
     const data = await res.json();
     const badgeDV = document.getElementById('badge-dichvu');

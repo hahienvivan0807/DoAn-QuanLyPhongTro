@@ -20,13 +20,29 @@ namespace QuanLyNhaTro.Pages.Manager
         public int SoThongBaoChuaDoc { get; set; }
         public int SoSuCoChoXuLy { get; set; }
 
-        // ── Dữ liệu hiển thị ──────────────────────────────────────────
-        public THONGKE_TONG? ThongKeTong { get; set; }
-        public List<THONGKE_DOANHTHU_THANG> DanhSachDoanhThuThang { get; set; } = new();
+        // ── Thống kê phòng (đọc, tính từ DB) ─────────────────────────
+        public int TongSoPhong { get; set; }
+        public int PhongDangThue { get; set; }
+        public int PhongConTrong { get; set; }
+        public int PhongDangSua { get; set; }
+        public decimal TiLeLapDay { get; set; }
 
-        // ── Bind properties Form 1: THONGKE_TONG ──────────────────────
-        [BindProperty]
-        public TongInputModel TongInput { get; set; } = new();
+        // ── Thống kê doanh thu (đọc, tính từ DB) ─────────────────────
+        public decimal DoanhThuThangNay { get; set; }
+        public decimal DoanhThuThangTruoc { get; set; }
+        public decimal TangTruongDoanhThu { get; set; }
+
+        // ── Thống kê hóa đơn (đọc, tính từ DB) ──────────────────────
+        public int HoaDonChuaDong { get; set; }
+        public int HoaDonSapDenHan { get; set; }
+        public int HoaDonQuaHan { get; set; }
+
+        // ── Thống kê đơn dịch vụ (đọc, tính từ DB) ──────────────────
+        public int DonDVChoXuLy { get; set; }
+        public int DonDVKhanCap { get; set; }
+
+        // ── Dữ liệu hiển thị ──────────────────────────────────────────
+        public List<THONGKE_DOANHTHU_THANG> DanhSachDoanhThuThang { get; set; } = new();
 
         // ── Bind properties Form 2: THONGKE_DOANHTHU_THANG ───────────
         [BindProperty]
@@ -35,23 +51,6 @@ namespace QuanLyNhaTro.Pages.Manager
         // ================================================================
         // INPUT MODELS
         // ================================================================
-        public class TongInputModel
-        {
-            public int TongSoPhong { get; set; }
-            public int PhongDangThue { get; set; }
-            public int PhongConTrong { get; set; }
-            public int PhongDangSua { get; set; }
-            public decimal TiLeLapDay { get; set; }
-            public decimal DoanhThuThangNay { get; set; }
-            public decimal DoanhThuThangTruoc { get; set; }
-            public decimal TangTruongDoanhThu { get; set; }
-            public int HoaDonChuaDong { get; set; }
-            public int HoaDonSapDenHan { get; set; }
-            public int HoaDonQuaHan { get; set; }
-            public int DonDVChoXuLy { get; set; }
-            public int DonDVKhanCap { get; set; }
-        }
-
         public class DoanhThuThangInputModel
         {
             public short Nam { get; set; } = (short)DateTime.Now.Year;
@@ -66,57 +65,112 @@ namespace QuanLyNhaTro.Pages.Manager
         }
 
         // ================================================================
-        // ON GET — Tải dữ liệu mặc định
+        // ON GET — Tải và tính dữ liệu trực tiếp từ DB
         // ================================================================
         public async Task<IActionResult> OnGetAsync()
         {
-            // ── Xác thực ─────────────────────────────────────────────
-            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(idUserStr, out int idUser))
+            // ── Bước 1: Parse idManager theo pattern chuẩn dự án ─────
+            var idStr = User.FindFirst("IDUser")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idStr, out int idManager) || idManager == 0)
                 return RedirectToPage("/Login");
 
+            // ── Tải thông tin tài khoản hiện tại ─────────────────────
             CurrentUser = await _context.ACCOUNT
                 .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.IDUser == idUser);
+                .FirstOrDefaultAsync(a => a.IDUser == idManager);
 
             // ── Thông báo chưa đọc ───────────────────────────────────
             SoThongBaoChuaDoc = await _context.THONGBAO
-                .Where(t => t.IDUser == idUser && !t.DaDoc)
+                .Where(t => t.IDUser == idManager && !t.DaDoc)
                 .CountAsync();
 
-            // ── Sự cố chờ xử lý (sidebar badge) ──────────────────────
-            SoSuCoChoXuLy = await _context.DONDV
-                .Where(d => d.LoaiDV == "Hư hỏng" && d.TrangThai_DV == "Chờ xử lý")
-                .CountAsync();
-
-            // ── Tải THONGKE_TONG (ID = 1) ────────────────────────────
-            ThongKeTong = await _context.THONGKE_TONG
+            // ── Bước 2: Lấy danh sách phòng được phân công ───────────
+            var idPhong = await _context.PHONG_MANAGER
                 .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.ID == 1);
+                .Where(pm => pm.IDManager == idManager && pm.IsActive)
+                .Select(pm => pm.IDPhong)
+                .ToListAsync();
 
-            // Nếu record chưa tồn tại, khởi tạo đối tượng rỗng để hiển thị form
-            if (ThongKeTong == null)
-                ThongKeTong = new THONGKE_TONG { ID = 1 };
+            // ── Bước 3: Thống kê trạng thái phòng từ bảng PHONG ──────
+            var dsPhong = await _context.PHONG
+                .AsNoTracking()
+                .Where(p => idPhong.Contains(p.IDPhong))
+                .Select(p => p.TrangThai)
+                .ToListAsync();
 
-            // Điền sẵn giá trị vào input model Form 1
-            TongInput = new TongInputModel
-            {
-                TongSoPhong = ThongKeTong.TongSoPhong,
-                PhongDangThue = ThongKeTong.PhongDangThue,
-                PhongConTrong = ThongKeTong.PhongConTrong,
-                PhongDangSua = ThongKeTong.PhongDangSua,
-                TiLeLapDay = ThongKeTong.TiLeLapDay,
-                DoanhThuThangNay = ThongKeTong.DoanhThuThangNay,
-                DoanhThuThangTruoc = ThongKeTong.DoanhThuThangTruoc,
-                TangTruongDoanhThu = ThongKeTong.TangTruongDoanhThu,
-                HoaDonChuaDong = ThongKeTong.HoaDonChuaDong,
-                HoaDonSapDenHan = ThongKeTong.HoaDonSapDenHan,
-                HoaDonQuaHan = ThongKeTong.HoaDonQuaHan,
-                DonDVChoXuLy = ThongKeTong.DonDVChoXuLy,
-                DonDVKhanCap = ThongKeTong.DonDVKhanCap
-            };
+            int tongSoPhong = dsPhong.Count;
+            int phongDangThue = dsPhong.Count(t => t == "Đang thuê");
+            int phongConTrong = dsPhong.Count(t => t == "Trống");
+            int phongDangSua = dsPhong.Count(t => t == "Đang sửa");
+            decimal tiLeLapDay = tongSoPhong > 0
+                ? Math.Round((decimal)phongDangThue / tongSoPhong * 100, 2) : 0;
 
-            // ── Tải danh sách THONGKE_DOANHTHU_THANG ─────────────────
+            // ── Bước 4: Doanh thu tháng này và tháng trước từ HDTHANG ─
+            var kyNay = DateTime.Now.ToString("MM/yyyy");
+            var kyTruoc = DateTime.Now.AddMonths(-1).ToString("MM/yyyy");
+
+            var dtThangNay = await _context.HDTHANG
+                .AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong)
+                         && h.KyThanhToan == kyNay
+                         && h.TrangThai_TT == "Đã hoàn thành")
+                .SumAsync(h => (decimal?)h.TongCong) ?? 0;
+
+            var dtThangTruoc = await _context.HDTHANG
+                .AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong)
+                         && h.KyThanhToan == kyTruoc
+                         && h.TrangThai_TT == "Đã hoàn thành")
+                .SumAsync(h => (decimal?)h.TongCong) ?? 0;
+
+            decimal tangTruong = dtThangTruoc > 0
+                ? Math.Round((dtThangNay - dtThangTruoc) / dtThangTruoc * 100, 2) : 0;
+
+            // ── Bước 5: Thống kê hóa đơn tháng này từ HDTHANG ────────
+            var hdThangNay = await _context.HDTHANG
+                .AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong) && h.KyThanhToan == kyNay)
+                .Select(h => new { h.TrangThai_TT, h.HanDong })
+                .ToListAsync();
+
+            int hdChuaDong = hdThangNay.Count(h => h.TrangThai_TT == "Chưa đóng" || h.TrangThai_TT == "Quá hạn");
+            int hdSapDenHan = hdThangNay.Count(h =>
+                h.TrangThai_TT != "Đã hoàn thành" &&
+                (h.HanDong.Date - DateTime.Today).TotalDays is >= 0 and <= 5);
+            int hdQuaHan = hdThangNay.Count(h => h.TrangThai_TT == "Quá hạn");
+
+            // ── Bước 6: Thống kê đơn dịch vụ và sự cố từ DONDV ──────
+            var dsDonDV = await _context.DONDV
+                .AsNoTracking()
+                .Where(d => idPhong.Contains(d.IDPhong)
+                         && d.TrangThai_DV != "Đã hủy"
+                         && d.TrangThai_DV != "Thành công")
+                .Select(d => new { d.TrangThai_DV, d.MucDo, d.LoaiDV })
+                .ToListAsync();
+
+            int donDVChoXuLy = dsDonDV.Count(d => d.TrangThai_DV == "Chờ xử lý");
+            int donDVKhanCap = dsDonDV.Count(d => d.MucDo == "Khẩn cấp" && d.LoaiDV == "Hư hỏng");
+
+            // Sự cố chờ xử lý — dùng cho badge sidebar (chỉ phòng phân công)
+            SoSuCoChoXuLy = dsDonDV.Count(d => d.LoaiDV == "Hư hỏng" && d.TrangThai_DV == "Chờ xử lý");
+
+            // ── Bước 7: Gán thẳng vào các property đọc ───────────────
+            TongSoPhong = tongSoPhong;
+            PhongDangThue = phongDangThue;
+            PhongConTrong = phongConTrong;
+            PhongDangSua = phongDangSua;
+            TiLeLapDay = tiLeLapDay;
+            DoanhThuThangNay = dtThangNay;
+            DoanhThuThangTruoc = dtThangTruoc;
+            TangTruongDoanhThu = tangTruong;
+            HoaDonChuaDong = hdChuaDong;
+            HoaDonSapDenHan = hdSapDenHan;
+            HoaDonQuaHan = hdQuaHan;
+            DonDVChoXuLy = donDVChoXuLy;
+            DonDVKhanCap = donDVKhanCap;
+
+            // ── Bước 8: Tải danh sách THONGKE_DOANHTHU_THANG ─────────
+            // Bảng này không có cột IDManager nên giữ nguyên query cũ
             DanhSachDoanhThuThang = await _context.THONGKE_DOANHTHU_THANG
                 .AsNoTracking()
                 .OrderByDescending(t => t.Nam)
@@ -124,71 +178,40 @@ namespace QuanLyNhaTro.Pages.Manager
                 .Take(24) // Hiển thị 24 tháng gần nhất
                 .ToListAsync();
 
+            // ── Bước 9: Tự tính sẵn DoanhThuThangInput từ HDTHANG theo kyNay ─
+            DoanhThuThangInput.TongTienPhong = await _context.HDTHANG.AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong) && h.KyThanhToan == kyNay)
+                .SumAsync(h => (decimal?)h.TongCong) ?? 0;
+
+            DoanhThuThangInput.TongTienDien = await _context.HDTHANG.AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong) && h.KyThanhToan == kyNay)
+                .SumAsync(h => (decimal?)h.TongCong) ?? 0;
+
+            DoanhThuThangInput.TongTienNuoc = await _context.HDTHANG.AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong) && h.KyThanhToan == kyNay)
+                .SumAsync(h => (decimal?)h.TongCong) ?? 0;
+
+            DoanhThuThangInput.TongTienDV = await _context.HDTHANG.AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong) && h.KyThanhToan == kyNay)
+                .SumAsync(h => (decimal?)h.TongCong) ?? 0;
+
+            DoanhThuThangInput.TongCong = await _context.HDTHANG.AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong) && h.KyThanhToan == kyNay)
+                .SumAsync(h => (decimal?)h.TongCong) ?? 0;
+
+            DoanhThuThangInput.SoHoaDonDaDong = await _context.HDTHANG.AsNoTracking()
+                .Where(h => idPhong.Contains(h.IDPhong) && h.KyThanhToan == kyNay
+                         && h.TrangThai_TT == "Đã hoàn thành")
+                .CountAsync();
+
+            // ChiPhiThang giữ 0 — manager tự nhập
+            DoanhThuThangInput.ChiPhiThang = 0;
+
+            // Điền tháng/năm theo tháng hiện tại
+            DoanhThuThangInput.Thang = (byte)DateTime.Now.Month;
+            DoanhThuThangInput.Nam = (short)DateTime.Now.Year;
+
             return Page();
-        }
-
-        // ================================================================
-        // HANDLER — Form 1: Cập nhật THONGKE_TONG
-        // ================================================================
-        public async Task<IActionResult> OnPostUpdateTongAsync()
-        {
-            // Xác thực người dùng
-            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(idUserStr, out _))
-                return RedirectToPage("/Login");
-
-            // Validate model state cho TongInput
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = "Dữ liệu nhập không hợp lệ. Vui lòng kiểm tra lại.";
-                return RedirectToPage();
-            }
-
-            try
-            {
-                var record = await _context.THONGKE_TONG.FindAsync(1);
-
-                if (record == null)
-                {
-                    // Tạo mới nếu chưa có (trường hợp seed chưa chạy)
-                    record = new THONGKE_TONG { ID = 1 };
-                    _context.THONGKE_TONG.Add(record);
-                }
-
-                // Cập nhật từng trường từ input
-                record.TongSoPhong = TongInput.TongSoPhong;
-                record.PhongDangThue = TongInput.PhongDangThue;
-                record.PhongConTrong = TongInput.PhongConTrong;
-                record.PhongDangSua = TongInput.PhongDangSua;
-                record.TiLeLapDay = TongInput.TiLeLapDay;
-                record.DoanhThuThangNay = TongInput.DoanhThuThangNay;
-                record.DoanhThuThangTruoc = TongInput.DoanhThuThangTruoc;
-                record.TangTruongDoanhThu = TongInput.TangTruongDoanhThu;
-                record.HoaDonChuaDong = TongInput.HoaDonChuaDong;
-                record.HoaDonSapDenHan = TongInput.HoaDonSapDenHan;
-                record.HoaDonQuaHan = TongInput.HoaDonQuaHan;
-                record.DonDVChoXuLy = TongInput.DonDVChoXuLy;
-                record.DonDVKhanCap = TongInput.DonDVKhanCap;
-                record.NgayCapNhat = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "✅ Cập nhật thống kê tổng quan thành công!";
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                TempData["ErrorMessage"] = $"Lỗi xung đột dữ liệu khi lưu: {ex.Message}";
-            }
-            catch (DbUpdateException ex)
-            {
-                TempData["ErrorMessage"] = $"Lỗi cơ sở dữ liệu: {ex.InnerException?.Message ?? ex.Message}";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Lỗi không xác định: {ex.Message}";
-            }
-
-            return RedirectToPage();
         }
 
         // ================================================================
@@ -197,8 +220,8 @@ namespace QuanLyNhaTro.Pages.Manager
         public async Task<IActionResult> OnPostUpdateDoanhThuAsync()
         {
             // Xác thực người dùng
-            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(idUserStr, out _))
+            var idStr = User.FindFirst("IDUser")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idStr, out int idManager) || idManager == 0)
                 return RedirectToPage("/Login");
 
             // Validate tháng/năm hợp lệ
@@ -214,6 +237,8 @@ namespace QuanLyNhaTro.Pages.Manager
                 return RedirectToPage();
             }
 
+            // Bọc transaction để tránh race condition duplicate insert đồng thời
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // Kiểm tra bản ghi tháng/năm này đã tồn tại chưa
@@ -232,7 +257,7 @@ namespace QuanLyNhaTro.Pages.Manager
                     existing.TongCong = DoanhThuThangInput.TongCong;
                     existing.SoHoaDonDaDong = DoanhThuThangInput.SoHoaDonDaDong;
                     existing.ChiPhiThang = DoanhThuThangInput.ChiPhiThang;
-                    existing.NgayCapNhat = DateTime.UtcNow;
+                    existing.NgayCapNhat = DateTime.Now;
 
                     TempData["SuccessMessage"] = $"✅ Đã cập nhật dữ liệu tháng {DoanhThuThangInput.Thang}/{DoanhThuThangInput.Nam} thành công!";
                 }
@@ -250,7 +275,7 @@ namespace QuanLyNhaTro.Pages.Manager
                         TongCong = DoanhThuThangInput.TongCong,
                         SoHoaDonDaDong = DoanhThuThangInput.SoHoaDonDaDong,
                         ChiPhiThang = DoanhThuThangInput.ChiPhiThang,
-                        NgayCapNhat = DateTime.UtcNow
+                        NgayCapNhat = DateTime.Now
                     };
 
                     _context.THONGKE_DOANHTHU_THANG.Add(newRecord);
@@ -259,27 +284,21 @@ namespace QuanLyNhaTro.Pages.Manager
                 }
 
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                TempData["ErrorMessage"] = $"Lỗi xung đột dữ liệu: {ex.Message}";
+                await transaction.CommitAsync();
             }
             catch (DbUpdateException ex)
             {
-                // Bắt lỗi vi phạm unique index (Nam + Thang)
-                if (ex.InnerException?.Message.Contains("UNIQUE") == true ||
-                    ex.InnerException?.Message.Contains("unique") == true)
-                {
-                    TempData["ErrorMessage"] = $"Dữ liệu tháng {DoanhThuThangInput.Thang}/{DoanhThuThangInput.Nam} đã tồn tại và có xung đột. Vui lòng thử lại.";
-                }
+                await transaction.RollbackAsync();
+                // Bắt lỗi vi phạm unique index (Nam + Thang) — ẩn chi tiết schema
+                if (ex.InnerException?.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) == true)
+                    TempData["ErrorMessage"] = $"Dữ liệu tháng {DoanhThuThangInput.Thang}/{DoanhThuThangInput.Nam} đã tồn tại. Vui lòng thử lại.";
                 else
-                {
-                    TempData["ErrorMessage"] = $"Lỗi cơ sở dữ liệu: {ex.InnerException?.Message ?? ex.Message}";
-                }
+                    TempData["ErrorMessage"] = "Lỗi cơ sở dữ liệu khi lưu. Vui lòng thử lại.";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                TempData["ErrorMessage"] = $"Lỗi không xác định: {ex.Message}";
+                await transaction.RollbackAsync();
+                TempData["ErrorMessage"] = "Lỗi không xác định. Vui lòng thử lại.";
             }
 
             return RedirectToPage();
@@ -290,12 +309,13 @@ namespace QuanLyNhaTro.Pages.Manager
         // ================================================================
         public async Task<IActionResult> OnPostDeleteDoanhThuAsync(int id)
         {
-            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(idUserStr, out _))
+            var idStr = User.FindFirst("IDUser")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idStr, out int idManager) || idManager == 0)
                 return RedirectToPage("/Login");
 
             try
             {
+                // Lấy bản ghi trước khi xóa — kiểm tra tồn tại server-side
                 var record = await _context.THONGKE_DOANHTHU_THANG.FindAsync(id);
                 if (record == null)
                 {
@@ -303,18 +323,21 @@ namespace QuanLyNhaTro.Pages.Manager
                     return RedirectToPage();
                 }
 
+                // Uncomment nếu bảng THONGKE_DOANHTHU_THANG có cột IDManager:
+                // if (record.IDManager != idManager) return Forbid();
+
                 _context.THONGKE_DOANHTHU_THANG.Remove(record);
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = $"✅ Đã xóa dữ liệu tháng {record.Thang}/{record.Nam} thành công!";
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                TempData["ErrorMessage"] = $"Lỗi khi xóa: {ex.InnerException?.Message ?? ex.Message}";
+                TempData["ErrorMessage"] = "Lỗi cơ sở dữ liệu khi xóa. Vui lòng thử lại.";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                TempData["ErrorMessage"] = $"Lỗi không xác định: {ex.Message}";
+                TempData["ErrorMessage"] = "Lỗi không xác định. Vui lòng thử lại.";
             }
 
             return RedirectToPage();

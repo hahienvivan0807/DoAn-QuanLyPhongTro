@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
             /* ============================================================
-                                               BIẾN MÀU & RESET
-                                            ============================================================ */
+                                                           BIẾN MÀU & RESET
+                                                        ============================================================ */
             :root {
                 --sidebar: #0d1b3e;
                 --sidebar-dark: #091429;
@@ -50,8 +50,8 @@
             }
 
             /* ============================================================
-                                               SIDEBAR
-                                            ============================================================ */
+                                                           SIDEBAR
+                                                        ============================================================ */
             #sidebar {
                 width: 220px;
                 min-width: 220px;
@@ -215,8 +215,8 @@
             }
 
             /* ============================================================
-                                               MAIN
-                                            ============================================================ */
+                                                           MAIN
+                                                        ============================================================ */
             #main {
                 flex: 1;
                 display: flex;
@@ -375,8 +375,8 @@
             }
 
             /* ============================================================
-                                               PAGE CONTENT
-                                            ============================================================ */
+                                                           PAGE CONTENT
+                                                        ============================================================ */
             #content {
                 flex: 1;
                 overflow-y: auto;
@@ -448,8 +448,8 @@
                 }
 
             /* ============================================================
-                                               STATS CARDS
-                                            ============================================================ */
+                                                           STATS CARDS
+                                                        ============================================================ */
             .stats-grid {
                 display: grid;
                 grid-template-columns: repeat(5,1fr);
@@ -544,8 +544,8 @@
             }
 
             /* ============================================================
-                                               MAIN TABS
-                                            ============================================================ */
+                                                           MAIN TABS
+                                                        ============================================================ */
             .main-tabs {
                 display: flex;
                 gap: 0;
@@ -608,8 +608,8 @@
                 }
 
             /* ============================================================
-                                               TAB PANEL WRAPPER
-                                            ============================================================ */
+                                                           TAB PANEL WRAPPER
+                                                        ============================================================ */
             .tab-panel-wrap {
                 background: var(--white);
                 border-radius: 0 0 14px 14px;
@@ -628,8 +628,8 @@
                 }
 
             /* ============================================================
-                                               SUB TABS
-                                            ============================================================ */
+                                                           SUB TABS
+                                                        ============================================================ */
             .sub-tabs {
                 display: flex;
                 gap: 6px;
@@ -722,8 +722,8 @@
                 }
 
             /* ============================================================
-                                               TOOLBAR
-                                            ============================================================ */
+                                                           TOOLBAR
+                                                        ============================================================ */
             .toolbar {
                 display: flex;
                 align-items: center;
@@ -772,8 +772,8 @@
                 }
 
             /* ============================================================
-                                               INVOICE LIST
-                                            ============================================================ */
+                                                           INVOICE LIST
+                                                        ============================================================ */
             .invoice-list {
                 display: flex;
                 flex-direction: column;
@@ -1029,8 +1029,8 @@
                 }
 
             /* ============================================================
-                                               MODAL
-                                            ============================================================ */
+                                                           MODAL
+                                                        ============================================================ */
             .modal-overlay {
                 display: none;
                 position: fixed;
@@ -1763,7 +1763,7 @@
             // ================================================================
             async function taiDonDV() {
                 try {
-                    const res = await fetch('/api/hoa-don/danh-sach-dv?ky=@Model.KyXem');
+                    const res = await fetch('?handler=DanhSachDV&ky=@Model.KyXem');
                     if (res.ok) dsHoaDonDV = await res.json();
                 } catch (e) {
                     dsHoaDonDV = [];
@@ -2329,26 +2329,26 @@
             // ================================================================
             // NHẮC NHỞ
             // ================================================================
-            let remindId = null, remindType = null;
-            function moNhacNho(event, id, type) {
+            async function moNhacNho(event, id, loai) {
                 if (event) event.stopPropagation();
-                remindId = id; remindType = type;
-                const ds   = type === 'dv' ? dsHoaDonDV : dsHoaDonThang;
-                const item = ds.find(x => x.id === id);
-                document.getElementById('remind-tenant').textContent = item?.tenNguoiThue || '—';
-                document.getElementById('remind-room').textContent   = item?.soPhong || '—';
-                document.getElementById('modal-remind').classList.add('open');
+                try {
+                    const res = await fetch('?handler=NhacNho', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': csrfToken
+                        },
+                        body: JSON.stringify({ id, loai })
+                    });
+                    const data = await res.json();
+                    if (res.ok) toast('✅ Đã gửi nhắc nhở đến khách.', 'success');
+                    else toast(`❌ ${data.message || 'Lỗi gửi nhắc nhở.'}`, 'error');
+                } catch (e) {
+                    toast('❌ Mất kết nối máy chủ.', 'error');
+                }
             }
             async function guiNhacNho() {
-                try {
-                    await fetch('/api/thong-bao/gui-nhac', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken },
-                        body: JSON.stringify({ id: remindId, type: remindType })
-                    });
-                } catch (e) {}
                 dongModal('modal-remind');
-                toast('✅ Đã gửi nhắc nhở thành công!', 'success');
             }
 
             // ================================================================

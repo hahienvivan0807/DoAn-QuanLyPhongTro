@@ -59,10 +59,36 @@ namespace QuanLyNhaTro.Pages.Manager
 
             // ----------------------------------------------------------------
             // QUERY CHÍNH:
-            // Lấy tất cả DONDV có LoaiDV = 'Hư hỏng'
-            // Include Phong, Tenant (người gửi), ManagerXuLy (người xử lý)
+            // [LỖI 1 ĐÃ SỬA] Chỉ lấy phòng được phân công cho manager này,
+            // lọc LoaiDV = 'Hư hỏng' để đảm bảo data isolation.
             // ----------------------------------------------------------------
+
+            // Lấy IDManager từ Claims (hỗ trợ cả claim tùy chỉnh và claim chuẩn)
+            var idStr = User.FindFirst("IDUser")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(idStr, out int idManager);
+
+            // Lấy danh sách IDPhong được phân công cho manager
+            var idPhong = await _context.PHONG_MANAGER
+                .AsNoTracking()
+                .Where(pm => pm.IDManager == idManager && pm.IsActive)
+                .Select(pm => pm.IDPhong)
+                .ToListAsync();
+
+            // Nếu không có phòng nào được phân công, trả về danh sách rỗng
+            if (!idPhong.Any())
+            {
+                DanhSachSuCo = new List<DONDV>();
+                TongSuCo = 0;
+                DangXuLy = 0;
+                DaXuLy = 0;
+                KhanCap = 0;
+                SoSuCoChoXuLy = 0;
+                return Page();
+            }
+
+            // Chỉ lấy DONDV có LoaiDV = 'Hư hỏng' và thuộc phòng được phân công
             DanhSachSuCo = await _context.DONDV
+                .Where(d => d.LoaiDV == "Hư hỏng" && idPhong.Contains(d.IDPhong))
                 .Include(d => d.Phong)
                 .Include(d => d.Tenant)
                 .Include(d => d.ManagerXuLy)
@@ -101,14 +127,16 @@ namespace QuanLyNhaTro.Pages.Manager
         // HANDLER: BẮT ĐẦU XỬ LÝ
         // POST: /Manager/SuCoBaoTri?handler=BatDauXuLy
         // ================================================================
-        public async Task<IActionResult> OnPostBatDauXuLyAsync(int idDon, string? ghiChu)
+        public async Task<IActionResult> OnPostBatDauXuLyAsync([FromBody] SuCoRequest req)
         {
-            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(idUserStr, out int idManager))
-                return Unauthorized();
+            // [LỖI 2 ĐÃ SỬA] Kiểm tra quyền trước khi xử lý
+            int idManager = LayIdManager();
+            if (idManager == 0) return Unauthorized();
+            if (!await CoQuyenDonDVAsync(req.IdDon, idManager))
+                return new JsonResult(new { message = "Không có quyền thao tác sự cố này." }) { StatusCode = 403 };
 
             var don = await _context.DONDV
-                .FirstOrDefaultAsync(d => d.IDDonDV == idDon && d.LoaiDV == "Hư hỏng");
+                .FirstOrDefaultAsync(d => d.IDDonDV == req.IdDon && d.LoaiDV == "Hư hỏng");
 
             if (don == null) return NotFound();
 
@@ -118,9 +146,9 @@ namespace QuanLyNhaTro.Pages.Manager
 
             don.TrangThai_DV = "Đang xử lý";
             don.IDManagerXuLy = idManager;
-            don.NgayXuLy = DateTime.UtcNow;
-            don.GhiChuXuLy = ghiChu;
-            don.UpdatedAt = DateTime.UtcNow;
+            don.NgayXuLy = DateTime.Now;       // [LỖI 2 ĐÃ SỬA] Dùng DateTime.Now thay UtcNow
+            don.GhiChuXuLy = req.GhiChu;
+            don.UpdatedAt = DateTime.Now;      // [LỖI 2 ĐÃ SỬA] Dùng DateTime.Now thay UtcNow
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
@@ -130,14 +158,16 @@ namespace QuanLyNhaTro.Pages.Manager
         // HANDLER: HOÀN THÀNH XỬ LÝ
         // POST: /Manager/SuCoBaoTri?handler=HoanThanh
         // ================================================================
-        public async Task<IActionResult> OnPostHoanThanhAsync(int idDon, string? ghiChu)
+        public async Task<IActionResult> OnPostHoanThanhAsync([FromBody] SuCoRequest req)
         {
-            var idUserStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(idUserStr, out int idManager))
-                return Unauthorized();
+            // [LỖI 2 ĐÃ SỬA] Kiểm tra quyền trước khi xử lý
+            int idManager = LayIdManager();
+            if (idManager == 0) return Unauthorized();
+            if (!await CoQuyenDonDVAsync(req.IdDon, idManager))
+                return new JsonResult(new { message = "Không có quyền thao tác sự cố này." }) { StatusCode = 403 };
 
             var don = await _context.DONDV
-                .FirstOrDefaultAsync(d => d.IDDonDV == idDon && d.LoaiDV == "Hư hỏng");
+                .FirstOrDefaultAsync(d => d.IDDonDV == req.IdDon && d.LoaiDV == "Hư hỏng");
 
             if (don == null) return NotFound();
 
@@ -145,13 +175,39 @@ namespace QuanLyNhaTro.Pages.Manager
                 return BadRequest("Trạng thái không hợp lệ.");
 
             don.TrangThai_DV = "Thành công";
-            don.GhiChuXuLy = ghiChu;
-            don.NgayHoanThanh = DateTime.UtcNow;
+            don.GhiChuXuLy = req.GhiChu;
+            don.NgayHoanThanh = DateTime.Now;  // [LỖI 2 ĐÃ SỬA] Dùng DateTime.Now thay UtcNow
             don.IDManagerXuLy = idManager;
-            don.UpdatedAt = DateTime.UtcNow;
+            don.UpdatedAt = DateTime.Now;      // [LỖI 2 ĐÃ SỬA] Dùng DateTime.Now thay UtcNow
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
+
+        // ================================================================
+        // PRIVATE HELPERS — KIỂM TRA QUYỀN
+        // ================================================================
+
+        /// <summary>[LỖI 2 ĐÃ SỬA] Lấy IDManager từ Claims (hỗ trợ claim tùy chỉnh và chuẩn)</summary>
+        private int LayIdManager()
+        {
+            var s = User.FindFirst("IDUser")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(s, out int id);
+            return id;
+        }
+
+        /// <summary>[LỖI 2 ĐÃ SỬA] Kiểm tra manager có quyền thao tác với đơn dịch vụ không</summary>
+        private async Task<bool> CoQuyenDonDVAsync(int idDonDV, int idManager) =>
+            await _context.DONDV.AsNoTracking()
+                .AnyAsync(d => d.IDDonDV == idDonDV
+                    && _context.PHONG_MANAGER.Any(pm =>
+                        pm.IDPhong == d.IDPhong && pm.IDManager == idManager && pm.IsActive));
+    }
+
+    /// <summary>[LỖI 4 ĐÃ SỬA] Request model cho POST handlers dùng JSON body</summary>
+    public class SuCoRequest
+    {
+        public int IdDon { get; set; }
+        public string? GhiChu { get; set; }
     }
 }

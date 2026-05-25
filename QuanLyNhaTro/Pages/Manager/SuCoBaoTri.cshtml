@@ -1832,29 +1832,33 @@
         mà không cần gọi thêm API.
         Controller cần Include: .Include(d => d.Tenant).Include(d => d.Phong).Include(d => d.ManagerXuLy)
     -->
+    @Html.AntiForgeryToken()
     <script>
+        // [LỖI 3 ĐÃ SỬA] Lấy CSRF token để gửi kèm các POST request
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
         // Dữ liệu được inject từ Razor Model
         // Dùng Html.Raw + Json.Serialize để tránh HTML-encode ký tự tiếng Việt
         const danhSachSuCo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                    Model.DanhSachSuCo.Select(don => new
-                    {
-                        id = don.IDDonDV,
-                        noiDung = don.NoiDung ?? "",
-                        phong = don.Phong?.SoPhong ?? "",
-                        nguoiGui = don.Tenant?.FullName ?? "",
-                        nguoiXuLy = don.ManagerXuLy?.FullName ?? "",
-                        mucDo = don.MucDo,
-                        trangThai = don.TrangThai_DV,
-                        ngayTao = don.NgayTao.ToString("dd/MM/yyyy HH:mm"),
-                        ngayXuLy = don.NgayXuLy.HasValue ? don.NgayXuLy.Value.ToString("dd/MM/yyyy HH:mm") : "",
-                        ngayHoanThanh = don.NgayHoanThanh.HasValue ? don.NgayHoanThanh.Value.ToString("dd/MM/yyyy HH:mm") : "",
-                        tongTien = don.TongTien > 0 ? don.TongTien.ToString("N0") + " ₫" : "—",
-                        ghiChuXuLy = don.GhiChuXuLy ?? "",
-                        lyDoHuy = don.LyDoHuy ?? "",
-                        anhBienLai = don.AnhBienLai ?? "",
-                        anhKetQua = don.AnhKetQua ?? ""
-                    })
-                ));
+                            Model.DanhSachSuCo.Select(don => new
+                            {
+                                id = don.IDDonDV,
+                                noiDung = don.NoiDung ?? "",
+                                phong = don.Phong?.SoPhong ?? "",
+                                nguoiGui = don.Tenant?.FullName ?? "",
+                                nguoiXuLy = don.ManagerXuLy?.FullName ?? "",
+                                mucDo = don.MucDo,
+                                trangThai = don.TrangThai_DV,
+                                ngayTao = don.NgayTao.ToString("dd/MM/yyyy HH:mm"),
+                                ngayXuLy = don.NgayXuLy.HasValue ? don.NgayXuLy.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                                ngayHoanThanh = don.NgayHoanThanh.HasValue ? don.NgayHoanThanh.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                                tongTien = don.TongTien > 0 ? don.TongTien.ToString("N0") + " ₫" : "—",
+                                ghiChuXuLy = don.GhiChuXuLy ?? "",
+                                lyDoHuy = don.LyDoHuy ?? "",
+                                anhBienLai = don.AnhBienLai ?? "",
+                                anhKetQua = don.AnhKetQua ?? ""
+                            })
+                        ));
 
         // ====== NGÀY GIỜ HIỆN TẠI ======
         (function() {
@@ -2014,34 +2018,39 @@
         }
 
         // ====== BẮT ĐẦU XỬ LÝ ======
-        // ⚙️ BACKEND: PATCH /api/don-dv/{id}/bat-dau-xu-ly → TrangThai_DV = 'Đang xử lý', NgayXuLy = now
-        function batDauXuLy() {
+        // [LỖI 3 ĐÃ SỬA] Gọi backend thực sự thay vì chỉ cập nhật UI
+        async function batDauXuLy() {
         const ghiChu = document.getElementById('input-ghi-chu-xu-ly').value;
-        // fetch(`/api/su-co/${idDangXuLy}/bat-dau-xu-ly`, {
-        //     method: 'PATCH',
-        //     headers: {'Content-Type':'application/json'},
-        //     body: JSON.stringify({ ghiChuXuLy: ghiChu })
-        // }).then(() => window.location.reload());
-
-        hienToast('Đã bắt đầu xử lý sự cố #' + idDangXuLy, 'thanh-cong');
+        try {
+        const res = await fetch('?handler=BatDauXuLy', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','RequestVerificationToken':csrfToken},
+        body: JSON.stringify({ idDon: idDangXuLy, ghiChu })
+        });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok) { hienToast(data.message||'Lỗi xử lý.','loi'); return; }
+        } catch(e) { hienToast('Mất kết nối máy chủ.','loi'); return; }
+        hienToast('Đã bắt đầu xử lý sự cố #'+idDangXuLy,'thanh-cong');
         dongModal('modal-chi-tiet');
-        // Cập nhật UI ngay mà không reload (tùy chọn)
-        capNhatCardTrangThai(idDangXuLy, 'Đang xử lý');
+        capNhatCardTrangThai(idDangXuLy,'Đang xử lý');
         }
 
         // ====== HOÀN THÀNH XỬ LÝ ======
-        // ⚙️ BACKEND: PATCH /api/don-dv/{id}/hoan-thanh → TrangThai_DV = 'Thành công', NgayHoanThanh = now
-        function hoanThanhXuLy() {
+        // [LỖI 3 ĐÃ SỬA] Gọi backend thực sự thay vì chỉ cập nhật UI
+        async function hoanThanhXuLy() {
         const ghiChu = document.getElementById('input-ghi-chu-xu-ly').value;
-        // fetch(`/api/su-co/${idDangXuLy}/hoan-thanh`, {
-        //     method: 'PATCH',
-        //     headers: {'Content-Type':'application/json'},
-        //     body: JSON.stringify({ ghiChuXuLy: ghiChu, ngayHoanThanh: new Date() })
-        // }).then(() => window.location.reload());
-
-        hienToast('Sự cố #' + idDangXuLy + ' đã được xử lý thành công!', 'thanh-cong');
+        try {
+        const res = await fetch('?handler=HoanThanh', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','RequestVerificationToken':csrfToken},
+        body: JSON.stringify({ idDon: idDangXuLy, ghiChu })
+        });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok) { hienToast(data.message||'Lỗi hoàn thành.','loi'); return; }
+        } catch(e) { hienToast('Mất kết nối máy chủ.','loi'); return; }
+        hienToast('Sự cố #'+idDangXuLy+' đã xử lý thành công!','thanh-cong');
         dongModal('modal-chi-tiet');
-        capNhatCardTrangThai(idDangXuLy, 'Thành công');
+        capNhatCardTrangThai(idDangXuLy,'Thành công');
         }
 
         // Cập nhật badge trạng thái trên card ngay sau action (UI optimistic)
