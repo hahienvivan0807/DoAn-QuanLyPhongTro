@@ -11,6 +11,7 @@
     <title>Hệ Thống Quản Lý – Quản Lý Phòng</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="/js/ChuTro/ChuTro-core.js"></script>
+    <script src="/js/ChuTro/ChuTro-QuanLyPhong.js"></script>
     <style>
         /* ==========================================================
         IMPORT FONT – đồng bộ ChuTro.cshtml
@@ -2152,13 +2153,7 @@
     <!-- Toast -->
     <div id="toastContainer"></div>
 
-
-    <!-- =============================================
-     JAVASCRIPT
-============================================= -->
     <script>
-        // ── Các hàm sidebar, modal, dropdown đã có trong ChuTro-core.js ──
-
         function dongModalNhapNgoai(event, id) {
         if (event.target === document.getElementById(id)) dongModal(id);
         }
@@ -2167,9 +2162,9 @@
         // ── LỌC DANH SÁCH PHÒNG ──
         function locDanhSachPhong() {
         const tuKhoa = document.getElementById('tim-phong-input').value.toLowerCase().trim();
-        const tt     = document.getElementById('loc-trang-thai').value;
-        const tang   = document.getElementById('loc-tang').value;
-        const rows   = Array.from(document.querySelectorAll('#tbody-phong tr'));
+        const tt = document.getElementById('loc-trang-thai').value;
+        const tang = document.getElementById('loc-tang').value;
+        const rows = Array.from(document.querySelectorAll('#tbody-phong tr'));
 
         // Bước 1: Hiện toàn bộ (xóa filter phân trang), giữ display=none của lọc sẽ set lại
         rows.forEach(row => { delete row.dataset.phanTrang; row.style.display = ''; });
@@ -2177,12 +2172,12 @@
         // Bước 2: Áp dụng bộ lọc tìm kiếm
         let soHienThi = 0;
         rows.forEach(row => {
-        const soPhong   = row.dataset.soPhong || '';
+        const soPhong = row.dataset.soPhong || '';
         const trangThai = row.dataset.trangThai || '';
-        const tangRow   = row.dataset.tang || '';
-        const khopTu    = !tuKhoa || soPhong.includes(tuKhoa);
-        const khopTT    = !tt     || trangThai === tt;
-        const khopTang  = !tang   || tangRow === tang;
+        const tangRow = row.dataset.tang || '';
+        const khopTu = !tuKhoa || soPhong.includes(tuKhoa);
+        const khopTT = !tt || trangThai === tt;
+        const khopTang = !tang || tangRow === tang;
         if (khopTu && khopTT && khopTang) { soHienThi++; }
         else row.style.display = 'none';
         });
@@ -2253,12 +2248,12 @@
 
         // Trạng thái nút prev / next
         document.getElementById('nut-trang-truoc').disabled = trangHienTai <= 1;
-        document.getElementById('nut-trang-tiep').disabled  = trangHienTai >= tongTrang;
+        document.getElementById('nut-trang-tiep').disabled = trangHienTai >= tongTrang;
         }
 
         // Sinh danh sách số trang có dấu "..."
         function phanTrangSo(hienTai, tongTrang) {
-        if (tongTrang <= 7) return Array.from({length: tongTrang}, (_, i) => i + 1);
+        if (tongTrang <= 7) return Array.from({ length: tongTrang }, (_, i) => i + 1);
         const ds = [];
         if (hienTai <= 4) {
         for (let i = 1; i <= 5; i++) ds.push(i);
@@ -2278,31 +2273,31 @@
         function chonTrangThai(gt, loai) {
         document.getElementById(loai + '-trang-thai').value = gt;
         const nhom = document.querySelectorAll('#modal-' + (loai === 'them' ? 'them' : 'sua') + '-phong .nut-chon-tt');
-        nhom.forEach(n => n.classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
+        nhom.forEach(n => n.classList.remove('chon-trong', 'chon-da-thue', 'chon-dang-sua'));
         const mapClass = { 'Trống': 'chon-trong', 'Đã thuê': 'chon-da-thue', 'Đang sửa': 'chon-dang-sua' };
         event.currentTarget.classList.add(mapClass[gt] || 'chon-trong');
         }
 
         // ── MODAL THÊM PHÒNG ──
         function moModalThemPhong() {
-        ['them-so-phong','them-dien-tich','them-gia-phong','them-mo-ta'].forEach(id => document.getElementById(id).value = '');
+        ['them-so-phong', 'them-dien-tich', 'them-gia-phong', 'them-mo-ta'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('them-so-luong').value = 1;
         document.getElementById('them-tang').value = 1;
         document.getElementById('them-trang-thai').value = 'Trống';
         const nhom = document.querySelectorAll('#modal-them-phong .nut-chon-tt');
-        nhom.forEach(n => n.classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
+        nhom.forEach(n => n.classList.remove('chon-trong', 'chon-da-thue', 'chon-dang-sua'));
         nhom[0].classList.add('chon-trong');
         moModal('modal-them-phong');
         }
 
         function xacNhanThemPhong() {
-        const soPhong  = document.getElementById('them-so-phong').value.trim();
-        const tang     = parseInt(document.getElementById('them-tang').value);
-        const soLuong  = parseInt(document.getElementById('them-so-luong').value) || 1;
+        const soPhong = document.getElementById('them-so-phong').value.trim();
+        const tang = parseInt(document.getElementById('them-tang').value);
+        const soLuong = parseInt(document.getElementById('them-so-luong').value) || 1;
         const dienTich = document.getElementById('them-dien-tich').value;
         const giaPhong = parseFloat(document.getElementById('them-gia-phong').value);
-        const trangThai= document.getElementById('them-trang-thai').value;
-        const moTa     = document.getElementById('them-mo-ta').value.trim();
+        const trangThai = document.getElementById('them-trang-thai').value;
+        const moTa = document.getElementById('them-mo-ta').value.trim();
         if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
         if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
         if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
@@ -2331,32 +2326,32 @@
         const phong = danhSachPhongData.find(p => p.idPhong === idPhong);
         if (!phong) return;
         idPhongHienTai = idPhong;
-        document.getElementById('sua-id-phong').value   = idPhong;
-        document.getElementById('sua-so-phong').value   = phong.soPhong;
-        document.getElementById('sua-tang').value       = phong.tang;
-        document.getElementById('sua-so-luong').value   = phong.soLuong ?? 1;
-        document.getElementById('sua-dien-tich').value  = phong.dienTich ?? '';
-        document.getElementById('sua-gia-phong').value  = phong.giaPhongFix;
+        document.getElementById('sua-id-phong').value = idPhong;
+        document.getElementById('sua-so-phong').value = phong.soPhong;
+        document.getElementById('sua-tang').value = phong.tang;
+        document.getElementById('sua-so-luong').value = phong.soLuong ?? 1;
+        document.getElementById('sua-dien-tich').value = phong.dienTich ?? '';
+        document.getElementById('sua-gia-phong').value = phong.giaPhongFix;
         document.getElementById('sua-trang-thai').value = phong.trangThai;
-        document.getElementById('sua-mo-ta').value      = phong.moTa ?? '';
+        document.getElementById('sua-mo-ta').value = phong.moTa ?? '';
         document.getElementById('sua-phu-tieu-de').textContent = 'Phòng ' + phong.soPhong;
-        const mapId  = { 'Trống': 'sua-tt-trong', 'Đã thuê': 'sua-tt-da-thue', 'Đang sửa': 'sua-tt-dang-sua' };
+        const mapId = { 'Trống': 'sua-tt-trong', 'Đã thuê': 'sua-tt-da-thue', 'Đang sửa': 'sua-tt-dang-sua' };
         const mapCls = { 'Trống': 'chon-trong', 'Đã thuê': 'chon-da-thue', 'Đang sửa': 'chon-dang-sua' };
-        ['sua-tt-trong','sua-tt-da-thue','sua-tt-dang-sua'].forEach(id => document.getElementById(id).classList.remove('chon-trong','chon-da-thue','chon-dang-sua'));
+        ['sua-tt-trong', 'sua-tt-da-thue', 'sua-tt-dang-sua'].forEach(id => document.getElementById(id).classList.remove('chon-trong', 'chon-da-thue', 'chon-dang-sua'));
         const nutId = mapId[phong.trangThai];
         if (nutId) document.getElementById(nutId).classList.add(mapCls[phong.trangThai]);
         moModal('modal-sua-phong');
         }
 
         function xacNhanSuaPhong() {
-        const idPhong   = parseInt(document.getElementById('sua-id-phong').value);
-        const soPhong   = document.getElementById('sua-so-phong').value.trim();
-        const tang      = parseInt(document.getElementById('sua-tang').value);
-        const soLuong   = parseInt(document.getElementById('sua-so-luong').value) || 1;
-        const dienTich  = document.getElementById('sua-dien-tich').value;
-        const giaPhong  = parseFloat(document.getElementById('sua-gia-phong').value);
+        const idPhong = parseInt(document.getElementById('sua-id-phong').value);
+        const soPhong = document.getElementById('sua-so-phong').value.trim();
+        const tang = parseInt(document.getElementById('sua-tang').value);
+        const soLuong = parseInt(document.getElementById('sua-so-luong').value) || 1;
+        const dienTich = document.getElementById('sua-dien-tich').value;
+        const giaPhong = parseFloat(document.getElementById('sua-gia-phong').value);
         const trangThai = document.getElementById('sua-trang-thai').value;
-        const moTa      = document.getElementById('sua-mo-ta').value.trim();
+        const moTa = document.getElementById('sua-mo-ta').value.trim();
         if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
         if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
         if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
@@ -2379,13 +2374,13 @@
         if (data.success) {
         // ── Cập nhật dữ liệu local ngay lập tức ──
         if (phongCu) {
-        phongCu.soPhong   = soPhong;
-        phongCu.tang      = tang;
-        phongCu.soLuong   = soLuong;
-        phongCu.dienTich  = dienTich ? parseFloat(dienTich) : null;
+        phongCu.soPhong = soPhong;
+        phongCu.tang = tang;
+        phongCu.soLuong = soLuong;
+        phongCu.dienTich = dienTich ? parseFloat(dienTich) : null;
         phongCu.giaPhongFix = giaPhong;
         phongCu.trangThai = trangThai;
-        phongCu.moTa      = moTa || null;
+        phongCu.moTa = moTa || null;
         // Nếu chuyển sang Trống → xóa thông tin người thuê trong local data
         if (trangThaiCu !== 'Trống' && trangThai === 'Trống') {
         phongCu.tenNguoiThue = null;
@@ -2414,9 +2409,9 @@
         if (!row) return;
 
         // Cập nhật data attribute để bộ lọc hoạt động đúng
-        row.dataset.soPhong  = soPhong.toLowerCase();
+        row.dataset.soPhong = soPhong.toLowerCase();
         row.dataset.trangThai = trangThai;
-        row.dataset.tang     = tang;
+        row.dataset.tang = tang;
 
         const cells = row.querySelectorAll('td');
 
@@ -2504,26 +2499,40 @@
         const phong = danhSachPhongData.find(p => p.idPhong === idPhong);
         if (!phong) return;
         idPhongHienTai = idPhong;
-        document.getElementById('cdt-ten-phong').textContent       = 'Phòng ' + phong.soPhong;
+
+        document.getElementById('cdt-ten-phong').textContent = 'Phòng ' + phong.soPhong;
         document.getElementById('cdt-trang-thai-header').textContent = phong.trangThai;
-        document.getElementById('cdt-so-phong').textContent        = phong.soPhong;
-        document.getElementById('cdt-tang').textContent            = 'Tầng ' + phong.tang;
-        document.getElementById('cdt-so-luong').textContent        = phong.trangThai === 'Trống' ? '— Không có người ở —' : (phong.soLuong ?? 1) + ' người';
-        document.getElementById('cdt-dien-tich').textContent       = phong.dienTich ? phong.dienTich.toFixed(1) + ' m²' : '— Chưa cập nhật —';
-        document.getElementById('cdt-gia-phong').textContent       = new Intl.NumberFormat('vi-VN').format(phong.giaPhongFix) + ' ₫';
-        document.getElementById('cdt-ngay-tao').textContent        = phong.createdAt;
-        document.getElementById('cdt-mo-ta').textContent           = phong.moTa || '— Chưa có mô tả —';
+        document.getElementById('cdt-so-phong').textContent = phong.soPhong;
+        document.getElementById('cdt-tang').textContent = 'Khu ' + phong.khu;
+        document.getElementById('cdt-so-luong').textContent = phong.trangThai === 'Trống' ? '— Không có người ở —' : (phong.soLuong ?? 1) + ' người';
+        document.getElementById('cdt-dien-tich').textContent = phong.dienTich ? phong.dienTich.toFixed(1) + ' m²' : '— Chưa cập nhật —';
+        document.getElementById('cdt-gia-phong').textContent = new Intl.NumberFormat('vi-VN').format(phong.giaPhongFix) + ' ₫';
+        document.getElementById('cdt-ngay-tao').textContent = phong.createdAt;
+        document.getElementById('cdt-mo-ta').textContent = phong.moTa || '— Chưa có mô tả —';
+
         const container = document.getElementById('cdt-nguoi-thue-container');
-        if (phong.tenNguoiThue) {
-        container.innerHTML = `
-        <div class="khung-nguoi-thue">
-        <div class="anh-nguoi-thue">${phong.tenNguoiThue[0]}</div>
+        const khach = phong.danhSachKhachO;
+
+        if (khach && khach.length > 0) {
+        container.innerHTML = khach.map(k => {
+        const mauAvatar = k.isChinhChu
+        ? 'linear-gradient(135deg,var(--mau-xanh-bien),#60a5fa)'
+        : 'linear-gradient(135deg,var(--mau-xanh),#34d399)';
+        const nhanQuanHe = k.isChinhChu
+        ? `<span class="trang-thai-phong tt-da-thue">Chính chủ</span>`
+        : `<span style="font-size:10.5px;color:var(--mau-chu-phu);">${k.quanHe || 'Người ở ghép'}</span>`;
+        return `
+        <div class="khung-nguoi-thue" style="margin-bottom:8px;">
+        <div class="anh-nguoi-thue" style="background:${mauAvatar}">${k.hoTen[0]}</div>
         <div class="thong-tin-nguoi-thue">
-        <div class="ten-nguoi-thue">${phong.tenNguoiThue}</div>
-        <div class="phu-nguoi-thue"><i class="fas fa-phone" style="width:12px;margin-right:4px;"></i>${phong.sdtNguoiThue || '—'}</div>
+        <div class="ten-nguoi-thue">${k.hoTen}</div>
+        <div class="phu-nguoi-thue">
+        <i class="fas fa-phone" style="width:12px;margin-right:4px;"></i>${k.sdt || '—'}
         </div>
-        <span class="trang-thai-phong tt-da-thue">Đang thuê</span>
+        </div>
+        ${nhanQuanHe}
         </div>`;
+        }).join('');
         } else {
         container.innerHTML = `
         <div class="trong-phong-hint">
@@ -2531,7 +2540,18 @@
         Phòng hiện chưa có người thuê
         </div>`;
         }
+
         moModal('modal-chi-tiet-phong');
+        }
+
+        function chuyenSangSuaTuChiTiet() {
+        dongModal('modal-chi-tiet-phong');
+        moModalSuaPhong(idPhongHienTai);
+        }
+
+        function chuyenSangSuaTuChiTiet() {
+        dongModal('modal-chi-tiet-phong');
+        moModalSuaPhong(idPhongHienTai);
         }
 
         function chuyenSangSuaTuChiTiet() {
@@ -2547,8 +2567,8 @@
         const mauMap = { 'thanh-cong': '#059669', 'loi': '#dc2626', 'canh-bao': '#d97706', 'thong-tin': '#2563eb' };
         const iconMap = { 'thanh-cong': 'fa-check-circle', 'loi': 'fa-times-circle', 'canh-bao': 'fa-exclamation-triangle', 'thong-tin': 'fa-info-circle' };
         const toast = document.createElement('div');
-        toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.14);border-left:4px solid ${mauMap[loai]||'#2563eb'};min-width:260px;font-size:13px;font-family:'Be Vietnam Pro',sans-serif;`;
-        toast.innerHTML = `<i class="fas ${iconMap[loai]||'fa-info-circle'}" style="color:${mauMap[loai]};font-size:15px;flex-shrink:0;"></i><span>${noiDung}</span>`;
+        toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.14);border-left:4px solid ${mauMap[loai] || '#2563eb'};min-width:260px;font-size:13px;font-family:'Be Vietnam Pro',sans-serif;`;
+        toast.innerHTML = `<i class="fas ${iconMap[loai] || 'fa-info-circle'}" style="color:${mauMap[loai]};font-size:15px;flex-shrink:0;"></i><span>${noiDung}</span>`;
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 3500);
         }
@@ -2556,7 +2576,7 @@
         // ── LOAD PROFILE từ API (đồng bộ ChuTro-core.js) ──
         async function HienThiProfile() {
         try {
-        const res   = await fetch('/api/ChuTro/Profile');
+        const res = await fetch('/api/ChuTro/Profile');
         const dulieu = await res.json();
         const adminHeader = document.querySelector('.ten-admin-header');
         if (adminHeader) adminHeader.textContent = dulieu.fullName;
@@ -2577,6 +2597,7 @@
         denTrang(1);  // Khởi tạo phân trang khi tải trang
         });
     </script>
+    <script src="/js/ChuTro/ChuTro-core.js"></script>
 
 </body>
 </html>

@@ -70,11 +70,41 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 return BadRequest(new { message = "Mật khẩu không được để trống" });
             if (req.IDPhong <= 0)
                 return BadRequest(new { message = "Vui lòng chọn phòng" });
+            if (req.NgayVaoO == default(DateTime))
+                return BadRequest(new { message = "Ngày vào ở không được để trống" });
 
+            if (!req.NgayKetThuc.HasValue)
+                return BadRequest(new { message = "Ngày kết thúc hợp đồng không được để trống" });
+            if (req.NgaySinh.HasValue)
+            {
+                var ngaySinh = req.NgaySinh.Value.Date;
+                var ngayHienTai = DateTime.Today;
+
+                int tuoi = ngayHienTai.Year - ngaySinh.Year;
+
+                // Kiểm tra nếu chưa đến sinh nhật trong năm nay thì giảm đi 1 tuổi
+                if (ngayHienTai < ngaySinh.AddYears(tuoi))
+                {
+                    tuoi--;
+                }
+
+                if (tuoi < 16)
+                {
+                    return BadRequest(new
+                    {
+                        message = $"Người thuê mới {tuoi} tuổi. Hợp đồng chỉ áp dụng cho người từ đủ 16 tuổi trở lên."
+                    });
+                }
+            }
             // ── Validate ngày ──
             if (req.NgayKetThuc.HasValue && req.NgayKetThuc.Value.Date <= req.NgayVaoO.Date)
                 return BadRequest(new { message = "Ngày hết hạn HĐ phải sau ngày vào ở" });
-
+            // Ngày không được quá ngắn
+            int soNgayThue = (req.NgayKetThuc.Value.Date - req.NgayVaoO.Date).Days;
+            if (soNgayThue < 180)
+            {
+                return BadRequest(new { message = $"Thời gian thuê quá ngắn ({soNgayThue} ngày). Hợp đồng tối thiểu phải từ 180 ngày trở lên." });
+            }
             // ── Validate trùng ──
             bool sdtTrung = await _context.ACCOUNT.AnyAsync(u => u.Phone == req.SoDienThoai);
             if (sdtTrung)
@@ -142,6 +172,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     GhiChu = req.GhiChuHD?.Trim(),
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
+                    GiaThueChot = phong.GiaPhongFix,
                 };
                 _context.HOPDONG.Add(newHopDong);
 
@@ -176,6 +207,47 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             user.Passwords = hashPassword;
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật mật khẩu thành công" });
+        }
+        public class TraPhongRequest
+        {
+            public string? LyDo { get; set; }
+            public int IDUser { get; set; }
+        }
+        [HttpPut("{id}/tra-phong")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> XoaNguoiThue(int id, [FromBody] TraPhongRequest request)
+        {
+            // 1. Tìm hợp đồng theo id (IDHopDong)
+            var hopDong = await _context.HOPDONG
+                .Include(h => h.Phong)
+                .Include(h => h.Tenant)
+                .FirstOrDefaultAsync(h => h.IDHopDong == id
+                                       && h.IDUser == request.IDUser
+                                       && h.TrangThaiHD == "Đang hiệu lực");
+
+            if (hopDong == null)
+                return NotFound(new { success = false, message = "Không tìm thấy hợp đồng hợp lệ" });
+
+            // 2. Đổi trạng thái phòng → Trống
+            hopDong.Phong.TrangThai = "Trống";
+
+            // 3. Đổi trạng thái hợp đồng → Đã kết thúc
+            hopDong.TrangThaiHD = "Đã kết thúc";
+            hopDong.NgayThanhLy = DateTime.UtcNow;
+            hopDong.LyDoKetThuc = request.LyDo;
+            hopDong.UpdatedAt = DateTime.UtcNow;
+
+            // 4. Khóa tài khoản người thuê
+            hopDong.Tenant.IsActive = false;
+            hopDong.Tenant.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã trả phòng thành công cho {hopDong.Tenant.FullName}"
+            });
         }
     }
 }

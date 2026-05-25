@@ -56,6 +56,9 @@ namespace QuanLyNhaTro.Pages.Admin
                 .Include(p => p.HopDongs
                     .Where(hd => hd.TrangThaiHD == "Đang hiệu lực"))
                     .ThenInclude(hd => hd.Tenant)
+                .Include(p => p.HopDongs
+                    .Where(hd => hd.TrangThaiHD == "Đang hiệu lực"))
+                    .ThenInclude(hd => hd.KhachO)  // ← add this
                 .OrderBy(p => p.Khu)
                 .ThenBy(p => p.SoPhong)
                 .ToListAsync();
@@ -85,7 +88,16 @@ namespace QuanLyNhaTro.Pages.Admin
                         trangThai = p.TrangThai,
                         createdAt = p.CreatedAt.ToString("dd/MM/yyyy"),
                         tenNguoiThue = hd?.Tenant?.FullName,
-                        sdtNguoiThue = hd?.Tenant?.Phone
+                        sdtNguoiThue = hd?.Tenant?.Phone,
+                            danhSachKhachO = hd?.KhachO
+                            .Where(k => k.NgayRa == null)   // only current occupants
+                            .Select(k => new {
+                                hoTen = k.HoTen,
+                                quanHe = k.QuanHe,
+                                sdt = k.SoDienThoai,
+                                isChinhChu = k.IsChinhChu
+                            })
+                            .ToList()
                     };
                 }),
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }

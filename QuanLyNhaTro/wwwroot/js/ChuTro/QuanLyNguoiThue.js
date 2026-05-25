@@ -234,18 +234,22 @@ async function ntTaiDanhSachPhong() {
 async function ntXacNhanXoa() {
     const id = document.getElementById('inp-xoa-id-khach-thue').value;
     const lyDo = document.getElementById('inp-ly-do-xoa').value.trim();
+    const idUser = document.getElementById('inp-xoa-id-user').value;
 
     const btnXoa = document.getElementById('nt-btn-confirm-xoa');
     btnXoa.disabled = true;
     btnXoa.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
 
     try {
-        // const res = await fetch(`/api/nguoithue/${id}/tra-phong`, {
-        //   method: 'PUT',
-        //   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${layToken()}` },
-        //   body: JSON.stringify({ LyDo: lyDo })
-        // });
-        // if (!res.ok) throw new Error('Lỗi xử lý');
+         const res = await fetch(`/api/ChuTroThemNguoiThue/${id}/tra-phong`, {
+           method: 'PUT',
+           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${layToken()}` },
+             body: JSON.stringify({
+                 LyDo: lyDo,
+                 IDUser: parseInt(idUser)
+             })
+         });
+         if (!res.ok) throw new Error('Lỗi xử lý');
 
         await new Promise(r => setTimeout(r, 600)); // Mock
 
@@ -658,14 +662,25 @@ function ntMoModalSua(id) {
     const item = NT.duLieu.find(x => x.IDKhachThue === id);
     if (!item) return;
 
+    const daKetThuc = item.TrangThai === 'da-roi';
+
     ntResetForm();
     document.getElementById('nt-modal-mode').value = 'sua';
     document.getElementById('inp-id-khach-thue').value = id;
     document.getElementById('inp-id-user').value = item.IDUser;
-    document.getElementById('nt-modal-tieu-de').textContent = 'Chỉnh sửa thông tin';
-    document.getElementById('nt-modal-mo-ta').textContent = `Cập nhật hồ sơ: ${item.HoTen}`;
+
+    // ── Tiêu đề thay đổi theo trạng thái ──
+    if (daKetThuc) {
+        document.getElementById('nt-modal-tieu-de').textContent = 'Xem thông tin người thuê';
+        document.getElementById('nt-modal-mo-ta').textContent = `Hồ sơ đã kết thúc: ${item.HoTen}`;
+        document.getElementById('nt-modal-icon').innerHTML = '<i class="fas fa-eye"></i>';
+    } else {
+        document.getElementById('nt-modal-tieu-de').textContent = 'Chỉnh sửa thông tin';
+        document.getElementById('nt-modal-mo-ta').textContent = `Cập nhật hồ sơ: ${item.HoTen}`;
+        document.getElementById('nt-modal-icon').innerHTML = '<i class="fas fa-user-edit"></i>';
+    }
+
     document.getElementById('nt-btn-submit-label').textContent = 'Lưu thay đổi';
-    document.getElementById('nt-modal-icon').innerHTML = '<i class="fas fa-user-edit"></i>';
     document.getElementById('field-password').style.display = 'none';
     document.getElementById('field-trang-thai').style.display = '';
     document.getElementById('inp-trang-thai').value = item.TrangThai;
@@ -683,27 +698,12 @@ function ntMoModalSua(id) {
     set('inp-gioi-tinh', item.GioiTinh);
     set('inp-so-cccd', item.SoCCCD);
     set('inp-que-quan', item.QueQuan);
-    set('inp-dia-chi-thuong-tru', item.DiaChiThuongTru);
-    set('inp-ghi-chu', item.GhiChu);
-
-    set('inp-so-cccd', item.SoCCCD);
-    set('inp-ngay-sinh', item.NgaySinh ? item.NgaySinh.split('T')[0] : '');
-    set('inp-gioi-tinh', item.GioiTinh);
-    set('inp-email', item.Email);
-    set('inp-dia-chi', item.DiaChiThuongTru);  // textarea địa chỉ
-    set('inp-que-quan', item.QueQuan);
+    set('inp-dia-chi', item.DiaChiThuongTru);
     set('inp-ghi-chu', item.GhiChu);
     set('inp-username', item.Username);
 
-    // ✅ Username lấy từ item — nếu API chưa trả về thì gọi thêm API
-    set('inp-username', item.Username);
+    if (!item.Username && item.IDUser) ntLayUsername(item.IDUser);
 
-    // Nếu Username rỗng → tự động lấy từ API Account
-    if (!item.Username && item.IDUser) {
-        ntLayUsername(item.IDUser);
-    }
-
-    // Tab Phòng & Hợp đồng
     ntChuyenCheDoPHong('sua', item);
 
     if (item.AnhChanDung) {
@@ -711,8 +711,64 @@ function ntMoModalSua(id) {
             `<img src="${item.AnhChanDung}" alt="">`;
     }
 
+    // ── KHÓA TOÀN BỘ MODAL nếu đã kết thúc ──
+    _ntKhoaToanBoModal(daKetThuc);
+
     ntMoOverlay('nt-modal-overlay');
     ntChuyenTabById('tab-co-ban');
+}
+
+// Khóa/mở toàn bộ modal
+function _ntKhoaToanBoModal(khoa) {
+    const modal = document.getElementById('nt-modal-box');
+    if (!modal) return;
+
+    // Khóa tất cả input/select/textarea/button trong modal body
+    const fields = modal.querySelectorAll(
+        '.nt-modal-body input, .nt-modal-body select, ' +
+        '.nt-modal-body textarea, .nt-modal-body button, ' +
+        '#phong-display-box'
+    );
+
+    fields.forEach(el => {
+        el.disabled = khoa;
+        el.style.opacity = khoa ? '0.55' : '';
+        el.style.cursor = khoa ? 'not-allowed' : '';
+        el.style.pointerEvents = khoa ? 'none' : '';
+    });
+
+    // Ẩn/hiện nút Lưu
+    const btnSubmit = document.getElementById('nt-btn-submit');
+    if (btnSubmit) {
+        btnSubmit.style.display = khoa ? 'none' : '';
+    }
+
+    // Banner cảnh báo toàn modal
+    let banner = document.getElementById('nt-modal-readonly-banner');
+    if (khoa) {
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'nt-modal-readonly-banner';
+            banner.style.cssText = `
+                display: flex; align-items: center; gap: 10px;
+                padding: 10px 16px; margin: 0;
+                background: #f3f4f6; border-bottom: 1px solid #e5e7eb;
+                font-size: 12.5px; color: #6b7280; font-weight: 600;
+                flex-shrink: 0;
+            `;
+            banner.innerHTML = `
+                <i class="fas fa-lock" style="color:#9ca3af;font-size:13px;"></i>
+                Hợp đồng đã kết thúc — chỉ xem, không thể chỉnh sửa.
+            `;
+            // Chèn banner vào sau tabs, trước modal-body
+            const tabs = modal.querySelector('.nt-tabs');
+            const body = modal.querySelector('.nt-modal-body');
+            if (tabs && body) tabs.after(banner);
+        }
+        banner.style.display = 'flex';
+    } else {
+        if (banner) banner.style.display = 'none';
+    }
 }
 async function ntLayUsername(idUser) {
     try {
@@ -909,6 +965,7 @@ function ntMoModalXoa(id) {
 
     document.getElementById('inp-xoa-id-khach-thue').value = id;
     document.getElementById('inp-ly-do-xoa').value = '';
+    document.getElementById('inp-xoa-id-user').value = item.IDUser;
     document.getElementById('nt-xoa-noi-dung').innerHTML =
         `Bạn có chắc muốn trả phòng cho <strong>${ntEscape(item.HoTen)}</strong> (Phòng ${ntEscape(item.SoPhong)})?
      Thao tác này sẽ kết thúc hợp đồng và đánh dấu phòng là trống.`;
@@ -1061,6 +1118,8 @@ function ntResetForm() {
 
     document.getElementById('nt-avatar-preview').innerHTML = '<i class="fas fa-user"></i>';
     document.getElementById('nt-room-preview').style.display = 'none';
+
+    _ntKhoaToanBoModal(false);
 }
 
 /* ================================================================
@@ -1073,7 +1132,6 @@ function ntChuyenCheDoPHong(mode, item) {
     const banner = document.getElementById('nt-phong-readonly-banner');
     if (banner) banner.style.display = isThemMoi ? 'none' : 'block';
 
-    // Dropdown chọn phòng (chỉ thêm mới)
     const selPhong = document.getElementById('inp-id-phong');
     const divPhongHienTai = document.getElementById('nt-phong-hien-tai');
     const hintPhong = document.getElementById('hint-phong');
@@ -1087,21 +1145,18 @@ function ntChuyenCheDoPHong(mode, item) {
         if (reqPhong) reqPhong.style.display = '';
         if (reqNgay) reqNgay.style.display = '';
     } else {
-        // Chế độ sửa: ẩn dropdown, hiện tên phòng hiện tại
         if (selPhong) selPhong.style.display = 'none';
         if (divPhongHienTai) divPhongHienTai.style.display = 'block';
         if (hintPhong) hintPhong.textContent = 'Phòng hiện tại của người thuê';
         if (reqPhong) reqPhong.style.display = 'none';
         if (reqNgay) reqNgay.style.display = 'none';
 
-        // Điền tên phòng + lưu IDPhong vào hidden input
         const tenPhong = document.getElementById('nt-phong-hien-tai-ten');
         if (tenPhong) tenPhong.textContent = `Phòng ${item?.SoPhong || '—'}`;
 
         const hiddenPhong = document.getElementById('inp-id-phong-sua');
         if (hiddenPhong) hiddenPhong.value = item?.IDPhong || '';
 
-        // Điền dữ liệu hợp đồng
         const ngayVao = document.getElementById('inp-ngay-vao-o');
         if (ngayVao && item?.NgayVaoO)
             ngayVao.value = item.NgayVaoO.split('T')[0];
@@ -1117,11 +1172,11 @@ function ntChuyenCheDoPHong(mode, item) {
         if (trangThaiHD) trangThaiHD.textContent =
             item?.TrangThai === 'dang-o' ? '✅ Đang hiệu lực' : '⛔ Đã kết thúc';
 
-        // Ẩn điện nước đầu kỳ (chỉ cần khi tạo mới)
         document.getElementById('field-dien-dau-ky').style.display = 'none';
         document.getElementById('field-nuoc-dau-ky').style.display = 'none';
         document.getElementById('field-trang-thai-hd').style.display = '';
         document.getElementById('nt-room-preview').style.display = 'none';
+        // ── KHÔNG gọi _ntKhoaTabPhong nữa, _ntKhoaToanBoModal xử lý rồi ──
     }
 }
 function ntChuyenTab(btn) {
@@ -1419,10 +1474,10 @@ function _pickerRender(list) {
 
         return `
         <div class="rp-card ${isSelected ? 'selected' : ''} ${disabled}"
-             onclick="_pickerChonPhong(${p.idPhong}, '${p.soPhong}', ${p.tang}, '${p.trangThai}', ${p.giaPhongFix})">
+             onclick="_pickerChonPhong(${p.idPhong}, '${p.soPhong}', ${p.khu}, '${p.trangThai}', ${p.giaPhongFix})">
             <div class="rp-check"><i class="fas fa-check"></i></div>
             <div class="rp-so-phong">P.${p.soPhong}</div>
-            <div class="rp-tang">Tầng ${p.tang}</div>
+            <div class="rp-tang">Khu ${p.khu}</div>
             <span class="rp-badge ${badgeClass}">${p.trangThai}</span>
             <div class="rp-gia">${_fmtTien(p.giaPhongFix)}/tháng</div>
         </div>`;
@@ -1430,18 +1485,18 @@ function _pickerRender(list) {
 }
 
 /* Chọn phòng → cập nhật form */
-function _pickerChonPhong(id, soPhong, tang, trangThai, gia) {
+function _pickerChonPhong(id, soPhong, khu, trangThai, gia) {
     _pickerDaChon = {
-        IDPhong: id, SoPhong: soPhong, Tang: tang,
+        IDPhong: id, SoPhong: soPhong, Khu: khu,
         TrangThai: trangThai, GiaPhongFix: gia
     };
 
     document.getElementById('inp-id-phong').value = id;
-    document.getElementById('phong-display-text').textContent = `Phòng ${soPhong} — Tầng ${tang}`;
+    document.getElementById('phong-display-text').textContent = `Phòng ${soPhong} — Khu ${khu}`;
     document.getElementById('phong-display-text').style.color = 'var(--mau-chu)';
     document.getElementById('err-id-phong').textContent = '';
 
-    _pickerHienThiPreview(soPhong, tang, trangThai, gia);
+    _pickerHienThiPreview(soPhong, khu, trangThai, gia);
     document.getElementById('nt-picker-overlay').classList.remove('mo');
 
     _pickerRender(_pickerPhongs.filter(p => {
@@ -1451,13 +1506,13 @@ function _pickerChonPhong(id, soPhong, tang, trangThai, gia) {
 }
 
 /* Hiện preview phòng đã chọn trong tab 3 */
-function _pickerHienThiPreview(soPhong, tang, trangThai, gia) {
+function _pickerHienThiPreview(soPhong, khu, trangThai, gia) {
     const preview = document.getElementById('nt-room-preview');
     const body = document.getElementById('nt-rp-body');
 
     body.innerHTML = `
         <div><div class="nt-rp-key">Số phòng</div><div class="nt-rp-val">Phòng ${soPhong}</div></div>
-        <div><div class="nt-rp-key">Tầng</div><div class="nt-rp-val">Tầng ${tang}</div></div>
+        <div><div class="nt-rp-key">Khu</div><div class="nt-rp-val">Khu ${khu}</div></div>
         <div><div class="nt-rp-key">Trạng thái</div><div class="nt-rp-val">${trangThai}</div></div>
         <div><div class="nt-rp-key">Giá thuê</div><div class="nt-rp-val">${_fmtTien(gia)}/tháng</div></div>
     `;
