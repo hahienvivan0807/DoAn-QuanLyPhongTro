@@ -455,7 +455,7 @@ function ntRenderBang() {
     }).join('');
 }
 
-/** Render lưới */
+/** Render lưới- */
 function ntRenderLuoi() {
     const grid = document.getElementById('nt-grid-body');
     const trang = ntLayTrang();

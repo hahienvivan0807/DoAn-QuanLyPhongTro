@@ -96,7 +96,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     });
                 }
             }
-            // ── Validate ngày ──
+            // ── Validate ngày ──-
             if (req.NgayKetThuc.HasValue && req.NgayKetThuc.Value.Date <= req.NgayVaoO.Date)
                 return BadRequest(new { message = "Ngày hết hạn HĐ phải sau ngày vào ở" });
             // Ngày không được quá ngắn

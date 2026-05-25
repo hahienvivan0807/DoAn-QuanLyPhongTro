@@ -46,7 +46,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     // PHONG fields
                     SoPhong = hd.Phong.SoPhong,
 
-                    // KHACH_THUE fields — join qua IDUser
+                    // KHACH_THUE fields — join qua IDUser-
                     KhachThue = _context.KHACH_THUE
                         .Where(kt => kt.IDUser == hd.IDUser)
                         .Select(kt => new {

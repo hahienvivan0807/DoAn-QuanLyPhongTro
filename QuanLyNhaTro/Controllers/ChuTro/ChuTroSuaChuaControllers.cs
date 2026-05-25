@@ -16,7 +16,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
         }
 
         // ================================================================
-        // GET /api/ChuTroSuaChua/danh-sach
+        // GET /api/ChuTroSuaChua/danh-sach-
         // Lấy danh sách đơn DV cần phê duyệt (Chờ xử lý)
         // JOIN: DONDV → PHONG (SoPhong), ACCOUNT (FullName người báo)
         // Query param: trangThai (mặc định "Chờ xử lý")
