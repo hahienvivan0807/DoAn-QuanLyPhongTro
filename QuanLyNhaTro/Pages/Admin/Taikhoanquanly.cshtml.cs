@@ -169,9 +169,9 @@ namespace QuanLyNhaTro.Pages.Admin
             conn.Open();
 
             const string sql = @"
-                SELECT IDPhong, SoPhong, Tang, TrangThai, GiaPhongFix
+                SELECT IDPhong, SoPhong, Khu, TrangThai, GiaPhongFix
                 FROM   PHONG
-                ORDER  BY Tang, SoPhong";
+                ORDER  BY Khu, SoPhong";
 
             using var cmd = new SqlCommand(sql, conn);
             using var reader = cmd.ExecuteReader();
