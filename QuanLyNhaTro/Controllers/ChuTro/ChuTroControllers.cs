@@ -8,7 +8,7 @@ using QuanLyNhaTro.Models;
 using System.Security.Claims;
 using System.Text.RegularExpressions; //Thư viện kiểm tra ký tự
 
-namespace QuanLyNhaTro.Controllers
+namespace QuanLyNhaTro.Controllers.ChuTro
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -233,14 +233,14 @@ namespace QuanLyNhaTro.Controllers
         public async Task<IActionResult> DanhSachPhong()
         {
             var DSPhong = await _context.PHONG
-             .OrderBy(u => u.Tang)      
+             .OrderBy(u => u.Khu)      
              .ThenBy(u => u.SoPhong)
              .Select(u => new
             {
                  u.soluong,
                  u.IDPhong,
                 u.SoPhong,
-                u.Tang,
+                u.Khu,
                 u.DienTich,
                 u.GiaPhongFix,
                 u.MoTa,

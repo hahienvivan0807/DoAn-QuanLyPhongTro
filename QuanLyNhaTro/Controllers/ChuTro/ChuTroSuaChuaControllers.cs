@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
 
-namespace QuanLyNhaTro.Controllers
+namespace QuanLyNhaTro.Controllers.ChuTro
 {
     [ApiController]
     [Route("api/[controller]")]

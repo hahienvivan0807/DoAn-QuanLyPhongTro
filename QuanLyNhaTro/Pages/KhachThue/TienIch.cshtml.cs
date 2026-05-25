@@ -71,7 +71,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
 
             TenKhach = hopDong.Tenant.FullName;
             SoPhong = $"Phòng {hopDong.Phong.SoPhong}";
-            TangPhong = $"Tầng {hopDong.Phong.Tang}";
+            TangPhong = $"Tầng {hopDong.Phong.Khu}";
             ChuVietTat = !string.IsNullOrEmpty(TenKhach) ? TenKhach[0].ToString().ToUpper() : "K";
 
             var dienNuocCu = await _db.DIENNUOC

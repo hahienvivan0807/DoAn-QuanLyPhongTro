@@ -11,7 +11,7 @@
             : "?";
         string tenNgan = tenHienThi.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? tenHienThi;
         string soPhongHienThi = Model.PhongHienTai?.SoPhong ?? "---";
-        string tangHienThi = Model.PhongHienTai != null ? $"Tầng {Model.PhongHienTai.Tang}" : "";
+        string tangHienThi = Model.PhongHienTai != null ? $"Khu {Model.PhongHienTai.Khu}" : "";
     }
     <!DOCTYPE html>
     <html lang="vi">

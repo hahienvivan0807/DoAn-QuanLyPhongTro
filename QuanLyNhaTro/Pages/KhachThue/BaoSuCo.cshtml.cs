@@ -69,7 +69,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
             {
                 IDPhongHienTai = hopDong.IDPhong;
                 SoPhongHienTai = hopDong.Phong.SoPhong;
-                TangHienTai = hopDong.Phong.Tang;
+                TangHienTai = hopDong.Phong.Khu;
             }
 
             // Danh sách phòng (dropdown) — chỉ phòng đang thuê

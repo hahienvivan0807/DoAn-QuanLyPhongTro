@@ -122,7 +122,7 @@ namespace QuanLyNhaTro.Pages
 
             // Tất cả phòng (dùng cho modal danh sách phòng)
             TatCaPhong = await _db.PHONG
-                .OrderBy(x => x.Tang).ThenBy(x => x.SoPhong)
+                .OrderBy(x => x.Khu).ThenBy(x => x.SoPhong)
                 .ToListAsync();
         }
 

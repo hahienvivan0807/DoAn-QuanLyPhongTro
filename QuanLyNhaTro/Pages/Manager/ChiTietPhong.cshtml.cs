@@ -66,7 +66,7 @@ namespace QuanLyNhaTro.Pages
 
             var phongs = await _db.PHONG
                 .AsNoTracking()
-                .OrderBy(p => p.Tang)
+                .OrderBy(p => p.Khu)
                 .ThenBy(p => p.SoPhong)
                 .ToListAsync();
 

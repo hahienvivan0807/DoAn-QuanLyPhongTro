@@ -69,7 +69,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (hopDong != null)
             {
                 SoPhong = hopDong.Phong.SoPhong;
-                TangPhong = $"Tầng {hopDong.Phong.Tang}";
+                TangPhong = $"Tầng {hopDong.Phong.Khu}";
             }
 
             SoThongBaoChuaDoc = await _db.THONGBAO

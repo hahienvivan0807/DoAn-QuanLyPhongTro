@@ -9,7 +9,7 @@
     var phong  = Model.Phong;
     var tenViet = Model.HoTen ?? "";
     var chuCai  = tenViet.Length > 0 ? tenViet[0].ToString() : "?";
-    var soPhongHienThi = phong != null ? $"Phòng {phong.SoPhong} · Tầng {phong.Tang}" : "";
+    var soPhongHienThi = phong != null ? $"Phòng {phong.SoPhong} · Tầng {phong.Khu}" : "";
 
     string NhanTrangThaiHD(string trangThai) => trangThai switch {
         "Đang hiệu lực" => "nhan-xanh-la",
@@ -771,7 +771,7 @@
 
           <div class="hang-thong-tin">
             <span class="nhan-truong-bang"><i class="fas fa-layer-group"></i> Tầng</span>
-            <span class="gia-tri-truong-bang">Tầng @(phong?.Tang.ToString() ?? "-")</span>
+            <span class="gia-tri-truong-bang">Tầng @(phong?.Khu.ToString() ?? "-")</span>
           </div>
 
           <div class="hang-thong-tin">

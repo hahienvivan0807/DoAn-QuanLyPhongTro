@@ -42,7 +42,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (hopDong != null)
             {
                 SoPhong = hopDong.Phong.SoPhong;
-                Tang = hopDong.Phong.Tang;
+                Tang = hopDong.Phong.Khu;
             }
 
             DanhSachThongBao = await _db.THONGBAO

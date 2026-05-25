@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
 
-namespace QuanLyNhaTro.Pages.Admin
+namespace QuanLyNhaTro.Controllers.ChuTro
 {
     [Route("api/[controller]")]
     [ApiController]

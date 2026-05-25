@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
 using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-namespace QuanLyNhaTro.Controllers
+namespace QuanLyNhaTro.Controllers.ChuTro
 {
     [ApiController]
     [Route("api/[controller]")]

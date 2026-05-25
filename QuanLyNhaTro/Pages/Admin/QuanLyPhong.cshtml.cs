@@ -77,7 +77,7 @@ namespace QuanLyNhaTro.Pages.Admin
                     {
                         idPhong = p.IDPhong,
                         soPhong = p.SoPhong,
-                        tang = (int)p.Khu,
+                        Khu = (int)p.Khu,
                         soLuong = p.soluong,
                         dienTich = p.DienTich,
                         giaPhongFix = p.GiaPhongFix,

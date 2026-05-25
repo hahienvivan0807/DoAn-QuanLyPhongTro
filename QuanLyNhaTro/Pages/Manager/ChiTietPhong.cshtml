@@ -1645,11 +1645,11 @@
                                         "fas fa-bed", "color:#d97706;"),
                         "bao-tri" => ("background:linear-gradient(135deg,#fee2e2,#fca5a5);",
                                         "fas fa-tools", "color:#dc2626;"),
-                        _ => (vm.Phong.Tang >= 3
+                        _ => (vm.Phong.Khu >= 3
                                             ? "background:linear-gradient(135deg,#e0f2fe,#bae6fd);"
                                             : "",
-                                        vm.Phong.Tang >= 3 ? "fas fa-crown" : "fas fa-bed",
-                                        vm.Phong.Tang >= 3 ? "color:#0284c7;" : "")
+                                        vm.Phong.Khu >= 3 ? "fas fa-crown" : "fas fa-bed",
+                                        vm.Phong.Khu >= 3 ? "color:#0284c7;" : "")
                     };
 
                     <div class="phong-item trang-thai-@cssClass"
@@ -1674,7 +1674,7 @@
                                     @(vm.Phong.DienTich.HasValue ? $"{vm.Phong.DienTich:0.#}m²" : "—")
                                 </span>
                                 <span class="thong-tin-nhap">
-                                    <i class="fas fa-layer-group"></i> Tầng @vm.Phong.Tang
+                                    <i class="fas fa-layer-group"></i> Khu @vm.Phong.Khu
                                 </span>
                                 <span class="thong-tin-nhap">
                                     <i class="fas fa-tag"></i>

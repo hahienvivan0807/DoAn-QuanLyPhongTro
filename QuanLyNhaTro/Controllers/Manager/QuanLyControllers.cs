@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
 
-namespace QuanLyNhaTro.Controllers
+namespace QuanLyNhaTro.Controllers.Manager
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -24,7 +24,7 @@ namespace QuanLyNhaTro.Controllers
                 .Select(p => new {
                     idPhong = p.IDPhong,
                     soPhong = p.SoPhong,
-                    tang = p.Tang,
+                    Khu = p.Khu,
                     dienTich = p.DienTich,
                     giaPhong = p.GiaPhongFix,
                     trangThai = p.TrangThai,
@@ -33,7 +33,7 @@ namespace QuanLyNhaTro.Controllers
                         .Select(h => h.Tenant.FullName)
                         .FirstOrDefault()
                 })
-                .OrderBy(p => p.tang)
+                .OrderBy(p => p.Khu)
                 .ThenBy(p => p.soPhong)
                 .ToListAsync();
 
@@ -93,7 +93,7 @@ namespace QuanLyNhaTro.Controllers
             {
                 idPhong = phong.IDPhong,
                 soPhong = phong.SoPhong,
-                tang = phong.Tang,
+                tang = phong.Khu,
                 dienTich = phong.DienTich,
                 giaPhong = phong.GiaPhongFix,
                 trangThai = phong.TrangThai,

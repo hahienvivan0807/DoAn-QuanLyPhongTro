@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
 
-namespace QuanLyNhaTro.Controllers
+namespace QuanLyNhaTro.Controllers.ChuTro
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -85,13 +85,13 @@ namespace QuanLyNhaTro.Controllers
                 query = query.Where(p => p.SoPhong.Contains(tuKhoa));
 
             var dsPhong = await query
-                .OrderBy(p => p.Tang)
+                .OrderBy(p => p.Khu)
                 .ThenBy(p => p.SoPhong)
                 .Select(p => new
                 {
                     p.IDPhong,
                     p.SoPhong,
-                    p.Tang,
+                    p.Khu,
                     p.DienTich,
                     p.GiaPhongFix,
                     p.MoTa,
