@@ -177,6 +177,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
 
                 // 4. UPDATE PHONG → Đã thuê
                 phong.TrangThai = "Đã thuê";
+                phong.soluong += 1;
 
                 // ✅ FIX 1: SaveChanges TRƯỚC khi dùng newHopDong.IDHopDong
                 // Trước đây IDHopDong = 0 (chưa được DB gán) → vi phạm FK → lỗi 500

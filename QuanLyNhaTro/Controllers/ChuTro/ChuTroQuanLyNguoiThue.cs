@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuanLyNhaTro.Migrations;
 using QuanLyNhaTro.Models;
 using static QuanLyNhaTro.Controllers.ChuTro.ChuTroQuanLyNguoiThueController;
 
@@ -744,71 +745,72 @@ namespace QuanLyNhaTro.Controllers.ChuTro
 
             return Ok(new { success = true, danhSach = results });
         }
-        [HttpPost("them-nguoi-co-san/{idHopDong}")]
-        public async Task<IActionResult> ThemNguoiCoSan(
-    int idHopDong,
-    [FromBody] ThemNguoiCoSanDto dto)
-        {
-            // Verify contract exists and is active
-            var hopDong = await _context.HOPDONG
-                .Include(h => h.Phong)
-                .FirstOrDefaultAsync(h => h.IDHopDong == idHopDong && h.TrangThaiHD == "Đang hiệu lực");
-
-            if (hopDong == null)
-                return NotFound(new { success = false, message = "Hợp đồng không tồn tại hoặc đã kết thúc" });
-
-            // Prevent duplicates — check if already an active occupant
-            var daCoTrong = await _context.HOPDONG_KHACHO.AnyAsync(ko =>
-                ko.IDHopDong == idHopDong &&
-                ko.IDUser == dto.IDUser &&
-                ko.NgayRa == null);
-
-            if (daCoTrong)
-                return BadRequest(new { success = false, message = "Người này đã đang ở trong phòng này" });
-
-            // Pull name/phone from ACCOUNT
-            var account = await _context.ACCOUNT.FindAsync(dto.IDUser);
-            if (account == null)
-                return NotFound(new { success = false, message = "Không tìm thấy tài khoản" });
-
-            var khachThue = await _context.KHACH_THUE
-                .FirstOrDefaultAsync(kt => kt.IDUser == dto.IDUser);
-
-            // Create the KHACHO record
-            var khachO = new HOPDONG_KHACHO
+            [HttpPost("them-nguoi-co-san/{idHopDong}")]
+            public async Task<IActionResult> ThemNguoiCoSan(int idHopDong, [FromBody] ThemNguoiCoSanDto dto)
             {
-                IDHopDong = idHopDong,
-                IDUser = dto.IDUser,
-                HoTen = account.FullName,
-                SoCCCD = khachThue?.SoCCCD ?? dto.SoCCCD,
-                NgaySinh = khachThue?.NgaySinh ?? dto.NgaySinh,
-                GioiTinh = khachThue?.GioiTinh ?? dto.GioiTinh,
-                SoDienThoai = account.Phone,
-                QuanHe = dto.QuanHe ?? "Người ở ghép",
-                IsChinhChu = false,
-                NgayVao = dto.NgayVao ?? DateTime.Today,
-                NgayRa = null,
-                GhiChu = dto.GhiChu,
-            };
+                // Verify contract exists and is active
+                var hopDong = await _context.HOPDONG
+                    .Include(h => h.Phong)
+                    .FirstOrDefaultAsync(h => h.IDHopDong == idHopDong && h.TrangThaiHD == "Đang hiệu lực");
 
-            _context.HOPDONG_KHACHO.Add(khachO);
+                if (hopDong == null)
+                    return NotFound(new { success = false, message = "Hợp đồng không tồn tại hoặc đã kết thúc" });
 
-            // Re-activate the account if it was locked
-            if (!account.IsActive)
-            {
-                account.IsActive = true;
-                account.UpdatedAt = DateTime.UtcNow;
-            }
+                // Prevent duplicates — check if already an active occupant
+                var daCoTrong = await _context.HOPDONG_KHACHO.AnyAsync(ko =>
+                    ko.IDHopDong == idHopDong &&
+                    ko.IDUser == dto.IDUser &&
+                    ko.NgayRa == null);
 
+                if (daCoTrong)
+                    return BadRequest(new { success = false, message = "Người này đã đang ở trong phòng này" });
+
+                // Pull name/phone from ACCOUNT
+                var account = await _context.ACCOUNT.FindAsync(dto.IDUser);
+                if (account == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy tài khoản" });
+
+                var khachThue = await _context.KHACH_THUE
+                    .FirstOrDefaultAsync(kt => kt.IDUser == dto.IDUser);
+
+                // Create the KHACHO record
+                var khachO = new HOPDONG_KHACHO
+                {
+                    IDHopDong = idHopDong,
+                    IDUser = dto.IDUser,
+                    HoTen = account.FullName,
+                    SoCCCD = khachThue?.SoCCCD ?? dto.SoCCCD,
+                    NgaySinh = khachThue?.NgaySinh ?? dto.NgaySinh,
+                    GioiTinh = khachThue?.GioiTinh ?? dto.GioiTinh,
+                    SoDienThoai = account.Phone,
+                    QuanHe = dto.QuanHe ?? "Người ở ghép",
+                    IsChinhChu = false,
+                    NgayVao = dto.NgayVao ?? DateTime.Today,
+                    NgayRa = null,
+                    GhiChu = dto.GhiChu,
+                };
+
+                _context.HOPDONG_KHACHO.Add(khachO);
+
+                // Re-activate the account if it was locked
+                if (!account.IsActive)
+                {
+                    account.IsActive = true;
+                    account.UpdatedAt = DateTime.UtcNow;
+                }
+                if (hopDong.Phong != null)
+                {
+                    hopDong.Phong.soluong += 1;
+                }
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                success = true,
-                message = $"Đã thêm {account.FullName} vào phòng {hopDong.Phong?.SoPhong}",
-                idKhachO = khachO.IDKhachO
-            });
-        }
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Đã thêm {account.FullName} vào phòng {hopDong.Phong?.SoPhong}",
+                    idKhachO = khachO.IDKhachO
+                });
+            }
         [HttpGet("nguoi-ghep-trong-phong/{idHopDong}")]
         public async Task<IActionResult> GetNguoiGhepTrongPhong(int idHopDong)
         {
