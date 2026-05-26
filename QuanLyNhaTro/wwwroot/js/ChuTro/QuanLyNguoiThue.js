@@ -141,6 +141,9 @@ function ntKhoiTao() {
  * Tải danh sách người thuê từ API
  * API endpoint: GET /api/nguoithue
  * Response: KhachThueDto[] (kết hợp KHACH_THUE + ACCOUNT + PHONG)
+ *
+ * FIX: Deduplicate theo idHopDong để tránh render trùng khi API
+ *      trả về nhiều row cho cùng một hợp đồng (do JOIN KHACH_O_GHEP).
  */
 async function ntTaiDuLieu() {
     ntHienThiLoading(true);
@@ -150,46 +153,60 @@ async function ntTaiDuLieu() {
         const result = await res.json();
 
         if (result.success) {
-            NT.duLieu = result.danhSach.map(hd => ({
-                // IDs
-                IDKhachThue: hd.idHopDong,
-                IDUser: hd.idUser,
-                IDPhong: hd.idPhong,
+            // ── FIX: dùng Map để group theo idHopDong, tránh duplicate ──
+            const hopDongMap = new Map();
 
-                // Ưu tiên KHACH_THUE, fallback sang ACCOUNT
-                HoTen: hd.khachThue?.hoTen || hd.tenKhachThue || '—',
-                SoDienThoai: hd.khachThue?.soDienThoai || hd.soDienThoai || '',
-                SoCCCD: hd.khachThue?.soCCCD || '',
-                NgaySinh: hd.khachThue?.ngaySinh || null,
-                GioiTinh: hd.khachThue?.gioiTinh || '',
-                QueQuan: hd.khachThue?.queQuan || '',
-                DiaChiThuongTru: hd.khachThue?.diaChiThuongTru || '',
-                AnhChanDung: hd.khachThue?.anhChanDung || null,
-                GhiChu: hd.khachThue?.ghiChu || hd.ghiChu || '',
+            result.danhSach.forEach(hd => {
+                const key = hd.idHopDong;
 
-                // ACCOUNT
-                Email: hd.email || '',
-                Username: hd.username || '',
-                IsActive: hd.isActive,
+                if (!hopDongMap.has(key)) {
+                    // Lần đầu gặp hợp đồng này → tạo entry mới
+                    hopDongMap.set(key, {
+                        // IDs
+                        IDKhachThue: hd.idHopDong,
+                        IDUser: hd.idUser,
+                        IDPhong: hd.idPhong,
 
-                // HOPDONG
-                NgayVaoO: hd.ngayBatDau,
-                NgayKetThuc: hd.ngayKetThuc,
-                TienCoc: hd.tienCocBanDau,
-                DienDauKy: hd.dienDauKy,
-                NuocDauKy: hd.nuocDauKy,
-                GhiChuHD: hd.ghiChu || '',
-                SoNgayConLai: hd.soNgayConLai,
-                TrangThaiHD: hd.trangThaiHD,
+                        // Ưu tiên KHACH_THUE, fallback sang ACCOUNT
+                        HoTen: hd.khachThue?.hoTen || hd.tenKhachThue || '—',
+                        SoDienThoai: hd.khachThue?.soDienThoai || hd.soDienThoai || '',
+                        SoCCCD: hd.khachThue?.soCCCD || '',
+                        NgaySinh: hd.khachThue?.ngaySinh || null,
+                        GioiTinh: hd.khachThue?.gioiTinh || '',
+                        QueQuan: hd.khachThue?.queQuan || '',
+                        DiaChiThuongTru: hd.khachThue?.diaChiThuongTru || '',
+                        AnhChanDung: hd.khachThue?.anhChanDung || null,
+                        GhiChu: hd.khachThue?.ghiChu || hd.ghiChu || '',
 
-                // PHONG
-                SoPhong: hd.soPhong,
+                        // ACCOUNT
+                        Email: hd.email || '',
+                        Username: hd.username || '',
+                        IsActive: hd.isActive,
 
-                // Trạng thái hiển thị
-                TrangThai: hd.trangThaiHD === 'Đang hiệu lực' ? 'dang-o' : 'da-roi',
+                        // HOPDONG
+                        NgayVaoO: hd.ngayBatDau,
+                        NgayKetThuc: hd.ngayKetThuc,
+                        TienCoc: hd.tienCocBanDau,
+                        DienDauKy: hd.dienDauKy,
+                        NuocDauKy: hd.nuocDauKy,
+                        GhiChuHD: hd.ghiChu || '',
+                        SoNgayConLai: hd.soNgayConLai,
+                        TrangThaiHD: hd.trangThaiHD,
 
-                NguoiOGhep: hd.nguoiOGhep || [],
-            }));
+                        // PHONG
+                        SoPhong: hd.soPhong,
+
+                        // Trạng thái hiển thị
+                        TrangThai: hd.trangThaiHD === 'Đang hiệu lực' ? 'dang-o' : 'da-roi',
+
+                        // Người ở ghép — lấy từ row đầu tiên (đã là mảng từ API)
+                        NguoiOGhep: hd.nguoiOGhep || [],
+                    });
+                }
+                // Nếu key đã tồn tại → bỏ qua, không thêm duplicate
+            });
+
+            NT.duLieu = Array.from(hopDongMap.values());
 
             ntCapNhatThongKe();
             ntRenderFilterPhong();
@@ -202,6 +219,7 @@ async function ntTaiDuLieu() {
         ntHienThiLoading(false);
     }
 }
+
 /**
  * Tải danh sách phòng trống
  * API endpoint: GET /api/phong?trangThai=Trống
@@ -243,15 +261,15 @@ async function ntXacNhanXoa() {
     btnXoa.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
 
     try {
-         const res = await fetch(`/api/ChuTroThemNguoiThue/${id}/tra-phong`, {
-           method: 'PUT',
-           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${layToken()}` },
-             body: JSON.stringify({
-                 LyDo: lyDo,
-                 IDUser: parseInt(idUser)
-             })
-         });
-         if (!res.ok) throw new Error('Lỗi xử lý');
+        const res = await fetch(`/api/ChuTroThemNguoiThue/${id}/tra-phong`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${layToken()}` },
+            body: JSON.stringify({
+                LyDo: lyDo,
+                IDUser: parseInt(idUser)
+            })
+        });
+        if (!res.ok) throw new Error('Lỗi xử lý');
 
         await new Promise(r => setTimeout(r, 600)); // Mock
 
@@ -1301,7 +1319,7 @@ function ntValidate() {
     // → chỉ cần họ tên, SĐT, username không rỗng là được lưu
 
     return ok;
-}   
+}
 
 /* ================================================================
    LẤY PAYLOAD
@@ -1510,7 +1528,7 @@ function ntTogglePassword(inputId, btn) {
 /* ================================================================
    OVERLAY HELPERS
 ================================================================ */
-let _overlayCount = 0;  
+let _overlayCount = 0;
 function ntMoOverlay(id) {
     const el = document.getElementById(id);
     if (el) el.classList.add('mo');

@@ -36,11 +36,14 @@ function tbCapNhatPreview(loai) {
     el.style.display = 'block';
     if (loai === 'all') {
         txt.textContent = 'Sẽ gửi đến tất cả người thuê đang hoạt động.';
-    } else if (loai === 'phong') {
+    }
+    else if (loai === 'phong') {
         txt.textContent = 'Sẽ gửi đến người thuê của phòng được chọn.';
+    } else if (loai === 'quan-ly') {
+        txt.textContent = 'Sẽ gửi đến tất cả các tài khoản cấp quản lý.';
     } else {
         txt.textContent = 'Sẽ gửi đến người thuê được chọn.';
-    }
+    } 
 }
 
 // Cập nhật badge mức độ

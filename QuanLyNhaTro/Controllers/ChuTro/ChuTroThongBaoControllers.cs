@@ -55,6 +55,22 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     danhSachTB.Add(TaoThongBao(req, uid));
                 }
             }
+            else if (req.LoaiGui == "quan-ly")
+            {
+                // Lấy danh sách IDUser của các tài khoản có role là Manager (hoặc Admin) đang active
+                var danhSachQuanLy = await _context.ACCOUNT
+                    .Where(u => (u.Roles == "Manager" || u.Roles == "Admin") && u.IsActive)
+                    .Select(u => u.IDUser)
+                    .ToListAsync();
+
+                if (!danhSachQuanLy.Any())
+                    return BadRequest(new { success = false, message = "Không có quản lý nào đang hoạt động trong hệ thống." });
+
+                foreach (var uid in danhSachQuanLy)
+                {
+                    danhSachTB.Add(TaoThongBao(req, uid));
+                }
+            }
             else if (req.LoaiGui == "phong")
             {
                 if (req.IDNguonTB == null)
