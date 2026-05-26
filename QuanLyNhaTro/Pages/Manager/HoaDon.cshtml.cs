@@ -23,6 +23,8 @@ namespace QuanLyNhaTro.Pages.Manager
         public string SoDienThoai { get; set; } = "";
         public string? AnhBienLai { get; set; }
         public string? GhiChu { get; set; }
+        /// <summary>true = khách đã gửi ảnh biên lai, đang chờ quản lý xác nhận</summary>
+        public bool CoAnhChoXacNhan { get; set; }
     }
 
     // ================================================================
@@ -85,7 +87,6 @@ namespace QuanLyNhaTro.Pages.Manager
 
             if (idManager > 0)
             {
-                // Truy vấn trực tiếp từ bảng ACCOUNT trong SQL Server
                 var acc = await _db.ACCOUNT
                     .Where(a => a.IDUser == idManager && a.IsActive)
                     .Select(a => new { a.FullName, a.Roles })
@@ -112,7 +113,6 @@ namespace QuanLyNhaTro.Pages.Manager
 
             if (!idPhongDuocPhanCong.Any())
             {
-                // Manager chưa được phân công phòng nào → trả về tập rỗng, không lỗi
                 DanhSachHoaDon = new List<HoaDonThangViewModel>();
                 DanhSachDonDVChoXacNhan = new List<HoaDonDichVuViewModel>();
                 DanhSachHoaDonJson = "[]";
@@ -120,53 +120,75 @@ namespace QuanLyNhaTro.Pages.Manager
                 return;
             }
 
-            // ── Truy vấn HDTHANG theo kỳ ─────────────────────────────
-            var query = await _db.HDTHANG
+            // ── Truy vấn HDTHANG theo kỳ ─────────────────────────────────────────
+            // LỖI 1 ĐÃ SỬA: HDTHANG không có navigation HopDongs nên KHÔNG thể
+            // ThenInclude(p => p.HopDongs).ThenInclude(hd => hd.Tenant).
+            // Giải pháp: lấy HDTHANG trước, sau đó JOIN với HOPDONG để lấy tenant.
+            var dsHDThang = await _db.HDTHANG
+                .AsNoTracking()
                 .Where(h => h.KyThanhToan == KyXem
                          && idPhongDuocPhanCong.Contains(h.IDPhong))
                 .Include(h => h.Phong)
-                    .ThenInclude(p => p.HopDongs.Where(hd => hd.TrangThaiHD == "Đang hiệu lực"))
-                        .ThenInclude(hd => hd.Tenant)
                 .ToListAsync();
 
-            DanhSachHoaDon = query.Select(h =>
-            {
-                var hopDong = h.Phong.HopDongs.FirstOrDefault();
-                var tenant = hopDong?.Tenant;
+            // Lấy tất cả IDPhong từ kết quả để query HOPDONG một lần (tránh N+1)
+            var idPhongCanLay = dsHDThang.Select(h => h.IDPhong).Distinct().ToList();
 
-                // ── Map trạng thái ──────────────────────────────────
-                // "Chờ duyệt"     = khách đã gửi ảnh CK, quản lý chưa xác nhận → cho-xac-nhan
-                // "Đã hoàn thành" = quản lý đã xác nhận HOẶC thu tiền mặt      → hoan-thanh
-                // "Quá hạn"       = đã quá hạn thanh toán                       → qua-han
-                // Các giá trị khác ("Chưa đóng", null...) → xác định theo ngày hạn
+            // LỖI 1 ĐÃ SỬA: Lấy hợp đồng đang hiệu lực + tenant (ACCOUNT) theo phòng
+            // HOPDONG.Tenant là navigation FK đến ACCOUNT (IDUser), ACCOUNT có Phone + FullName
+            var dsHopDong = await _db.HOPDONG
+                .AsNoTracking()
+                .Where(hd => idPhongCanLay.Contains(hd.IDPhong)
+                          && hd.TrangThaiHD == "Đang hiệu lực")
+                .Include(hd => hd.Tenant)  // Tenant = ACCOUNT (có FullName, Phone)
+                .ToListAsync();
+
+            // Tạo lookup: IDPhong → HopDong (lấy hợp đồng đầu tiên nếu có nhiều)
+            var hopDongTheoPhong = dsHopDong
+                .GroupBy(hd => hd.IDPhong)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            DanhSachHoaDon = dsHDThang.Select(h =>
+            {
+                hopDongTheoPhong.TryGetValue(h.IDPhong, out var hopDong);
+                var tenant = hopDong?.Tenant; // ACCOUNT
+
+                // ── Map trạng thái ────────────────────────────────────────────────
+                // "Chờ duyệt"     → cho-xac-nhan (khách đã gửi ảnh CK, chờ quản lý)
+                // "Đã hoàn thành" → hoan-thanh
+                // "Quá hạn"       → qua-han
+                // Còn lại ("Chưa đóng", null...) → xét theo ngày hạn
                 var trangThai = h.TrangThai_TT switch
                 {
-                    "Quá hạn" => "qua-han",
-                    "Chờ duyệt" => "cho-xac-nhan",
+                    "Quá hạn"       => "qua-han",
+                    "Chờ duyệt"     => "cho-xac-nhan",
                     "Đã hoàn thành" => "hoan-thanh",
-                    _ => IsSapDen(h.HanDong) ? "sap-den" : "qua-han"
+                    _               => IsSapDen(h.HanDong) ? "sap-den" : "qua-han"
                 };
 
+                // TienDV + TienNoDV đều nullable trong model
                 var noDV = (h.TienDV ?? 0) + (h.TienNoDV ?? 0);
 
                 return new HoaDonThangViewModel
                 {
-                    Id = h.IDHDThang,
-                    SoPhong = h.Phong.SoPhong,
-                    TenNguoiThue = tenant?.FullName ?? "—",
-                    TrangThai = trangThai,
-                    KyThanhToan = $"Tháng {h.KyThanhToan}",
-                    HanNop = h.HanDong.ToString("dd/MM/yyyy"),
-                    NgayNop = h.NgayDuyet?.ToString("dd/MM/yyyy HH:mm"),
-                    TienPhong = h.TienPhong ?? 0,
-                    TienDien = h.TienDienSum ?? 0,
-                    TienNuoc = h.TienNuocSum ?? 0,
-                    TienDichVu = noDV,
-                    SoDienThoai = tenant?.Phone ?? "",
-                    GhiChu = h.GhiChuDuyet,
-                    // Có ảnh & đang "Chờ duyệt" → hiện nút xác nhận cho manager
-                    AnhChuyenKhoan = h.AnhChuyenKhoan,
-                    CoAnhChoXacNhan = trangThai == "cho-xac-nhan" && !string.IsNullOrEmpty(h.AnhChuyenKhoan),
+                    Id              = h.IDHDThang,
+                    SoPhong         = h.Phong.SoPhong,
+                    TenNguoiThue    = tenant?.FullName ?? "—",
+                    TrangThai       = trangThai,
+                    KyThanhToan     = $"Tháng {h.KyThanhToan}",
+                    HanNop          = h.HanDong.ToString("dd/MM/yyyy"),
+                    NgayNop         = h.NgayDuyet?.ToString("dd/MM/yyyy HH:mm"),
+                    TienPhong       = h.TienPhong ?? 0,
+                    TienDien        = h.TienDienSum ?? 0,
+                    TienNuoc        = h.TienNuocSum ?? 0,
+                    TienDichVu      = noDV,
+                    // ACCOUNT.Phone là string (không nullable) theo model
+                    SoDienThoai     = tenant?.Phone ?? "",
+                    GhiChu          = h.GhiChuDuyet,
+                    AnhChuyenKhoan  = h.AnhChuyenKhoan,
+                    // Hiện nút Duyệt khi: đang chờ xác nhận VÀ có ảnh CK
+                    CoAnhChoXacNhan = trangThai == "cho-xac-nhan"
+                                      && !string.IsNullOrEmpty(h.AnhChuyenKhoan),
                 };
             }).ToList();
 
@@ -175,31 +197,35 @@ namespace QuanLyNhaTro.Pages.Manager
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
-            // Lấy DONDV cần quản lý xem/xác nhận:
-            // – "Chờ duyệt"      : đã có ảnh biên lai (Giặt sấy / Nước bình)
-            // – "Chờ thanh toán" : Nước bình – khách đã gửi ảnh CK nhưng trạng thái
-            //   chỉ lên "Chờ thanh toán" (QuanLyDichVu set sau khi giao hàng)
+            // ── Lấy DONDV chờ xác nhận ảnh biên lai ─────────────────────────────
+            // Lọc đơn ở trạng thái "Chờ duyệt" hoặc "Chờ thanh toán" mà đã có ảnh biên lai.
+            // DONDV.Tenant → ACCOUNT (IDUser FK), ACCOUNT.Phone + FullName đều tồn tại.
             var donDVChoXacNhan = await _db.DONDV
+                .AsNoTracking()
                 .Where(d => (d.TrangThai_DV == "Chờ duyệt" || d.TrangThai_DV == "Chờ thanh toán")
                          && d.AnhBienLai != null
                          && idPhongDuocPhanCong.Contains(d.IDPhong))
                 .Include(d => d.Phong)
-                .Include(d => d.Tenant)
+                .Include(d => d.Tenant)  // Tenant = ACCOUNT
                 .ToListAsync();
 
             DanhSachDonDVChoXacNhan = donDVChoXacNhan.Select(d => new HoaDonDichVuViewModel
             {
-                Id = d.IDDonDV,
-                SoPhong = d.Phong.SoPhong,
-                TenNguoiThue = d.Tenant?.FullName ?? "—",
-                TrangThai = "cho-xac-nhan",
-                LoaiDV = d.LoaiDV,
-                HanNop = d.NgayHetHan?.ToString("dd/MM/yyyy") ?? "—",
-                NgayNop = d.UpdatedAt.ToString("dd/MM/yyyy HH:mm"),
-                TongTien = d.TongTien,
-                SoDienThoai = d.Tenant?.Phone ?? "",
-                AnhBienLai = d.AnhBienLai,
-                GhiChu = d.GhiChuXuLy,
+                Id              = d.IDDonDV,
+                SoPhong         = d.Phong.SoPhong,
+                TenNguoiThue    = d.Tenant?.FullName ?? "—",
+                TrangThai       = "cho-xac-nhan",
+                LoaiDV          = d.LoaiDV,
+                HanNop          = d.NgayHetHan?.ToString("dd/MM/yyyy") ?? "—",
+                // UpdatedAt là DateTime (không nullable) theo model DONDV
+                NgayNop         = d.UpdatedAt.ToString("dd/MM/yyyy HH:mm"),
+                TongTien        = d.TongTien,
+                // ACCOUNT.Phone là string (không nullable)
+                SoDienThoai     = d.Tenant?.Phone ?? "",
+                AnhBienLai      = d.AnhBienLai,
+                GhiChu          = d.GhiChuXuLy,
+                // Query đã lọc AnhBienLai != null nên luôn true ở đây
+                CoAnhChoXacNhan = !string.IsNullOrEmpty(d.AnhBienLai),
             }).ToList();
 
             DanhSachDonDVChoXacNhanJson = JsonSerializer.Serialize(DanhSachDonDVChoXacNhan, new JsonSerializerOptions
@@ -209,11 +235,10 @@ namespace QuanLyNhaTro.Pages.Manager
         }
 
         // ================================================================
-        // API: XÁC NHẬN THANH TOÁN HDTHANG (POST /api/hoa-don/xac-nhan)
+        // POST: XÁC NHẬN THANH TOÁN HDTHANG (?handler=XacNhan)
         // ================================================================
         public async Task<IActionResult> OnPostXacNhanAsync([FromBody] IdRequest req)
         {
-            // Kiểm tra quyền: Manager chỉ được thao tác trên phòng được phân công
             int idManager = LayIdManager();
             if (!await CoQuyenHDThangAsync(req.Id, idManager))
                 return new JsonResult(new { message = "Không có quyền thao tác hóa đơn này." }) { StatusCode = 403 };
@@ -227,21 +252,21 @@ namespace QuanLyNhaTro.Pages.Manager
             if (hd.TrangThai_TT != "Chờ duyệt")
                 return BadRequest(new { message = "Hóa đơn không ở trạng thái chờ xác nhận." });
 
-            hd.TrangThai_TT = "Đã hoàn thành";
-            hd.NgayDuyet = DateTime.Now;
+            hd.TrangThai_TT   = "Đã hoàn thành";
+            hd.NgayDuyet      = DateTime.Now;
+            // IDManagerDuyet là int? theo model HDTHANG
             hd.IDManagerDuyet = idManager > 0 ? idManager : null;
-            hd.UpdatedAt = DateTime.Now;
+            hd.UpdatedAt      = DateTime.Now;
 
             await _db.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
 
         // ================================================================
-        // API: TỪ CHỐI THANH TOÁN HDTHANG (POST /api/hoa-don/tu-choi)
+        // POST: TỪ CHỐI THANH TOÁN HDTHANG (?handler=TuChoi)
         // ================================================================
         public async Task<IActionResult> OnPostTuChoiAsync([FromBody] IdRequest req)
         {
-            // Kiểm tra quyền: Manager chỉ được thao tác trên phòng được phân công
             int idManager = LayIdManager();
             if (!await CoQuyenHDThangAsync(req.Id, idManager))
                 return new JsonResult(new { message = "Không có quyền thao tác hóa đơn này." }) { StatusCode = 403 };
@@ -252,22 +277,21 @@ namespace QuanLyNhaTro.Pages.Manager
             if (hd.TrangThai_TT != "Chờ duyệt")
                 return BadRequest(new { message = "Hóa đơn không ở trạng thái chờ xác nhận." });
 
-            // Reset về "Quá hạn" để PageModel map đúng → "qua-han"
-            hd.TrangThai_TT = "Quá hạn";
+            // Reset: xóa ảnh, trả về "Quá hạn" để khách gửi lại
+            hd.TrangThai_TT  = "Quá hạn";
             hd.AnhChuyenKhoan = null;
-            hd.NgayDuyet = null;
-            hd.UpdatedAt = DateTime.Now;
+            hd.NgayDuyet     = null;
+            hd.UpdatedAt     = DateTime.Now;
 
             await _db.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
 
         // ================================================================
-        // API: GHI THU TIỀN MẶT HDTHANG (POST /api/hoa-don/thu-tien-mat)
+        // POST: GHI THU TIỀN MẶT HDTHANG (?handler=ThuTienMat)
         // ================================================================
         public async Task<IActionResult> OnPostThuTienMatAsync([FromBody] IdRequest req)
         {
-            // Kiểm tra quyền: Manager chỉ được thao tác trên phòng được phân công
             int idManager = LayIdManager();
             if (!await CoQuyenHDThangAsync(req.Id, idManager))
                 return new JsonResult(new { message = "Không có quyền thao tác hóa đơn này." }) { StatusCode = 403 };
@@ -275,27 +299,24 @@ namespace QuanLyNhaTro.Pages.Manager
             var hd = await _db.HDTHANG.FindAsync(req.Id);
             if (hd == null) return NotFound();
 
-            // Guard: không thu tiền mặt nếu đã hoàn thành
             if (hd.TrangThai_TT == "Đã hoàn thành")
                 return BadRequest(new { message = "Hóa đơn đã được thanh toán." });
 
-            hd.TrangThai_TT = "Đã hoàn thành";
-            hd.NgayDuyet = DateTime.Now;
+            hd.TrangThai_TT   = "Đã hoàn thành";
+            hd.NgayDuyet      = DateTime.Now;
             hd.IDManagerDuyet = idManager > 0 ? idManager : null;
-            hd.GhiChuDuyet = "Thu tiền mặt";
-            hd.UpdatedAt = DateTime.Now;
+            hd.GhiChuDuyet    = "Thu tiền mặt";
+            hd.UpdatedAt      = DateTime.Now;
 
             await _db.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
 
         // ================================================================
-        // API: XÁC NHẬN THANH TOÁN DONDV (POST /api/hoa-don/xac-nhan-dich-vu)
-        // Task 3 – approve guest's uploaded receipt for Giặt sấy / Nước bình
+        // POST: XÁC NHẬN THANH TOÁN DONDV (?handler=XacNhanDichVu)
         // ================================================================
         public async Task<IActionResult> OnPostXacNhanDichVuAsync([FromBody] IdRequest req)
         {
-            // Kiểm tra quyền: Manager chỉ được thao tác trên phòng được phân công
             int idManager = LayIdManager();
             if (!await CoQuyenDonDVAsync(req.Id, idManager))
                 return new JsonResult(new { message = "Không có quyền thao tác đơn dịch vụ này." }) { StatusCode = 403 };
@@ -306,26 +327,28 @@ namespace QuanLyNhaTro.Pages.Manager
             if (don.TrangThai_DV == "Thành công")
                 return BadRequest(new { message = "Đơn dịch vụ đã được xác nhận trước đó." });
 
-            // Chấp nhận cả "Chờ duyệt" (Giặt sấy) lẫn "Chờ thanh toán" (Nước bình)
+            // Chấp nhận cả "Chờ duyệt" (Giặt sấy) lẫn "Chờ thanh toán" (Nước bình đã gửi ảnh)
             if (don.TrangThai_DV != "Chờ duyệt" && don.TrangThai_DV != "Chờ thanh toán")
                 return BadRequest(new { message = "Đơn dịch vụ không ở trạng thái chờ xác nhận." });
 
-            don.TrangThai_DV = "Thành công";
+            don.TrangThai_DV  = "Thành công";
+            // IDManagerXuLy là int? theo model DONDV
             don.IDManagerXuLy = idManager > 0 ? idManager : don.IDManagerXuLy;
-            don.NgayXuLy = DateTime.Now;
-            don.UpdatedAt = DateTime.Now;
+            // LỖI 3 ĐÃ SỬA: Xác nhận thanh toán → set NgayHoanThanh (không phải NgayXuLy)
+            // NgayXuLy = thời điểm xử lý đơn (giao hàng/nhập giá)
+            // NgayHoanThanh = thời điểm thanh toán hoàn tất
+            don.NgayHoanThanh = DateTime.Now;
+            don.UpdatedAt     = DateTime.Now;
 
             await _db.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
 
         // ================================================================
-        // API: TỪ CHỐI THANH TOÁN DONDV (POST /api/hoa-don/tu-choi-dich-vu)
-        // Task 3 – reject guest's receipt; reset so they can re-upload
+        // POST: TỪ CHỐI THANH TOÁN DONDV (?handler=TuChoiDichVu)
         // ================================================================
         public async Task<IActionResult> OnPostTuChoiDichVuAsync([FromBody] IdRequest req)
         {
-            // Kiểm tra quyền: Manager chỉ được thao tác trên phòng được phân công
             int idManager = LayIdManager();
             if (!await CoQuyenDonDVAsync(req.Id, idManager))
                 return new JsonResult(new { message = "Không có quyền thao tác đơn dịch vụ này." }) { StatusCode = 403 };
@@ -333,22 +356,20 @@ namespace QuanLyNhaTro.Pages.Manager
             var don = await _db.DONDV.FindAsync(req.Id);
             if (don == null) return NotFound();
 
-            // Chấp nhận cả "Chờ duyệt" (Giặt sấy) lẫn "Chờ thanh toán" (Nước bình)
             if (don.TrangThai_DV != "Chờ duyệt" && don.TrangThai_DV != "Chờ thanh toán")
                 return BadRequest(new { message = "Đơn dịch vụ không ở trạng thái chờ xác nhận." });
 
-            // Reset về "Chờ thanh toán" — xóa ảnh để khách có thể gửi lại
+            // Reset: xóa ảnh biên lai, giữ "Chờ thanh toán" để khách gửi lại
             don.TrangThai_DV = "Chờ thanh toán";
-            don.AnhBienLai = null;
-            don.UpdatedAt = DateTime.Now;
+            don.AnhBienLai   = null;
+            don.UpdatedAt    = DateTime.Now;
 
             await _db.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
 
         // ================================================================
-        // GET: DANH SÁCH ĐƠN DỊCH VỤ THEO KỲ (GET ?handler=DanhSachDV&ky=MM/yyyy)
-        // Lỗi 3: thay thế endpoint /api/hoa-don/danh-sach-dv không tồn tại
+        // GET: DANH SÁCH ĐƠN DỊCH VỤ THEO KỲ (?handler=DanhSachDV&ky=MM/yyyy)
         // ================================================================
         public async Task<IActionResult> OnGetDanhSachDVAsync(string ky)
         {
@@ -365,53 +386,60 @@ namespace QuanLyNhaTro.Pages.Manager
                 return new JsonResult(new List<HoaDonDichVuViewModel>());
 
             // Parse kỳ xem "MM/yyyy"
-            var kyXem = string.IsNullOrEmpty(ky) ? DateTime.Now.ToString("MM/yyyy") : ky;
-            var parts = kyXem.Split('/');
-            int thang = int.Parse(parts[0]);
-            int nam = int.Parse(parts[1]);
+            var kyXem  = string.IsNullOrEmpty(ky) ? DateTime.Now.ToString("MM/yyyy") : ky;
+            var parts  = kyXem.Split('/');
+            int thang  = int.Parse(parts[0]);
+            int nam    = int.Parse(parts[1]);
 
-            var dons = await _db.DONDV
+            // LỖI 4 ĐÃ SỬA: Không dùng .Select() phức tạp trực tiếp trên IQueryable khi
+            // có điều kiện client-side (CoAnhChoXacNhan, string.IsNullOrEmpty).
+            // → ToListAsync() trước để load về bộ nhớ, sau đó mới .Select() bằng LINQ-to-Objects.
+            var rawDons = await _db.DONDV
                 .AsNoTracking()
                 .Include(d => d.Phong)
-                .Include(d => d.Tenant)
+                .Include(d => d.Tenant)  // Tenant = ACCOUNT
                 .Where(d => idPhong.Contains(d.IDPhong)
                          && d.NgayTao.Month == thang
-                         && d.NgayTao.Year == nam)
+                         && d.NgayTao.Year  == nam)
                 .OrderByDescending(d => d.NgayTao)
-                .Select(d => new HoaDonDichVuViewModel
-                {
-                    Id = d.IDDonDV,
-                    SoPhong = d.Phong.SoPhong,
-                    TenNguoiThue = d.Tenant != null ? d.Tenant.FullName : "—",
-                    // "Chờ thanh toán" + có ảnh biên lai = khách Nước bình đã gửi ảnh CK → cho-xac-nhan
-                    // "Chờ thanh toán" + chưa có ảnh    = chờ khách gửi → sap-den / qua-han
-                    TrangThai = d.TrangThai_DV == "Thành công"
-                                        ? "hoan-thanh"
-                                 : d.TrangThai_DV == "Đã hoàn thành"
-                                        ? "hoan-thanh"
-                                 : d.TrangThai_DV == "Chờ duyệt"
-                                        ? "cho-xac-nhan"
-                                 : (d.TrangThai_DV == "Chờ thanh toán" && d.AnhBienLai != null)
-                                        ? "cho-xac-nhan"
-                                 : d.TrangThai_DV == "Đã hủy" || d.TrangThai_DV == "Từ chối"
-                                        ? "hoan-thanh"
-                                 : d.NgayHetHan.HasValue && d.NgayHetHan < DateTime.Today
-                                        ? "qua-han"
-                                 : d.NgayHetHan.HasValue
-                                   && (d.NgayHetHan.Value - DateTime.Today).TotalDays <= 5
-                                        ? "sap-den"
-                                 : "qua-han",
-                    LoaiDV = d.LoaiDV,
-                    HanNop = d.NgayHetHan.HasValue
-                                        ? d.NgayHetHan.Value.ToString("dd/MM/yyyy") : "—",
-                    NgayNop = d.NgayHoanThanh.HasValue
-                                        ? d.NgayHoanThanh.Value.ToString("dd/MM/yyyy HH:mm") : null,
-                    TongTien = d.TongTien,
-                    SoDienThoai = d.Tenant != null ? d.Tenant.Phone : "",
-                    AnhBienLai = d.AnhBienLai,
-                    GhiChu = d.GhiChuXuLy,
-                })
                 .ToListAsync();
+
+            var dons = rawDons.Select(d => new HoaDonDichVuViewModel
+            {
+                Id           = d.IDDonDV,
+                SoPhong      = d.Phong.SoPhong,
+                TenNguoiThue = d.Tenant?.FullName ?? "—",
+                // Map trạng thái DB → trạng thái UI
+                TrangThai    = d.TrangThai_DV switch
+                {
+                    "Thành công"    => "hoan-thanh",
+                    "Đã hoàn thành" => "hoan-thanh",
+                    "Đã hủy"        => "hoan-thanh",
+                    "Từ chối"       => "hoan-thanh",
+                    "Chờ duyệt"     => "cho-xac-nhan",
+                    // "Chờ thanh toán" + có ảnh → đã gửi biên lai, chờ duyệt
+                    // "Chờ thanh toán" + chưa có ảnh → chờ khách gửi
+                    "Chờ thanh toán" when !string.IsNullOrEmpty(d.AnhBienLai) => "cho-xac-nhan",
+                    _ => d.NgayHetHan.HasValue && d.NgayHetHan < DateTime.Today
+                             ? "qua-han"
+                             : d.NgayHetHan.HasValue
+                               && (d.NgayHetHan.Value - DateTime.Today).TotalDays <= 5
+                                   ? "sap-den"
+                                   : "qua-han"
+                },
+                LoaiDV          = d.LoaiDV,
+                HanNop          = d.NgayHetHan?.ToString("dd/MM/yyyy") ?? "—",
+                // NgayHoanThanh nullable theo model DONDV
+                NgayNop         = d.NgayHoanThanh?.ToString("dd/MM/yyyy HH:mm"),
+                TongTien        = d.TongTien,
+                SoDienThoai     = d.Tenant?.Phone ?? "",
+                AnhBienLai      = d.AnhBienLai,
+                GhiChu          = d.GhiChuXuLy,
+                // CoAnhChoXacNhan: true khi đơn đang chờ duyệt VÀ có ảnh biên lai
+                CoAnhChoXacNhan = (d.TrangThai_DV == "Chờ duyệt"
+                                   || d.TrangThai_DV == "Chờ thanh toán")
+                                  && !string.IsNullOrEmpty(d.AnhBienLai),
+            }).ToList();
 
             return new JsonResult(dons, new System.Text.Json.JsonSerializerOptions
             {
@@ -420,15 +448,14 @@ namespace QuanLyNhaTro.Pages.Manager
         }
 
         // ================================================================
-        // POST: NHẮC NHỞ THANH TOÁN (POST ?handler=NhacNho)
-        // Lỗi 4: thêm handler cho nút Nhắc nhở trên UI
+        // POST: NHẮC NHỞ THANH TOÁN (?handler=NhacNho)
         // ================================================================
         public async Task<IActionResult> OnPostNhacNhoAsync([FromBody] NhacNhoRequest req)
         {
             int idManager = LayIdManager();
             if (idManager == 0) return Unauthorized();
 
-            int idUser = 0;
+            int idUser    = 0;
             string soPhong = "?";
             decimal soTien = 0;
 
@@ -444,18 +471,19 @@ namespace QuanLyNhaTro.Pages.Manager
                 if (hd == null) return NotFound();
 
                 // Lấy tenant qua HOPDONG đang hiệu lực của phòng
+                // HOPDONG.IDUser là FK → ACCOUNT (Tenant)
                 var hopDong = await _db.HOPDONG
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.IDPhong == hd.IDPhong
                                            && x.TrangThaiHD == "Đang hiệu lực");
 
-                idUser = hopDong?.IDUser ?? 0;
+                idUser  = hopDong?.IDUser ?? 0;
                 soPhong = hd.Phong?.SoPhong ?? "?";
-                soTien = (hd.TienPhong ?? 0)
+                soTien  = (hd.TienPhong   ?? 0)
                         + (hd.TienDienSum ?? 0)
                         + (hd.TienNuocSum ?? 0)
-                        + (hd.TienDV ?? 0)
-                        + (hd.TienNoDV ?? 0);
+                        + (hd.TienDV      ?? 0)
+                        + (hd.TienNoDV    ?? 0);
             }
             else if (req.Loai == "dv")
             {
@@ -468,9 +496,10 @@ namespace QuanLyNhaTro.Pages.Manager
                     .FirstOrDefaultAsync(d => d.IDDonDV == req.Id);
                 if (don == null) return NotFound();
 
-                idUser = don.IDUser;
+                // DONDV.IDUser là FK → ACCOUNT (Tenant)
+                idUser  = don.IDUser;
                 soPhong = don.Phong?.SoPhong ?? "?";
-                soTien = don.TongTien;
+                soTien  = don.TongTien;
             }
             else
             {
@@ -481,34 +510,35 @@ namespace QuanLyNhaTro.Pages.Manager
                 return BadRequest(new { message = "Không tìm thấy thông tin tenant." });
 
             // Chống spam: không nhắc quá 1 lần trong 6 giờ cùng nguồn
-            var gioiHan = DateTime.Now.AddHours(-6);
-            var loaiNguon = req.Loai == "month" ? "HoaDon" : "DonDV"; // khớp CHECK constraint DB
+            var gioiHan  = DateTime.Now.AddHours(-6);
+            // LoaiNguon phải khớp CHECK constraint DB: 'DonDV'|'HoaDon'|'DiemNuoc'|'HeThong'
+            var loaiNguon = req.Loai == "month" ? "HoaDon" : "DonDV";
+
             bool daCoNhac = await _db.THONGBAO
-                .AnyAsync(t => t.IDUser == idUser
+                .AnyAsync(t => t.IDUser    == idUser
                             && t.IDNguonTB == req.Id
                             && t.LoaiNguon == loaiNguon
-                            && t.LoaiTB == "canh-bao"  // khớp CHECK constraint DB
-                            && t.NgayTao >= gioiHan);
+                            && t.LoaiTB    == "canh-bao"
+                            && t.NgayTao   >= gioiHan);
 
             if (daCoNhac)
-                return BadRequest(new
-                {
-                    message = "Đã nhắc nhở trong vòng 6 giờ qua. Vui lòng chờ thêm."
-                });
+                return BadRequest(new { message = "Đã nhắc nhở trong vòng 6 giờ qua. Vui lòng chờ thêm." });
 
-            // Ghi thông báo — tất cả giá trị đều khớp CHECK constraint của DB
+            // Ghi thông báo — các giá trị khớp CHECK constraint của bảng THONGBAO
+            // LoaiTB: 'thong-tin'|'canh-bao'|'thanh-toan'|'he-thong'
+            // LoaiNguon: 'DonDV'|'HoaDon'|'DiemNuoc'|'HeThong'
             _db.THONGBAO.Add(new THONGBAO
             {
                 IDNguoiGui = idManager,
-                IDUser = idUser,
-                IDNguonTB = req.Id,
-                LoaiNguon = loaiNguon,   // 'HoaDon' hoặc 'DonDV'
-                TieuDe = "Nhắc nhở thanh toán",
-                NoiDung = $"Quản lý nhắc bạn thanh toán hóa đơn phòng {soPhong}. "
+                IDUser     = idUser,
+                IDNguonTB  = req.Id,
+                LoaiNguon  = loaiNguon,
+                TieuDe     = "Nhắc nhở thanh toán",
+                NoiDung    = $"Quản lý nhắc bạn thanh toán hóa đơn phòng {soPhong}. "
                            + $"Số tiền: {soTien:N0} đ. Vui lòng thanh toán sớm.",
-                LoaiTB = "canh-bao",  // khớp CHECK: 'he-thong'|'thanh-toan'|'canh-bao'|'thong-tin'
-                DaDoc = false,
-                NgayTao = DateTime.Now,
+                LoaiTB     = "canh-bao",
+                DaDoc      = false,
+                NgayTao    = DateTime.Now,
             });
             await _db.SaveChangesAsync();
 
@@ -516,7 +546,7 @@ namespace QuanLyNhaTro.Pages.Manager
         }
 
         // ================================================================
-        // HELPER
+        // HELPERS
         // ================================================================
         private static bool IsSapDen(DateTime hanDong)
         {
@@ -524,7 +554,6 @@ namespace QuanLyNhaTro.Pages.Manager
             return con >= 0 && con <= 5;
         }
 
-        // Lấy idManager từ Claims
         private int LayIdManager()
         {
             var s = User.FindFirst("IDUser")?.Value
@@ -533,28 +562,44 @@ namespace QuanLyNhaTro.Pages.Manager
             return id;
         }
 
-        // Kiểm tra Manager có quyền thao tác trên hóa đơn tháng không
+        // Kiểm tra Manager có quyền thao tác trên HDTHANG không
+        // Tách 2 bước để tránh lỗi CS1061 (EF nhầm TEntity khi lồng subquery DbSet khác)
         private async Task<bool> CoQuyenHDThangAsync(int idHDThang, int idManager)
         {
-            return await _db.HDTHANG
+            // Bước 1: lấy IDPhong của hóa đơn
+            var idPhong = await _db.HDTHANG
                 .AsNoTracking()
-                .AnyAsync(h => h.IDHDThang == idHDThang
-                            && _db.PHONG_MANAGER.Any(pm =>
-                                    pm.IDPhong == h.IDPhong
-                                 && pm.IDManager == idManager
-                                 && pm.IsActive));
+                .Where(h => h.IDHDThang == idHDThang)
+                .Select(h => (int?)h.IDPhong)
+                .FirstOrDefaultAsync();
+
+            if (idPhong == null) return false;
+
+            // Bước 2: kiểm tra phòng đó có thuộc phân công của Manager không
+            return await _db.PHONG_MANAGER
+                .AnyAsync(pm => pm.IDPhong   == idPhong
+                             && pm.IDManager == idManager
+                             && pm.IsActive);
         }
 
-        // Kiểm tra Manager có quyền thao tác trên đơn dịch vụ không
+        // Kiểm tra Manager có quyền thao tác trên DONDV không
+        // Tách 2 bước để tránh lỗi CS1061 (EF nhầm TEntity khi lồng subquery DbSet khác)
         private async Task<bool> CoQuyenDonDVAsync(int idDonDV, int idManager)
         {
-            return await _db.DONDV
+            // Bước 1: lấy IDPhong của đơn dịch vụ
+            var idPhong = await _db.DONDV
                 .AsNoTracking()
-                .AnyAsync(d => d.IDDonDV == idDonDV
-                            && _db.PHONG_MANAGER.Any(pm =>
-                                    pm.IDPhong == d.IDPhong
-                                 && pm.IDManager == idManager
-                                 && pm.IsActive));
+                .Where(d => d.IDDonDV == idDonDV)
+                .Select(d => (int?)d.IDPhong)
+                .FirstOrDefaultAsync();
+
+            if (idPhong == null) return false;
+
+            // Bước 2: kiểm tra phòng đó có thuộc phân công của Manager không
+            return await _db.PHONG_MANAGER
+                .AnyAsync(pm => pm.IDPhong   == idPhong
+                             && pm.IDManager == idManager
+                             && pm.IsActive);
         }
     }
 
@@ -562,7 +607,6 @@ namespace QuanLyNhaTro.Pages.Manager
     {
         public int Id { get; set; }
     }
-
 
     public class NhacNhoRequest
     {

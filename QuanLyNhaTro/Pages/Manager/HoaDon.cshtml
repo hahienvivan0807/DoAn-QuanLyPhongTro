@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
             /* ============================================================
-                                                                       BIẾN MÀU & RESET
-                                                                    ============================================================ */
+                                 BIẾN MÀU & RESET
+             ============================================================ */
             :root {
                 --sidebar: #0d1b3e;
                 --sidebar-dark: #091429;
@@ -50,8 +50,8 @@
             }
 
             /* ============================================================
-                                                                       SIDEBAR
-                                                                    ============================================================ */
+                                    SIDEBAR
+            ============================================================ */
             #sidebar {
                 width: 220px;
                 min-width: 220px;
@@ -215,8 +215,8 @@
             }
 
             /* ============================================================
-                                                                       MAIN
-                                                                    ============================================================ */
+                                                                                   MAIN
+                                                                                ============================================================ */
             #main {
                 flex: 1;
                 display: flex;
@@ -375,8 +375,8 @@
             }
 
             /* ============================================================
-                                                                       PAGE CONTENT
-                                                                    ============================================================ */
+                                                                                   PAGE CONTENT
+                                                                                ============================================================ */
             #content {
                 flex: 1;
                 overflow-y: auto;
@@ -448,8 +448,8 @@
                 }
 
             /* ============================================================
-                                                                       STATS CARDS
-                                                                    ============================================================ */
+                                                                                   STATS CARDS
+                                                                                ============================================================ */
             .stats-grid {
                 display: grid;
                 grid-template-columns: repeat(5,1fr);
@@ -544,8 +544,8 @@
             }
 
             /* ============================================================
-                                                                       MAIN TABS
-                                                                    ============================================================ */
+                                                                                   MAIN TABS
+                                                                                ============================================================ */
             .main-tabs {
                 display: flex;
                 gap: 0;
@@ -608,8 +608,8 @@
                 }
 
             /* ============================================================
-                                                                       TAB PANEL WRAPPER
-                                                                    ============================================================ */
+                                                                                   TAB PANEL WRAPPER
+                                                                                ============================================================ */
             .tab-panel-wrap {
                 background: var(--white);
                 border-radius: 0 0 14px 14px;
@@ -628,8 +628,8 @@
                 }
 
             /* ============================================================
-                                                                       SUB TABS
-                                                                    ============================================================ */
+                                                                                   SUB TABS
+                                                                                ============================================================ */
             .sub-tabs {
                 display: flex;
                 gap: 6px;
@@ -722,8 +722,8 @@
                 }
 
             /* ============================================================
-                                                                       TOOLBAR
-                                                                    ============================================================ */
+                                                                                   TOOLBAR
+                                                                                ============================================================ */
             .toolbar {
                 display: flex;
                 align-items: center;
@@ -772,8 +772,8 @@
                 }
 
             /* ============================================================
-                                                                       INVOICE LIST
-                                                                    ============================================================ */
+                                                                                   INVOICE LIST
+                                                                                ============================================================ */
             .invoice-list {
                 display: flex;
                 flex-direction: column;
@@ -1029,8 +1029,8 @@
                 }
 
             /* ============================================================
-                                                                       MODAL
-                                                                    ============================================================ */
+                                                                                   MODAL
+                                                                                ============================================================ */
             .modal-overlay {
                 display: none;
                 position: fixed;
@@ -1862,14 +1862,14 @@
                 let nutDong = '';
                 if (d.trangThai === 'hoan-thanh') {
                     nutDong = ''; // Đã xong – không hiện bất kỳ nút nào trên card
-                } else if (d.trangThai === 'cho-xac-nhan' && d.anhBienLai) {
+                } else if (d.trangThai === 'cho-xac-nhan' && d.coAnhChoXacNhan && d.anhBienLai) {
                     nutDong = `<button class="btn-action confirm" onclick="xacNhanDV(event,${d.id})"><i class="fas fa-check"></i> Duyệt</button>`;
                 } else if (d.trangThai === 'qua-han' || d.trangThai === 'sap-den') {
                     nutDong = `<button class="btn-action remind" onclick="moNhacNho(event,${d.id},'dv')"><i class="fas fa-bell"></i> Nhắc</button>`;
                 }
                 // "cho-xac-nhan" không có ảnh → nutDong = '' (khách chưa gửi, chờ thêm)
 
-                const anhBadge = (d.trangThai === 'cho-xac-nhan' && d.anhBienLai)
+                const anhBadge = (d.trangThai === 'cho-xac-nhan' && d.coAnhChoXacNhan && d.anhBienLai)
                     ? `<span class="anh-ck-badge"><i class="fas fa-image"></i> Có ảnh CK</span>` : '';
 
                 return `
@@ -1921,14 +1921,15 @@
                 let nutDong = '';
                 if (h.trangThai === 'hoan-thanh') {
                     nutDong = ''; // Đã xong – không hiện bất kỳ nút nào trên card
-                } else if (h.trangThai === 'cho-xac-nhan' && h.coAnhChoXacNhan) {
+                } else if (h.trangThai === 'cho-xac-nhan' && (h.coAnhChoXacNhan || h.anhChuyenKhoan)) {
+                    // FIX 5: dùng || để không bỏ sót đơn nào có ảnh dù cờ chưa set
                     nutDong = `<button class="btn-action confirm" onclick="xacNhanThang(event,${h.id})"><i class="fas fa-check"></i> Duyệt</button>`;
                 } else if (h.trangThai === 'qua-han' || h.trangThai === 'sap-den') {
                     nutDong = `<button class="btn-action remind" onclick="moNhacNho(event,${h.id},'month')"><i class="fas fa-bell"></i> Nhắc</button>`;
                 }
                 // "cho-xac-nhan" không có ảnh → nutDong = '' (chờ khách)
 
-                const anhBadge = (h.trangThai === 'cho-xac-nhan' && h.coAnhChoXacNhan)
+                const anhBadge = (h.trangThai === 'cho-xac-nhan' && (h.coAnhChoXacNhan || h.anhChuyenKhoan))
                     ? `<span class="anh-ck-badge"><i class="fas fa-image"></i> Có ảnh CK</span>` : '';
 
                 return `
@@ -2031,8 +2032,8 @@
                         <div class="conf-title" style="color:var(--primary)"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản (đã duyệt)</div>
                         <img class="proof-img" src="${d.anhBienLai}" onclick="xemAnh('${d.anhBienLai}')">
                     </div>` : ''}`;
-                } else if (d.trangThai === 'cho-xac-nhan' && d.anhBienLai) {
-                    // Khách đã gửi ảnh, quản lý CHƯA xác nhận → hiện nút xác nhận + từ chối
+                } else if (d.trangThai === 'cho-xac-nhan' && d.coAnhChoXacNhan && d.anhBienLai) {
+                    // FIX 2: Khách đã gửi ảnh, quản lý CHƯA xác nhận → hiện nút xác nhận + từ chối
                     confirmHTML = `
                     <div class="confirm-box">
                         <div class="conf-title"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản của khách</div>
@@ -2102,8 +2103,8 @@
                 // ── LOGIC HIỂN THỊ XÁC NHẬN ──────────────────────────────
                 // QUAN TRỌNG: khi trangThai = 'hoan-thanh', tuyệt đối không hiện nút Duyệt/Từ chối
                 // dù coAnhChoXacNhan có giá trị gì – khách đã thanh toán, luồng đã kết thúc
-                // "cho-xac-nhan" + coAnhChoXacNhan = true → hiện ảnh + nút Duyệt / Từ chối
-                // "cho-xac-nhan" + chưa có ảnh → thông báo chờ, không có nút
+                // FIX 3: bỏ điều kiện thừa h.coAnhChoXacNhan – chỉ cần h.anhChuyenKhoan là đủ
+                // vì coAnhChoXacNhan chỉ là cờ phụ, anhChuyenKhoan mới là dữ liệu thực
                 let confirmHTML = '';
                 if (h.trangThai === 'hoan-thanh') {
                     // Đã hoàn thành → chỉ hiện "Đã xác nhận", KHÔNG có nút Duyệt
@@ -2121,8 +2122,8 @@
                         <div class="conf-title" style="color:var(--primary)"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản (đã duyệt)</div>
                         <img class="proof-img" src="${h.anhChuyenKhoan}" onclick="xemAnh('${h.anhChuyenKhoan}')">
                     </div>` : ''}`;
-                } else if (h.trangThai === 'cho-xac-nhan' && h.coAnhChoXacNhan && h.anhChuyenKhoan) {
-                    // Khách đã gửi ảnh, quản lý CHƯA xác nhận → hiện nút Duyệt / Từ chối
+                } else if (h.trangThai === 'cho-xac-nhan' && h.anhChuyenKhoan) {
+                    // FIX 3: Khách đã gửi ảnh, quản lý CHƯA xác nhận → hiện nút Duyệt / Từ chối
                     confirmHTML = `
                     <div class="confirm-box">
                         <div class="conf-title"><i class="fas fa-image" style="margin-right:6px"></i>Ảnh chuyển khoản của khách</div>

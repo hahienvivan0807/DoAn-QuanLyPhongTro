@@ -232,9 +232,10 @@ namespace QuanLyNhaTro.Pages.KhachThue
                     tongTien = nuoc.TongTien,
                     ngayHetHan = nuoc.NgayHetHan?.ToString("dd/MM/yyyy"),
                     conHan = nuoc.NgayHetHan.HasValue ? (nuoc.NgayHetHan.Value - DateTime.Now).Days : (int?)null,
+                    coAnhBienLai = !string.IsNullOrEmpty(nuoc.AnhBienLai), // ← thêm dòng này
                     duocCongVaoTro = duocCongVaoTro
-                        && nuoc.TrangThai_DV == "Chờ thanh toán"
-                        && nuoc.NgayTao <= ngayNguong
+                    && nuoc.TrangThai_DV == "Chờ thanh toán"
+                    && nuoc.NgayTao <= ngayNguong
                 }
             });
         }
@@ -281,8 +282,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 var don = await _db.DONDV.FirstOrDefaultAsync(d => d.IDDonDV == nuocId && d.IDPhong == idPhong);
                 if (don != null)
                 {
-                    don.TrangThai_DV = "Thành công";
-                    don.AnhBienLai = anhPath;
+                    don.TrangThai_DV = "Chờ thanh toán"; // giữ nguyên, manager sẽ xác nhận
+                    don.AnhBienLai = anhPath;             // lưu ảnh để manager xem
                     don.UpdatedAt = now;
                 }
             }

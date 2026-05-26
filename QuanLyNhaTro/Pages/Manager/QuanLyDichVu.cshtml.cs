@@ -789,10 +789,11 @@ namespace QuanLyNhaTro.Pages.Manager
                   AND d.IDPhong IN ({inClause})
                 ORDER BY
                     CASE d.TrangThai_DV
-                        WHEN N'Chờ xử lý'    THEN 0
-                        WHEN N'Đang xử lý'    THEN 0
-                        WHEN N'Chờ thanh toán' THEN 1
-                        ELSE 2
+                        WHEN N'Chờ xử lý'      THEN 0
+                        WHEN N'Đang xử lý'     THEN 0
+                        WHEN N'Chưa thanh toán' THEN 1
+                        WHEN N'Chờ thanh toán'  THEN 2
+                        ELSE 3
                     END, d.NgayTao DESC";
             cmd.Parameters.AddWithValue("@Loai", loai);
             using var r = await cmd.ExecuteReaderAsync();
@@ -1038,6 +1039,67 @@ namespace QuanLyNhaTro.Pages.Manager
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddRange(ps);
             cmd.ExecuteNonQuery();
+        }
+        public IActionResult OnPostTuChoiAnhCK(int idDonDV)
+        {
+            try
+            {
+                using var conn = OpenConn();
+                // Kiểm tra quyền
+                var idMgrStr = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr, out int idMgr);
+                var phong = LayPhongDuocPhanCong(conn, idMgr);
+                if (!phong.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
+
+                int idUser = GetIDUserFromDon(conn, idDonDV);
+                string soPhong = GetSoPhongFromDon(conn, idDonDV);
+
+                // Lấy tên file ảnh trước khi xóa (nếu cần xóa file vật lý sau)
+                string? anhCu = null;
+                using (var cmd = new SqlCommand(
+                    "SELECT AnhBienLai FROM dbo.DONDV WHERE IDDonDV = @ID", conn))
+                {
+                    cmd.Parameters.AddWithValue("@ID", idDonDV);
+                    var v = cmd.ExecuteScalar();
+                    if (v != null && v != DBNull.Value) anhCu = v.ToString();
+                }
+
+                // Cập nhật: xóa ảnh, trả về trạng thái "Chưa thanh toán"
+                ExecNonQuery(conn, @"
+            UPDATE dbo.DONDV
+            SET TrangThai_DV = N'Chưa thanh toán',
+                AnhBienLai   = NULL,
+                GhiChuXuLy   = ISNULL(GhiChuXuLy,'') + N' [Ảnh CK bị từ chối bởi Manager]',
+                UpdatedAt    = GETDATE()
+            WHERE IDDonDV = @ID",
+                    P("@ID", idDonDV));
+
+                // TODO (tuỳ bạn): xóa file vật lý anhCu khỏi wwwroot nếu cần
+                // if (!string.IsNullOrEmpty(anhCu)) { ... }
+
+                // Thông báo cho khách
+                if (idUser > 0)
+                    GuiThongBao(conn, idUser, idDonDV, "DonDV",
+                        "Ảnh chuyển khoản không hợp lệ — vui lòng gửi lại",
+                        $"Ảnh xác nhận thanh toán đơn nước bình phòng {soPhong} không được chấp nhận. " +
+                        "Vui lòng chụp lại ảnh biên lai chuyển khoản rõ ràng và gửi lại.",
+                        "canh-bao");
+
+                ThongBao = $"Đã từ chối ảnh CK phòng {soPhong}. Khách cần gửi lại ảnh.";
+                LoaiThongBao = "warning";
+            }
+            catch (Exception ex)
+            {
+                ThongBao = $"Lỗi: {ex.Message}";
+                LoaiThongBao = "danger";
+            }
+            return RedirectToPage();
         }
     }
 }

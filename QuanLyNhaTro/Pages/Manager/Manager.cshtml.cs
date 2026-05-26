@@ -10,7 +10,7 @@ namespace QuanLyNhaTro.Pages
     [Authorize(Roles = "Manager")]
     public class ManagerModel : PageModel
     {
-        private readonly QuanLyKhuNhaTro _db;  
+        private readonly QuanLyKhuNhaTro _db;
 
         public ManagerModel(QuanLyKhuNhaTro db)
         {
@@ -37,6 +37,15 @@ namespace QuanLyNhaTro.Pages
 
         // ── Số dịch vụ mới (badge sidebar) ──────────────────────────
         public int SoDichVuMoi { get; set; }
+
+        // ── Danh sách tất cả thông báo của Manager (tối đa 20) ──────
+        public List<ThongBaoViewModel> DanhSachThongBao { get; set; } = new();
+
+        // ── Thông báo từ chủ trọ mới nhất (hiển thị trong dashboard) ─
+        public List<ThongBaoViewModel> ThongBaoChuTroMoiNhat { get; set; } = new();
+
+        // ── Số thông báo từ chủ trọ chưa đọc ───────────────────────
+        public int SoThongBaoChuTroChuaDoc { get; set; }
 
         // ── Danh sách sự cố mới nhất (tối đa 4) ────────────────────
         public List<DONDV> SuCoMoiNhat { get; set; } = new();
@@ -124,12 +133,98 @@ namespace QuanLyNhaTro.Pages
             TatCaPhong = await _db.PHONG
                 .OrderBy(x => x.Khu).ThenBy(x => x.SoPhong)
                 .ToListAsync();
+
+            // ── THÔNG BÁO: Load danh sách thông báo dành cho Manager ─────
+            // Lấy tất cả thông báo gửi tới Manager này (IDUser == userId),
+            // bao gồm cả thông báo từ chủ trọ (LoaiTB == "ChuTro")
+            var rawTB = await _db.THONGBAO
+                .Where(x => x.IDUser == userId)
+                .OrderByDescending(x => x.NgayTao)
+                .Take(30)
+                .ToListAsync();
+
+            // Join với ACCOUNT để lấy tên người gửi
+            var nguoiGuiIds = rawTB
+                .Where(x => x.IDNguoiGui.HasValue)
+                .Select(x => x.IDNguoiGui!.Value)
+                .Distinct()
+                .ToList();
+
+            var nguoiGuiDict = await _db.ACCOUNT
+                .Where(a => nguoiGuiIds.Contains(a.IDUser))
+                .ToDictionaryAsync(a => a.IDUser, a => a.FullName);
+
+            // Với thông báo từ chủ trọ, lấy thêm số phòng từ PHONG_MANAGER
+            // (người gửi là Manager được phân công phòng)
+            var phongManagerDict = new Dictionary<int, string>();
+            foreach (var id in nguoiGuiIds)
+            {
+                var soPhong = await _db.PHONG_MANAGER
+                    .Include(pm => pm.Phong)
+                    .Where(pm => pm.IDManager == id && pm.IsActive)
+                    .Select(pm => pm.Phong.SoPhong)
+                    .FirstOrDefaultAsync();
+                if (soPhong != null)
+                    phongManagerDict[id] = soPhong;
+            }
+
+            DanhSachThongBao = rawTB.Select(tb => new ThongBaoViewModel
+            {
+                IDThongBao = tb.IDThongBao,
+                TieuDe = tb.TieuDe,
+                NoiDung = tb.NoiDung ?? "",
+                LoaiTB = tb.LoaiTB,
+                DaDoc = tb.DaDoc,
+                NgayTao = tb.NgayTao,
+                TenNguoiGui = tb.IDNguoiGui.HasValue && nguoiGuiDict.TryGetValue(tb.IDNguoiGui.Value, out var ten)
+                                   ? ten : "Hệ thống",
+                SoPhongNguoiGui = tb.IDNguoiGui.HasValue && phongManagerDict.TryGetValue(tb.IDNguoiGui.Value, out var sp)
+                                   ? sp : null
+            }).ToList();
+
+            // Lọc thông báo từ chủ trọ để hiển thị riêng trên dashboard
+            ThongBaoChuTroMoiNhat = DanhSachThongBao
+                .Where(x => x.LoaiTB == "ChuTro")
+                .Take(6)
+                .ToList();
+
+            SoThongBaoChuTroChuaDoc = ThongBaoChuTroMoiNhat.Count(x => !x.DaDoc);
+
+            // Cập nhật lại tổng số thông báo chưa đọc (bao gồm mọi loại)
+            SoThongBaoChuaDoc = DanhSachThongBao.Count(x => !x.DaDoc);
         }
 
         private int GetCurrentUserId()
         {
             var claim = User.FindFirst("IDUser") ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
             return claim != null && int.TryParse(claim.Value, out var id) ? id : 0;
+        }
+
+        // ── Handler: Đánh dấu một thông báo đã đọc ─────────────────
+        public async Task<IActionResult> OnPostMarkReadAsync(int id)
+        {
+            var userId = GetCurrentUserId();
+            var tb = await _db.THONGBAO
+                .FirstOrDefaultAsync(x => x.IDThongBao == id && x.IDUser == userId);
+            if (tb != null && !tb.DaDoc)
+            {
+                tb.DaDoc = true;
+                await _db.SaveChangesAsync();
+            }
+            return new OkResult();
+        }
+
+        // ── Handler: Đánh dấu tất cả thông báo đã đọc ──────────────
+        public async Task<IActionResult> OnPostMarkAllReadAsync()
+        {
+            var userId = GetCurrentUserId();
+            var dsChuaDoc = await _db.THONGBAO
+                .Where(x => x.IDUser == userId && !x.DaDoc)
+                .ToListAsync();
+            foreach (var tb in dsChuaDoc)
+                tb.DaDoc = true;
+            await _db.SaveChangesAsync();
+            return new OkResult();
         }
         public async Task<IActionResult> OnPostChangePasswordAsync(
     string oldPassword, string newPassword, string confirmPassword)
@@ -237,6 +332,19 @@ namespace QuanLyNhaTro.Pages
         public string NutOnClick => TrangThai == "Đã hoàn thành"
             ? $"xemHoaDon('P.{SoPhong}')"
             : $"nhacNhoThanhToan('P.{SoPhong}')";
+    }
+
+    // ── ViewModel phụ cho thông báo ────────────────────────────────
+    public class ThongBaoViewModel
+    {
+        public int IDThongBao { get; set; }
+        public string TieuDe { get; set; } = "";
+        public string NoiDung { get; set; } = "";
+        public string LoaiTB { get; set; } = "";
+        public bool DaDoc { get; set; }
+        public DateTime NgayTao { get; set; }
+        public string TenNguoiGui { get; set; } = "Hệ thống";
+        public string? SoPhongNguoiGui { get; set; }
     }
 
 }

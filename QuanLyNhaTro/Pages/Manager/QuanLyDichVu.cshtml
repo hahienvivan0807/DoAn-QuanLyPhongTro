@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "/Manager/QuanLyDichVu"
 @model QuanLyNhaTro.Pages.Manager.QuanLyDichVuModel
 @{
     Layout = null;
@@ -1727,6 +1727,7 @@
                                                 {
                                                     "Chờ xử lý" => "cho-xu-ly",
                                                     "Đang xử lý" => "dang-xu-ly",
+                                                    "Chưa thanh toán" => "chua-dong",
                                                     "Chờ thanh toán" => "cho-tt",
                                                     "Thành công" => "xong",
                                                     "Đã hủy" => "huy",
@@ -1757,39 +1758,69 @@
                                                     </button>
                                                 </form>
                                             }
-                                            @if (don.TrangThai_DV == "Chờ thanh toán")
-                                            {
-                                                <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-start;">
-                                                    @if (!string.IsNullOrEmpty(don.AnhBienLai))
+                                            <td>
+                                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                                    @if (don.TrangThai_DV == "Chờ xử lý" || don.TrangThai_DV == "Đang xử lý")
                                                     {
-                                                        <!-- Có ảnh CK → bắt buộc xem ảnh trước, xác nhận TT nằm trong modal -->
-                                                        <button class="btn btn-success btn-sm"
-                                                                onclick="xemAnhBienLai('@don.AnhBienLai', @don.IDDonDV, '@don.SoPhong', '@don.TenKhach')">
-                                                            <i class="fas fa-image"></i> Xem ảnh & Xác nhận TT
+                                                        <button class="btn btn-warning btn-sm"
+                                                                onclick="moModalXacNhanGiao(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung', @don.TongTien)">
+                                                            <i class="fas fa-truck"></i> Xác nhận giao
                                                         </button>
+                                                        <form method="post" asp-page-handler="HuyDon" style="display:inline;">
+                                                            <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
+                                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                                    onclick="return confirm('Hủy đơn này?')">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
                                                     }
-                                                    else
+
+                                                    @if (don.TrangThai_DV == "Chờ thanh toán")
                                                     {
-                                                        <!-- Chưa có ảnh CK → chỉ hiện nhắc nhở, không cho xác nhận -->
-                                                        <span style="font-size:11px;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;">
-                                                            <i class="fas fa-clock"></i> Chờ khách gửi ảnh CK
-                                                        </span>
+                                                        <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-start;">
+                                                            @if (!string.IsNullOrEmpty(don.AnhBienLai))
+                                                            {
+                                                                <!-- Có ảnh CK → cho duyệt -->
+                                                                <button class="btn btn-primary btn-sm"
+                                                                        onclick="xemAnhBienLai('@don.AnhBienLai', @don.IDDonDV, '@don.SoPhong', '@don.TenKhach')">
+                                                                    <i class="fas fa-image"></i> Duyệt ảnh CK
+                                                                </button>
+                                                            }
+                                                            else
+                                                            {
+                                                                <!-- Chưa có ảnh CK → chờ khách gửi -->
+                                                                <span style="font-size:11px;color:#b45309;background:#fef3c7;padding:4px 9px;
+                                                                    border-radius:6px;display:inline-flex;align-items:center;gap:4px;">
+                                                                    <i class="fas fa-clock"></i> Chờ khách gửi ảnh CK
+                                                                </span>
+                                                            }
+                                                        </div>
                                                     }
-                                                    <form method="post" asp-page-handler="NhacNhoThanhToanNuoc" style="display:inline;">
-                                                        <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
-                                                        <button type="submit" class="btn btn-warning btn-sm"
-                                                                onclick="return confirm('Gửi nhắc nhở thanh toán cho khách phòng @don.SoPhong?')">
-                                                            <i class="fas fa-bell"></i> Nhắc nhở
-                                                        </button>
-                                                    </form>
+
+                                                    @if (don.TrangThai_DV == "Chưa thanh toán")
+                                                    {
+                                                        <!-- Ảnh bị từ chối → chờ khách gửi lại -->
+                                                        <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-start;">
+                                                            <span style="font-size:11px;color:#b91c1c;background:#fee2e2;padding:4px 9px;
+                                                                border-radius:6px;display:inline-flex;align-items:center;gap:4px;">
+                                                                <i class="fas fa-redo"></i> Chờ khách gửi ảnh mới
+                                                            </span>
+                                                            <form method="post" asp-page-handler="NhacNhoThanhToanNuoc" style="display:inline;">
+                                                                <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
+                                                                <button type="submit" class="btn btn-warning btn-sm"
+                                                                        onclick="return confirm('Gửi nhắc nhở đến khách phòng @don.SoPhong?')">
+                                                                    <i class="fas fa-bell"></i> Nhắc nhở
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    }
+
+                                                    @if (don.TrangThai_DV == "Thành công" || don.TrangThai_DV == "Đã hủy")
+                                                    {
+                                                        <span style="font-size:11px;color:var(--mau-chu-phu);">Hoàn tất</span>
+                                                    }
                                                 </div>
-                                            }
-                                            @if (don.TrangThai_DV == "Thành công" || don.TrangThai_DV == "Đã hủy")
-                                            {
-                                                <span style="font-size:11px;color:var(--mau-chu-phu);">Hoàn tất</span>
-                                            }
-                                        </div>
-                                    </td>
+                                            </td>
                                 </tr>
                             }
                         </tbody>
@@ -1816,13 +1847,14 @@
                     </div>
                 </div>
                 <div class="toolbar">
-                    <button class="filter-pill on" onclick="locDonGS('', this)">Tất cả</button>
-                    <button class="filter-pill" onclick="locDonGS('Chờ xử lý', this)">Chờ nhập giá</button>
-                    <button class="filter-pill" onclick="locDonGS('Chờ thanh toán', this)">Chờ thanh toán</button>
-                    <button class="filter-pill" onclick="locDonGS('Thành công', this)">Thành công</button>
+                    <button class="filter-pill on" onclick="locDonNuoc('', this)">Tất cả</button>
+                    <button class="filter-pill" onclick="locDonNuoc('Chờ xử lý', this)">Chờ xử lý</button>
+                    <button class="filter-pill" onclick="locDonNuoc('Chờ thanh toán', this)">Chờ thanh toán</button>
+                    <button class="filter-pill" onclick="locDonNuoc('Chưa thanh toán', this)">Chưa thanh toán</button>
+                    <button class="filter-pill" onclick="locDonNuoc('Thành công', this)">Thành công</button>
                     <div class="o-tim-kiem">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchGS" placeholder="Tìm phòng, khách..." oninput="timKiemDon('gs')" />
+                        <input type="text" id="searchNuoc" placeholder="Tìm phòng, khách..." oninput="timKiemDon('nuoc')" />
                     </div>
                 </div>
                 <div class="table-wrap">
@@ -2130,29 +2162,41 @@
 </div>
 
 <!-- ===================================================================
-     MODAL: XEM ẢNH CHUYỂN KHOẢN NƯỚC BÌNH + XÁC NHẬN THANH TOÁN
+     MODAL: XEM ẢNH CHUYỂN KHOẢN NƯỚC BÌNH + XÁC NHẬN / TỪ CHỐI
 =================================================================== -->
 <div class="modal-overlay" id="modal-xem-anh-ck" onclick="dongModalNeuNhanNgoai(event,'modal-xem-anh-ck')">
     <div class="modal modal-lg">
         <div class="modal-header">
             <div>
-                <h3><i class="fas fa-image" style="color:#059669;margin-right:8px;"></i>Ảnh chuyển khoản thanh toán nước bình</h3>
+                <h3><i class="fas fa-image" style="color:#059669;margin-right:8px;"></i>Duyệt ảnh chuyển khoản</h3>
                 <div class="sub" id="subAnhCK">Phòng —</div>
             </div>
             <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-ck')"><i class="fas fa-times"></i></button>
         </div>
-        <img id="anhCKPreview" class="anh-xem-truoc" src="" alt="Ảnh chuyển khoản" />
+        <img id="anhCKPreview" class="anh-xem-truoc" src="" alt="Ảnh chuyển khoản"
+             style="cursor:zoom-in;" onclick="window.open(this.src,'_blank')" />
         <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;font-size:13px;color:#065f46;margin-top:12px;">
             <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-            Kiểm tra ảnh chuyển khoản rồi bấm <strong>"Xác nhận đã thanh toán"</strong> để hoàn tất đơn.
+            Kiểm tra ảnh chuyển khoản. Bấm <strong>"Xác nhận"</strong> nếu hợp lệ, hoặc <strong>"Từ chối"</strong> nếu ảnh không hợp lệ — trạng thái sẽ trở về <em>Chưa thanh toán</em> để khách gửi lại.
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-ck')">Đóng</button>
+
+            <!-- TỪ CHỐI: xóa ảnh, trở về "Chưa thanh toán" -->
+            <form method="post" asp-page-handler="TuChoiAnhCK" style="display:inline;">
+                <input type="hidden" name="idDonDV" id="ck_idDonDV_tuchoi" />
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('Từ chối ảnh này? Trạng thái sẽ trở về Chưa thanh toán và khách cần gửi lại.')">
+                    <i class="fas fa-times"></i> Từ chối ảnh
+                </button>
+            </form>
+
+            <!-- XÁC NHẬN: hoàn tất đơn -->
             <form method="post" asp-page-handler="XacNhanThanhToanNuoc" style="display:inline;">
                 <input type="hidden" name="idDonDV" id="ck_idDonDV" />
                 <button type="submit" class="btn btn-success"
-                        onclick="return confirm('Xác nhận khách đã thanh toán?')">
-                    <i class="fas fa-check"></i> Xác nhận đã thanh toán
+                        onclick="return confirm('Xác nhận ảnh hợp lệ và hoàn tất thanh toán?')">
+                    <i class="fas fa-check"></i> Xác nhận thanh toán
                 </button>
             </form>
         </div>
@@ -2545,9 +2589,11 @@
     function xemAnhBienLai(url, id, phong, khach) {
     document.getElementById('anhCKPreview').src = url;
     document.getElementById('ck_idDonDV').value = id;
+    document.getElementById('ck_idDonDV_tuchoi').value = id;
     document.getElementById('subAnhCK').textContent = `Phòng ${phong} | Khách: ${khach}`;
     document.getElementById('modal-xem-anh-ck').classList.add('hien');
     }
+
 
     // Giữ lại tên cũ để tương thích nếu có chỗ nào còn gọi
     function moModalNhapGiaNuoc(id, phong, khach, noiDung, tienHienTai) {
@@ -2688,6 +2734,7 @@
     if (badgeSC) { badgeSC.textContent = data.suCoChoXuLy; badgeSC.style.display = data.suCoChoXuLy > 0 ? 'inline' : 'none'; }
     } catch (e) { console.warn('Không thể load badge sidebar:', e); }
     })();
+
 </script>
 </body>
 </html>
