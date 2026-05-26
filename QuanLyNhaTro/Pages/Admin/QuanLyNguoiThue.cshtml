@@ -1913,7 +1913,50 @@
     }, 3000);
 }
     function prompt_themNguoiCoSan() {
-    hienToast('Mở tab "Có sẵn" trong modal Thêm người ở ghép và chọn phòng trước.', 'info');
+    _tncs_moPickerPhong();
+}
+async function _tncs_moPickerPhong() {
+    // Show a simple confirm-style picker using the existing oGhep picker UI
+    // but override the selection callback temporarily
+    const overlay = document.getElementById('og-picker-overlay');
+    if (!overlay) { hienToast('Không tìm thấy giao diện chọn phòng', 'error'); return; }
+
+    // Set filter to "Đã thuê" and load
+    const filterEl = document.getElementById('og-picker-filter-tt');
+    if (filterEl) filterEl.value = 'Đã thuê';
+
+    // Override _chonPhong temporarily so selecting a room opens themNguoiCoSan instead
+    const _originalChon = oGhep._chonPhong.bind(oGhep);
+    oGhep._chonPhong = async function(idPhong) {
+        // Restore original immediately
+        oGhep._chonPhong = _originalChon;
+
+        // Find the room's active contract IDHopDong
+        try {
+            const res = await fetch('/api/ChuTroQuanLyNguoiThue/ds-phong-dang-thue');
+            const data = await res.json();
+            const phong = data.danhSach?.find(p => p.idPhong === idPhong);
+            const idHopDong = phong?.hopDong?.idHopDong;
+            const soPhong = phong?.soPhong || '';
+
+            if (!idHopDong) {
+                hienToast('Phòng này chưa có hợp đồng hiệu lực', 'warning');
+                oGhep.dongPicker();
+                return;
+            }
+
+            oGhep.dongPicker();
+            // Small delay so picker closes cleanly before new modal opens
+            setTimeout(() => {
+                themNguoiCoSan.moModal(idHopDong, idPhong, soPhong);
+            }, 200);
+        } catch (e) {
+            hienToast('Lỗi tải thông tin phòng', 'error');
+            oGhep.dongPicker();
+        }
+    };
+
+    await oGhep.moPickerPhong();
 }
   // Sidebar toggle
   function dongMoSidebar() {

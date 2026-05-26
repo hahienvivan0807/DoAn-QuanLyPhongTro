@@ -3062,30 +3062,31 @@ function nguoiOLai_moModal(danhSach, idHopDongCu) {
         tbody.innerHTML = danhSach.map(ng => `
             <tr>
                 <td style="padding:10px 12px;">
-                    <div style="font-weight:700;font-size:13.5px;">${_escape2(ng.hoTen)}</div>
+                    <div style="font-weight:700;font-size:13.5px;">${_escape2(ng.hoTen || ng.HoTen || '—')}</div>
                     <div style="font-size:11.5px;color:var(--mau-chu-phu);">
-                        ${_escape2(ng.soDienThoai || '—')}
+                        ${_escape2(ng.soDienThoai || ng.SoDienThoai || '—')}
                     </div>
                 </td>
                 <td style="padding:10px 12px;">
                     <span style="font-size:12.5px;padding:3px 10px;border-radius:20px;
                                  background:rgba(124,58,237,0.1);color:#7c3aed;font-weight:600;">
-                        ${_escape2(ng.quanHe || 'Người ở ghép')}
+                        ${_escape2(ng.quanHe || ng.QuanHe || 'Người ở ghép')}
                     </span>
                 </td>
-                <td style="padding:10px 12px;text-align:right;">
+                <td style="padding:10px 12px;text-align:right;display:flex;gap:6px;justify-content:flex-end;align-items:center;">
                     <button class="nt-btn-submit"
                             style="padding:6px 14px;font-size:12.5px;
                                    background:linear-gradient(135deg,#059669,#34d399);
                                    box-shadow:0 4px 12px rgba(5,150,105,0.25);"
-                            onclick="ngGhep_moModalHD(${ng.idKhachO},'${_escape2(ng.hoTen)}',${ng.idPhong},'${_escape2(ng.soPhong)}')">
+                            onclick="ngGhep_moModalHD(${ng.idKhachO || ng.IDKhachO},'${_escape2(ng.hoTen || ng.HoTen)}',${ng.idPhong || ng.IDPhong},'${_escape2(ng.soPhong || ng.SoPhong)}')">
                         <i class="fas fa-file-contract"></i> Lập HĐ mới
                     </button>
-                        <button class="nt-act" title="Thêm người có sẵn vào phòng này"
-                                style="background:rgba(5,150,105,0.1);color:#059669;"
-                                onclick="themNguoiCoSan.moModal(${x.IDKhachThue}, ${x.IDPhong}, '${ntEscape(x.SoPhong)}')">
-                            <i class="fas fa-user-check"></i>
-                        </button>
+                    <button class="nt-act"
+                            title="Thêm người có sẵn vào hợp đồng này"
+                            style="background:rgba(5,150,105,0.1);color:#059669;width:32px;height:32px;"
+                            onclick="themNguoiCoSan.moModal(${ng.idKhachO || ng.IDKhachO}, ${ng.idPhong || ng.IDPhong}, '${_escape2(ng.soPhong || ng.SoPhong)}')">
+                        <i class="fas fa-user-check"></i>
+                    </button>
                 </td>
             </tr>`).join('');
     }
