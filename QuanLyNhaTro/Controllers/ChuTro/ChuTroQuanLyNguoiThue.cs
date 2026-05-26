@@ -19,6 +19,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
         [HttpGet("ds-nguoi-thue")]
         public async Task<IActionResult> GetDanhSachNguoiThue()
         {
+            // BƯỚC 1: Load tất cả hợp đồng
             var dsHopDong = await _context.HOPDONG
                 .AsNoTracking()
                 .OrderByDescending(hd => hd.NgayBatDau)
@@ -34,14 +35,12 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     hd.GhiChu,
                     hd.DienDauKy,
                     hd.NuocDauKy,
-
                     TenKhachThue = hd.Tenant.FullName,
                     SoDienThoai = hd.Tenant.Phone,
                     Email = hd.Tenant.Email,
                     Username = hd.Tenant.Username,
                     IsActive = hd.Tenant.IsActive,
                     SoPhong = hd.Phong.SoPhong,
-
                     KhachThue = _context.KHACH_THUE
                         .Where(kt => kt.IDUser == hd.IDUser)
                         .Select(kt => new {
@@ -58,33 +57,91 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                             kt.NgayVaoO,
                         })
                         .FirstOrDefault(),
-
-                    // ── THÊM MỚI: Danh sách người ở ghép ──
-                    NguoiOGhep = hd.KhachO
-                        .Where(ko => ko.NgayRa == null && ko.IsChinhChu == false)
-                        .Select(ko => new {
-                            ko.IDKhachO,
-                            ko.IDUser,
-                            ko.HoTen,
-                            ko.SoCCCD,
-                            ko.NgaySinh,
-                            ko.GioiTinh,
-                            ko.SoDienThoai,
-                            ko.QuanHe,
-                            ko.IsChinhChu,
-                            ko.NgayVao,
-                            ko.NgayRa,
-                            ko.GhiChu,
-                        })
-                        .ToList(),
-
                     SoNgayConLai = hd.NgayKetThuc.HasValue
                         ? (int?)EF.Functions.DateDiffDay(DateTime.UtcNow, hd.NgayKetThuc.Value)
                         : null
                 })
                 .ToListAsync();
 
-            return Ok(new { success = true, danhSach = dsHopDong });
+            // BƯỚC 2: Mỗi IDUser chỉ giữ 1 hợp đồng mới nhất
+            // (ưu tiên "Đang hiệu lực", nếu không có thì lấy hợp đồng gần nhất)
+            var dsHopDongLoc = dsHopDong
+                .GroupBy(hd => hd.IDUser)
+                .Select(g =>
+                    g.FirstOrDefault(hd => hd.TrangThaiHD == "Đang hiệu lực")
+                    ?? g.OrderByDescending(hd => hd.NgayBatDau).First()
+                )
+                .ToList();
+
+            // BƯỚC 3: Lấy IDPhong đang hiệu lực
+            var idPhongList = dsHopDongLoc
+                .Where(hd => hd.TrangThaiHD == "Đang hiệu lực")
+                .Select(hd => hd.IDPhong)
+                .Distinct()
+                .ToList();
+
+            // BƯỚC 4: Load người ở ghép riêng
+            var nguoiOGhepRaw = await _context.HOPDONG_KHACHO
+                .AsNoTracking()
+                .Where(ko =>
+                    ko.NgayRa == null &&
+                    ko.IsChinhChu == false &&
+                    idPhongList.Contains(ko.HopDong.IDPhong) &&
+                    ko.HopDong.TrangThaiHD == "Đang hiệu lực")
+                .Select(ko => new {
+                    ko.IDKhachO,
+                    ko.IDUser,
+                    ko.HoTen,
+                    ko.SoCCCD,
+                    ko.NgaySinh,
+                    ko.GioiTinh,
+                    ko.SoDienThoai,
+                    ko.QuanHe,
+                    ko.IsChinhChu,
+                    ko.NgayVao,
+                    ko.NgayRa,
+                    ko.GhiChu,
+                    IDPhong = ko.HopDong.IDPhong,
+                    IDUserChuPhong = ko.HopDong.IDUser,
+                })
+                .ToListAsync();
+
+            // BƯỚC 5: GroupBy trong memory — mỗi IDUser chỉ lấy record mới nhất
+            var nguoiOGhepDict = nguoiOGhepRaw
+                .GroupBy(ko => new { ko.IDPhong, ko.IDUser })
+                .Select(g => g.OrderByDescending(x => x.IDKhachO).First())
+                .GroupBy(ko => ko.IDPhong)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // BƯỚC 6: Ghép kết quả
+            var ketQua = dsHopDongLoc.Select(hd => new
+            {
+                hd.IDHopDong,
+                hd.IDUser,
+                hd.IDPhong,
+                hd.NgayBatDau,
+                hd.NgayKetThuc,
+                hd.TienCocBanDau,
+                hd.TrangThaiHD,
+                hd.GhiChu,
+                hd.DienDauKy,
+                hd.NuocDauKy,
+                hd.TenKhachThue,
+                hd.SoDienThoai,
+                hd.Email,
+                hd.Username,
+                hd.IsActive,
+                hd.SoPhong,
+                hd.KhachThue,
+                hd.SoNgayConLai,
+                NguoiOGhep = nguoiOGhepDict.ContainsKey(hd.IDPhong)
+                    ? nguoiOGhepDict[hd.IDPhong]
+                        .Where(ko => ko.IDUser != hd.IDUser)
+                        .ToList()
+                    : nguoiOGhepRaw.Take(0).ToList()
+            });
+
+            return Ok(new { success = true, danhSach = ketQua });
         }
 
         [HttpGet("ds-phong")]
@@ -261,6 +318,195 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 .ToListAsync();
 
             return Ok(new { success = true, danhSach = dsPhong });
+        }
+        // DELETE người ở ghép — khóa tài khoản + đánh dấu NgayRa
+        [HttpPut("nguoi-ghep/roi-di/{idKhachO}")]
+        public async Task<IActionResult> NguoiGhepRoiDi(int idKhachO, [FromBody] NguoiGhepRoiDiDto dto)
+        {
+            var khachO = await _context.HOPDONG_KHACHO.FindAsync(idKhachO);
+            if (khachO == null) return NotFound(new { success = false, message = "Không tìm thấy" });
+
+            // Đánh dấu ngày ra
+            khachO.NgayRa = DateTime.Today;
+            if (!string.IsNullOrWhiteSpace(dto?.GhiChu))
+                khachO.GhiChu = dto.GhiChu;
+
+            // Khóa tài khoản
+            var acc = await _context.ACCOUNT.FindAsync(khachO.IDUser);
+            if (acc != null) acc.IsActive = false;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Đã gỡ người ở ghép" });
+        }
+
+        // POST tạo hợp đồng mới cho người ở ghép (thăng lên chủ phòng)
+        [HttpPost("nguoi-ghep/tao-hop-dong/{idKhachO}")]
+        public async Task<IActionResult> TaoHopDongChoNguoiGhep(int idKhachO, [FromBody] TaoHDNguoiGhepDto dto)
+        {
+            var khachO = await _context.HOPDONG_KHACHO
+                .Include(k => k.HopDong).ThenInclude(h => h.Phong)
+                .FirstOrDefaultAsync(k => k.IDKhachO == idKhachO);
+
+            if (khachO == null) return NotFound(new { success = false, message = "Không tìm thấy" });
+
+            var phong = khachO.HopDong.Phong;
+
+            var hdCu = await _context.HOPDONG
+                .Where(h => h.IDPhong == phong.IDPhong && h.TrangThaiHD == "Đang hiệu lực")
+                .FirstOrDefaultAsync();
+            if (hdCu != null) return BadRequest(new { success = false, message = "Phòng vẫn còn hợp đồng hiệu lực" });
+
+            // ── FIX: Đánh dấu NgayRa cho TẤT CẢ record cũ của người này ──────
+            var cacRecordCu = await _context.HOPDONG_KHACHO
+                .Where(ko => ko.IDUser == khachO.IDUser && ko.NgayRa == null)
+                .ToListAsync();
+            foreach (var record in cacRecordCu)
+            {
+                record.NgayRa = DateTime.Today;
+            }
+            // ──────────────────────────────────────────────────────────────────
+
+            // Tạo hợp đồng mới
+            var hdMoi = new HOPDONG
+            {
+                IDUser = khachO.IDUser,
+                IDPhong = phong.IDPhong,
+                NgayBatDau = dto.NgayBatDau,
+                NgayKetThuc = dto.NgayKetThuc,
+                TienCocBanDau = dto.TienCoc,
+                GiaThueChot = dto.GiaThue > 0 ? dto.GiaThue : phong.GiaPhongFix,
+                TrangThaiHD = "Đang hiệu lực",
+                DienDauKy = dto.DienDauKy,
+                NuocDauKy = dto.NuocDauKy,
+                GhiChu = dto.GhiChu,
+            };
+            _context.HOPDONG.Add(hdMoi);
+            phong.TrangThai = "Đã thuê";
+
+            await _context.SaveChangesAsync();
+
+            _context.HOPDONG_KHACHO.Add(new HOPDONG_KHACHO
+            {
+                IDHopDong = hdMoi.IDHopDong,
+                IDUser = khachO.IDUser,
+                HoTen = khachO.HoTen,
+                SoCCCD = khachO.SoCCCD,
+                NgaySinh = khachO.NgaySinh,
+                GioiTinh = khachO.GioiTinh,
+                SoDienThoai = khachO.SoDienThoai,
+                QuanHe = "Đại diện",
+                IsChinhChu = true,
+                NgayVao = dto.NgayBatDau,
+            });
+
+            var ktExist = await _context.KHACH_THUE.AnyAsync(k => k.IDUser == khachO.IDUser);
+            if (!ktExist)
+            {
+                _context.KHACH_THUE.Add(new KHACH_THUE
+                {
+                    IDUser = khachO.IDUser,
+                    HoTen = khachO.HoTen,
+                    SoCCCD = khachO.SoCCCD,
+                    NgaySinh = khachO.NgaySinh,
+                    GioiTinh = khachO.GioiTinh,
+                    SoDienThoai = khachO.SoDienThoai,
+                    NgayVaoO = dto.NgayBatDau,
+                });
+            }
+
+            // ── FIX: Kích hoạt lại tài khoản cho người ghép thành chủ phòng ──
+            var account = await _context.ACCOUNT.FindAsync(khachO.IDUser);
+            if (account != null) account.IsActive = true;
+            // ──────────────────────────────────────────────────────────────────
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Đã tạo hợp đồng mới", idHopDong = hdMoi.IDHopDong });
+        }
+
+        // DTOs
+        public class NguoiGhepRoiDiDto { public string? GhiChu { get; set; } }
+        public class TaoHDNguoiGhepDto
+        {
+            public DateTime NgayBatDau { get; set; }
+            public DateTime? NgayKetThuc { get; set; }
+            public decimal TienCoc { get; set; } = 0;
+            public decimal GiaThue { get; set; } = 0;
+            public int DienDauKy { get; set; } = 0;
+            public int NuocDauKy { get; set; } = 0;
+            public string? GhiChu { get; set; }
+        }
+        // Trong ChuTroThemNguoiThueController.cs
+        [HttpPut("cap-nhat/{idHopDong}")]
+        public async Task<IActionResult> CapNhatNguoiThue(int idHopDong, [FromBody] CapNhatNguoiThueDto dto)
+        {
+            // Tìm hop dong
+            var hopDong = await _context.HOPDONG
+                .Include(h => h.Phong)
+                .FirstOrDefaultAsync(h => h.IDHopDong == idHopDong);
+
+            if (hopDong == null)
+                return NotFound(new { success = false, message = "Không tìm thấy hợp đồng" });
+
+            // Cập nhật ACCOUNT
+            var account = await _context.ACCOUNT.FindAsync(hopDong.IDUser);
+            if (account != null)
+            {
+                if (!string.IsNullOrWhiteSpace(dto.HoTen)) account.FullName = dto.HoTen;
+                if (!string.IsNullOrWhiteSpace(dto.SoDienThoai)) account.Phone = dto.SoDienThoai;
+                if (dto.Email != null) account.Email = dto.Email;
+                if (!string.IsNullOrWhiteSpace(dto.Username)) account.Username = dto.Username;
+                account.UpdatedAt = DateTime.UtcNow;
+            }
+
+            // Cập nhật KHACH_THUE
+            var khachThue = await _context.KHACH_THUE
+                .FirstOrDefaultAsync(k => k.IDUser == hopDong.IDUser);
+            if (khachThue != null)
+            {
+                if (!string.IsNullOrWhiteSpace(dto.HoTen)) khachThue.HoTen = dto.HoTen;
+                if (!string.IsNullOrWhiteSpace(dto.SoDienThoai)) khachThue.SoDienThoai = dto.SoDienThoai;
+                if (dto.NgaySinh.HasValue) khachThue.NgaySinh = dto.NgaySinh;
+                if (dto.GioiTinh != null) khachThue.GioiTinh = dto.GioiTinh;
+                if (dto.SoCCCD != null) khachThue.SoCCCD = dto.SoCCCD;
+                if (dto.QueQuan != null) khachThue.QueQuan = dto.QueQuan;
+                if (dto.DiaChiThuongTru != null) khachThue.DiaChiThuongTru = dto.DiaChiThuongTru;
+                if (dto.GhiChu != null) khachThue.GhiChu = dto.GhiChu;
+            }
+
+            // Cập nhật HOPDONG (chỉ các field được phép)
+            if (dto.NgayKetThuc.HasValue) hopDong.NgayKetThuc = dto.NgayKetThuc;
+            if (dto.TienCoc.HasValue) hopDong.TienCocBanDau = dto.TienCoc.Value;
+            if (dto.GhiChuHD != null) hopDong.GhiChu = dto.GhiChuHD;
+            hopDong.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Cập nhật thành công" });
+        }
+
+        // DTO
+        public class CapNhatNguoiThueDto
+        {
+            public string? HoTen { get; set; }
+            public string? SoDienThoai { get; set; }
+            public string? Email { get; set; }
+            public string? Username { get; set; }
+            public DateTime? NgaySinh { get; set; }
+            public string? GioiTinh { get; set; }
+            public string? SoCCCD { get; set; }
+            public string? NgayCapCCCD { get; set; }
+            public string? NoiCapCCCD { get; set; }
+            public string? NgheNghiep { get; set; }
+            public string? LienHeKhan { get; set; }
+            public string? SDTKhan { get; set; }
+            public string? DiaChi { get; set; }
+            public string? TinhThanh { get; set; }
+            public string? QueQuan { get; set; }
+            public string? GhiChu { get; set; }
+            public string? AnhChanDung { get; set; }
+            public string? DiaChiThuongTru { get; set; }
+            public DateTime? NgayKetThuc { get; set; }
+            public decimal? TienCoc { get; set; }
+            public string? GhiChuHD { get; set; }
         }
     }
 }

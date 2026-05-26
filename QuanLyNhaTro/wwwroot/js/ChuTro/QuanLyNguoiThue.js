@@ -383,7 +383,7 @@ function ntRenderBang() {
     let html = '';
 
     trang.forEach((x, i) => {
-        // ── Contract deadline cell (reused logic) ──
+        // ── Ô hạn hợp đồng ──
         const soNgay = x.SoNgayConLai;
         let hdHtml = '<span class="nt-hd-unlimited">Không thời hạn</span>';
         if (x.NgayKetThuc) {
@@ -398,7 +398,7 @@ function ntRenderBang() {
             }
         }
 
-        // ── Main tenant row ──
+        // ── Hàng chính (chủ phòng) ──
         html += `
         <tr class="nt-row-main">
             <td class="nt-col-stt">
@@ -467,7 +467,7 @@ function ntRenderBang() {
             </td>
         </tr>`;
 
-        // ── Co-tenant rows ──
+        // ── Hàng người ở ghép ──
         (x.NguoiOGhep || []).forEach(ko => {
             html += `
             <tr class="nt-row-ghep" style="background:linear-gradient(90deg,rgba(124,58,237,0.035),transparent);">
@@ -539,6 +539,15 @@ function ntRenderBang() {
                                 style="background:rgba(124,58,237,0.1);color:#7c3aed;"
                                 onclick="ntXemChiTietGhep(${ko.idKhachO}, ${x.IDKhachThue})">
                             <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="nt-act nt-act-edit" title="Tạo hợp đồng mới"
+                                style="background:rgba(5,150,105,0.1);color:#059669;"
+                                onclick="ngGhep_moModalHD(${ko.idKhachO}, '${ntEscape(ko.hoTen)}', ${x.IDPhong}, '${ntEscape(x.SoPhong)}')">
+                            <i class="fas fa-file-contract"></i>
+                        </button>
+                        <button class="nt-act nt-act-del" title="Gỡ khỏi phòng"
+                                onclick="ngGhep_xacNhanXoa(${ko.idKhachO}, '${ntEscape(ko.hoTen)}')">
+                            <i class="fas fa-user-minus"></i>
                         </button>
                     </div>
                 </td>
@@ -748,6 +757,22 @@ function ntMoModalThem() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('inp-ngay-vao-o').value = today;
 
+    document.getElementById('field-trang-thai-hd').style.display = 'none';
+    document.getElementById('field-dien-dau-ky').style.display = '';
+    document.getElementById('field-nuoc-dau-ky').style.display = '';
+
+    const banner = document.getElementById('nt-phong-readonly-banner');
+    if (banner) banner.style.display = 'none';
+
+    const divPhongHienTai = document.getElementById('nt-phong-hien-tai');
+    if (divPhongHienTai) divPhongHienTai.style.display = 'none';
+
+    const pickerBox = document.getElementById('phong-display-box');
+    if (pickerBox) { pickerBox.style.display = ''; pickerBox.style.pointerEvents = ''; }
+
+    const inpPhong = document.getElementById('inp-id-phong');
+    if (inpPhong) inpPhong.style.display = '';
+
     ntMoOverlay('nt-modal-overlay');
     ntChuyenTabById('tab-co-ban');
 }
@@ -761,9 +786,10 @@ function ntMoModalSua(id) {
     ntResetForm();
     document.getElementById('nt-modal-mode').value = 'sua';
     document.getElementById('inp-id-khach-thue').value = id;
+    document.getElementById('inp-id-hop-dong').value = id;
     document.getElementById('inp-id-user').value = item.IDUser;
 
-    // ── Tiêu đề thay đổi theo trạng thái ──
+    // ── Tiêu đề ──
     if (daKetThuc) {
         document.getElementById('nt-modal-tieu-de').textContent = 'Xem thông tin người thuê';
         document.getElementById('nt-modal-mo-ta').textContent = `Hồ sơ đã kết thúc: ${item.HoTen}`;
@@ -774,12 +800,21 @@ function ntMoModalSua(id) {
         document.getElementById('nt-modal-icon').innerHTML = '<i class="fas fa-user-edit"></i>';
     }
 
-    document.getElementById('nt-btn-submit-label').textContent = 'Lưu thay đổi';
+    // ── FIX BUG 1: Ghi đè toàn bộ nút submit, không chỉ span label ──
+    const btnSubmit = document.getElementById('nt-btn-submit');
+    if (btnSubmit) {
+        btnSubmit.innerHTML = '<i class="fas fa-save"></i> <span id="nt-btn-submit-label">Lưu thay đổi</span>';
+    }
+
+    // ── Ẩn field password khi sửa ──
     document.getElementById('field-password').style.display = 'none';
+
+    // ── Hiện field trạng thái ──
     document.getElementById('field-trang-thai').style.display = '';
-    document.getElementById('inp-trang-thai').value = item.TrangThai;
+    document.getElementById('inp-trang-thai').value = item.TrangThai === 'da-roi' ? 'da-roi' : 'dang-o';
     document.getElementById('canh-bao-trang-thai').style.display = 'none';
 
+    // ── Điền dữ liệu ──
     const set = (elId, val) => {
         const el = document.getElementById(elId);
         if (el) el.value = val || '';
@@ -805,7 +840,7 @@ function ntMoModalSua(id) {
             `<img src="${item.AnhChanDung}" alt="">`;
     }
 
-    // ── KHÓA TOÀN BỘ MODAL nếu đã kết thúc ──
+    // ── Khóa modal nếu đã kết thúc ──
     _ntKhoaToanBoModal(daKetThuc);
 
     ntMoOverlay('nt-modal-overlay');
@@ -1318,7 +1353,7 @@ function ntResetForm() {
         'inp-so-cccd', 'inp-que-quan', 'inp-dia-chi-thuong-tru', 'inp-ghi-chu',
         'inp-username', 'inp-password', 'inp-ngay-vao-o', 'inp-id-phong',
         'inp-tien-coc', 'inp-dien-dau-ky', 'inp-nuoc-dau-ky', 'inp-ngay-ket-thuc', 'inp-ghi-chu-hd',
-        'inp-id-khach-thue', 'inp-id-user'];
+        'inp-id-khach-thue', 'inp-id-hop-dong', 'inp-id-user'];
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 
     ['err-ho-ten', 'err-so-dien-thoai', 'err-username', 'err-password', 'err-ngay-vao-o', 'err-id-phong']
@@ -1336,6 +1371,13 @@ function ntResetForm() {
 function ntChuyenCheDoPHong(mode, item) {
     const isThemMoi = mode === 'them';
 
+    const pickerBox = document.getElementById('phong-display-box');
+    if (pickerBox) {
+        pickerBox.style.display = isThemMoi ? '' : 'none';
+        pickerBox.style.pointerEvents = isThemMoi ? '' : 'none';
+    }
+    const inpPhong = document.getElementById('inp-id-phong');
+    if (inpPhong) inpPhong.style.display = isThemMoi ? '' : 'none';
     // Banner thông báo
     const banner = document.getElementById('nt-phong-readonly-banner');
     if (banner) banner.style.display = isThemMoi ? 'none' : 'block';
@@ -1360,7 +1402,9 @@ function ntChuyenCheDoPHong(mode, item) {
         if (reqNgay) reqNgay.style.display = 'none';
 
         const tenPhong = document.getElementById('nt-phong-hien-tai-ten');
-        if (tenPhong) tenPhong.textContent = `Phòng ${item?.SoPhong || '—'}`;
+        if (tenPhong) tenPhong.textContent = item?.SoPhong
+            ? `Phòng ${item.SoPhong}`
+            : '(Chưa cập nhật phòng — reload trang)';
 
         const hiddenPhong = document.getElementById('inp-id-phong-sua');
         if (hiddenPhong) hiddenPhong.value = item?.IDPhong || '';
@@ -1379,6 +1423,20 @@ function ntChuyenCheDoPHong(mode, item) {
         const trangThaiHD = document.getElementById('hien-thi-trang-thai-hd');
         if (trangThaiHD) trangThaiHD.textContent =
             item?.TrangThai === 'dang-o' ? '✅ Đang hiệu lực' : '⛔ Đã kết thúc';
+
+        if (!item?.SoPhong && item?.IDUser) {
+            fetch(`/api/ChuTroQuanLyNguoiThue/ds-nguoi-thue`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const found = data.danhSach.find(x => x.idUser === item.IDUser
+                            && x.trangThaiHD === 'Đang hiệu lực');
+                        if (found && tenPhong) {
+                            tenPhong.textContent = `Phòng ${found.soPhong}`;
+                        }
+                    }
+                }).catch(() => { });
+        }
 
         document.getElementById('field-dien-dau-ky').style.display = 'none';
         document.getElementById('field-nuoc-dau-ky').style.display = 'none';
@@ -1452,16 +1510,21 @@ function ntTogglePassword(inputId, btn) {
 /* ================================================================
    OVERLAY HELPERS
 ================================================================ */
+let _overlayCount = 0;  
 function ntMoOverlay(id) {
     const el = document.getElementById(id);
     if (el) el.classList.add('mo');
+    _overlayCount++;
     document.body.style.overflow = 'hidden';
 }
 
 function ntDongOverlay(id) {
     const el = document.getElementById(id);
     if (el) el.classList.remove('mo');
-    document.body.style.overflow = '';
+    _overlayCount = Math.max(0, _overlayCount - 1);
+    if (_overlayCount === 0) {
+        document.body.style.overflow = '';
+    }
 }
 
 /* ================================================================
@@ -1601,8 +1664,11 @@ let _pickerDaChon = null;      // { IDPhong, SoPhong, Tang, TrangThai, GiaPhongF
 
 /* Mở picker */
 async function ntMoPickerPhong() {
-    document.getElementById('nt-picker-overlay').classList.add('mo');
-    document.getElementById('picker-search-inp').value = '';
+    const overlay = document.getElementById('nt-picker-overlay');
+    if (overlay) overlay.classList.add('mo');
+    const inp = document.getElementById('picker-search-inp');
+    if (inp) inp.value = '';
+    // KHÔNG set document.body.style.overflow ở đây
 
     if (_pickerPhongs.length === 0) {
         await _pickerTaiPhong();
@@ -1745,6 +1811,7 @@ function ntLayDuLieuForm() {
 
         // ── Tab 2: Cư trú & Tài khoản ──
         DiaChi: get('inp-dia-chi'),
+        DiaChiThuongTru: get('inp-dia-chi'),
         TinhThanh: get('inp-tinh-thanh'),
         QueQuan: get('inp-que-quan'),
         GhiChu: get('inp-ghi-chu'),
@@ -1902,39 +1969,119 @@ async function ntLuuNguoiThue() {
     if (!ntValidateDuLieu(duLieu, mode)) return;
 
     const btn = document.getElementById('nt-btn-submit');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+    }
 
     try {
-        const res = await fetch('/api/ChuTroThemNguoiThue/them-nguoi-thue', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(duLieu)
-        });
 
-        const result = await res.json();
+        /* ══════════════════════════════════════════════════════
+           THÊM MỚI
+        ══════════════════════════════════════════════════════ */
+        if (mode === 'them') {
+            const res = await fetch('/api/ChuTroThemNguoiThue/them-nguoi-thue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(duLieu),
+            });
+            const result = await res.json();
 
-        if (!res.ok) {
-            hienToast(result.message || 'Lỗi không xác định', 'error');
-            return;
+            if (!res.ok) {
+                hienToast(result.message || result.title || 'Lỗi không xác định', 'error');
+                return;
+            }
+
+            hienToast(`Đã thêm người thuê "${duLieu.HoTen}" thành công!`, 'success');
+
+            // Reset picker để phòng vừa chọn không còn trống
+            _pickerPhongs = [];
+            _pickerDaChon = null;
         }
 
-        hienToast(`Đã thêm người thuê "${duLieu.HoTen}" thành công!`, 'success');
-        ntDongModal();
+        /* ══════════════════════════════════════════════════════
+           CHỈNH SỬA
+        ══════════════════════════════════════════════════════ */
+        else if (mode === 'sua') {
+            const idKhachThue = document.getElementById('inp-id-hop-dong')?.value
+                || document.getElementById('inp-id-khach-thue').value;
+            const idUser = document.getElementById('inp-id-user').value;
+            const trangThai = document.getElementById('inp-trang-thai')?.value || 'dang-o';
 
-        // Làm mới picker (phòng vừa chọn không còn trống)
-        _pickerPhongs = [];
-        _pickerDaChon = null;
+            /* ── Chuyển sang RỜI ĐI → gọi API trả phòng ── */
+            if (trangThai === 'da-roi') {
+                const lyDo = (document.getElementById('inp-ghi-chu')?.value || '').trim();
 
-        // Tải lại danh sách
+                const res = await fetch(`/api/ChuTroQuanLyNguoiThue/tra-phong/${idUser}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ GhiChu: lyDo }),
+                });
+                const result = await res.json();
+
+                if (!res.ok) {
+                    hienToast(result.message || result.title || 'Lỗi trả phòng', 'error');
+                    return;
+                }
+                hienToast(`Đã trả phòng cho "${duLieu.HoTen}" thành công!`, 'success');
+            }
+
+            /* ── Vẫn đang ở → cập nhật thông tin ── */
+            else {
+                // Chỉ gửi các field cho phép sửa, KHÔNG gửi IDPhong/Password/Roles
+                const payload = {
+                    HoTen: duLieu.HoTen,
+                    SoDienThoai: duLieu.SoDienThoai,
+                    Email: duLieu.Email || null,
+                    NgaySinh: duLieu.NgaySinh || null,
+                    GioiTinh: duLieu.GioiTinh || null,
+                    SoCCCD: duLieu.SoCCCD,
+                    NgayCapCCCD: duLieu.NgayCapCCCD || null,
+                    NoiCapCCCD: duLieu.NoiCapCCCD,
+                    NgheNghiep: duLieu.NgheNghiep,
+                    LienHeKhan: duLieu.LienHeKhan,
+                    SDTKhan: duLieu.SDTKhan,
+                    DiaChi: duLieu.DiaChi,
+                    TinhThanh: duLieu.TinhThanh,
+                    QueQuan: duLieu.QueQuan,
+                    GhiChu: duLieu.GhiChu,
+                    Username: duLieu.Username,
+                    AnhChanDung: duLieu.AnhChanDung || null,
+                    // Hợp đồng
+                    NgayKetThuc: duLieu.NgayKetThuc || null,
+                    TienCoc: duLieu.TienCoc || 0,
+                    GhiChuHD: duLieu.GhiChuHD,
+                };
+
+                const res = await fetch(`/api/ChuTroQuanLyNguoiThue/cap-nhat/${idKhachThue}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const result = await res.json();
+
+                if (!res.ok) {
+                    hienToast(result.message || result.title || 'Lỗi cập nhật', 'error');
+                    return;
+                }
+                hienToast(`Đã cập nhật thông tin "${duLieu.HoTen}" thành công!`, 'success');
+            }
+        }
+
+        // Đóng modal và tải lại danh sách
+        ntDongOverlay('nt-modal-overlay');
         await ntTaiDuLieu();
 
     } catch (e) {
         hienToast('Lỗi kết nối máy chủ!', 'error');
-        console.error(e);
+        console.error('[ntLuuNguoiThue]', e);
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check"></i> <span id="nt-btn-submit-label">Thêm người thuê</span>';
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = mode === 'them'
+                ? '<i class="fas fa-check"></i> <span id="nt-btn-submit-label">Thêm người thuê</span>'
+                : '<i class="fas fa-save"></i>  <span id="nt-btn-submit-label">Lưu thay đổi</span>';
+        }
     }
 }
 (function () {
@@ -2351,3 +2498,112 @@ async function ntLuuNguoiThue() {
 
     window.oGhep = pub;
 })();
+// ── XÓA người ở ghép ──────────────────────────────────────
+function ngGhep_xacNhanXoa(idKhachO, hoTen) {
+    if (!confirm(`Xác nhận gỡ "${hoTen}" khỏi phòng và khóa tài khoản?`)) return;
+
+    fetch(`/api/ChuTroQuanLyNguoiThue/nguoi-ghep/roi-di/${idKhachO}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ghiChu: 'Gỡ bởi chủ trọ' })
+    })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                hienToast('Đã gỡ người ở ghép thành công', 'success');
+                ntTaiDuLieu();
+            } else {
+                hienToast(d.message || 'Lỗi không xác định', 'error');
+            }
+        })
+        .catch(() => hienToast('Lỗi kết nối máy chủ', 'error'));
+}
+// ── MỞ MODAL tạo hợp đồng mới cho người ở ghép ───────────
+function ngGhep_moModalHD(idKhachO, hoTen, idPhong, soPhong) {
+    const modal = document.getElementById('ng-ghep-hd-modal');
+    if (!modal) return;
+
+    modal.dataset.idKhachO = idKhachO;
+    modal.dataset.idPhong = idPhong;
+
+    const elTen = document.getElementById('ng-ghep-hd-ten');
+    const elPhong = document.getElementById('ng-ghep-hd-phong');
+    const elNgay = document.getElementById('ng-ghep-hd-ngay-bat-dau');
+    const elGia = document.getElementById('ng-ghep-hd-gia');
+
+    if (elTen) elTen.textContent = hoTen;
+    if (elPhong) elPhong.textContent = `Phòng ${soPhong}`;
+    if (elNgay) elNgay.value = new Date().toISOString().slice(0, 10);
+
+    // Reset các field còn lại về trống
+    ['ng-ghep-hd-ngay-ket-thuc', 'ng-ghep-hd-tien-coc',
+        'ng-ghep-hd-dien', 'ng-ghep-hd-nuoc', 'ng-ghep-hd-ghi-chu']
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+    // Xóa giá trị ô giá (để trống, backend tự lấy từ phòng)
+    if (elGia) elGia.value = '';
+
+    document.getElementById('ng-ghep-hd-overlay').classList.add('mo');
+    document.body.style.overflow = 'hidden';
+}
+
+function ngGhep_dongModalHD() {
+    const overlay = document.getElementById('ng-ghep-hd-overlay');
+    if (overlay) overlay.classList.remove('mo');
+    document.body.style.overflow = '';
+}
+
+function ngGhep_luuHopDong() {
+    const modal = document.getElementById('ng-ghep-hd-modal');
+    if (!modal) return;
+
+    const payload = {
+        ngayBatDau: (document.getElementById('ng-ghep-hd-ngay-bat-dau')?.value || '').trim(),
+        ngayKetThuc: (document.getElementById('ng-ghep-hd-ngay-ket-thuc')?.value || '').trim() || null,
+        tienCoc: +document.getElementById('ng-ghep-hd-tien-coc')?.value || 0,
+        giaThue: +document.getElementById('ng-ghep-hd-gia')?.value || 0,
+        dienDauKy: +document.getElementById('ng-ghep-hd-dien')?.value || 0,
+        nuocDauKy: +document.getElementById('ng-ghep-hd-nuoc')?.value || 0,
+        ghiChu: (document.getElementById('ng-ghep-hd-ghi-chu')?.value || '').trim(),
+    };
+
+    // Validate tối thiểu
+    if (!payload.ngayBatDau) {
+        hienToast('Vui lòng chọn ngày bắt đầu', 'warning');
+        return;
+    }
+    if (payload.ngayKetThuc && payload.ngayKetThuc <= payload.ngayBatDau) {
+        hienToast('Ngày kết thúc phải sau ngày bắt đầu', 'warning');
+        return;
+    }
+
+    const btn = document.querySelector('#ng-ghep-hd-modal .nt-btn-submit')
+        || document.querySelector('[onclick="ngGhep_luuHopDong()"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...'; }
+
+    fetch(`/api/ChuTroQuanLyNguoiThue/nguoi-ghep/tao-hop-dong/${modal.dataset.idKhachO}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                hienToast('Đã tạo hợp đồng mới thành công', 'success');
+                ngGhep_dongModalHD();
+                ntTaiDuLieu();
+            } else {
+                hienToast(d.message || 'Lỗi không xác định', 'error');
+            }
+        })
+        .catch(() => hienToast('Lỗi kết nối máy chủ', 'error'))
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Tạo hợp đồng';
+            }
+        });
+}

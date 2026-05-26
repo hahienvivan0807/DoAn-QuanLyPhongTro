@@ -1501,6 +1501,7 @@
 
         <!-- Hidden fields -->
         <input type="hidden" id="inp-id-khach-thue" value="" />
+        <input type="hidden" id="inp-id-hop-dong" value="" />
         <input type="hidden" id="inp-id-user" value="" />
         <input type="hidden" id="nt-modal-mode" value="them" />
 
@@ -2032,6 +2033,102 @@
         <i class="fas fa-times"></i> Đóng
       </button>
     </div>
+  </div>
+</div>
+<!-- MODAL: Tạo HĐ mới cho người ở ghép -->
+<div class="nt-overlay" id="ng-ghep-hd-overlay" onclick="if(event.target===this)ngGhep_dongModalHD()">
+  <div class="nt-modal nt-modal-confirm" id="ng-ghep-hd-modal" style="max-width:520px;">
+
+    <div class="nt-modal-hd">
+      <div class="nt-modal-hd-left">
+        <div class="nt-modal-hd-icon" style="background:linear-gradient(135deg,#059669,#34d399);">
+          <i class="fas fa-file-contract"></i>
+        </div>
+        <div>
+          <h3 class="nt-modal-title">Tạo hợp đồng mới</h3>
+          <p class="nt-modal-sub">
+            Người thuê: <strong id="ng-ghep-hd-ten"></strong> —
+            <span id="ng-ghep-hd-phong"></span>
+          </p>
+        </div>
+      </div>
+      <button class="nt-modal-close-btn" onclick="ngGhep_dongModalHD()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="nt-modal-body">
+      <div class="nt-form-grid">
+
+        <div class="nt-field">
+          <label class="nt-lbl">Ngày bắt đầu <span class="req">*</span></label>
+          <input class="nt-inp" type="date" id="ng-ghep-hd-ngay-bat-dau" />
+        </div>
+
+        <div class="nt-field">
+          <label class="nt-lbl">Ngày kết thúc</label>
+          <input class="nt-inp" type="date" id="ng-ghep-hd-ngay-ket-thuc" />
+          <span class="nt-hint">Để trống nếu không xác định</span>
+        </div>
+
+        <div class="nt-field">
+          <label class="nt-lbl">Giá thuê (đ)</label>
+          <div class="nt-inp-unit-wrap">
+            <input class="nt-inp" type="number" id="ng-ghep-hd-gia"
+                   min="0" step="100000" />
+            <span class="nt-unit">đ</span>
+          </div>
+          <span class="nt-hint">Mặc định theo giá phòng hiện tại</span>
+        </div>
+
+        <div class="nt-field">
+          <label class="nt-lbl">Tiền cọc (đ)</label>
+          <div class="nt-inp-unit-wrap">
+            <input class="nt-inp" type="number" id="ng-ghep-hd-tien-coc"
+                   min="0" step="100000" placeholder="0" />
+            <span class="nt-unit">đ</span>
+          </div>
+        </div>
+
+        <div class="nt-field">
+          <label class="nt-lbl">Chỉ số điện đầu kỳ</label>
+          <div class="nt-inp-unit-wrap">
+            <input class="nt-inp" type="number" id="ng-ghep-hd-dien" min="0" placeholder="0" />
+            <span class="nt-unit">kWh</span>
+          </div>
+        </div>
+
+        <div class="nt-field">
+          <label class="nt-lbl">Chỉ số nước đầu kỳ</label>
+          <div class="nt-inp-unit-wrap">
+            <input class="nt-inp" type="number" id="ng-ghep-hd-nuoc" min="0" placeholder="0" />
+            <span class="nt-unit">m³</span>
+          </div>
+        </div>
+
+        <div class="nt-field full">
+          <label class="nt-lbl">Ghi chú</label>
+          <textarea class="nt-inp" id="ng-ghep-hd-ghi-chu" rows="2"
+                    placeholder="Ghi chú hợp đồng..." maxlength="500"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="nt-modal-ft">
+      <div class="nt-ft-note"><span>*</span> Trường bắt buộc</div>
+      <div class="nt-ft-btns">
+        <button class="nt-btn-cancel" onclick="ngGhep_dongModalHD()">
+          <i class="fas fa-times"></i> Hủy
+        </button>
+        <button class="nt-btn-submit" onclick="ngGhep_luuHopDong()"
+                style="background:linear-gradient(135deg,#059669,#34d399);
+                       box-shadow:0 4px 12px rgba(5,150,105,0.28);">
+          <i class="fas fa-check"></i> Tạo hợp đồng
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 @await Html.PartialAsync("ModalChung")
