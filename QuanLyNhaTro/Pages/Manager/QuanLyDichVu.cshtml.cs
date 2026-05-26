@@ -21,7 +21,7 @@ namespace QuanLyNhaTro.Pages.Manager
         public string TrangThai_DV { get; set; } = "";
         public string? GhiChuXuLy { get; set; }
         public DateTime NgayTao { get; set; }
-        public string? AnhChuyenKhoan { get; set; }
+        public string? AnhBienLai { get; set; }
     }
 
     // =====================================================================
@@ -37,6 +37,7 @@ namespace QuanLyNhaTro.Pages.Manager
         public int SoNuocMoi { get; set; }
         public int SoNuocCu { get; set; }
         public string AnhChupDongHo { get; set; } = "";
+        public string? AnhChupDongHoNuoc { get; set; }
         public byte TrangThaiDuyet { get; set; } // 0=Chờ | 1=Duyệt | 2=Từ chối
         public DateTime NgayGhi { get; set; }
     }
@@ -237,6 +238,53 @@ namespace QuanLyNhaTro.Pages.Manager
         }
 
         // =====================================================================
+        // HANDLER: Xác nhận khách đã thanh toán giặt sấy (sau khi gửi ảnh CK)
+        //   → TrangThai_DV: "Chờ thanh toán" → "Thành công"
+        // =====================================================================
+        public IActionResult OnPostXacNhanThanhToanGiatSay(int idDonDV)
+        {
+            try
+            {
+                using var conn = OpenConn();
+                var idMgrStr = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStr, out int idMgr);
+                var phong = LayPhongDuocPhanCong(conn, idMgr);
+                if (!phong.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
+                int idUser = GetIDUserFromDon(conn, idDonDV);
+                string soPhong = GetSoPhongFromDon(conn, idDonDV);
+
+                ExecNonQuery(conn, @"
+                    UPDATE dbo.DONDV
+                    SET TrangThai_DV  = N'Thành công',
+                        NgayHoanThanh = GETDATE(),
+                        UpdatedAt     = GETDATE()
+                    WHERE IDDonDV = @ID AND LoaiDV = N'Giặt sấy'",
+                    P("@ID", idDonDV));
+
+                if (idUser > 0)
+                    GuiThongBao(conn, idUser, idDonDV, "DonDV",
+                        "Thanh toán giặt sấy đã được xác nhận",
+                        $"Quản lý đã xác nhận thanh toán đơn giặt sấy phòng {soPhong}. Cảm ơn bạn!",
+                        "thong-tin");
+
+                ThongBao = $"Đã xác nhận thanh toán đơn giặt sấy phòng {soPhong}.";
+                LoaiThongBao = "success";
+            }
+            catch (Exception ex)
+            {
+                ThongBao = $"Lỗi: {ex.Message}";
+                LoaiThongBao = "danger";
+            }
+            return RedirectToPage();
+        }
+
+        // =====================================================================
         // HANDLER: Nhắc nhở khách thanh toán nước bình (không đổi trạng thái)
         // =====================================================================
         public IActionResult OnPostNhacNhoThanhToanNuoc(int idDonDV)
@@ -276,6 +324,57 @@ namespace QuanLyNhaTro.Pages.Manager
                         "canh-bao");
 
                 ThongBao = $"Đã gửi nhắc nhở thanh toán đến khách phòng {soPhong}.";
+                LoaiThongBao = "warning";
+            }
+            catch (Exception ex)
+            {
+                ThongBao = $"Lỗi: {ex.Message}";
+                LoaiThongBao = "danger";
+            }
+            return RedirectToPage();
+        }
+
+        // =====================================================================
+        // HANDLER: Nhắc nhở khách về khoản nợ DV bất kỳ (từ tab Nợ dịch vụ)
+        // =====================================================================
+        public IActionResult OnPostNhacNhoDichVu(int idDonDV)
+        {
+            try
+            {
+                using var conn = OpenConn();
+                // Kiểm tra quyền
+                var idMgrStrN = User.FindFirst("IDUser")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(idMgrStrN, out int idMgrN);
+                var phongN = LayPhongDuocPhanCong(conn, idMgrN);
+                if (!phongN.Contains(GetIDPhongFromDon(conn, idDonDV)))
+                {
+                    ThongBao = "Không có quyền xử lý đơn này.";
+                    LoaiThongBao = "danger";
+                    return RedirectToPage();
+                }
+
+                int idUser = GetIDUserFromDon(conn, idDonDV);
+                string soPhong = GetSoPhongFromDon(conn, idDonDV);
+
+                // Lấy thông tin đơn
+                decimal tongTien = 0; string loaiDV = "";
+                using (var cmd = new SqlCommand(
+                    "SELECT TongTien, LoaiDV FROM dbo.DONDV WHERE IDDonDV = @ID", conn))
+                {
+                    cmd.Parameters.AddWithValue("@ID", idDonDV);
+                    using var r = cmd.ExecuteReader();
+                    if (r.Read()) { tongTien = r.GetDecimal(0); loaiDV = r.GetString(1); }
+                }
+
+                if (idUser > 0)
+                    GuiThongBao(conn, idUser, idDonDV, "DonDV",
+                        $"Nhắc nhở thanh toán dịch vụ: {loaiDV}",
+                        $"Bạn còn khoản nợ dịch vụ {loaiDV} phòng {soPhong} số tiền {tongTien:N0} đ chưa thanh toán. " +
+                        "Vui lòng thanh toán sớm để tránh bị cộng vào hóa đơn tháng.",
+                        "canh-bao");
+
+                ThongBao = $"Đã gửi nhắc nhở đến khách phòng {soPhong} về khoản nợ {loaiDV}.";
                 LoaiThongBao = "warning";
             }
             catch (Exception ex)
@@ -709,7 +808,7 @@ namespace QuanLyNhaTro.Pages.Manager
                     TrangThai_DV = r.GetString(6),
                     GhiChuXuLy = r.IsDBNull(7) ? null : r.GetString(7),
                     NgayTao = r.GetDateTime(8),
-                    AnhChuyenKhoan = r.IsDBNull(9) ? null : r.GetString(9),
+                    AnhBienLai = r.IsDBNull(9) ? null : r.GetString(9),
                 });
             return list;
         }
@@ -753,23 +852,27 @@ namespace QuanLyNhaTro.Pages.Manager
             return list;
         }
 
-        // ── Điện nước (async + filter phòng) ─────────────────────────────────
+        // ── Điện nước (async + filter phòng) ────────────────────────────────
         private async Task<List<DienNuocViewModel>> LayDanhSachDienNuocAsync(
             SqlConnection conn, List<int> phongDuocPhanCong)
         {
             var list = new List<DienNuocViewModel>();
             using var cmd = new SqlCommand("", conn);
             var inClause = TaoInClause(phongDuocPhanCong, cmd, "pdn");
+            // QUAN TRỌNG: Bảng DIENNUOC hiện chỉ có cột AnhChupDongHo (dùng chung cho cả điện lẫn nước).
+            // Sau khi chạy migration thêm cột AnhChupDongHoNuoc, câu lệnh dưới sẽ hoạt động đúng.
+            // Nếu chưa migrate, AnhChupDongHoNuoc sẽ luôn NULL (ảnh đồng hồ nước không hiển thị được).
             cmd.CommandText = $@"
-                SELECT dn.IDGhiNhan, p.SoPhong, dn.KyGhiNhan,
-                       dn.SoDienMoi, dn.SoDienCu, dn.SoNuocMoi, dn.SoNuocCu,
-                       dn.AnhChupDongHo, dn.TrangThaiDuyet, dn.NgayGhi
-                FROM dbo.DIENNUOC dn
-                JOIN dbo.PHONG p ON p.IDPhong = dn.IDPhong
-                WHERE dn.IDPhong IN ({inClause})
-                ORDER BY
-                    CASE dn.TrangThaiDuyet WHEN 0 THEN 0 ELSE 1 END,
-                    dn.NgayGhi DESC";
+                SELECT IDGhiNhan, p.SoPhong, KyGhiNhan,
+                       SoDienMoi, SoDienCu, SoNuocMoi, SoNuocCu,
+                       d.AnhChupDongHo,
+                       CASE WHEN COL_LENGTH('dbo.DIENNUOC','AnhChupDongHoNuoc') IS NOT NULL
+                            THEN d.AnhChupDongHoNuoc ELSE NULL END AS AnhChupDongHoNuoc,
+                       d.TrangThaiDuyet, d.NgayGhi
+                FROM dbo.DIENNUOC d
+                JOIN dbo.PHONG p ON p.IDPhong = d.IDPhong
+                WHERE d.IDPhong IN ({inClause})
+                ORDER BY d.NgayGhi DESC";
             using var r = await cmd.ExecuteReaderAsync();
             while (await r.ReadAsync())
                 list.Add(new DienNuocViewModel
@@ -782,20 +885,20 @@ namespace QuanLyNhaTro.Pages.Manager
                     SoNuocMoi = r.GetInt32(5),
                     SoNuocCu = r.GetInt32(6),
                     AnhChupDongHo = r.GetString(7),
-                    TrangThaiDuyet = r.GetByte(8),
-                    NgayGhi = r.GetDateTime(9),
+                    AnhChupDongHoNuoc = r.IsDBNull(8) ? null : r.GetString(8),
+                    TrangThaiDuyet = r.GetByte(9),
+                    NgayGhi = r.GetDateTime(10),
                 });
             return list;
         }
 
-        // ── Config giá ──────────────────────────────────────────────────────
+        // ── Config giá (đồng bộ) ──────────────────────────────────────────
         private List<ConfigGiaViewModel> LayDanhSachConfig(SqlConnection conn)
         {
             var list = new List<ConfigGiaViewModel>();
-            const string sql = @"
-                SELECT IDConfig, TenDichVu, MaDichVu, DonGia, DonVi, IsActive
-                FROM dbo.CONFIG_GIA ORDER BY TenDichVu";
-            using var cmd = new SqlCommand(sql, conn);
+            using var cmd = new SqlCommand(
+                "SELECT IDConfig, TenDichVu, MaDichVu, DonGia, DonVi, IsActive FROM dbo.CONFIG_GIA ORDER BY TenDichVu",
+                conn);
             using var r = cmd.ExecuteReader();
             while (r.Read())
                 list.Add(new ConfigGiaViewModel
@@ -810,182 +913,34 @@ namespace QuanLyNhaTro.Pages.Manager
             return list;
         }
 
-        // =====================================================================
-        // PRIVATE HELPERS
-        // =====================================================================
-        private SqlConnection OpenConn()
-        {
-            var c = new SqlConnection(ConnStr);
-            c.Open();
-            return c;
-        }
-
-        private static void ExecNonQuery(SqlConnection conn, string sql, params SqlParameter[] ps)
-        {
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddRange(ps);
-            cmd.ExecuteNonQuery();
-        }
-
-        private static int ScalarInt(SqlConnection conn, string sql)
-        {
-            using var cmd = new SqlCommand(sql, conn);
-            var v = cmd.ExecuteScalar();
-            return v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
-        }
-
-        private static SqlParameter P(string name, object? value) =>
-            new(name, value ?? DBNull.Value);
-
-        private static int GetIDUserFromDon(SqlConnection conn, int idDonDV)
-        {
-            using var cmd = new SqlCommand(
-                "SELECT IDUser FROM dbo.DONDV WHERE IDDonDV = @ID", conn);
-            cmd.Parameters.AddWithValue("@ID", idDonDV);
-            var v = cmd.ExecuteScalar();
-            return v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
-        }
-
-        private static string GetSoPhongFromDon(SqlConnection conn, int idDonDV)
-        {
-            using var cmd = new SqlCommand(@"
-                SELECT p.SoPhong FROM dbo.DONDV d
-                JOIN dbo.PHONG p ON p.IDPhong = d.IDPhong
-                WHERE d.IDDonDV = @ID", conn);
-            cmd.Parameters.AddWithValue("@ID", idDonDV);
-            return cmd.ExecuteScalar()?.ToString() ?? "?";
-        }
-
-        /// <summary>
-        /// Gửi thông báo vào bảng THONGBAO cho khách thuê.
-        /// </summary>
-        private static void GuiThongBao(SqlConnection conn,
-            int idUser, int idNguon, string loaiNguon,
-            string tieuDe, string noiDung, string loaiTB)
-        {
-            ExecNonQuery(conn, @"
-                INSERT INTO dbo.THONGBAO
-                    (IDUser, IDNguonTB, LoaiNguon, TieuDe, NoiDung, LoaiTB, DaDoc, NgayTao)
-                VALUES
-                    (@IDUser, @IDNguon, @LoaiNguon, @TieuDe, @NoiDung, @LoaiTB, 0, GETDATE())",
-                P("@IDUser", idUser),
-                P("@IDNguon", idNguon),
-                P("@LoaiNguon", loaiNguon),
-                P("@TieuDe", tieuDe),
-                P("@NoiDung", noiDung),
-                P("@LoaiTB", loaiTB));
-        }
-
-        public IActionResult OnPostChangePasswordAsync(
-    string oldPassword, string newPassword, string confirmPassword)
-        {
-            // 1. Lấy userId từ Claims
-            var userIdClaim = User.FindFirst("IDUser")
-                           ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdClaim?.Value, out var userId) || userId == 0)
-            {
-                ThongBao = "Phiên đăng nhập đã hết hạn.";
-                LoaiThongBao = "danger";
-                return RedirectToPage();
-            }
-
-            // 2. Validate đầu vào
-            if (string.IsNullOrWhiteSpace(oldPassword) ||
-                string.IsNullOrWhiteSpace(newPassword) ||
-                string.IsNullOrWhiteSpace(confirmPassword))
-            { ThongBao = "Vui lòng điền đầy đủ tất cả các trường."; LoaiThongBao = "danger"; return RedirectToPage(); }
-
-            if (newPassword.Length < 6)
-            { ThongBao = "Mật khẩu mới phải có ít nhất 6 ký tự."; LoaiThongBao = "danger"; return RedirectToPage(); }
-
-            if (newPassword != confirmPassword)
-            { ThongBao = "Mật khẩu xác nhận không khớp."; LoaiThongBao = "danger"; return RedirectToPage(); }
-
-            if (newPassword == oldPassword)
-            { ThongBao = "Mật khẩu mới phải khác mật khẩu hiện tại."; LoaiThongBao = "danger"; return RedirectToPage(); }
-
-            try
-            {
-                using var conn = OpenConn();
-
-                // 3. Truy vấn mật khẩu hiện tại
-                string? currentPwd = null;
-                bool isActive = false;
-                using (var cmd = new SqlCommand(
-                    "SELECT Passwords, IsActive FROM dbo.ACCOUNT WHERE IDUser = @ID", conn))
-                {
-                    cmd.Parameters.AddWithValue("@ID", userId);
-                    using var r = cmd.ExecuteReader();
-                    if (r.Read())
-                    {
-                        currentPwd = r.GetString(0);
-                        isActive = r.GetBoolean(1);
-                    }
-                }
-
-                if (currentPwd == null || !isActive)
-                { ThongBao = "Không tìm thấy tài khoản hoặc tài khoản đã bị vô hiệu hóa."; LoaiThongBao = "danger"; return RedirectToPage(); }
-
-                // 4. Kiểm tra mật khẩu cũ — hỗ trợ cả SHA-256 lẫn plain text legacy
-                var hashedOld = HashPasswordDV(oldPassword);
-                if (currentPwd != hashedOld && currentPwd != oldPassword)
-                { ThongBao = "Mật khẩu hiện tại không đúng."; LoaiThongBao = "danger"; return RedirectToPage(); }
-
-                // 5. Cập nhật mật khẩu mới
-                ExecNonQuery(conn, @"
-            UPDATE dbo.ACCOUNT
-            SET Passwords = @NewPwd, UpdatedAt = GETUTCDATE()
-            WHERE IDUser = @ID",
-                    P("@NewPwd", HashPasswordDV(newPassword)),
-                    P("@ID", userId));
-
-                ThongBao = "Đổi mật khẩu thành công!";
-                LoaiThongBao = "success";
-            }
-            catch (Exception ex)
-            {
-                ThongBao = $"Lỗi: {ex.Message}";
-                LoaiThongBao = "danger";
-            }
-
-            return RedirectToPage();
-        }
-
-        private static string HashPasswordDV(string password)
-        {
-            using var sha256 = System.Security.Cryptography.SHA256.Create();
-            var bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            return Convert.ToHexString(bytes).ToLower();
-        }
-
-        // =====================================================================
-        // HELPER: Lấy danh sách IDPhong được phân công cho Manager hiện tại (async)
-        // =====================================================================
-        private static async Task<List<int>> LayPhongDuocPhanCongAsync(SqlConnection conn, int idManager)
+        // ── Lấy danh sách IDPhong được phân công cho Manager (async) ────────
+        private async Task<List<int>> LayPhongDuocPhanCongAsync(SqlConnection conn, int idManager)
         {
             var list = new List<int>();
             using var cmd = new SqlCommand(
-                "SELECT IDPhong FROM dbo.PHONG_MANAGER WHERE IDManager = @ID AND IsActive = 1", conn);
-            cmd.Parameters.AddWithValue("@ID", idManager);
+                "SELECT IDPhong FROM dbo.PHONG_MANAGER WHERE IDManager = @IDMgr AND IsActive = 1",
+                conn);
+            cmd.Parameters.AddWithValue("@IDMgr", idManager);
             using var r = await cmd.ExecuteReaderAsync();
             while (await r.ReadAsync()) list.Add(r.GetInt32(0));
             return list;
         }
 
-        // Phiên bản đồng bộ dùng trong POST handlers
-        private static List<int> LayPhongDuocPhanCong(SqlConnection conn, int idManager)
+        // ── Lấy danh sách IDPhong được phân công cho Manager (đồng bộ) ─────
+        private List<int> LayPhongDuocPhanCong(SqlConnection conn, int idManager)
         {
             var list = new List<int>();
             using var cmd = new SqlCommand(
-                "SELECT IDPhong FROM dbo.PHONG_MANAGER WHERE IDManager = @ID AND IsActive = 1", conn);
-            cmd.Parameters.AddWithValue("@ID", idManager);
+                "SELECT IDPhong FROM dbo.PHONG_MANAGER WHERE IDManager = @IDMgr AND IsActive = 1",
+                conn);
+            cmd.Parameters.AddWithValue("@IDMgr", idManager);
             using var r = cmd.ExecuteReader();
             while (r.Read()) list.Add(r.GetInt32(0));
             return list;
         }
 
-        // ── Lấy IDPhong của một đơn dịch vụ (DONDV) ─────────────────────────
-        private static int GetIDPhongFromDon(SqlConnection conn, int idDonDV)
+        // ── Lấy IDPhong từ DONDV ────────────────────────────────────────────
+        private int GetIDPhongFromDon(SqlConnection conn, int idDonDV)
         {
             using var cmd = new SqlCommand(
                 "SELECT IDPhong FROM dbo.DONDV WHERE IDDonDV = @ID", conn);
@@ -994,8 +949,8 @@ namespace QuanLyNhaTro.Pages.Manager
             return v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
         }
 
-        // ── Lấy IDPhong từ bảng DIENNUOC ─────────────────────────────────────
-        private static int GetIDPhongFromDienNuoc(SqlConnection conn, int idGhiNhan)
+        // ── Lấy IDPhong từ DIENNUOC ─────────────────────────────────────────
+        private int GetIDPhongFromDienNuoc(SqlConnection conn, int idGhiNhan)
         {
             using var cmd = new SqlCommand(
                 "SELECT IDPhong FROM dbo.DIENNUOC WHERE IDGhiNhan = @ID", conn);
@@ -1004,16 +959,85 @@ namespace QuanLyNhaTro.Pages.Manager
             return v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
         }
 
-        // ── Tạo chuỗi IN clause an toàn từ danh sách int (tránh SQL injection) ─
+        // ── Lấy IDUser (tenant) từ DONDV ────────────────────────────────────
+        private int GetIDUserFromDon(SqlConnection conn, int idDonDV)
+        {
+            using var cmd = new SqlCommand(
+                "SELECT IDUser FROM dbo.DONDV WHERE IDDonDV = @ID", conn);
+            cmd.Parameters.AddWithValue("@ID", idDonDV);
+            var v = cmd.ExecuteScalar();
+            return v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v);
+        }
+
+        // ── Lấy SoPhong từ DONDV ────────────────────────────────────────────
+        private string GetSoPhongFromDon(SqlConnection conn, int idDonDV)
+        {
+            using var cmd = new SqlCommand(@"
+                SELECT p.SoPhong FROM dbo.DONDV d
+                JOIN dbo.PHONG p ON p.IDPhong = d.IDPhong
+                WHERE d.IDDonDV = @ID", conn);
+            cmd.Parameters.AddWithValue("@ID", idDonDV);
+            var v = cmd.ExecuteScalar();
+            return v == null || v == DBNull.Value ? "?" : v.ToString()!;
+        }
+
+        // ── Gửi thông báo vào bảng THONGBAO ────────────────────────────────
+        // Khớp với model THONGBAO:
+        //   IDNguoiGui(int?), IDUser(int?), IDNguonTB(int?),
+        //   LoaiNguon(string?), TieuDe, NoiDung(string?), LoaiTB, DaDoc, NgayTao
+        private void GuiThongBao(
+            SqlConnection conn,
+            int idNguoiNhan,
+            int idNguon,
+            string loaiNguon,   // 'DonDV' | 'HoaDon' | 'DiemNuoc' | 'HeThong'
+            string tieuDe,
+            string? noiDung,
+            string loaiTB)      // 'thong-tin' | 'canh-bao' | 'thanh-toan' | 'he-thong'
+        {
+            ExecNonQuery(conn, @"
+                INSERT INTO dbo.THONGBAO
+                    (IDNguoiGui, IDUser, IDNguonTB, LoaiNguon, TieuDe, NoiDung, LoaiTB, DaDoc, NgayTao)
+                VALUES
+                    (NULL, @IDUser, @IDNguon, @LoaiNguon, @TieuDe, @NoiDung, @LoaiTB, 0, GETUTCDATE())",
+                P("@IDUser", idNguoiNhan),
+                P("@IDNguon", idNguon),
+                P("@LoaiNguon", loaiNguon),
+                P("@TieuDe", tieuDe),
+                P("@NoiDung", (object?)noiDung ?? DBNull.Value),
+                P("@LoaiTB", loaiTB));
+        }
+
+        // ── Helper: tạo tham số IN clause an toàn (tránh SQL injection) ─────
+        // Ví dụ: ids=[1,2,3], prefix="p" → "@p0,@p1,@p2" và thêm params vào cmd
         private static string TaoInClause(List<int> ids, SqlCommand cmd, string prefix)
         {
-            if (!ids.Any()) return "-1"; // Không có phòng nào → không khớp kết quả nào
-            var pNames = ids.Select((id, i) => {
-                var p = $"@{prefix}{i}";
-                cmd.Parameters.AddWithValue(p, id);
-                return p;
+            var paramNames = ids.Select((id, i) =>
+            {
+                var name = $"@{prefix}{i}";
+                cmd.Parameters.AddWithValue(name, id);
+                return name;
             });
-            return string.Join(",", pNames);
+            return string.Join(",", paramNames);
+        }
+
+        // ── Helper: tạo SqlParameter gọn ─────────────────────────────────────
+        private static SqlParameter P(string name, object value)
+            => new SqlParameter(name, value);
+
+        // ── Helper: mở kết nối DB ────────────────────────────────────────────
+        private SqlConnection OpenConn()
+        {
+            var conn = new SqlConnection(ConnStr);
+            conn.Open();
+            return conn;
+        }
+
+        // ── Helper: thực thi câu lệnh không trả dữ liệu (INSERT/UPDATE/DELETE)
+        private static void ExecNonQuery(SqlConnection conn, string sql, params SqlParameter[] ps)
+        {
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddRange(ps);
+            cmd.ExecuteNonQuery();
         }
     }
 }

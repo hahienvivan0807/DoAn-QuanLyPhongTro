@@ -175,8 +175,12 @@ namespace QuanLyNhaTro.Pages.Manager
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
+            // Lấy DONDV cần quản lý xem/xác nhận:
+            // – "Chờ duyệt"      : đã có ảnh biên lai (Giặt sấy / Nước bình)
+            // – "Chờ thanh toán" : Nước bình – khách đã gửi ảnh CK nhưng trạng thái
+            //   chỉ lên "Chờ thanh toán" (QuanLyDichVu set sau khi giao hàng)
             var donDVChoXacNhan = await _db.DONDV
-                .Where(d => d.TrangThai_DV == "Chờ duyệt"
+                .Where(d => (d.TrangThai_DV == "Chờ duyệt" || d.TrangThai_DV == "Chờ thanh toán")
                          && d.AnhBienLai != null
                          && idPhongDuocPhanCong.Contains(d.IDPhong))
                 .Include(d => d.Phong)
@@ -302,10 +306,11 @@ namespace QuanLyNhaTro.Pages.Manager
             if (don.TrangThai_DV == "Thành công")
                 return BadRequest(new { message = "Đơn dịch vụ đã được xác nhận trước đó." });
 
-            if (don.TrangThai_DV != "Chờ duyệt")
+            // Chấp nhận cả "Chờ duyệt" (Giặt sấy) lẫn "Chờ thanh toán" (Nước bình)
+            if (don.TrangThai_DV != "Chờ duyệt" && don.TrangThai_DV != "Chờ thanh toán")
                 return BadRequest(new { message = "Đơn dịch vụ không ở trạng thái chờ xác nhận." });
 
-            don.TrangThai_DV = "Thành công";   // ← đúng theo constraint DONDV
+            don.TrangThai_DV = "Thành công";
             don.IDManagerXuLy = idManager > 0 ? idManager : don.IDManagerXuLy;
             don.NgayXuLy = DateTime.Now;
             don.UpdatedAt = DateTime.Now;
@@ -328,7 +333,8 @@ namespace QuanLyNhaTro.Pages.Manager
             var don = await _db.DONDV.FindAsync(req.Id);
             if (don == null) return NotFound();
 
-            if (don.TrangThai_DV != "Chờ duyệt")
+            // Chấp nhận cả "Chờ duyệt" (Giặt sấy) lẫn "Chờ thanh toán" (Nước bình)
+            if (don.TrangThai_DV != "Chờ duyệt" && don.TrangThai_DV != "Chờ thanh toán")
                 return BadRequest(new { message = "Đơn dịch vụ không ở trạng thái chờ xác nhận." });
 
             // Reset về "Chờ thanh toán" — xóa ảnh để khách có thể gửi lại
@@ -377,11 +383,15 @@ namespace QuanLyNhaTro.Pages.Manager
                     Id = d.IDDonDV,
                     SoPhong = d.Phong.SoPhong,
                     TenNguoiThue = d.Tenant != null ? d.Tenant.FullName : "—",
+                    // "Chờ thanh toán" + có ảnh biên lai = khách Nước bình đã gửi ảnh CK → cho-xac-nhan
+                    // "Chờ thanh toán" + chưa có ảnh    = chờ khách gửi → sap-den / qua-han
                     TrangThai = d.TrangThai_DV == "Thành công"
                                         ? "hoan-thanh"
                                  : d.TrangThai_DV == "Đã hoàn thành"
                                         ? "hoan-thanh"
                                  : d.TrangThai_DV == "Chờ duyệt"
+                                        ? "cho-xac-nhan"
+                                 : (d.TrangThai_DV == "Chờ thanh toán" && d.AnhBienLai != null)
                                         ? "cho-xac-nhan"
                                  : d.TrangThai_DV == "Đã hủy" || d.TrangThai_DV == "Từ chối"
                                         ? "hoan-thanh"
@@ -553,7 +563,7 @@ namespace QuanLyNhaTro.Pages.Manager
         public int Id { get; set; }
     }
 
-   
+
     public class NhacNhoRequest
     {
         public int Id { get; set; }

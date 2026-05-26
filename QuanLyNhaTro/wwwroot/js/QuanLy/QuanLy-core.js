@@ -1,31 +1,25 @@
 ﻿let curFilter = "all";
 let curSearch = "";
 let roomsData = [];
+
+// ===== THỐNG KÊ =====
 async function HienThiThongKe() {
     try {
         const response = await fetch('/api/ChuTro/TyLeLap');
-
         if (!response.ok) throw new Error('Lỗi khi gọi API');
 
         const data = await response.json();
-        // Card tổng số phòng (.mau-xanh)
+
         const theTongSoPhong = document.querySelector('.card-thong-ke.mau-xanh .con-so');
         const theTyLe = document.querySelector('.card-thong-ke.mau-xanh .ty-le-thay-doi');
-
         if (theTongSoPhong) theTongSoPhong.textContent = data.tongSoPhong;
         if (theTyLe) theTyLe.textContent = `↑ ${data.tyLeLapDay}% lấp đầy`;
 
-        // Card phòng đang thuê (.mau-xanh-la)
         const theSoPhongThue = document.querySelector('.card-thong-ke.mau-xanh-la .con-so');
-        const theTyLePhongThue = document.querySelector('.card-thong-ke.mau-xanh-la .ty-le-thay-doi');
-
         if (theSoPhongThue) theSoPhongThue.textContent = data.phongThue;
 
-        
-        const thePhongtrong = document.querySelector('.card-thong-ke.mau-cam .con-so')
+        const thePhongtrong = document.querySelector('.card-thong-ke.mau-cam .con-so');
         const theBaoTri = document.querySelector('.card-thong-ke.mau-cam .ty-le-thay-doi');
-
-        console.log(data.PhongTrong)
         if (thePhongtrong) thePhongtrong.textContent = data.phongTrong;
         if (theBaoTri) theBaoTri.textContent = `⚠️ ${data.phongBaoTri} đang bảo trì`;
 
@@ -33,6 +27,8 @@ async function HienThiThongKe() {
         console.error("Đã xảy ra lỗi:", error);
     }
 }
+
+// ===== DANH SÁCH PHÒNG NHỎ (sidebar/widget) =====
 async function HienThiDanhSachPhong() {
     try {
         const response = await fetch('/api/QuanLy/DanhSachPhong');
@@ -40,11 +36,10 @@ async function HienThiDanhSachPhong() {
 
         const data = await response.json();
         const container = document.querySelector('.danh-sach-phong');
+        if (!container) return; // ✅ Guard: element không tồn tại trên trang này thì bỏ qua
 
-        // Xóa phòng cũ (giữ lại nút ở cuối)
         container.querySelectorAll('.muc-phong').forEach(el => el.remove());
 
-        // Hàm map trạng thái → CSS class
         function layClass(trangThai) {
             if (trangThai === 'Trống') return 'trong';
             if (trangThai === 'Đã thuê') return 'dang-thue';
@@ -52,7 +47,6 @@ async function HienThiDanhSachPhong() {
             return '';
         }
 
-        // Hàm map trạng thái → text hiển thị
         function layText(trangThai) {
             if (trangThai === 'Trống') return 'Còn trống';
             if (trangThai === 'Đã thuê') return 'Đang thuê';
@@ -60,12 +54,10 @@ async function HienThiDanhSachPhong() {
             return trangThai;
         }
 
-        // Hàm format giá tiền
         function formatGia(gia) {
             return (gia / 1000000).toFixed(1) + 'M/th';
         }
 
-        // Render từng phòng, chèn trước nút
         const nut = container.querySelector('button');
         data.forEach(phong => {
             const div = document.createElement('div');
@@ -91,42 +83,104 @@ async function HienThiDanhSachPhong() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    HienThiThongKe();
-    HienThiDanhSachPhong(); // ✅ Gọi thêm hàm này
-});
-document.addEventListener('DOMContentLoaded', () => {
-    HienThiThongKe(); 
-});
-//Danh sách phòng/////////////////////////////////////////////////////
+// ===== DOM READY — chỉ 1 block duy nhất =====
+document.addEventListener('DOMContentLoaded', function () {
+    // ✅ Chỉ gọi khi có element thống kê (trang QuanLy)
+    if (document.querySelector('.card-thong-ke')) {
+        HienThiThongKe();
+    }
 
+    // ✅ HienThiDanhSachPhong đã có guard bên trong, gọi an toàn
+    HienThiDanhSachPhong();
+
+    // ✅ Chỉ gọi mgrLoadEmail khi có element hiển thị email
+    if (document.getElementById('mgr-dd-email')) {
+        mgrLoadEmail();
+    }
+
+    // ✅ Tab switching — chỉ chạy khi trang có .dtab
+    const tabs = document.querySelectorAll(".dtab");
+    if (tabs.length > 0) {
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                document.querySelectorAll(".dtab").forEach(t => t.classList.remove("on"));
+                document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("on"));
+                tab.classList.add("on");
+                const tabEl = document.getElementById(
+                    "tab" + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1)
+                );
+                if (tabEl) tabEl.classList.add("on");
+            });
+        });
+    }
+
+    // ✅ Validation form đổi mật khẩu
+    const formMk = document.getElementById('form-doi-mat-khau');
+    if (formMk) {
+        formMk.addEventListener('submit', function (e) {
+            const oldPwd = document.getElementById('old-password').value.trim();
+            const newPwd = document.getElementById('new-password').value.trim();
+            const conPwd = document.getElementById('confirm-password').value.trim();
+            const alertEl = document.getElementById('doi-mk-alert');
+
+            function showInlineError(msg) {
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#fee2e2';
+                alertEl.style.color = '#dc2626';
+                alertEl.style.border = '1px solid #fca5a5';
+                alertEl.textContent = msg;
+                e.preventDefault();
+            }
+
+            if (!oldPwd || !newPwd || !conPwd) return showInlineError('Vui lòng điền đầy đủ tất cả các trường.');
+            if (newPwd.length < 6) return showInlineError('Mật khẩu mới phải có ít nhất 6 ký tự.');
+            if (newPwd !== conPwd) return showInlineError('Mật khẩu xác nhận không khớp.');
+            if (newPwd === oldPwd) return showInlineError('Mật khẩu mới phải khác mật khẩu hiện tại.');
+
+            const btn = document.getElementById('btn-submit-mk');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+        });
+    }
+});
+
+// ===== MODAL DANH SÁCH PHÒNG =====
 function dongModalPhong(event) {
     if (event.target.id === 'overlay-danh-sach-phong') {
         document.getElementById('overlay-danh-sach-phong').style.display = 'none';
         showList();
     }
 }
-function badgeClass(s) { if (s === "Trống") return "badge-trong"; if (s === "Đã thuê") return "badge-thue"; return "badge-sua"; }
+
+function badgeClass(s) {
+    if (s === "Trống") return "badge-trong";
+    if (s === "Đã thuê") return "badge-thue";
+    return "badge-sua";
+}
+
 function fmtPrice(p) { return (p / 1000000).toFixed(1) + "M/th"; }
-function initials(name) { const p = name.trim().split(" "); return (p[p.length - 1][0] || "?").toUpperCase(); }
+
+function initials(name) {
+    if (!name || !name.trim()) return '?';
+    const p = name.trim().split(" ");
+    return (p[p.length - 1][0] || "?").toUpperCase();
+}
 
 async function xemTatCaPhong() {
     const overlay = document.getElementById('overlay-danh-sach-phong');
     overlay.style.display = 'flex';
+    await loadRoomsFromAPI();
 
-    // Nếu chưa có data thì fetch, có rồi thì dùng lại
-    if (roomsData.length === 0) {
-        await loadRoomsFromAPI();
-    }
     renderGrid();
 }
+
 async function loadRoomsFromAPI() {
     try {
         const response = await fetch('/api/QuanLy/DanhSachPhong');
         if (!response.ok) throw new Error('Lỗi API');
         const data = await response.json();
         console.log("API data[0]:", data[0]);
-        // Map dữ liệu API → format rooms
+
         roomsData = data.map(p => ({
             id: p.idPhong,
             num: p.soPhong,
@@ -154,6 +208,8 @@ function renderGrid() {
     });
 
     const g = document.getElementById("roomGrid");
+    if (!g) return;
+
     document.getElementById("sTrong").textContent = roomsData.filter(r => r.status === "Trống").length;
     document.getElementById("sThue").textContent = roomsData.filter(r => r.status === "Đã thuê").length;
     document.getElementById("sSua").textContent = roomsData.filter(r => r.status === "Đang sửa").length;
@@ -175,11 +231,11 @@ function renderGrid() {
             <div class="area">${r.area}m²</div>
             <div class="price">${fmtPrice(r.price)}</div>
             ${r.tenNguoiThue
-                    ? `<div style="font-size:11px;color:var(--mau-chu-phu);margin-top:4px;
-                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                        <i class="fas fa-user" style="font-size:10px"></i> ${r.tenNguoiThue}
-                    </div>`
-                    : ''}
+                ? `<div style="font-size:11px;color:var(--mau-chu-phu);margin-top:4px;
+                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    <i class="fas fa-user" style="font-size:10px"></i> ${r.tenNguoiThue}
+                   </div>`
+                : ''}
             <span class="badge ${badgeClass(r.status)}">${r.status}</span>
         </div>`;
     }).join("");
@@ -190,29 +246,24 @@ function renderGrid() {
 }
 
 async function openDetail(id) {
-    // Tìm phòng cơ bản từ cache
-    const r = roomsData.find(x => x.id == id); // dùng == thay == để tránh lỗi kiểu
+    const r = roomsData.find(x => x.id == id);
     if (!r) return;
 
-    // Hiển thị detail view ngay với data cơ bản (loading state)
     document.getElementById("detailTitle").textContent = "Phòng " + r.num;
     const db = document.getElementById("detailBadge");
     db.textContent = r.status;
     db.className = "badge " + badgeClass(r.status);
 
-    // Reset tabs về info
     document.querySelectorAll(".dtab").forEach(t => t.classList.remove("on"));
     document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("on"));
     document.querySelector(".dtab[data-tab='info']").classList.add("on");
     document.getElementById("tabInfo").classList.add("on");
 
-    // Chuyển sang detail view
     document.getElementById("listView").style.display = "none";
     const dv = document.getElementById("detailView");
     dv.style.display = "flex";
     dv.classList.add("show");
 
-    // Hiện loading
     document.getElementById("tabInfo").innerHTML = `
         <div style="text-align:center;padding:32px;color:var(--mau-chu-phu);">
             <i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:8px;display:block"></i>
@@ -222,13 +273,12 @@ async function openDetail(id) {
     document.getElementById("tabHistory").innerHTML = "";
 
     try {
-        // Gọi API chi tiết phòng
         const res = await fetch(`/api/QuanLy/ChiTietPhong/${id}`);
         if (!res.ok) throw new Error('Lỗi API');
         const p = await res.json();
         console.log(p);
 
-        // ===== TAB THÔNG TIN CHUNG =====
+        // TAB THÔNG TIN CHUNG
         document.getElementById("tabInfo").innerHTML = `
         <div class="info-grid">
             <div class="info-cell"><div class="lbl">Số phòng</div><div class="val">Phòng ${p.soPhong}</div></div>
@@ -241,7 +291,7 @@ async function openDetail(id) {
             <div class="info-cell"><div class="lbl">Trạng thái</div><div class="val"><span class="badge ${badgeClass(p.trangThai)}">${p.trangThai}</span></div></div>
         </div>`;
 
-        // ===== TAB NGƯỜI THUÊ =====
+        // TAB NGƯỜI THUÊ
         const nt = p.nguoiThue;
         document.getElementById("tabTenant").innerHTML = nt ? `
         <div class="tenant-card">
@@ -259,24 +309,22 @@ async function openDetail(id) {
         </div>` :
             '<div class="no-tenant"><i class="fas fa-user-slash" style="font-size:28px;display:block;margin-bottom:8px"></i>Phòng chưa có người thuê</div>';
 
-        // ===== TAB LỊCH SỬ =====
+        // TAB LỊCH SỬ
         const hoaDons = p.hoaDons ?? [];
         const suCos = p.suCos ?? [];
 
-        // Hóa đơn — field từ API: thang, tongTien, trangThai
         const invHtml = hoaDons.length ? hoaDons.map(inv => `
             <div class="invoice-row">
                 <div><div class="month">Hóa đơn ${inv.thang}</div></div>
                 <div style="text-align:right">
                     <div class="amt">${inv.tongTien.toLocaleString("vi-VN")}đ</div>
                     <div style="font-size:10px;margin-top:2px;color:${inv.trangThai === "Đã hoàn thành" ? "#15803d" :
-                            inv.trangThai === "Chưa đóng" ? "#dc2626" :
-                                inv.trangThai === "Quá hạn" ? "#dc2626" : "#d97706"
-                        }">${inv.trangThai}</div>
+                inv.trangThai === "Chưa đóng" ? "#dc2626" :
+                    inv.trangThai === "Quá hạn" ? "#dc2626" : "#d97706"
+            }">${inv.trangThai}</div>
                 </div>
             </div>`).join("") : "<div class='no-tenant'>Chưa có hóa đơn</div>";
 
-        // Sự cố — field từ API: moTa, ngay, trangThai
         const incHtml = suCos.length ? suCos.map(inc => `
             <div class="invoice-row">
                 <div>
@@ -284,7 +332,7 @@ async function openDetail(id) {
                     <div style="font-size:10px;color:var(--mau-chu-phu)">${inc.ngay}</div>
                 </div>
                 <div style="font-size:10px;color:#c2410c">${inc.trangThai}</div>
-            </div>`).join("") : 
+            </div>`).join("") :
             "<div style='font-size:12px;color:var(--mau-chu-phu);padding:8px 0'>Không có sự cố nào</div>";
 
         document.getElementById("tabHistory").innerHTML = `
@@ -301,8 +349,17 @@ async function openDetail(id) {
             Không thể tải thông tin phòng
         </div>`;
     }
-    //////////////////Chỗ chưa sửa////////////////////////
-} function mgrToggleMenu() {
+}
+
+function showList() {
+    document.getElementById("listView").style.display = "";
+    const dv = document.getElementById("detailView");
+    dv.style.display = "none";
+    dv.classList.remove("show");
+}
+
+// ===== HEADER MANAGER DROPDOWN =====
+function mgrToggleMenu() {
     const dd = document.getElementById('mgrDropdown');
     const ch = document.getElementById('mgrChevron');
     const open = dd.classList.toggle('show');
@@ -322,38 +379,35 @@ function mgrMoDoiMatKhau() {
     mgrToggleMenu();
     moModalDoiMatKhau();
 }
+
+// ✅ Chỉ 1 khai báo duy nhất, dùng route /Index
 function mgrXacNhanDangXuat() {
     mgrToggleMenu();
     if (confirm('Bạn có chắc muốn đăng xuất?')) {
-        window.location.href = '/logout'; // đổi route khi làm BE
+        window.location.href = '/Index';
     }
 }
 
 async function mgrLoadEmail() {
+    // ✅ FIX: Chỉ gọi API khi element tồn tại trên trang (tránh 404 log)
+    const el = document.getElementById('mgr-dd-email');
+    if (!el) return;
     try {
         const res = await fetch('/api/QuanLy/Profile');
+        if (!res.ok) return; // Endpoint chưa sẵn sàng — bỏ qua yên lặng
         const data = await res.json();
-        const el = document.getElementById('mgr-dd-email');
-        if (el) el.textContent = data.email ?? 'Chưa cập nhật';
-    } catch { }
-}
-document.addEventListener('DOMContentLoaded', mgrLoadEmail);
-
-function showList() {
-    document.getElementById("listView").style.display = "";
-    const dv = document.getElementById("detailView");
-    dv.style.display = "none"; dv.classList.remove("show");
+        el.textContent = data.email ?? 'Chưa cập nhật';
+    } catch { /* bỏ qua lỗi mạng */ }
 }
 
-
-
+// ===== FILTER PILLS =====
 document.addEventListener("click", e => {
     const pill = e.target.closest(".pill");
     if (!pill) return;
 
     curFilter = pill.dataset.filter;
-
     document.querySelectorAll(".pill").forEach(x => { x.className = "pill"; });
+
     if (curFilter === "all") pill.classList.add("active-all");
     else if (curFilter === "Trống") pill.classList.add("active-trong");
     else if (curFilter === "Đã thuê") pill.classList.add("active-thue");
@@ -362,6 +416,7 @@ document.addEventListener("click", e => {
     renderGrid();
 });
 
+// ===== TÌM KIẾM =====
 document.addEventListener("input", e => {
     if (e.target.id === "searchInput") {
         curSearch = e.target.value;
@@ -369,15 +424,7 @@ document.addEventListener("input", e => {
     }
 });
 
-document.querySelectorAll(".dtab").forEach(tab => {
-    tab.addEventListener("click", () => {
-        document.querySelectorAll(".dtab").forEach(t => t.classList.remove("on"));
-        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("on"));
-        tab.classList.add("on");
-        document.getElementById("tab" + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1)).classList.add("on");
-    });
-});
-// ===== ĐỔI MẬT KHẨU =====
+// ===== ĐỔI MẬT KHẨU MODAL =====
 function moModalDoiMatKhau() {
     document.getElementById('form-doi-mat-khau').reset();
     const alert = document.getElementById('doi-mk-alert');
@@ -395,42 +442,5 @@ function togglePwd(inputId, btn) {
     } else {
         input.type = 'password';
         icon.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-
-// Client-side validation trước khi submit
-document.addEventListener('DOMContentLoaded', function () {
-    const formMk = document.getElementById('form-doi-mat-khau');
-    if (!formMk) return;
-    formMk.addEventListener('submit', function (e) {
-    const oldPwd = document.getElementById('old-password').value.trim();
-    const newPwd = document.getElementById('new-password').value.trim();
-    const conPwd = document.getElementById('confirm-password').value.trim();
-    const alertEl = document.getElementById('doi-mk-alert');
-
-    function showInlineError(msg) {
-        alertEl.style.display = 'block';
-        alertEl.style.background = '#fee2e2';
-        alertEl.style.color = '#dc2626';
-        alertEl.style.border = '1px solid #fca5a5';
-        alertEl.textContent = msg;
-        e.preventDefault();
-    }
-
-    if (!oldPwd || !newPwd || !conPwd) return showInlineError('Vui lòng điền đầy đủ tất cả các trường.');
-    if (newPwd.length < 6) return showInlineError('Mật khẩu mới phải có ít nhất 6 ký tự.');
-    if (newPwd !== conPwd) return showInlineError('Mật khẩu xác nhận không khớp.');
-    if (newPwd === oldPwd) return showInlineError('Mật khẩu mới phải khác mật khẩu hiện tại.');
-
-    // Hợp lệ — disable nút để tránh double submit
-    const btn = document.getElementById('btn-submit-mk');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-    });
-});
-function mgrXacNhanDangXuat() {
-    mgrToggleMenu();
-    if (confirm('Bạn có chắc muốn đăng xuất?')) {
-        window.location.href = '/Index'; //
     }
 }

@@ -1899,11 +1899,12 @@
         html += '<div class="trong-phong-empty"><i class="fas fa-bed" style="font-size:24px;margin-bottom:8px;display:block;"></i>Phòng đang trống</div>';
         } else {
         data.danhSachNguoiO.forEach(function(nguoi) {
-        var initial = nguoi.hoTen && nguoi.hoTen.length > 0 ? nguoi.hoTen[0].toUpperCase() : '?';
+        var hoTen = nguoi.hoTen || '?';
+        var initial = hoTen.trim().length > 0 ? hoTen.trim()[0].toUpperCase() : '?';
         html += '<div class="item-nguoi-o">';
         html += '  <div class="avatar">' + initial + '</div>';
         html += '  <div class="info-nguoi">';
-        html += '    <div class="ten">' + nguoi.hoTen;
+        html += '    <div class="ten">' + hoTen;
         if (nguoi.isChinhChu) html += '<span class="tag-chinh-chu">Chính chủ</span>';
         html += '    </div>';
         html += '    <div class="sub">' + (nguoi.quanHe || 'Người ở') + (nguoi.soDienThoai ? ' · ' + nguoi.soDienThoai : '') + '</div>';
