@@ -6,6 +6,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cài Đặt Hệ Thống – Nhà Trọ</title>
@@ -1490,6 +1491,40 @@
                     if (e.key === 'Enter') doiMatKhau();
                 });
             });
+                        window.hienThiThongBao = function(noiDung, loai = 'success') {
+                // Gọi ID bằng tiếng Việt
+                const khuVucChua = document.getElementById('khu-vuc-thong-bao-nha-tro');
+                if (!khuVucChua) return;
+
+                // Chuyển đổi tham số type sang class tiếng Việt tương ứng
+                let classMauSac = '';
+                switch(loai) {
+                    case 'success': classMauSac = 'thong-bao-thanh-cong'; break;
+                    case 'fail': classMauSac = 'thong-bao-canh-bao'; break;
+                    case 'error': classMauSac = 'thong-bao-loi'; break;
+                    default: classMauSac = 'thong-bao-thanh-cong';
+                }
+
+                // Tạo phần tử DOM
+                const theThongBao = document.createElement('div');
+                theThongBao.className = `thong-bao-muc ${classMauSac}`;
+    
+                // Gắn HTML nội dung và nút X
+                theThongBao.innerHTML = `
+                    <span>${noiDung}</span>
+                    <button class="nut-tat-thong-bao" onclick="this.parentElement.remove()">×</button>
+                `;
+
+                // Đẩy vào trang
+                khuVucChua.appendChild(theThongBao);
+
+                // Xóa thẻ DOM hoàn toàn sau đúng 3000ms (3 giây)
+                setTimeout(() => {
+                    if (theThongBao.parentNode) {
+                        theThongBao.remove();
+                    }
+                }, 3000);
+            }
     </script>
     <!--Thông báo-->
     <div id="khu-vuc-thong-bao-nha-tro" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>

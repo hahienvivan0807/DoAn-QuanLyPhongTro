@@ -1433,3 +1433,74 @@ textarea.o-nhap {
     stroke-dashoffset: 30;
     animation: drawX 0.3s 0.5s ease forwards;
 }
+/* Khối thông báo chính */
+.thong-bao-muc {
+    min-width: 300px;
+    max-width: 400px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    /* Chạy hiệu ứng trượt vào, sau 2.7s thì bắt đầu mờ dần đi */
+    animation: hieuUngTruotVao 0.3s ease forwards, hieuUngMoDan 0.3s ease 2.7s forwards;
+}
+
+/* Các loại màu sắc */
+.thong-bao-thanh-cong {
+    background-color: #10B981;
+    border-left: 5px solid #047857;
+}
+
+.thong-bao-canh-bao {
+    background-color: #F59E0B;
+    border-left: 5px solid #D97706;
+}
+
+.thong-bao-loi {
+    background-color: #EF4444;
+    border-left: 5px solid #DC2626;
+}
+
+/* Nút tắt thủ công */
+.nut-tat-thong-bao {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.7;
+    margin-left: 15px;
+}
+
+    .nut-tat-thong-bao:hover {
+        opacity: 1;
+    }
+
+/* Hiệu ứng trượt và mờ được đặt tên tiếng Việt để tránh trùng */
+@keyframes hieuUngTruotVao {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes hieuUngMoDan {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}

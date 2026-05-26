@@ -11,6 +11,7 @@
     <title>Hệ Thống Quản Lý – Chủ Trọ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="/css/ChuTro.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Javascript-->
     <script src="/js/ChuTro/ChuTro-ThongBao.js"></script>
@@ -4825,6 +4826,40 @@
     </div><!-- /backdrop -->
 
     <script>
+        window.hienThiThongBao = function(noiDung, loai = 'success') {
+        // Gọi ID bằng tiếng Việt
+        const khuVucChua = document.getElementById('khu-vuc-thong-bao-nha-tro');
+        if (!khuVucChua) return;
+
+        // Chuyển đổi tham số type sang class tiếng Việt tương ứng
+        let classMauSac = '';
+        switch(loai) {
+        case 'success': classMauSac = 'thong-bao-thanh-cong'; break;
+        case 'fail': classMauSac = 'thong-bao-canh-bao'; break;
+        case 'error': classMauSac = 'thong-bao-loi'; break;
+        default: classMauSac = 'thong-bao-thanh-cong';
+        }
+
+        // Tạo phần tử DOM
+        const theThongBao = document.createElement('div');
+        theThongBao.className = `thong-bao-muc ${classMauSac}`;
+    
+        // Gắn HTML nội dung và nút X
+        theThongBao.innerHTML = `
+        <span>${noiDung}</span>
+        <button class="nut-tat-thong-bao" onclick="this.parentElement.remove()">×</button>
+        `;
+
+        // Đẩy vào trang
+        khuVucChua.appendChild(theThongBao);
+
+        // Xóa thẻ DOM hoàn toàn sau đúng 3000ms (3 giây)
+        setTimeout(() => {
+        if (theThongBao.parentNode) {
+        theThongBao.remove();
+        }
+        }, 3000);
+        }
 
         function taoTruong(nhan, giatri) {
         return '<div><div style="font-size:11px;color:var(--mau-chu-phu);font-weight:600;">' + nhan + '</div>' +

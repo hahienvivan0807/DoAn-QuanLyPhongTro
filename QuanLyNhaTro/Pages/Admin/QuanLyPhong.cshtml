@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="/js/ChuTro/ChuTro-core.js"></script>
     <script src="/js/ChuTro/ChuTro-QuanLyPhong.js"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
         /* ==========================================================
         IMPORT FONT – đồng bộ ChuTro.cshtml
@@ -2165,6 +2166,40 @@
     <div id="toastContainer"></div>
 
     <script>
+        window.hienThiThongBao = function(noiDung, loai = 'success') {
+        // Gọi ID bằng tiếng Việt
+        const khuVucChua = document.getElementById('khu-vuc-thong-bao-nha-tro');
+        if (!khuVucChua) return;
+
+        // Chuyển đổi tham số type sang class tiếng Việt tương ứng
+        let classMauSac = '';
+        switch(loai) {
+        case 'success': classMauSac = 'thong-bao-thanh-cong'; break;
+        case 'fail': classMauSac = 'thong-bao-canh-bao'; break;
+        case 'error': classMauSac = 'thong-bao-loi'; break;
+        default: classMauSac = 'thong-bao-thanh-cong';
+        }
+
+        // Tạo phần tử DOM
+        const theThongBao = document.createElement('div');
+        theThongBao.className = `thong-bao-muc ${classMauSac}`;
+    
+        // Gắn HTML nội dung và nút X
+        theThongBao.innerHTML = `
+        <span>${noiDung}</span>
+        <button class="nut-tat-thong-bao" onclick="this.parentElement.remove()">×</button>
+        `;
+
+        // Đẩy vào trang
+        khuVucChua.appendChild(theThongBao);
+
+        // Xóa thẻ DOM hoàn toàn sau đúng 3000ms (3 giây)
+        setTimeout(() => {
+        if (theThongBao.parentNode) {
+        theThongBao.remove();
+        }
+        }, 3000);
+        }
         function dongModalNhapNgoai(event, id) {
         if (event.target === document.getElementById(id)) dongModal(id);
         }
