@@ -860,15 +860,20 @@ namespace QuanLyNhaTro.Pages.Manager
             var list = new List<DienNuocViewModel>();
             using var cmd = new SqlCommand("", conn);
             var inClause = TaoInClause(phongDuocPhanCong, cmd, "pdn");
-            // QUAN TRỌNG: Bảng DIENNUOC hiện chỉ có cột AnhChupDongHo (dùng chung cho cả điện lẫn nước).
-            // Sau khi chạy migration thêm cột AnhChupDongHoNuoc, câu lệnh dưới sẽ hoạt động đúng.
-            // Nếu chưa migrate, AnhChupDongHoNuoc sẽ luôn NULL (ảnh đồng hồ nước không hiển thị được).
+            // Nếu bảng DIENNUOC đã có cột AnhChupDongHoNuoc riêng thì dùng cột đó;
+            // nếu chưa (hoặc null/rỗng), fallback về AnhChupDongHo (ảnh chụp chung) để
+            // ảnh đồng hồ nước vẫn hiển thị được trong modal.
             cmd.CommandText = $@"
                 SELECT IDGhiNhan, p.SoPhong, KyGhiNhan,
                        SoDienMoi, SoDienCu, SoNuocMoi, SoNuocCu,
                        d.AnhChupDongHo,
-                       CASE WHEN COL_LENGTH('dbo.DIENNUOC','AnhChupDongHoNuoc') IS NOT NULL
-                            THEN d.AnhChupDongHoNuoc ELSE NULL END AS AnhChupDongHoNuoc,
+                       CASE
+                           WHEN COL_LENGTH('dbo.DIENNUOC','AnhChupDongHoNuoc') IS NOT NULL
+                                AND d.AnhChupDongHoNuoc IS NOT NULL
+                                AND d.AnhChupDongHoNuoc <> ''
+                           THEN d.AnhChupDongHoNuoc
+                           ELSE d.AnhChupDongHo
+                       END AS AnhChupDongHoNuoc,
                        d.TrangThaiDuyet, d.NgayGhi
                 FROM dbo.DIENNUOC d
                 JOIN dbo.PHONG p ON p.IDPhong = d.IDPhong

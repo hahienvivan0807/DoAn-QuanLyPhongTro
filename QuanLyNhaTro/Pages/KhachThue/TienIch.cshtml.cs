@@ -357,17 +357,24 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (nM.HasValue && nM < (last?.SoNuocMoi ?? 0))
                 return BadRequest("Chỉ số nước mới không được nhỏ hơn chỉ số cũ.");
 
-            string anhPath = "";
-            var file = anhDien ?? anhNuoc;
-            if (file != null && file.Length > 0)
-            {
-                string folder = Path.Combine(_env.WebRootPath, "uploads", "dien-nuoc");
-                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+            string anhDienPath = "";
+            string anhNuocPath = "";
+            string folder = Path.Combine(_env.WebRootPath, "uploads", "dien-nuoc");
+            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            if (anhDien != null && anhDien.Length > 0)
+            {
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(anhDien.FileName);
                 using var fs = new FileStream(Path.Combine(folder, fileName), FileMode.Create);
-                await file.CopyToAsync(fs);
-                anhPath = "/uploads/dien-nuoc/" + fileName;
+                await anhDien.CopyToAsync(fs);
+                anhDienPath = "/uploads/dien-nuoc/" + fileName;
+            }
+            if (anhNuoc != null && anhNuoc.Length > 0)
+            {
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(anhNuoc.FileName);
+                using var fs = new FileStream(Path.Combine(folder, fileName), FileMode.Create);
+                await anhNuoc.CopyToAsync(fs);
+                anhNuocPath = "/uploads/dien-nuoc/" + fileName;
             }
 
             var entry = new DIENNUOC
@@ -378,7 +385,8 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 SoDienMoi = dM ?? (last?.SoDienMoi ?? 0),
                 SoNuocCu = last?.SoNuocMoi ?? 0,
                 SoNuocMoi = nM ?? (last?.SoNuocMoi ?? 0),
-                AnhChupDongHo = anhPath,
+                AnhChupDongHo = anhDienPath,
+                AnhChupDongHoNuoc = anhNuocPath,
                 NgayGhi = DateTime.Now,
                 TrangThaiDuyet = 0
             };

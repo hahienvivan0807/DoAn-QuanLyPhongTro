@@ -2568,9 +2568,6 @@
                 <div class="them-tab" onclick="moTabThem(1)">
                     <i class="fas fa-id-card"></i> Hồ sơ cá nhân
                 </div>
-                <div class="them-tab" onclick="moTabThem(2)">
-                    <i class="fas fa-file-contract"></i> Hợp đồng &amp; Phòng
-                </div>
             </div>
 
             <div class="modal-body" style="padding:20px 24px 8px;">
@@ -2834,68 +2831,70 @@
 
     <script>
         window.hienThiThongBao = function(noiDung, loai = 'success') {
-        // Gọi ID bằng tiếng Việt
         const khuVucChua = document.getElementById('khu-vuc-thong-bao-nha-tro');
         if (!khuVucChua) return;
 
-        // Chuyển đổi tham số type sang class tiếng Việt tương ứng
         let classMauSac = '';
-        switch(loai) {
+        switch (loai) {
         case 'success': classMauSac = 'thong-bao-thanh-cong'; break;
-        case 'fail': classMauSac = 'thong-bao-canh-bao'; break;
-        case 'error': classMauSac = 'thong-bao-loi'; break;
-        default: classMauSac = 'thong-bao-thanh-cong';
+        case 'fail':    classMauSac = 'thong-bao-canh-bao';   break;
+        case 'error':   classMauSac = 'thong-bao-loi';        break;
+        default:        classMauSac = 'thong-bao-thanh-cong';
         }
 
-        // Tạo phần tử DOM
         const theThongBao = document.createElement('div');
         theThongBao.className = `thong-bao-muc ${classMauSac}`;
-    
-        // Gắn HTML nội dung và nút X
         theThongBao.innerHTML = `
         <span>${noiDung}</span>
-        <button class="nut-tat-thong-bao" onclick="this.parentElement.remove()">×</button>
-        `;
-
-        // Đẩy vào trang
+        <button class="nut-tat-thong-bao" onclick="this.parentElement.remove()">×</button>`;
         khuVucChua.appendChild(theThongBao);
 
-        // Xóa thẻ DOM hoàn toàn sau đúng 3000ms (3 giây)
         setTimeout(() => {
-        if (theThongBao.parentNode) {
-        theThongBao.remove();
-        }
+        if (theThongBao.parentNode) theThongBao.remove();
         }, 3000);
-        }
-  window.__themTab = 0;
-function moTabThem(i) {
-    const n = 3;
-    for (let j = 0; j < n; j++) {
-        document.getElementById('them-panel-' + j)?.classList.toggle('them-panel-on', j === i);
-        document.querySelectorAll('#them-tabs .them-tab')[j]?.classList.toggle('them-tab-on', j === i);
+        };
+
+        // ─── Tab stepper cho modal Thêm quản lý ─────────────────────────
+        window.__themTab = 0;
+
+        function moTabThem(i) {
+        const n = 2; // Tài khoản (0) + Hồ sơ cá nhân (1)
+        for (let j = 0; j < n; j++) {
+        document.getElementById('them-panel-' + j)
+        ?.classList.toggle('them-panel-on', j === i);
+        document.querySelectorAll('#them-tabs .them-tab')[j]
+        ?.classList.toggle('them-tab-on', j === i);
+
         const dot = document.getElementById('them-dot-' + j);
         if (dot) {
-            dot.style.width = j === i ? '18px' : '7px';
-            dot.style.borderRadius = j === i ? '4px' : '50%';
-            dot.style.background = j === i ? '#7c3aed' : 'var(--mau-vien)';
+        dot.style.width        = j === i ? '18px' : '7px';
+        dot.style.borderRadius = j === i ? '4px'  : '50%';
+        dot.style.background   = j === i ? '#7c3aed' : 'var(--mau-vien)';
         }
-    }
-    window.__themTab = i;
-    document.getElementById('btn-them-back').style.display = i > 0 ? '' : 'none';
-    const nb = document.getElementById('btn-them-next');
-    nb.innerHTML = i === n - 1
+        }
+
+        window.__themTab = i;
+        document.getElementById('btn-them-back').style.display = i > 0 ? '' : 'none';
+
+        const nb = document.getElementById('btn-them-next');
+        nb.innerHTML = i === n - 1
         ? '<i class="fas fa-user-plus"></i> Tạo tài khoản'
         : 'Tiếp theo <i class="fas fa-arrow-right"></i>';
-}
-function tiepTabThem() {
-    if (window.__themTab < 2) moTabThem(window.__themTab + 1);
-    else themQuanLyFull(); // gọi hàm lưu hiện có
-}
-            // Toggle sidebar
-            function dongMoSidebar() {
-              const sb = document.getElementById('thanh-sidebar');
-              sb.classList.toggle('an');
-            }
+        }
+
+        function tiepTabThem() {
+        if (window.__themTab < 1) {
+        moTabThem(window.__themTab + 1);
+        } else {
+        themQuanLyFull();
+        }
+        }
+
+        // ─── Toggle sidebar ──────────────────────────────────────────────
+        function dongMoSidebar() {
+        const sb = document.getElementById('thanh-sidebar');
+        sb.classList.toggle('an');
+        }
     </script>
     <!--Thông báo-->
     <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;"></div>

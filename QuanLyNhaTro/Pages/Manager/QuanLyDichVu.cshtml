@@ -1821,282 +1821,591 @@
                                                     }
                                                 </div>
                                             </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <div class="phan-trang" id="phan-trang-nuoc"></div>
-                    @if (!Model.DanhSachDonNuoc.Any())
-                    {
-                        <div class="empty-state">
-                            <i class="fas fa-tint"></i>
-                            <p>Chưa có đơn nước bình nào</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== TAB 2: GIẶT SẤY ==================== -->
-        <div class="tab-panel" id="panel-giat-say">
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đơn giặt sấy</h3>
-                        <div class="sub">Khách đặt → Quản lý nhập số tiền → Khách thanh toán</div>
-                    </div>
-                </div>
-                <div class="toolbar">
-                    <button class="filter-pill on" onclick="locDonNuoc('', this)">Tất cả</button>
-                    <button class="filter-pill" onclick="locDonNuoc('Chờ xử lý', this)">Chờ xử lý</button>
-                    <button class="filter-pill" onclick="locDonNuoc('Chờ thanh toán', this)">Chờ thanh toán</button>
-                    <button class="filter-pill" onclick="locDonNuoc('Chưa thanh toán', this)">Chưa thanh toán</button>
-                    <button class="filter-pill" onclick="locDonNuoc('Thành công', this)">Thành công</button>
-                    <div class="o-tim-kiem">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchNuoc" placeholder="Tìm phòng, khách..." oninput="timKiemDon('nuoc')" />
-                    </div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Phòng</th>
-                                <th>Khách thuê</th>
-                                <th>Nội dung</th>
-                                <th>Ngày đặt</th>
-                                <th>Tiền</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyGS">
-                            @foreach (var don in Model.DanhSachDonGiatSay)
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div class="phan-trang" id="phan-trang-nuoc"></div>
+                            @if (!Model.DanhSachDonNuoc.Any())
                             {
-                                <tr data-trangthai="@don.TrangThai_DV" data-search="@don.SoPhong @don.TenKhach">
-                                    <td><strong>P.@don.SoPhong</strong></td>
-                                    <td>@don.TenKhach</td>
-                                    <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@don.NoiDung">@don.NoiDung</td>
-                                    <td style="color:var(--mau-chu-phu);font-size:12px;">@don.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>
-                                        @if (don.TongTien > 0)
-                                        {
-                                            <strong>@don.TongTien.ToString("N0") đ</strong>
-                                        }
-                                        else
-                                        {
-                                            <span style="color:var(--mau-chu-phu);font-style:italic;">Chưa nhập</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @{
-                                            var clsGs = don.TrangThai_DV switch
-                                            {
-                                                "Chờ xử lý" => "cho-xu-ly",
-                                                "Chờ thanh toán" => "cho-tt",
-                                                "Thành công" => "xong",
-                                                "Đã hủy" => "huy",
-                                                _ => "cho-xu-ly"
-                                            };
-                                        }
-                                        <span class="badge @clsGs">@don.TrangThai_DV</span>
-                                    </td>
-                                    <td>
-                                        <div style="display:flex;gap:6px;">
-                                            @if (don.TrangThai_DV == "Chờ xử lý")
-                                            {
-                                                <button class="btn btn-primary btn-sm"
-                                                        onclick="moModalNhapGiaGS(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung')">
-                                                    <i class="fas fa-dollar-sign"></i> Nhập tiền
-                                                </button>
-                                                <form method="post" asp-page-handler="HuyDon" style="display:inline;">
-                                                    <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hủy đơn?')">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
-                                            }
-                                            @if (don.TrangThai_DV == "Chờ thanh toán")
-                                            {
-                                                <span style="font-size:11px;color:var(--mau-chu-phu);">Đợi khách TT</span>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
+                                <div class="empty-state">
+                                    <i class="fas fa-tint"></i>
+                                    <p>Chưa có đơn nước bình nào</p>
+                                </div>
                             }
-                        </tbody>
-                    </table>
-                    <div class="phan-trang" id="phan-trang-gs"></div>
-                    @if (!Model.DanhSachDonGiatSay.Any())
-                    {
-                        <div class="empty-state">
-                            <i class="fas fa-wind"></i>
-                            <p>Chưa có đơn giặt sấy nào</p>
                         </div>
-                    }
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- ==================== TAB 3: ĐIỆN NƯỚC ==================== -->
-        <div class="tab-panel" id="panel-dien-nuoc">
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Chỉ số điện – nước theo kỳ</h3>
-                        <div class="sub">Khách chụp ảnh đồng hồ + nhập chỉ số → Quản lý xem & xác nhận (không có ảnh chuyển khoản)</div>
-                    </div>
-                </div>
-                <div class="toolbar">
-                    <button class="filter-pill on" onclick="locDienNuoc(255, this)">Tất cả</button>
-                    <button class="filter-pill" onclick="locDienNuoc(0, this)">Chờ duyệt</button>
-                    <button class="filter-pill" onclick="locDienNuoc(1, this)">Đã duyệt</button>
-                    <button class="filter-pill" onclick="locDienNuoc(2, this)">Từ chối</button>
-                    <div class="o-tim-kiem">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchDN" placeholder="Tìm phòng, kỳ..." oninput="timKiemDienNuoc()" />
-                    </div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Phòng</th>
-                                <th>Kỳ ghi nhận</th>
-                                <th>Điện cũ → mới</th>
-                                <th>Nước cũ → mới</th>
-                                <th>Ảnh đồng hồ</th>
-                                <th>Ngày ghi</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyDN">
-                            @foreach (var dn in Model.DanhSachDienNuoc)
+                <!-- ==================== TAB 2: GIẶT SẤY ==================== -->
+                <div class="tab-panel" id="panel-giat-say">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Đơn giặt sấy</h3>
+                                <div class="sub">Khách đặt → Quản lý nhập số tiền → Khách thanh toán</div>
+                            </div>
+                        </div>
+                        <div class="toolbar">
+                            <button class="filter-pill on" onclick="locDonNuoc('', this)">Tất cả</button>
+                            <button class="filter-pill" onclick="locDonNuoc('Chờ xử lý', this)">Chờ xử lý</button>
+                            <button class="filter-pill" onclick="locDonNuoc('Chờ thanh toán', this)">Chờ thanh toán</button>
+                            <button class="filter-pill" onclick="locDonNuoc('Chưa thanh toán', this)">Chưa thanh toán</button>
+                            <button class="filter-pill" onclick="locDonNuoc('Thành công', this)">Thành công</button>
+                            <div class="o-tim-kiem">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchNuoc" placeholder="Tìm phòng, khách..." oninput="timKiemDon('nuoc')" />
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Phòng</th>
+                                        <th>Khách thuê</th>
+                                        <th>Nội dung</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyGS">
+                                    @foreach (var don in Model.DanhSachDonGiatSay)
+                                    {
+                                        <tr data-trangthai="@don.TrangThai_DV" data-search="@don.SoPhong @don.TenKhach">
+                                            <td><strong>P.@don.SoPhong</strong></td>
+                                            <td>@don.TenKhach</td>
+                                            <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@don.NoiDung">@don.NoiDung</td>
+                                            <td style="color:var(--mau-chu-phu);font-size:12px;">@don.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @if (don.TongTien > 0)
+                                                {
+                                                    <strong>@don.TongTien.ToString("N0") đ</strong>
+                                                }
+                                                else
+                                                {
+                                                    <span style="color:var(--mau-chu-phu);font-style:italic;">Chưa nhập</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var clsGs = don.TrangThai_DV switch
+                                                    {
+                                                        "Chờ xử lý" => "cho-xu-ly",
+                                                        "Chờ thanh toán" => "cho-tt",
+                                                        "Thành công" => "xong",
+                                                        "Đã hủy" => "huy",
+                                                        _ => "cho-xu-ly"
+                                                    };
+                                                }
+                                                <span class="badge @clsGs">@don.TrangThai_DV</span>
+                                            </td>
+                                            <td>
+                                                <div style="display:flex;gap:6px;">
+                                                    @if (don.TrangThai_DV == "Chờ xử lý")
+                                                    {
+                                                        <button class="btn btn-primary btn-sm"
+                                                                onclick="moModalNhapGiaGS(@don.IDDonDV, '@don.SoPhong', '@don.TenKhach', '@don.NoiDung')">
+                                                            <i class="fas fa-dollar-sign"></i> Nhập tiền
+                                                        </button>
+                                                        <form method="post" asp-page-handler="HuyDon" style="display:inline;">
+                                                            <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
+                                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hủy đơn?')">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    @if (don.TrangThai_DV == "Chờ thanh toán")
+                                                    {
+                                                        <span style="font-size:11px;color:var(--mau-chu-phu);">Đợi khách TT</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div class="phan-trang" id="phan-trang-gs"></div>
+                            @if (!Model.DanhSachDonGiatSay.Any())
                             {
-                                <tr data-tt="@dn.TrangThaiDuyet" data-search="@dn.SoPhong @dn.KyGhiNhan">
-                                    <td><strong>P.@dn.SoPhong</strong></td>
-                                    <td>@dn.KyGhiNhan</td>
-                                    <td>@dn.SoDienCu → <strong>@dn.SoDienMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoDienMoi - dn.SoDienCu))</small></td>
-                                    <td>@dn.SoNuocCu → <strong>@dn.SoNuocMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoNuocMoi - dn.SoNuocCu))</small></td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(dn.AnhChupDongHo))
-                                        {
-                                            <button class="btn btn-ghost btn-sm"
-                                                    onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
-                                                <i class="fas fa-image"></i> Xem ảnh
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <span style="color:var(--mau-chu-phu);font-size:12px;">Chưa có ảnh</span>
-                                        }
-                                    </td>
-                                    <td style="color:var(--mau-chu-phu);font-size:12px;">@dn.NgayGhi.ToString("dd/MM/yyyy")</td>
-                                    <td>
-                                        @{
-                                            var clsDN = dn.TrangThaiDuyet switch { 0 => "cho-duyet", 1 => "da-duyet", 2 => "tu-choi", _ => "cho-duyet" };
-                                            var lblDN = dn.TrangThaiDuyet switch { 0 => "Chờ duyệt", 1 => "Đã duyệt", 2 => "Từ chối", _ => "Chờ duyệt" };
-                                        }
-                                        <span class="badge @clsDN">@lblDN</span>
-                                    </td>
-                                    <td>
-                                        @if (dn.TrangThaiDuyet == 0)
-                                        {
-                                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <div class="empty-state">
+                                    <i class="fas fa-wind"></i>
+                                    <p>Chưa có đơn giặt sấy nào</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== TAB 3: ĐIỆN NƯỚC ==================== -->
+                <div class="tab-panel" id="panel-dien-nuoc">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Chỉ số điện – nước theo kỳ</h3>
+                                <div class="sub">Khách chụp ảnh đồng hồ + nhập chỉ số → Quản lý xem & xác nhận (không có ảnh chuyển khoản)</div>
+                            </div>
+                        </div>
+                        <div class="toolbar">
+                            <button class="filter-pill on" onclick="locDienNuoc(255, this)">Tất cả</button>
+                            <button class="filter-pill" onclick="locDienNuoc(0, this)">Chờ duyệt</button>
+                            <button class="filter-pill" onclick="locDienNuoc(1, this)">Đã duyệt</button>
+                            <button class="filter-pill" onclick="locDienNuoc(2, this)">Từ chối</button>
+                            <div class="o-tim-kiem">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchDN" placeholder="Tìm phòng, kỳ..." oninput="timKiemDienNuoc()" />
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Phòng</th>
+                                        <th>Kỳ ghi nhận</th>
+                                        <th>Điện cũ → mới</th>
+                                        <th>Nước cũ → mới</th>
+                                        <th>Ảnh đồng hồ</th>
+                                        <th>Ngày ghi</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyDN">
+                                    @foreach (var dn in Model.DanhSachDienNuoc)
+                                    {
+                                        <tr data-tt="@dn.TrangThaiDuyet" data-search="@dn.SoPhong @dn.KyGhiNhan">
+                                            <td><strong>P.@dn.SoPhong</strong></td>
+                                            <td>@dn.KyGhiNhan</td>
+                                            <td>@dn.SoDienCu → <strong>@dn.SoDienMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoDienMoi - dn.SoDienCu))</small></td>
+                                            <td>@dn.SoNuocCu → <strong>@dn.SoNuocMoi</strong> <small style="color:var(--mau-chu-phu);">(+@(dn.SoNuocMoi - dn.SoNuocCu))</small></td>
+                                            <td>
                                                 @if (!string.IsNullOrEmpty(dn.AnhChupDongHo))
                                                 {
-                                                    <button class="btn btn-success btn-sm"
+                                                    <button class="btn btn-ghost btn-sm"
                                                             onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
-                                                        <i class="fas fa-image"></i> Xem ảnh & Duyệt
+                                                        <i class="fas fa-image"></i> Xem ảnh
                                                     </button>
                                                 }
                                                 else
                                                 {
-                                                    <!-- Không có ảnh → cho phép duyệt trực tiếp sau khi xem chỉ số -->
-                                                    <button class="btn btn-success btn-sm"
-                                                            onclick="xemAnhDienNuoc('', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
-                                                        <i class="fas fa-bolt"></i> Xem chỉ số & Duyệt
-                                                    </button>
+                                                    <span style="color:var(--mau-chu-phu);font-size:12px;">Chưa có ảnh</span>
                                                 }
-                                                <button class="btn btn-danger btn-sm"
-                                                        onclick="moModalTuChoiDN(@dn.IDGhiNhan, '@dn.SoPhong')">
-                                                    <i class="fas fa-times"></i> Từ chối
-                                                </button>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <span style="font-size:11px;color:var(--mau-chu-phu);">@(dn.TrangThaiDuyet == 1 ? "Đã xác nhận" : "Đã từ chối")</span>
-                                        }
-                                    </td>
-                                </tr>
+                                            </td>
+                                            <td style="color:var(--mau-chu-phu);font-size:12px;">@dn.NgayGhi.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                @{
+                                                    var clsDN = dn.TrangThaiDuyet switch { 0 => "cho-duyet", 1 => "da-duyet", 2 => "tu-choi", _ => "cho-duyet" };
+                                                    var lblDN = dn.TrangThaiDuyet switch { 0 => "Chờ duyệt", 1 => "Đã duyệt", 2 => "Từ chối", _ => "Chờ duyệt" };
+                                                }
+                                                <span class="badge @clsDN">@lblDN</span>
+                                            </td>
+                                            <td>
+                                                @if (dn.TrangThaiDuyet == 0)
+                                                {
+                                                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                                        @if (!string.IsNullOrEmpty(dn.AnhChupDongHo))
+                                                        {
+                                                            <button class="btn btn-success btn-sm"
+                                                                    onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
+                                                                <i class="fas fa-image"></i> Xem ảnh & Duyệt
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <!-- Không có ảnh → cho phép duyệt trực tiếp sau khi xem chỉ số -->
+                                                            <button class="btn btn-success btn-sm"
+                                                                    onclick="xemAnhDienNuoc('', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
+                                                                <i class="fas fa-bolt"></i> Xem chỉ số & Duyệt
+                                                            </button>
+                                                        }
+                                                        <button class="btn btn-danger btn-sm"
+                                                                onclick="moModalTuChoiDN(@dn.IDGhiNhan, '@dn.SoPhong')">
+                                                            <i class="fas fa-times"></i> Từ chối
+                                                        </button>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span style="font-size:11px;color:var(--mau-chu-phu);">@(dn.TrangThaiDuyet == 1 ? "Đã xác nhận" : "Đã từ chối")</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div class="phan-trang" id="phan-trang-dn"></div>
+                            @if (!Model.DanhSachDienNuoc.Any())
+                            {
+                                <div class="empty-state">
+                                    <i class="fas fa-bolt"></i>
+                                    <p>Chưa có chỉ số điện nước nào được gửi</p>
+                                </div>
                             }
-                        </tbody>
-                    </table>
-                    <div class="phan-trang" id="phan-trang-dn"></div>
-                    @if (!Model.DanhSachDienNuoc.Any())
-                    {
-                        <div class="empty-state">
-                            <i class="fas fa-bolt"></i>
-                            <p>Chưa có chỉ số điện nước nào được gửi</p>
                         </div>
-                    }
+                    </div>
+                </div>
+                <!-- ==================== TAB 4: NỢ DỊCH VỤ ==================== -->
+                <div class="tab-panel" id="panel-no-dv">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;margin-right:8px;"></i>Nợ dịch vụ chưa thanh toán</h3>
+                                <div class="sub">Các khoản dịch vụ quá hạn sẽ tự động cộng vào hóa đơn tháng tiếp theo</div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:12px;color:var(--mau-chu-phu);">
+                                    Tổng nợ: <strong style="color:#ef4444;">@Model.TongTienNoDV.ToString("N0") đ</strong>
+                                </span>
+                                <form method="post" asp-page-handler="ChuyenNoDVVaoHD">
+                                    <button type="submit" class="nut-them-moi"
+                                            onclick="return confirm('Cộng tất cả nợ DV vào hóa đơn tháng này?')"
+                                            style="font-size:12px;padding:8px 14px;">
+                                        <i class="fas fa-arrow-right"></i> Cộng vào HD tháng
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Phòng</th>
+                                        <th>Khách thuê</th>
+                                        <th>Loại DV</th>
+                                        <th>Số tiền nợ</th>
+                                        <th>Ngày tạo đơn</th>
+                                        <th>Ghi chú</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyNo">
+                                    @foreach (var no in Model.DanhSachNoDV)
+                                    {
+                                        <tr>
+                                            <td><strong>P.@no.SoPhong</strong></td>
+                                            <td>@no.TenKhach</td>
+                                            <td><span class="badge dang-xu-ly">@no.LoaiDV</span></td>
+                                            <td><span class="no-chip"><i class="fas fa-exclamation-triangle"></i> @no.TongTien.ToString("N0") đ</span></td>
+                                            <td style="color:var(--mau-chu-phu);font-size:12px;">@no.NgayTao.ToString("dd/MM/yyyy")</td>
+                                            <td style="font-size:12px;color:var(--mau-chu-phu);">@(no.GhiChuXuLy ?? "—")</td>
+                                            <td><span class="badge qua-han">Chờ thanh toán</span></td>
+                                            <td>
+                                                <form method="post" asp-page-handler="NhacNhoDichVu" style="display:inline;">
+                                                    <input type="hidden" name="idDonDV" value="@no.IDDonDV" />
+                                                    <button type="submit" class="btn btn-warning btn-sm"
+                                                            onclick="return confirm('Gửi nhắc nhở đến khách phòng @no.SoPhong về khoản nợ @no.LoaiDV (@no.TongTien.ToString("N0") đ)?')">
+                                                        <i class="fas fa-bell"></i> Nhắc nhở
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div class="phan-trang" id="phan-trang-no"></div>
+                            @if (!Model.DanhSachNoDV.Any())
+                            {
+                                <div class="empty-state">
+                                    <i class="fas fa-check-circle" style="color:#22c55e;"></i>
+                                    <p>Không có khoản nợ dịch vụ nào</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /#noi-dung -->
+        </div><!-- /#khu-vuc-chinh -->
+        <!-- ===================================================================
+     MODAL: NHẬP GIÁ & XÁC NHẬN GIAO NƯỚC BÌNH
+=================================================================== -->
+        <div class="modal-overlay" id="modal-nhap-gia-nuoc" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-nuoc')">
+            <div class="modal">
+                <div class="modal-header">
+                    <div>
+                        <h3><i class="fas fa-truck" style="color:#f59e0b;margin-right:8px;"></i>Xác nhận đã giao nước bình</h3>
+                        <div class="sub" id="subNuoc">Phòng — | Khách: —</div>
+                    </div>
+                    <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-nuoc')"><i class="fas fa-times"></i></button>
+                </div>
+                <form method="post" asp-page-handler="NhapGiaNuocVaGiao">
+                    <input type="hidden" name="idDonDV" id="nuoc_idDonDV" />
+                    <div class="form-group">
+                        <label>Nội dung đơn</label>
+                        <input class="inp" type="text" id="nuoc_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
+                    </div>
+                    <div class="form-group">
+                        <label>Đơn giá (theo cấu hình hệ thống)</label>
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;">
+                            <i class="fas fa-tag" style="color:#f59e0b;"></i>
+                            <span id="nuoc_hienThiGia" style="font-size:15px;font-weight:700;color:#92400e;">—</span>
+                            <span style="font-size:12px;color:#b45309;margin-left:auto;">Giá được xác định từ cấu hình</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ghi chú xử lý</label>
+                        <input class="inp" type="text" name="ghiChuXuLy" placeholder="Đã giao đủ số bình, tình trạng tốt..." />
+                    </div>
+                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:4px;">
+                        <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                        Sau khi xác nhận, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong> và khách thuê sẽ nhận thông báo.
+                        Khách sẽ gửi ảnh chuyển khoản để quản lý xác nhận. Nếu quá hạn, tiền sẽ cộng vào hóa đơn tháng.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-nuoc')">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Xác nhận đã giao</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+     MODAL: XEM ẢNH CHUYỂN KHOẢN NƯỚC BÌNH + XÁC NHẬN / TỪ CHỐI
+=================================================================== -->
+        <div class="modal-overlay" id="modal-xem-anh-ck" onclick="dongModalNeuNhanNgoai(event,'modal-xem-anh-ck')">
+            <div class="modal modal-lg">
+                <div class="modal-header">
+                    <div>
+                        <h3><i class="fas fa-image" style="color:#059669;margin-right:8px;"></i>Duyệt ảnh chuyển khoản</h3>
+                        <div class="sub" id="subAnhCK">Phòng —</div>
+                    </div>
+                    <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-ck')"><i class="fas fa-times"></i></button>
+                </div>
+                <img id="anhCKPreview" class="anh-xem-truoc" src="" alt="Ảnh chuyển khoản"
+                     style="cursor:zoom-in;" onclick="window.open(this.src,'_blank')" />
+                <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;font-size:13px;color:#065f46;margin-top:12px;">
+                    <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                    Kiểm tra ảnh chuyển khoản. Bấm <strong>"Xác nhận"</strong> nếu hợp lệ, hoặc <strong>"Từ chối"</strong> nếu ảnh không hợp lệ — trạng thái sẽ trở về <em>Chưa thanh toán</em> để khách gửi lại.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-ck')">Đóng</button>
+
+                    <!-- TỪ CHỐI: xóa ảnh, trở về "Chưa thanh toán" -->
+                    <form method="post" asp-page-handler="TuChoiAnhCK" style="display:inline;">
+                        <input type="hidden" name="idDonDV" id="ck_idDonDV_tuchoi" />
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Từ chối ảnh này? Trạng thái sẽ trở về Chưa thanh toán và khách cần gửi lại.')">
+                            <i class="fas fa-times"></i> Từ chối ảnh
+                        </button>
+                    </form>
+
+                    <!-- XÁC NHẬN: hoàn tất đơn -->
+                    <form method="post" asp-page-handler="XacNhanThanhToanNuoc" style="display:inline;">
+                        <input type="hidden" name="idDonDV" id="ck_idDonDV" />
+                        <button type="submit" class="btn btn-success"
+                                onclick="return confirm('Xác nhận ảnh hợp lệ và hoàn tất thanh toán?')">
+                            <i class="fas fa-check"></i> Xác nhận thanh toán
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-        <!-- ==================== TAB 4: NỢ DỊCH VỤ ==================== -->
-        <div class="tab-panel" id="panel-no-dv">
-            <div class="card">
-                <div class="card-header">
+
+        <!-- ===================================================================
+     MODAL: NHẬP TIỀN GIẶT SẤY
+=================================================================== -->
+        <div class="modal-overlay" id="modal-nhap-gia-gs" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-gs')">
+            <div class="modal">
+                <div class="modal-header">
                     <div>
-                        <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;margin-right:8px;"></i>Nợ dịch vụ chưa thanh toán</h3>
-                        <div class="sub">Các khoản dịch vụ quá hạn sẽ tự động cộng vào hóa đơn tháng tiếp theo</div>
+                        <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Nhập tiền giặt sấy</h3>
+                        <div class="sub" id="subGS">Phòng — | Khách: —</div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <span style="font-size:12px;color:var(--mau-chu-phu);">
-                            Tổng nợ: <strong style="color:#ef4444;">@Model.TongTienNoDV.ToString("N0") đ</strong>
-                        </span>
-                        <form method="post" asp-page-handler="ChuyenNoDVVaoHD">
-                            <button type="submit" class="nut-them-moi"
-                                    onclick="return confirm('Cộng tất cả nợ DV vào hóa đơn tháng này?')"
-                                    style="font-size:12px;padding:8px 14px;">
-                                <i class="fas fa-arrow-right"></i> Cộng vào HD tháng
-                            </button>
-                        </form>
+                    <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-gs')"><i class="fas fa-times"></i></button>
+                </div>
+                <form method="post" asp-page-handler="NhapGiaGiatSay">
+                    <input type="hidden" name="idDonDV" id="gs_idDonDV" />
+                    <div class="form-group">
+                        <label>Nội dung đơn</label>
+                        <input class="inp" type="text" id="gs_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Số tiền (đồng) <span style="color:#ef4444;">*</span></label>
+                            <input class="inp" type="number" name="tongTien" min="0" placeholder="VD: 50000" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Ghi chú</label>
+                            <input class="inp" type="text" name="ghiChuXuLy" placeholder="3 kg, đã sấy khô..." />
+                        </div>
+                    </div>
+                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;color:#1e40af;margin-bottom:4px;">
+                        <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                        Sau khi nhập giá, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong>.
+                        Nếu khách không thanh toán đúng hạn, khoản tiền sẽ được cộng vào hóa đơn cuối tháng.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-gs')">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gửi báo giá</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+     MODAL: XEM ẢNH ĐIỆN NƯỚC
+=================================================================== -->
+        <div class="modal-overlay" id="modal-xem-anh-dn" onclick="dongModalNeuNhanNgoai(event,'modal-xem-anh-dn')">
+            <div class="modal modal-lg">
+                <div class="modal-header">
+                    <div>
+                        <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Xác nhận chỉ số điện – nước</h3>
+                        <div class="sub" id="subAnhDN">Phòng —</div>
+                    </div>
+                    <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-dn')"><i class="fas fa-times"></i></button>
+                </div>
+
+                <!-- Bảng chỉ số để quản lý đối chiếu -->
+                <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 18px;margin-bottom:12px;">
+                    <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:10px;">
+                        <i class="fas fa-tachometer-alt" style="margin-right:6px;"></i>Chỉ số khách gửi
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div style="background:#fff;border-radius:8px;padding:10px 14px;border:1px solid #d1fae5;">
+                            <div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-bolt" style="color:#f59e0b;"></i> ĐIỆN</div>
+                            <div style="font-size:13px;">Chỉ số cũ: <strong id="anhDN_dienCu">—</strong></div>
+                            <div style="font-size:13px;">Chỉ số mới: <strong id="anhDN_dienMoi" style="color:#059669;">—</strong></div>
+                            <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tiêu thụ: <strong id="anhDN_dienTieu">—</strong></div>
+                        </div>
+                        <div style="background:#fff;border-radius:8px;padding:10px 14px;border:1px solid #d1fae5;">
+                            <div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-tint" style="color:#3b82f6;"></i> NƯỚC</div>
+                            <div style="font-size:13px;">Chỉ số cũ: <strong id="anhDN_nuocCu">—</strong></div>
+                            <div style="font-size:13px;">Chỉ số mới: <strong id="anhDN_nuocMoi" style="color:#059669;">—</strong></div>
+                            <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tiêu thụ: <strong id="anhDN_nuocTieu">—</strong></div>
+                        </div>
                     </div>
                 </div>
-                <div class="table-wrap">
+
+                <!-- Ảnh đồng hồ điện & nước -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+
+                    <!-- Cột ảnh ĐIỆN -->
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">
+                            <i class="fas fa-bolt" style="color:#f59e0b;margin-right:4px;"></i>Ảnh đồng hồ điện
+                        </div>
+                        <img id="anhDienPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ điện"
+                             style="display:none;max-height:220px;cursor:zoom-in;"
+                             onclick="window.open(this.src,'_blank')" />
+                        <div id="anhDN_noimg_dien" style="display:none;background:#fef3c7;border:1px solid #fcd34d;
+                            border-radius:10px;padding:14px;flex-direction:column;align-items:center;
+                            gap:5px;text-align:center;margin-top:2px;">
+                            <i class="fas fa-camera" style="font-size:24px;color:#d97706;"></i>
+                            <div style="font-size:12px;color:#92400e;font-weight:600;">Chưa có ảnh đồng hồ điện</div>
+                            <div style="font-size:11px;color:#b45309;">Khách chưa gửi hoặc chụp chung 1 ảnh</div>
+                        </div>
+                    </div>
+
+                    <!-- Cột ảnh NƯỚC -->
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">
+                            <i class="fas fa-tint" style="color:#3b82f6;margin-right:4px;"></i>Ảnh đồng hồ nước
+                        </div>
+                        <img id="anhNuocPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ nước"
+                             style="display:none;max-height:220px;cursor:zoom-in;"
+                             onclick="window.open(this.src,'_blank')" />
+                        <div id="anhDN_noimg_nuoc" style="display:none;background:#eff6ff;border:1px solid #93c5fd;
+                            border-radius:10px;padding:14px;flex-direction:column;align-items:center;
+                            gap:5px;text-align:center;margin-top:2px;">
+                            <i class="fas fa-camera" style="font-size:24px;color:#3b82f6;"></i>
+                            <div style="font-size:12px;color:#1e40af;font-weight:600;">Chưa có ảnh đồng hồ nước</div>
+                            <div style="font-size:11px;color:#1d4ed8;">Khách chưa gửi hoặc chụp chung 1 ảnh</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-dn')">Đóng</button>
+                    <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
+                        <input type="hidden" name="idGhiNhan" id="anhDN_idGhiNhan" />
+                        <input type="hidden" name="chapNhan" value="true" />
+                        <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Xác nhận & Duyệt</button>
+                    </form>
+                    <button class="btn btn-danger" onclick="dongModal('modal-xem-anh-dn');moModalTuChoiDN(document.getElementById('anhDN_idGhiNhan').value, '')">
+                        <i class="fas fa-times"></i> Từ chối
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+     MODAL: TỪ CHỐI ĐIỆN NƯỚC
+=================================================================== -->
+        <div class="modal-overlay" id="modal-tu-choi-dn" onclick="dongModalNeuNhanNgoai(event,'modal-tu-choi-dn')">
+            <div class="modal">
+                <div class="modal-header">
+                    <div>
+                        <h3><i class="fas fa-times-circle" style="color:#ef4444;margin-right:8px;"></i>Từ chối chỉ số điện nước</h3>
+                        <div class="sub" id="subTuChoiDN">Phòng —</div>
+                    </div>
+                    <button class="btn-dong-modal" onclick="dongModal('modal-tu-choi-dn')"><i class="fas fa-times"></i></button>
+                </div>
+                <form method="post" asp-page-handler="DuyetDienNuoc">
+                    <input type="hidden" name="idGhiNhan" id="tcDN_idGhiNhan" />
+                    <input type="hidden" name="chapNhan" value="false" />
+                    <div class="form-group">
+                        <label>Lý do từ chối <span style="color:#ef4444;">*</span></label>
+                        <input class="inp" type="text" name="ghiChuDuyet" placeholder="Ảnh mờ, số không khớp..." required />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-ghost" onclick="dongModal('modal-tu-choi-dn')">Hủy</button>
+                        <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Từ chối</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+     MODAL: CẤU HÌNH ĐƠN GIÁ DỊCH VỤ
+=================================================================== -->
+        <div class="modal-overlay" id="modal-cau-hinh-gia" onclick="dongModalNeuNhanNgoai(event,'modal-cau-hinh-gia')">
+            <div class="modal modal-lg">
+                <div class="modal-header">
+                    <div>
+                        <h3><i class="fas fa-sliders-h" style="color:var(--mau-chu-de);margin-right:8px;"></i>Cấu hình đơn giá dịch vụ</h3>
+                        <div class="sub">CONFIG_GIA — Dùng để tham khảo khi tính giá</div>
+                    </div>
+                    <button class="btn-dong-modal" onclick="dongModal('modal-cau-hinh-gia')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="table-wrap" style="margin-bottom:16px;">
                     <table>
                         <thead>
                             <tr>
-                                <th>Phòng</th>
-                                <th>Khách thuê</th>
-                                <th>Loại DV</th>
-                                <th>Số tiền nợ</th>
-                                <th>Ngày tạo đơn</th>
-                                <th>Ghi chú</th>
+                                <th>Tên dịch vụ</th>
+                                <th>Mã</th>
+                                <th>Đơn giá</th>
+                                <th>Đơn vị</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                <th></th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyNo">
-                            @foreach (var no in Model.DanhSachNoDV)
+                        <tbody>
+                            @foreach (var cf in Model.DanhSachConfig)
                             {
                                 <tr>
-                                    <td><strong>P.@no.SoPhong</strong></td>
-                                    <td>@no.TenKhach</td>
-                                    <td><span class="badge dang-xu-ly">@no.LoaiDV</span></td>
-                                    <td><span class="no-chip"><i class="fas fa-exclamation-triangle"></i> @no.TongTien.ToString("N0") đ</span></td>
-                                    <td style="color:var(--mau-chu-phu);font-size:12px;">@no.NgayTao.ToString("dd/MM/yyyy")</td>
-                                    <td style="font-size:12px;color:var(--mau-chu-phu);">@(no.GhiChuXuLy ?? "—")</td>
-                                    <td><span class="badge qua-han">Chờ thanh toán</span></td>
+                                    <td><strong>@cf.TenDichVu</strong></td>
+                                    <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:11px;">@cf.MaDichVu</code></td>
+                                    <td><strong>@cf.DonGia.ToString("N0") đ</strong></td>
+                                    <td>@cf.DonVi</td>
                                     <td>
-                                        <form method="post" asp-page-handler="NhacNhoDichVu" style="display:inline;">
-                                            <input type="hidden" name="idDonDV" value="@no.IDDonDV" />
-                                            <button type="submit" class="btn btn-warning btn-sm"
-                                                    onclick="return confirm('Gửi nhắc nhở đến khách phòng @no.SoPhong về khoản nợ @no.LoaiDV (@no.TongTien.ToString("N0") đ)?')">
-                                                <i class="fas fa-bell"></i> Nhắc nhở
+                                        @if (cf.IsActive)
+                                        {
+                                            <span class="badge da-duyet">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge tu-choi">Vô hiệu</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form method="post" asp-page-handler="DoiTrangThaiConfig" style="display:inline;">
+                                            <input type="hidden" name="idConfig" value="@cf.IDConfig" />
+                                            <input type="hidden" name="isActive" value="@cf.IsActive" />
+                                            <button type="submit" class="btn @(cf.IsActive ? "btn-warning" : "btn-success") btn-sm">
+                                                @(cf.IsActive ? "Vô hiệu" : "Kích hoạt")
                                             </button>
                                         </form>
                                     </td>
@@ -2104,637 +2413,337 @@
                             }
                         </tbody>
                     </table>
-                    <div class="phan-trang" id="phan-trang-no"></div>
-                    @if (!Model.DanhSachNoDV.Any())
-                    {
-                        <div class="empty-state">
-                            <i class="fas fa-check-circle" style="color:#22c55e;"></i>
-                            <p>Không có khoản nợ dịch vụ nào</p>
+                </div>
+                <!-- Form thêm cấu hình mới -->
+                <div style="border-top:1px solid var(--mau-vien);padding-top:16px;">
+                    <div style="font-size:12px;font-weight:700;color:var(--mau-chu-phu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Thêm đơn giá mới</div>
+                    <form method="post" asp-page-handler="ThemConfig">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tên dịch vụ</label>
+                                <input class="inp" type="text" name="tenDichVu" placeholder="Nước bình..." required />
+                            </div>
+                            <div class="form-group">
+                                <label>Mã dịch vụ</label>
+                                <input class="inp" type="text" name="maDichVu" placeholder="NUOC_BINH" required />
+                            </div>
                         </div>
-                    }
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Đơn giá (đ)</label>
+                                <input class="inp" type="number" name="donGia" min="0" placeholder="25000" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Đơn vị</label>
+                                <input class="inp" type="text" name="donVi" placeholder="bình / kg / lần" required />
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="padding-top:0;border-top:none;">
+                            <button type="button" class="btn btn-ghost" onclick="dongModal('modal-cau-hinh-gia')">Đóng</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm đơn giá</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-    </div><!-- /#noi-dung -->
-</div><!-- /#khu-vuc-chinh -->
-<!-- ===================================================================
-     MODAL: NHẬP GIÁ & XÁC NHẬN GIAO NƯỚC BÌNH
-=================================================================== -->
-<div class="modal-overlay" id="modal-nhap-gia-nuoc" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-nuoc')">
-    <div class="modal">
-        <div class="modal-header">
-            <div>
-                <h3><i class="fas fa-truck" style="color:#f59e0b;margin-right:8px;"></i>Xác nhận đã giao nước bình</h3>
-                <div class="sub" id="subNuoc">Phòng — | Khách: —</div>
-            </div>
-            <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-nuoc')"><i class="fas fa-times"></i></button>
-        </div>
-        <form method="post" asp-page-handler="NhapGiaNuocVaGiao">
-            <input type="hidden" name="idDonDV" id="nuoc_idDonDV" />
-            <div class="form-group">
-                <label>Nội dung đơn</label>
-                <input class="inp" type="text" id="nuoc_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
-            </div>
-            <div class="form-group">
-                <label>Đơn giá (theo cấu hình hệ thống)</label>
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;">
-                    <i class="fas fa-tag" style="color:#f59e0b;"></i>
-                    <span id="nuoc_hienThiGia" style="font-size:15px;font-weight:700;color:#92400e;">—</span>
-                    <span style="font-size:12px;color:#b45309;margin-left:auto;">Giá được xác định từ cấu hình</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Ghi chú xử lý</label>
-                <input class="inp" type="text" name="ghiChuXuLy" placeholder="Đã giao đủ số bình, tình trạng tốt..." />
-            </div>
-            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:4px;">
-                <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-                Sau khi xác nhận, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong> và khách thuê sẽ nhận thông báo.
-                Khách sẽ gửi ảnh chuyển khoản để quản lý xác nhận. Nếu quá hạn, tiền sẽ cộng vào hóa đơn tháng.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-nuoc')">Hủy</button>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Xác nhận đã giao</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ===================================================================
-     MODAL: XEM ẢNH CHUYỂN KHOẢN NƯỚC BÌNH + XÁC NHẬN / TỪ CHỐI
-=================================================================== -->
-<div class="modal-overlay" id="modal-xem-anh-ck" onclick="dongModalNeuNhanNgoai(event,'modal-xem-anh-ck')">
-    <div class="modal modal-lg">
-        <div class="modal-header">
-            <div>
-                <h3><i class="fas fa-image" style="color:#059669;margin-right:8px;"></i>Duyệt ảnh chuyển khoản</h3>
-                <div class="sub" id="subAnhCK">Phòng —</div>
-            </div>
-            <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-ck')"><i class="fas fa-times"></i></button>
-        </div>
-        <img id="anhCKPreview" class="anh-xem-truoc" src="" alt="Ảnh chuyển khoản"
-             style="cursor:zoom-in;" onclick="window.open(this.src,'_blank')" />
-        <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;font-size:13px;color:#065f46;margin-top:12px;">
-            <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-            Kiểm tra ảnh chuyển khoản. Bấm <strong>"Xác nhận"</strong> nếu hợp lệ, hoặc <strong>"Từ chối"</strong> nếu ảnh không hợp lệ — trạng thái sẽ trở về <em>Chưa thanh toán</em> để khách gửi lại.
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-ck')">Đóng</button>
-
-            <!-- TỪ CHỐI: xóa ảnh, trở về "Chưa thanh toán" -->
-            <form method="post" asp-page-handler="TuChoiAnhCK" style="display:inline;">
-                <input type="hidden" name="idDonDV" id="ck_idDonDV_tuchoi" />
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('Từ chối ảnh này? Trạng thái sẽ trở về Chưa thanh toán và khách cần gửi lại.')">
-                    <i class="fas fa-times"></i> Từ chối ảnh
-                </button>
-            </form>
-
-            <!-- XÁC NHẬN: hoàn tất đơn -->
-            <form method="post" asp-page-handler="XacNhanThanhToanNuoc" style="display:inline;">
-                <input type="hidden" name="idDonDV" id="ck_idDonDV" />
-                <button type="submit" class="btn btn-success"
-                        onclick="return confirm('Xác nhận ảnh hợp lệ và hoàn tất thanh toán?')">
-                    <i class="fas fa-check"></i> Xác nhận thanh toán
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- ===================================================================
-     MODAL: NHẬP TIỀN GIẶT SẤY
-=================================================================== -->
-<div class="modal-overlay" id="modal-nhap-gia-gs" onclick="dongModalNeuNhanNgoai(event,'modal-nhap-gia-gs')">
-    <div class="modal">
-        <div class="modal-header">
-            <div>
-                <h3><i class="fas fa-wind" style="color:var(--mau-chu-de);margin-right:8px;"></i>Nhập tiền giặt sấy</h3>
-                <div class="sub" id="subGS">Phòng — | Khách: —</div>
-            </div>
-            <button class="btn-dong-modal" onclick="dongModal('modal-nhap-gia-gs')"><i class="fas fa-times"></i></button>
-        </div>
-        <form method="post" asp-page-handler="NhapGiaGiatSay">
-            <input type="hidden" name="idDonDV" id="gs_idDonDV" />
-            <div class="form-group">
-                <label>Nội dung đơn</label>
-                <input class="inp" type="text" id="gs_noiDung" readonly style="background:#f8fafc;color:var(--mau-chu-phu);" />
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Số tiền (đồng) <span style="color:#ef4444;">*</span></label>
-                    <input class="inp" type="number" name="tongTien" min="0" placeholder="VD: 50000" required />
-                </div>
-                <div class="form-group">
-                    <label>Ghi chú</label>
-                    <input class="inp" type="text" name="ghiChuXuLy" placeholder="3 kg, đã sấy khô..." />
-                </div>
-            </div>
-            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:13px;color:#1e40af;margin-bottom:4px;">
-                <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-                Sau khi nhập giá, đơn sẽ chuyển sang <strong>"Chờ thanh toán"</strong>.
-                Nếu khách không thanh toán đúng hạn, khoản tiền sẽ được cộng vào hóa đơn cuối tháng.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" onclick="dongModal('modal-nhap-gia-gs')">Hủy</button>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gửi báo giá</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ===================================================================
-     MODAL: XEM ẢNH ĐIỆN NƯỚC
-=================================================================== -->
-<div class="modal-overlay" id="modal-xem-anh-dn" onclick="dongModalNeuNhanNgoai(event,'modal-xem-anh-dn')">
-    <div class="modal modal-lg">
-        <div class="modal-header">
-            <div>
-                <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Xác nhận chỉ số điện – nước</h3>
-                <div class="sub" id="subAnhDN">Phòng —</div>
-            </div>
-            <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-dn')"><i class="fas fa-times"></i></button>
-        </div>
-
-        <!-- Bảng chỉ số để quản lý đối chiếu -->
-        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 18px;margin-bottom:12px;">
-            <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:10px;">
-                <i class="fas fa-tachometer-alt" style="margin-right:6px;"></i>Chỉ số khách gửi
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div style="background:#fff;border-radius:8px;padding:10px 14px;border:1px solid #d1fae5;">
-                    <div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-bolt" style="color:#f59e0b;"></i> ĐIỆN</div>
-                    <div style="font-size:13px;">Chỉ số cũ: <strong id="anhDN_dienCu">—</strong></div>
-                    <div style="font-size:13px;">Chỉ số mới: <strong id="anhDN_dienMoi" style="color:#059669;">—</strong></div>
-                    <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tiêu thụ: <strong id="anhDN_dienTieu">—</strong></div>
-                </div>
-                <div style="background:#fff;border-radius:8px;padding:10px 14px;border:1px solid #d1fae5;">
-                    <div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-tint" style="color:#3b82f6;"></i> NƯỚC</div>
-                    <div style="font-size:13px;">Chỉ số cũ: <strong id="anhDN_nuocCu">—</strong></div>
-                    <div style="font-size:13px;">Chỉ số mới: <strong id="anhDN_nuocMoi" style="color:#059669;">—</strong></div>
-                    <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tiêu thụ: <strong id="anhDN_nuocTieu">—</strong></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ảnh đồng hồ điện & nước -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
-
-            <!-- Cột ảnh ĐIỆN -->
-            <div>
-                <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">
-                    <i class="fas fa-bolt" style="color:#f59e0b;margin-right:4px;"></i>Ảnh đồng hồ điện
-                </div>
-                <img id="anhDienPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ điện"
-                     style="display:none;max-height:220px;cursor:zoom-in;"
-                     onclick="window.open(this.src,'_blank')" />
-                <div id="anhDN_noimg_dien" style="display:none;background:#fef3c7;border:1px solid #fcd34d;
-                    border-radius:10px;padding:14px;flex-direction:column;align-items:center;
-                    gap:5px;text-align:center;margin-top:2px;">
-                    <i class="fas fa-camera" style="font-size:24px;color:#d97706;"></i>
-                    <div style="font-size:12px;color:#92400e;font-weight:600;">Chưa có ảnh đồng hồ điện</div>
-                    <div style="font-size:11px;color:#b45309;">Khách chưa gửi hoặc chụp chung 1 ảnh</div>
-                </div>
-            </div>
-
-            <!-- Cột ảnh NƯỚC -->
-            <div>
-                <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">
-                    <i class="fas fa-tint" style="color:#3b82f6;margin-right:4px;"></i>Ảnh đồng hồ nước
-                </div>
-                <img id="anhNuocPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ nước"
-                     style="display:none;max-height:220px;cursor:zoom-in;"
-                     onclick="window.open(this.src,'_blank')" />
-                <div id="anhDN_noimg_nuoc" style="display:none;background:#eff6ff;border:1px solid #93c5fd;
-                    border-radius:10px;padding:14px;flex-direction:column;align-items:center;
-                    gap:5px;text-align:center;margin-top:2px;">
-                    <i class="fas fa-camera" style="font-size:24px;color:#3b82f6;"></i>
-                    <div style="font-size:12px;color:#1e40af;font-weight:600;">Chưa có ảnh đồng hồ nước</div>
-                    <div style="font-size:11px;color:#1d4ed8;">Khách chưa gửi hoặc chụp chung 1 ảnh</div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-dn')">Đóng</button>
-            <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
-                <input type="hidden" name="idGhiNhan" id="anhDN_idGhiNhan" />
-                <input type="hidden" name="chapNhan" value="true" />
-                <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Xác nhận & Duyệt</button>
-            </form>
-            <button class="btn btn-danger" onclick="dongModal('modal-xem-anh-dn');moModalTuChoiDN(document.getElementById('anhDN_idGhiNhan').value, '')">
-                <i class="fas fa-times"></i> Từ chối
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ===================================================================
-     MODAL: TỪ CHỐI ĐIỆN NƯỚC
-=================================================================== -->
-<div class="modal-overlay" id="modal-tu-choi-dn" onclick="dongModalNeuNhanNgoai(event,'modal-tu-choi-dn')">
-    <div class="modal">
-        <div class="modal-header">
-            <div>
-                <h3><i class="fas fa-times-circle" style="color:#ef4444;margin-right:8px;"></i>Từ chối chỉ số điện nước</h3>
-                <div class="sub" id="subTuChoiDN">Phòng —</div>
-            </div>
-            <button class="btn-dong-modal" onclick="dongModal('modal-tu-choi-dn')"><i class="fas fa-times"></i></button>
-        </div>
-        <form method="post" asp-page-handler="DuyetDienNuoc">
-            <input type="hidden" name="idGhiNhan" id="tcDN_idGhiNhan" />
-            <input type="hidden" name="chapNhan" value="false" />
-            <div class="form-group">
-                <label>Lý do từ chối <span style="color:#ef4444;">*</span></label>
-                <input class="inp" type="text" name="ghiChuDuyet" placeholder="Ảnh mờ, số không khớp..." required />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" onclick="dongModal('modal-tu-choi-dn')">Hủy</button>
-                <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Từ chối</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ===================================================================
-     MODAL: CẤU HÌNH ĐƠN GIÁ DỊCH VỤ
-=================================================================== -->
-<div class="modal-overlay" id="modal-cau-hinh-gia" onclick="dongModalNeuNhanNgoai(event,'modal-cau-hinh-gia')">
-    <div class="modal modal-lg">
-        <div class="modal-header">
-            <div>
-                <h3><i class="fas fa-sliders-h" style="color:var(--mau-chu-de);margin-right:8px;"></i>Cấu hình đơn giá dịch vụ</h3>
-                <div class="sub">CONFIG_GIA — Dùng để tham khảo khi tính giá</div>
-            </div>
-            <button class="btn-dong-modal" onclick="dongModal('modal-cau-hinh-gia')"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="table-wrap" style="margin-bottom:16px;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tên dịch vụ</th>
-                        <th>Mã</th>
-                        <th>Đơn giá</th>
-                        <th>Đơn vị</th>
-                        <th>Trạng thái</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var cf in Model.DanhSachConfig)
-                    {
-                        <tr>
-                            <td><strong>@cf.TenDichVu</strong></td>
-                            <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:11px;">@cf.MaDichVu</code></td>
-                            <td><strong>@cf.DonGia.ToString("N0") đ</strong></td>
-                            <td>@cf.DonVi</td>
-                            <td>
-                                @if (cf.IsActive)
-                                {
-                                    <span class="badge da-duyet">Hoạt động</span>
-                                }
-                                else
-                                {
-                                    <span class="badge tu-choi">Vô hiệu</span>
-                                }
-                            </td>
-                            <td>
-                                <form method="post" asp-page-handler="DoiTrangThaiConfig" style="display:inline;">
-                                    <input type="hidden" name="idConfig" value="@cf.IDConfig" />
-                                    <input type="hidden" name="isActive" value="@cf.IsActive" />
-                                    <button type="submit" class="btn @(cf.IsActive ? "btn-warning" : "btn-success") btn-sm">
-                                        @(cf.IsActive ? "Vô hiệu" : "Kích hoạt")
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <!-- Form thêm cấu hình mới -->
-        <div style="border-top:1px solid var(--mau-vien);padding-top:16px;">
-            <div style="font-size:12px;font-weight:700;color:var(--mau-chu-phu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Thêm đơn giá mới</div>
-            <form method="post" asp-page-handler="ThemConfig">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Tên dịch vụ</label>
-                        <input class="inp" type="text" name="tenDichVu" placeholder="Nước bình..." required />
-                    </div>
-                    <div class="form-group">
-                        <label>Mã dịch vụ</label>
-                        <input class="inp" type="text" name="maDichVu" placeholder="NUOC_BINH" required />
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Đơn giá (đ)</label>
-                        <input class="inp" type="number" name="donGia" min="0" placeholder="25000" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Đơn vị</label>
-                        <input class="inp" type="text" name="donVi" placeholder="bình / kg / lần" required />
-                    </div>
-                </div>
-                <div class="modal-footer" style="padding-top:0;border-top:none;">
-                    <button type="button" class="btn btn-ghost" onclick="dongModal('modal-cau-hinh-gia')">Đóng</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm đơn giá</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- ===================================================================
+        <!-- ===================================================================
      JAVASCRIPT
 =================================================================== -->
-<script>
-    // ===== PHÂN TRANG =====
-    class TablePager {
-    constructor(tbodyId, containerId, pageSize = 10) {
-    this.tbody      = document.getElementById(tbodyId);
-    this.container  = document.getElementById(containerId);
-    this.pageSize   = pageSize;
-    this.currentPage = 1;
-    if (this.tbody && this.container) this.refresh();
-    }
+        <script>
+            // ===== PHÂN TRANG =====
+            class TablePager {
+            constructor(tbodyId, containerId, pageSize = 10) {
+            this.tbody      = document.getElementById(tbodyId);
+            this.container  = document.getElementById(containerId);
+            this.pageSize   = pageSize;
+            this.currentPage = 1;
+            if (this.tbody && this.container) this.refresh();
+            }
 
-    // Call after any filter/search changes visibility of rows
-    refresh() {
-    this.visibleRows = Array.from(this.tbody.querySelectorAll('tr'))
-    .filter(r => r.style.display !== 'none');
-    this.totalPages = Math.max(1, Math.ceil(this.visibleRows.length / this.pageSize));
-    if (this.currentPage > this.totalPages) this.currentPage = 1;
-    this._applyPage();
-    this._render();
-    }
+            // Call after any filter/search changes visibility of rows
+            refresh() {
+            this.visibleRows = Array.from(this.tbody.querySelectorAll('tr'))
+            .filter(r => r.style.display !== 'none');
+            this.totalPages = Math.max(1, Math.ceil(this.visibleRows.length / this.pageSize));
+            if (this.currentPage > this.totalPages) this.currentPage = 1;
+            this._applyPage();
+            this._render();
+            }
 
-    goTo(page) {
-    this.currentPage = page;
-    this._applyPage();
-    this._render();
-    }
+            goTo(page) {
+            this.currentPage = page;
+            this._applyPage();
+            this._render();
+            }
 
-    _applyPage() {
-    // First hide ALL rows, then show only the current page slice
-    Array.from(this.tbody.querySelectorAll('tr')).forEach(r => {
-    if (r.style.display !== 'none') r.dataset.pagerVisible = '1';
-    });
-    this.visibleRows.forEach((r, i) => {
-    const inPage = i >= (this.currentPage - 1) * this.pageSize
-    && i <   this.currentPage       * this.pageSize;
-    r.style.display = inPage ? '' : 'none';
-    });
-    }
+            _applyPage() {
+            // First hide ALL rows, then show only the current page slice
+            Array.from(this.tbody.querySelectorAll('tr')).forEach(r => {
+            if (r.style.display !== 'none') r.dataset.pagerVisible = '1';
+            });
+            this.visibleRows.forEach((r, i) => {
+            const inPage = i >= (this.currentPage - 1) * this.pageSize
+            && i <   this.currentPage       * this.pageSize;
+            r.style.display = inPage ? '' : 'none';
+            });
+            }
 
-    _render() {
-    const total  = this.visibleRows.length;
-    const start  = total === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
-    const end    = Math.min(this.currentPage * this.pageSize, total);
+            _render() {
+            const total  = this.visibleRows.length;
+            const start  = total === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+            const end    = Math.min(this.currentPage * this.pageSize, total);
 
-    // Build page number buttons (show max 5 around current)
-    let btns = '';
-    const range = 2;
-    for (let p = 1; p <= this.totalPages; p++) {
-    if (p === 1 || p === this.totalPages
-    || (p >= this.currentPage - range && p <= this.currentPage + range)) {
-    btns += `<button class="pt-btn${p === this.currentPage ? ' active' : ''}"
-    onclick="this.closest('.phan-trang').__pager.goTo(${p})">${p}</button>`;
-    } else if (p === this.currentPage - range - 1
-    || p === this.currentPage + range + 1) {
-    btns += `<button class="pt-btn" disabled>…</button>`;
-    }
-    }
+            // Build page number buttons (show max 5 around current)
+            let btns = '';
+            const range = 2;
+            for (let p = 1; p <= this.totalPages; p++) {
+            if (p === 1 || p === this.totalPages
+            || (p >= this.currentPage - range && p <= this.currentPage + range)) {
+            btns += `<button class="pt-btn${p === this.currentPage ? ' active' : ''}"
+            onclick="this.closest('.phan-trang').__pager.goTo(${p})">${p}</button>`;
+            } else if (p === this.currentPage - range - 1
+            || p === this.currentPage + range + 1) {
+            btns += `<button class="pt-btn" disabled>…</button>`;
+            }
+            }
 
-    this.container.innerHTML = `
-    <span>Hiển thị <strong>${start}–${end}</strong> / ${total} bản ghi</span>
-    <div class="phan-trang-buttons">
-    <button class="pt-btn" ${this.currentPage === 1 ? 'disabled' : ''}
-    onclick="this.closest('.phan-trang').__pager.goTo(${this.currentPage - 1})">
-    <i class="fas fa-chevron-left"></i>
-    </button>
-    ${btns}
-    <button class="pt-btn" ${this.currentPage === this.totalPages ? 'disabled' : ''}
-    onclick="this.closest('.phan-trang').__pager.goTo(${this.currentPage + 1})">
-    <i class="fas fa-chevron-right"></i>
-    </button>
-    </div>`;
-    // Attach reference so onclick can find this instance
-    this.container.__pager = this;
-    }
-    }
+            this.container.innerHTML = `
+            <span>Hiển thị <strong>${start}–${end}</strong> / ${total} bản ghi</span>
+            <div class="phan-trang-buttons">
+            <button class="pt-btn" ${this.currentPage === 1 ? 'disabled' : ''}
+            onclick="this.closest('.phan-trang').__pager.goTo(${this.currentPage - 1})">
+            <i class="fas fa-chevron-left"></i>
+            </button>
+            ${btns}
+            <button class="pt-btn" ${this.currentPage === this.totalPages ? 'disabled' : ''}
+            onclick="this.closest('.phan-trang').__pager.goTo(${this.currentPage + 1})">
+            <i class="fas fa-chevron-right"></i>
+            </button>
+            </div>`;
+            // Attach reference so onclick can find this instance
+            this.container.__pager = this;
+            }
+            }
 
-    const pagerNuoc = new TablePager('tbodyNuoc', 'phan-trang-nuoc', 10);
-    const pagerGS   = new TablePager('tbodyGS',   'phan-trang-gs',   10);
-    const pagerDN   = new TablePager('tbodyDN',   'phan-trang-dn',   10);
-    const pagerNo   = new TablePager('tbodyNo',   'phan-trang-no',   10);
-    // ===== SIDEBAR =====
-    function dongMoSidebar() {
-    document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
-    }
+            const pagerNuoc = new TablePager('tbodyNuoc', 'phan-trang-nuoc', 10);
+            const pagerGS   = new TablePager('tbodyGS',   'phan-trang-gs',   10);
+            const pagerDN   = new TablePager('tbodyDN',   'phan-trang-dn',   10);
+            const pagerNo   = new TablePager('tbodyNo',   'phan-trang-no',   10);
+            // ===== SIDEBAR =====
+            function dongMoSidebar() {
+            document.getElementById('thanh-sidebar').classList.toggle('an-sidebar');
+            }
 
-    function chuyenTrang(ten, el) {
-    const map = {
-    'trang-chu':      '/Manager/Manager',
-    'quan-ly-phong':  '/Manager/ChiTietPhong',
-    'quan-ly-dich-vu':'/Manager/QuanLyDichVu',
-    'hoa-don':        '/Manager/HoaDon',
-    'su-co':          '/Manager/SuCoBaoTri',
-    'bao-cao':        '/Manager/ThongKe',
-    'cai-dat':        '/Manager/CaiDat',
-    };
-    if (map[ten]) window.location.href = map[ten];
-    }
+            function chuyenTrang(ten, el) {
+            const map = {
+            'trang-chu':      '/Manager/Manager',
+            'quan-ly-phong':  '/Manager/ChiTietPhong',
+            'quan-ly-dich-vu':'/Manager/QuanLyDichVu',
+            'hoa-don':        '/Manager/HoaDon',
+            'su-co':          '/Manager/SuCoBaoTri',
+            'bao-cao':        '/Manager/ThongKe',
+            'cai-dat':        '/Manager/CaiDat',
+            };
+            if (map[ten]) window.location.href = map[ten];
+            }
 
-    // ===== TABS =====
-    function chonTab(tabId, btnEl) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('panel-' + tabId).classList.add('active');
-    (btnEl || document.querySelector(`[data-tab="${tabId}"]`)).classList.add('active');
-    }
+            // ===== TABS =====
+            function chonTab(tabId, btnEl) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('panel-' + tabId).classList.add('active');
+            (btnEl || document.querySelector(`[data-tab="${tabId}"]`)).classList.add('active');
+            }
 
-    // ===== MODAL =====
-    function dongModal(id) { document.getElementById(id).classList.remove('hien'); }
-    function dongModalNeuNhanNgoai(e, id) { if (e.target.id === id) dongModal(id); }
+            // ===== MODAL =====
+            function dongModal(id) { document.getElementById(id).classList.remove('hien'); }
+            function dongModalNeuNhanNgoai(e, id) { if (e.target.id === id) dongModal(id); }
 
-    // Đơn giá nước bình từ config (load 1 lần khi trang khởi động)
-    let donGiaNuocBinh = 0;
-    (async function loadDonGiaNuoc() {
-    try {
-    const res = await fetch('/api/ConfigGia?ma=NUOC_BINH');
-    if (res.ok) {
-    const d = await res.json();
-    donGiaNuocBinh = d.donGia || 0;
-    }
-    } catch (e) {
-    // Nếu không có API, sẽ dùng giá từ server-side
-    donGiaNuocBinh = 0;
-    }
-    })();
+            // Đơn giá nước bình từ config (load 1 lần khi trang khởi động)
+            let donGiaNuocBinh = 0;
+            (async function loadDonGiaNuoc() {
+            try {
+            const res = await fetch('/api/ConfigGia?ma=NUOC_BINH');
+            if (res.ok) {
+            const d = await res.json();
+            donGiaNuocBinh = d.donGia || 0;
+            }
+            } catch (e) {
+            // Nếu không có API, sẽ dùng giá từ server-side
+            donGiaNuocBinh = 0;
+            }
+            })();
 
-    function moModalXacNhanGiao(id, phong, khach, noiDung, tienHienTai) {
-    document.getElementById('nuoc_idDonDV').value = id;
-    document.getElementById('nuoc_noiDung').value = noiDung;
-    document.getElementById('subNuoc').textContent = `Phòng ${phong} | Khách: ${khach}`;
-    // Hiển thị giá: ưu tiên từ API, fallback sang giá đơn hiện tại
-    const gia = donGiaNuocBinh > 0 ? donGiaNuocBinh : tienHienTai;
-    document.getElementById('nuoc_hienThiGia').textContent =
-    gia > 0 ? gia.toLocaleString('vi-VN') + ' đ/bình' : 'Theo cấu hình hệ thống';
-    document.getElementById('modal-nhap-gia-nuoc').classList.add('hien');
-    }
+            function moModalXacNhanGiao(id, phong, khach, noiDung, tienHienTai) {
+            document.getElementById('nuoc_idDonDV').value = id;
+            document.getElementById('nuoc_noiDung').value = noiDung;
+            document.getElementById('subNuoc').textContent = `Phòng ${phong} | Khách: ${khach}`;
+            // Hiển thị giá: ưu tiên từ API, fallback sang giá đơn hiện tại
+            const gia = donGiaNuocBinh > 0 ? donGiaNuocBinh : tienHienTai;
+            document.getElementById('nuoc_hienThiGia').textContent =
+            gia > 0 ? gia.toLocaleString('vi-VN') + ' đ/bình' : 'Theo cấu hình hệ thống';
+            document.getElementById('modal-nhap-gia-nuoc').classList.add('hien');
+            }
 
-    function xemAnhBienLai(url, id, phong, khach) {
-    document.getElementById('anhCKPreview').src = url;
-    document.getElementById('ck_idDonDV').value = id;
-    document.getElementById('ck_idDonDV_tuchoi').value = id;
-    document.getElementById('subAnhCK').textContent = `Phòng ${phong} | Khách: ${khach}`;
-    document.getElementById('modal-xem-anh-ck').classList.add('hien');
-    }
+            function xemAnhBienLai(url, id, phong, khach) {
+            document.getElementById('anhCKPreview').src = url;
+            document.getElementById('ck_idDonDV').value = id;
+            document.getElementById('ck_idDonDV_tuchoi').value = id;
+            document.getElementById('subAnhCK').textContent = `Phòng ${phong} | Khách: ${khach}`;
+            document.getElementById('modal-xem-anh-ck').classList.add('hien');
+            }
 
 
-    // Giữ lại tên cũ để tương thích nếu có chỗ nào còn gọi
-    function moModalNhapGiaNuoc(id, phong, khach, noiDung, tienHienTai) {
-    moModalXacNhanGiao(id, phong, khach, noiDung, tienHienTai);
-    }
+            // Giữ lại tên cũ để tương thích nếu có chỗ nào còn gọi
+            function moModalNhapGiaNuoc(id, phong, khach, noiDung, tienHienTai) {
+            moModalXacNhanGiao(id, phong, khach, noiDung, tienHienTai);
+            }
 
-    function moModalNhapGiaGS(id, phong, khach, noiDung) {
-    document.getElementById('gs_idDonDV').value  = id;
-    document.getElementById('gs_noiDung').value  = noiDung;
-    document.getElementById('subGS').textContent = `Phòng ${phong} | Khách: ${khach}`;
-    document.getElementById('modal-nhap-gia-gs').classList.add('hien');
-    }
+            function moModalNhapGiaGS(id, phong, khach, noiDung) {
+            document.getElementById('gs_idDonDV').value  = id;
+            document.getElementById('gs_noiDung').value  = noiDung;
+            document.getElementById('subGS').textContent = `Phòng ${phong} | Khách: ${khach}`;
+            document.getElementById('modal-nhap-gia-gs').classList.add('hien');
+            }
 
-    function xemAnhDienNuoc(urlDien, urlNuoc, id, phong, dienCu, dienMoi, nuocCu, nuocMoi) {
-    document.getElementById('anhDN_idGhiNhan').value = id;
-    document.getElementById('subAnhDN').textContent  = `Phòng ${phong}`;
+            function xemAnhDienNuoc(urlDien, urlNuoc, id, phong, dienCu, dienMoi, nuocCu, nuocMoi) {
+            document.getElementById('anhDN_idGhiNhan').value = id;
+            document.getElementById('subAnhDN').textContent  = `Phòng ${phong}`;
 
-    // ── Cập nhật chỉ số ──────────────────────────────────────────────────
-    document.getElementById('anhDN_dienCu').textContent    = dienCu;
-    document.getElementById('anhDN_dienMoi').textContent   = dienMoi;
-    document.getElementById('anhDN_dienTieu').textContent  = (parseInt(dienMoi) - parseInt(dienCu)) + ' số';
-    document.getElementById('anhDN_nuocCu').textContent    = nuocCu;
-    document.getElementById('anhDN_nuocMoi').textContent   = nuocMoi;
-    document.getElementById('anhDN_nuocTieu').textContent  = (parseInt(nuocMoi) - parseInt(nuocCu)) + ' số';
+            // ── Cập nhật chỉ số ──────────────────────────────────────────────────
+            document.getElementById('anhDN_dienCu').textContent    = dienCu;
+            document.getElementById('anhDN_dienMoi').textContent   = dienMoi;
+            document.getElementById('anhDN_dienTieu').textContent  = (parseInt(dienMoi) - parseInt(dienCu)) + ' số';
+            document.getElementById('anhDN_nuocCu').textContent    = nuocCu;
+            document.getElementById('anhDN_nuocMoi').textContent   = nuocMoi;
+            document.getElementById('anhDN_nuocTieu').textContent  = (parseInt(nuocMoi) - parseInt(nuocCu)) + ' số';
 
-    // ── Ảnh đồng hồ điện ─────────────────────────────────────────────────
-    var imgDien   = document.getElementById('anhDienPreview');
-    var noDien    = document.getElementById('anhDN_noimg_dien');
-    if (urlDien) {
-    imgDien.src             = urlDien;
-    imgDien.style.display   = 'block';
-    noDien.style.display    = 'none';
-    } else {
-    imgDien.src             = '';
-    imgDien.style.display   = 'none';
-    noDien.style.display    = 'flex';
-    }
+            // ── Reset trạng thái ảnh trước khi hiển thị ──────────────────────────
+            var imgDien   = document.getElementById('anhDienPreview');
+            var noDien    = document.getElementById('anhDN_noimg_dien');
+            var imgNuoc   = document.getElementById('anhNuocPreview');
+            var noNuoc    = document.getElementById('anhDN_noimg_nuoc');
 
-    // ── Ảnh đồng hồ nước ─────────────────────────────────────────────────
-    var imgNuoc   = document.getElementById('anhNuocPreview');
-    var noNuoc    = document.getElementById('anhDN_noimg_nuoc');
-    if (urlNuoc) {
-    imgNuoc.src             = urlNuoc;
-    imgNuoc.style.display   = 'block';
-    noNuoc.style.display    = 'none';
-    } else {
-    imgNuoc.src             = '';
-    imgNuoc.style.display   = 'none';
-    noNuoc.style.display    = 'flex';
-    }
+            imgDien.src           = '';
+            imgDien.style.display = 'none';
+            noDien.style.display  = 'none';
+            imgNuoc.src           = '';
+            imgNuoc.style.display = 'none';
+            noNuoc.style.display  = 'none';
 
-    document.getElementById('modal-xem-anh-dn').classList.add('hien');
-    }
+            // ── Ảnh đồng hồ điện ─────────────────────────────────────────────────
+            if (urlDien && urlDien.trim() !== '') {
+            imgDien.src             = urlDien;
+            imgDien.style.display   = 'block';
+            noDien.style.display    = 'none';
+            } else {
+            imgDien.src             = '';
+            imgDien.style.display   = 'none';
+            noDien.style.display    = 'flex';
+            }
 
-    function moModalTuChoiDN(id, phong) {
-    document.getElementById('tcDN_idGhiNhan').value     = id;
-    document.getElementById('subTuChoiDN').textContent  = phong ? `Phòng ${phong}` : '';
-    document.getElementById('modal-tu-choi-dn').classList.add('hien');
-    }
+            // ── Ảnh đồng hồ nước ─────────────────────────────────────────────────
+            if (urlNuoc && urlNuoc.trim() !== '') {
+            imgNuoc.src             = urlNuoc;
+            imgNuoc.style.display   = 'block';
+            noNuoc.style.display    = 'none';
+            } else {
+            imgNuoc.src             = '';
+            imgNuoc.style.display   = 'none';
+            noNuoc.style.display    = 'flex';
+            }
 
-    function moModalCauHinhGia() {
-    document.getElementById('modal-cau-hinh-gia').classList.add('hien');
-    }
+            document.getElementById('modal-xem-anh-dn').classList.add('hien');
+            }
 
-    // ===== FILTER: ĐƠN NƯỚC =====
-    let filterNuoc = '';
-    function locDonNuoc(tt, btn) {
-    filterNuoc = tt;
-    document.querySelectorAll('#panel-don-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
-    }
+            function moModalTuChoiDN(id, phong) {
+            document.getElementById('tcDN_idGhiNhan').value     = id;
+            document.getElementById('subTuChoiDN').textContent  = phong ? `Phòng ${phong}` : '';
+            document.getElementById('modal-tu-choi-dn').classList.add('hien');
+            }
 
-    // ===== FILTER: GIẶT SẤY =====
-    let filterGS = '';
-    function locDonGS(tt, btn) {
-    filterGS = tt;
-    document.querySelectorAll('#panel-giat-say .filter-pill').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    apDungFilter('tbodyGS', filterGS, document.getElementById('searchGS').value);
-    }
+            function moModalCauHinhGia() {
+            document.getElementById('modal-cau-hinh-gia').classList.add('hien');
+            }
 
-    function apDungFilter(tbodyId, tt, kw) {
-    const rows = document.querySelectorAll(`#${tbodyId} tr`);
-    rows.forEach(r => {
-    const matchTT = !tt || r.dataset.trangthai === tt;
-    const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw.toLowerCase());
-    r.style.display = matchTT && matchKW ? '' : 'none';
-    });
-    if (tbodyId === 'tbodyNuoc') pagerNuoc.refresh();
-    if (tbodyId === 'tbodyGS')   pagerGS.refresh();
-    }
+            // ===== FILTER: ĐƠN NƯỚC =====
+            let filterNuoc = '';
+            function locDonNuoc(tt, btn) {
+            filterNuoc = tt;
+            document.querySelectorAll('#panel-don-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+            apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
+            }
 
-    function timKiemDon(loai) {
-    if (loai === 'nuoc') apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
-    else                 apDungFilter('tbodyGS',   filterGS,   document.getElementById('searchGS').value);
-    }
+            // ===== FILTER: GIẶT SẤY =====
+            let filterGS = '';
+            function locDonGS(tt, btn) {
+            filterGS = tt;
+            document.querySelectorAll('#panel-giat-say .filter-pill').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+            apDungFilter('tbodyGS', filterGS, document.getElementById('searchGS').value);
+            }
 
-    // ===== FILTER: ĐIỆN NƯỚC =====
-    let filterDN = 255;
-    function locDienNuoc(tt, btn) {
-    filterDN = tt;
-    document.querySelectorAll('#panel-dien-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    timKiemDienNuoc();
-    }
+            function apDungFilter(tbodyId, tt, kw) {
+            const rows = document.querySelectorAll(`#${tbodyId} tr`);
+            rows.forEach(r => {
+            const matchTT = !tt || r.dataset.trangthai === tt;
+            const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw.toLowerCase());
+            r.style.display = matchTT && matchKW ? '' : 'none';
+            });
+            if (tbodyId === 'tbodyNuoc') pagerNuoc.refresh();
+            if (tbodyId === 'tbodyGS')   pagerGS.refresh();
+            }
 
-    function timKiemDienNuoc() {
-    const kw = document.getElementById('searchDN').value.toLowerCase();
-    document.querySelectorAll('#tbodyDN tr').forEach(r => {
-    const matchTT = filterDN === 255 || parseInt(r.dataset.tt) === filterDN;
-    const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw);
-    r.style.display = matchTT && matchKW ? '' : 'none';
-    });
-    pagerDN.refresh();
-    }
+            function timKiemDon(loai) {
+            if (loai === 'nuoc') apDungFilter('tbodyNuoc', filterNuoc, document.getElementById('searchNuoc').value);
+            else                 apDungFilter('tbodyGS',   filterGS,   document.getElementById('searchGS').value);
+            }
 
-    // ===== TOAST =====
-    function hienToast(msg, loai) {
-    const icons = { success: 'fa-check-circle', danger: 'fa-times-circle', warning: 'fa-exclamation-triangle' };
-    const wrap  = document.getElementById('toastWrap');
-    const t     = document.createElement('div');
-    t.className = `toast ${loai}`;
-    t.innerHTML = `<i class="fas ${icons[loai] || icons.success}"></i>${msg}`;
-    wrap.appendChild(t);
-    setTimeout(() => t.remove(), 4000);
-    }
+            // ===== FILTER: ĐIỆN NƯỚC =====
+            let filterDN = 255;
+            function locDienNuoc(tt, btn) {
+            filterDN = tt;
+            document.querySelectorAll('#panel-dien-nuoc .filter-pill').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+            timKiemDienNuoc();
+            }
 
-    // ===== ĐỒNG BỘ BADGE SIDEBAR =====
-    (async function loadBadgeSidebar() {
-    try {
-    const res = await fetch('/Api/BadgeCounts?scopeManager=true');
-    if (!res.ok) return;
-    const data = await res.json();
-    const badgeDV = document.getElementById('badge-dichvu');
-    const badgeSC = document.getElementById('badge-suco');
-    if (badgeDV) { badgeDV.textContent = data.dichVuMoi; badgeDV.style.display = data.dichVuMoi > 0 ? 'inline' : 'none'; }
-    if (badgeSC) { badgeSC.textContent = data.suCoChoXuLy; badgeSC.style.display = data.suCoChoXuLy > 0 ? 'inline' : 'none'; }
-    } catch (e) { console.warn('Không thể load badge sidebar:', e); }
-    })();
+            function timKiemDienNuoc() {
+            const kw = document.getElementById('searchDN').value.toLowerCase();
+            document.querySelectorAll('#tbodyDN tr').forEach(r => {
+            const matchTT = filterDN === 255 || parseInt(r.dataset.tt) === filterDN;
+            const matchKW = !kw || r.dataset.search.toLowerCase().includes(kw);
+            r.style.display = matchTT && matchKW ? '' : 'none';
+            });
+            pagerDN.refresh();
+            }
 
-</script>
-</body>
+            // ===== TOAST =====
+            function hienToast(msg, loai) {
+            const icons = { success: 'fa-check-circle', danger: 'fa-times-circle', warning: 'fa-exclamation-triangle' };
+            const wrap  = document.getElementById('toastWrap');
+            const t     = document.createElement('div');
+            t.className = `toast ${loai}`;
+            t.innerHTML = `<i class="fas ${icons[loai] || icons.success}"></i>${msg}`;
+            wrap.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+            }
+
+            // ===== ĐỒNG BỘ BADGE SIDEBAR =====
+            (async function loadBadgeSidebar() {
+            try {
+            const res = await fetch('/Api/BadgeCounts?scopeManager=true');
+            if (!res.ok) return;
+            const data = await res.json();
+            const badgeDV = document.getElementById('badge-dichvu');
+            const badgeSC = document.getElementById('badge-suco');
+            if (badgeDV) { badgeDV.textContent = data.dichVuMoi; badgeDV.style.display = data.dichVuMoi > 0 ? 'inline' : 'none'; }
+            if (badgeSC) { badgeSC.textContent = data.suCoChoXuLy; badgeSC.style.display = data.suCoChoXuLy > 0 ? 'inline' : 'none'; }
+            } catch (e) { console.warn('Không thể load badge sidebar:', e); }
+            })();
+
+        </script>
+    </body>
 </html>

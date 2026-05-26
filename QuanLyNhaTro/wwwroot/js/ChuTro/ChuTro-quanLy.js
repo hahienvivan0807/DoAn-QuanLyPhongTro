@@ -783,31 +783,18 @@ function moModalDanhSachQuanLy() {
 async function themQuanLyFull() {
 
     const dulieu = {
-        // --- Tab 1: Tài khoản ---
         FullName: document.getElementById('them-fullname')?.value.trim(),
         Username: document.getElementById('them-username')?.value.trim(),
         Phone: document.getElementById('them-phone')?.value.trim(),
         Email: document.getElementById('them-email')?.value.trim(),
         Password: document.getElementById('them-password')?.value.trim(),
 
-        // --- Tab 2: Hồ sơ cá nhân ---
         CCCD: document.getElementById('them-cccd')?.value.trim(),
         NgaySinh: document.getElementById('them-ngaysinh')?.value,
         GioiTinh: document.getElementById('them-gioitinh')?.value,
         QueQuan: document.getElementById('them-quequan')?.value.trim(),
         DiaChiThuongTru: document.getElementById('them-diachi')?.value.trim(),
         GhiChu: document.getElementById('them-ghichu')?.value.trim(),
-
-        // --- Tab 3: Hợp đồng & Phòng ---
-        // Lấy ID phòng từ input hidden (như bạn đã code ở hàm chonPhongCard)
-        IDPhong: parseInt(document.getElementById('them-phong-phan-cong')?.value || '0'),
-
-        NgayBatDauHD: document.getElementById('them-ngay-bd-hd')?.value,
-        NgayKetThucHD: document.getElementById('them-ngay-kt-hd')?.value,
-
-        DienDauKy: parseInt(document.getElementById('them-dien-dau-ky')?.value || '0'),
-        NuocDauKy: parseInt(document.getElementById('them-nuoc-dau-ky')?.value || '0'),
-        TienCoc: parseFloat(document.getElementById('them-tien-coc')?.value || '0')
     };
 
     console.log("📦 Toàn bộ dulieu đã được gom nhóm chuẩn bị gửi:", dulieu);
@@ -913,7 +900,7 @@ function renderPhongGrid(danhSach, filter) {
              onclick="${disabled ? '' : `chonPhongCard(this,${p.iDPhong},'${p.soPhong}')`}"
              title="${disabled ? p.trangThai + ' – không thể chọn' : 'Chọn P.' + p.soPhong}">
             <div class="pc-so">P.${p.soPhong}</div>
-            <div class="pc-tang">Tầng ${p.tang}</div>
+            <div class="pc-tang">Khu ${p.khu}</div>
             <div class="pc-tt ${ttClass}">${ttLabel}</div>
         </div>`;
     }).join('');
