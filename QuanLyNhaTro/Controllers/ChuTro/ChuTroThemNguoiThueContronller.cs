@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
 using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace QuanLyNhaTro.Controllers.ChuTro
 {
     [ApiController]
@@ -22,6 +23,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             _context = context;
             _configuration = configuration;
         }
+
         public class NguoiThueRequest
         {
             // Tab 1: Thông tin cơ bản
@@ -57,6 +59,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             // Ảnh
             public string? AnhChanDung { get; set; }
         }
+
         [HttpPost("them-nguoi-thue")]
         public async Task<IActionResult> ThemNguoiThue([FromBody] NguoiThueRequest req)
         {
@@ -73,39 +76,34 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 return BadRequest(new { message = "Vui lòng chọn phòng" });
             if (req.NgayVaoO == default(DateTime))
                 return BadRequest(new { message = "Ngày vào ở không được để trống" });
-
             if (!req.NgayKetThuc.HasValue)
                 return BadRequest(new { message = "Ngày kết thúc hợp đồng không được để trống" });
+
+            // ── Validate tuổi ──
             if (req.NgaySinh.HasValue)
             {
                 var ngaySinh = req.NgaySinh.Value.Date;
                 var ngayHienTai = DateTime.Today;
 
                 int tuoi = ngayHienTai.Year - ngaySinh.Year;
-
-                // Kiểm tra nếu chưa đến sinh nhật trong năm nay thì giảm đi 1 tuổi
                 if (ngayHienTai < ngaySinh.AddYears(tuoi))
-                {
                     tuoi--;
-                }
 
                 if (tuoi < 16)
-                {
                     return BadRequest(new
                     {
                         message = $"Người thuê mới {tuoi} tuổi. Hợp đồng chỉ áp dụng cho người từ đủ 16 tuổi trở lên."
                     });
-                }
             }
-            // ── Validate ngày ──-
-            if (req.NgayKetThuc.HasValue && req.NgayKetThuc.Value.Date <= req.NgayVaoO.Date)
+
+            // ── Validate ngày ──
+            if (req.NgayKetThuc.Value.Date <= req.NgayVaoO.Date)
                 return BadRequest(new { message = "Ngày hết hạn HĐ phải sau ngày vào ở" });
-            // Ngày không được quá ngắn
+
             int soNgayThue = (req.NgayKetThuc.Value.Date - req.NgayVaoO.Date).Days;
             if (soNgayThue < 180)
-            {
                 return BadRequest(new { message = $"Thời gian thuê quá ngắn ({soNgayThue} ngày). Hợp đồng tối thiểu phải từ 180 ngày trở lên." });
-            }
+
             // ── Validate trùng ──
             bool sdtTrung = await _context.ACCOUNT.AnyAsync(u => u.Phone == req.SoDienThoai);
             if (sdtTrung)
@@ -140,7 +138,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     UpdatedAt = DateTime.Now,
                 };
                 _context.ACCOUNT.Add(newAccount);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // lấy IDUser
 
                 // 2. INSERT KHACH_THUE
                 var newKhachThue = new KHACH_THUE
@@ -180,19 +178,29 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 // 4. UPDATE PHONG → Đã thuê
                 phong.TrangThai = "Đã thuê";
 
-                var newNguoiOGhep = new HOPDONG_KHACHO
+                // ✅ FIX 1: SaveChanges TRƯỚC khi dùng newHopDong.IDHopDong
+                // Trước đây IDHopDong = 0 (chưa được DB gán) → vi phạm FK → lỗi 500
+                await _context.SaveChangesAsync(); // lấy IDHopDong
+
+                // 5. INSERT HOPDONG_KHACHO (chủ phòng)
+                // ✅ FIX 3: Bổ sung đầy đủ IsChinhChu, GioiTinh, QuanHe
+                var newKhachO = new HOPDONG_KHACHO
                 {
-                    IDHopDong = newHopDong.IDHopDong,
+                    IDHopDong = newHopDong.IDHopDong, // ✅ Lúc này đã có giá trị hợp lệ
                     IDUser = newAccount.IDUser,
                     HoTen = newAccount.FullName.Trim(),
                     SoCCCD = req.SoCCCD?.Trim(),
                     SoDienThoai = req.SoDienThoai.Trim(),
-                    NgayVao = DateTime.Now,
                     NgaySinh = req.NgaySinh,
-                    GhiChu = req.GhiChu
+                    GioiTinh = req.GioiTinh,
+                    QuanHe = "Đại diện",
+                    IsChinhChu = true,
+                    NgayVao = req.NgayVaoO,
+                    GhiChu = req.GhiChu?.Trim(),
                 };
-                _context.HOPDONG_KHACHO.Add(newNguoiOGhep);
+                _context.HOPDONG_KHACHO.Add(newKhachO);
                 await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
                 return Ok(new { message = "Thêm người thuê thành công!", idUser = newAccount.IDUser });
@@ -200,32 +208,42 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return StatusCode(500, new { message = "Lỗi hệ thống!", detail = ex.Message });
+                // InnerException chứa lỗi DB thật sự (ví dụ: constraint, column null, v.v.)
+                var innerMsg = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(500, new
+                {
+                    message = "Lỗi hệ thống!",
+                    detail = ex.Message,
+                    innerDetail = innerMsg
+                });
             }
         }
+
         public class ResetPasswordRequest
         {
             public string SDTKhach { get; set; }
             public string NewPassword { get; set; }
         }
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> UpdateUser([FromBody] ResetPasswordRequest request)
         {
             var user = await _context.ACCOUNT.FirstOrDefaultAsync(u => u.Phone == request.SDTKhach);
             if (user == null)
-            {
                 return BadRequest(new { message = "Không tồn tại số điện thoại" });
-            }
+
             string hashPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             user.Passwords = hashPassword;
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật mật khẩu thành công" });
         }
+
         public class TraPhongRequest
         {
             public string? LyDo { get; set; }
             public int IDUser { get; set; }
         }
+
         [HttpPut("{id}/tra-phong")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> XoaNguoiThue(int id, [FromBody] TraPhongRequest request)
@@ -262,6 +280,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 message = $"Đã trả phòng thành công cho {hopDong.Tenant.FullName}"
             });
         }
+
         public class NguoiOGhepRequest
         {
             // --- Phòng ---
@@ -275,17 +294,16 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             public string Email { get; set; }
             public string Roles { get; set; } = "Tenant";
 
-            public string SoCCCD { get; set; }
-
+            public string? SoCCCD { get; set; }
             public DateTime? NgaySinh { get; set; }
-
-            public string GioiTinh { get; set; }
-            public string QueQuan { get; set; }
+            public string? GioiTinh { get; set; }
+            public string? QueQuan { get; set; }
 
             public DateTime? NgayVaoO { get; set; }
             public string QuanHe { get; set; }
-            public string GhiChu { get; set; }
+            public string? GhiChu { get; set; }
         }
+
         [HttpPost("them-nguoi-o-ghep")]
         public async Task<IActionResult> ThemNguoiOGhep([FromBody] NguoiOGhepRequest request)
         {
@@ -298,7 +316,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             if (hopDongHienTai == null)
                 return BadRequest(new { message = "Không tìm thấy hợp đồng đang hiệu lực cho phòng này" });
 
-            // ── FIX: Kiểm tra account đã tồn tại chưa ──────────────────────
+            // ── Kiểm tra account đã tồn tại chưa ──
             var accountTonTai = await _context.ACCOUNT
                 .FirstOrDefaultAsync(a => a.Username == request.Username.Trim());
 
@@ -313,7 +331,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             }
             else
             {
-                // Kiểm tra thêm SĐT trùng không
+                // Kiểm tra SĐT trùng không
                 var sdtTonTai = await _context.ACCOUNT
                     .FirstOrDefaultAsync(a => a.Phone == request.Phone.Trim());
                 if (sdtTonTai != null)
@@ -334,10 +352,9 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     UpdatedAt = DateTime.Now,
                 };
                 _context.ACCOUNT.Add(newAccount);
-                await _context.SaveChangesAsync(); // ← SaveChanges riêng để lấy IDUser
+                await _context.SaveChangesAsync(); // lấy IDUser
                 idUser = newAccount.IDUser;
             }
-            // ───────────────────────────────────────────────────────────────
 
             // ── Tạo KHACH_THUE nếu chưa có ──
             var khachThueTonTai = await _context.KHACH_THUE
@@ -356,14 +373,13 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     QueQuan = request.QueQuan?.Trim(),
                     DiaChiThuongTru = "",
                     GhiChu = request.GhiChu?.Trim()
-                                      ?? $"Người ở ghép, quan hệ: {request.QuanHe}",
+                              ?? $"Người ở ghép, quan hệ: {request.QuanHe}",
                     NgayVaoO = request.NgayVaoO ?? DateTime.Today,
                 };
                 _context.KHACH_THUE.Add(newKhachThue);
             }
 
-            // ── Thêm vào HOPDONG_KHACHO ──────────────────────────────────
-            // Kiểm tra đã có trong hợp đồng này chưa
+            // ── Kiểm tra đã có trong hợp đồng này chưa ──
             var daCoTrongHD = await _context.HOPDONG_KHACHO
                 .AnyAsync(ko => ko.IDHopDong == hopDongHienTai.IDHopDong
                              && ko.IDUser == idUser
@@ -372,6 +388,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             if (daCoTrongHD)
                 return BadRequest(new { message = "Người này đã có trong hợp đồng của phòng" });
 
+            // ── INSERT HOPDONG_KHACHO ──
             var khachO = new HOPDONG_KHACHO
             {
                 IDHopDong = hopDongHienTai.IDHopDong,
@@ -386,9 +403,12 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 NgayVao = request.NgayVaoO ?? DateTime.Today,
             };
             _context.HOPDONG_KHACHO.Add(khachO);
-            var phong = await _context.PHONG.FirstOrDefaultAsync();
-            phong.soluong += 1;
-           
+
+
+            var phong = await _context.PHONG
+                .FirstOrDefaultAsync(p => p.IDPhong == hopDongHienTai.IDPhong);
+            if (phong != null)
+                phong.soluong += 1;
 
             await _context.SaveChangesAsync();
 
