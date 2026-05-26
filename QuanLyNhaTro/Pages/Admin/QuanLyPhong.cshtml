@@ -1814,6 +1814,17 @@
                                     <td><span class="gia-phong-hien">@p.GiaPhongFix.ToString("N0") ₫</span></td>
                                     <td><span class="trang-thai-phong @cssThangThai">@p.TrangThai</span></td>
                                     <td style="text-align:center;">
+                                        @{
+                                            int soNguoiThucTe = 0;
+                                            if (p.TrangThai != "Trống")
+                                            {
+                                                var khachOHienTai = hopDong?.KhachO?.Where(k => k.NgayRa == null).ToList();
+                                                if (khachOHienTai != null && khachOHienTai.Count > 0)
+                                                    soNguoiThucTe = khachOHienTai.Count;
+                                                else if (!string.IsNullOrEmpty(tenNguoiThue))
+                                                    soNguoiThucTe = 1; // chỉ có chính chủ, chưa có bản ghi KhachO riêng
+                                            }
+                                        }
                                         @if (p.TrangThai == "Trống")
                                         {
                                             <span style="color:var(--mau-chu-phu);font-size:12px;font-style:italic;">— Không có người ở —</span>
@@ -1822,7 +1833,7 @@
                                         {
                                             <span style="display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:13px;color:var(--mau-chu);">
                                                 <i class="fas fa-users" style="color:var(--mau-chu-phu);font-size:11px;"></i>
-                                                @p.soluong người
+                                                @soNguoiThucTe người
                                             </span>
                                         }
                                     </td>
@@ -2504,7 +2515,7 @@
         document.getElementById('cdt-trang-thai-header').textContent = phong.trangThai;
         document.getElementById('cdt-so-phong').textContent = phong.soPhong;
         document.getElementById('cdt-tang').textContent = 'Khu ' + phong.khu;
-        document.getElementById('cdt-so-luong').textContent = phong.trangThai === 'Trống' ? '— Không có người ở —' : (phong.soLuong ?? 1) + ' người';
+        document.getElementById('cdt-so-luong').textContent = phong.trangThai === 'Trống' ? '— Không có người ở —' : (phong.soLuong ?? 0) + ' người';
         document.getElementById('cdt-dien-tich').textContent = phong.dienTich ? phong.dienTich.toFixed(1) + ' m²' : '— Chưa cập nhật —';
         document.getElementById('cdt-gia-phong').textContent = new Intl.NumberFormat('vi-VN').format(phong.giaPhongFix) + ' ₫';
         document.getElementById('cdt-ngay-tao').textContent = phong.createdAt;
@@ -2542,16 +2553,6 @@
         }
 
         moModal('modal-chi-tiet-phong');
-        }
-
-        function chuyenSangSuaTuChiTiet() {
-        dongModal('modal-chi-tiet-phong');
-        moModalSuaPhong(idPhongHienTai);
-        }
-
-        function chuyenSangSuaTuChiTiet() {
-        dongModal('modal-chi-tiet-phong');
-        moModalSuaPhong(idPhongHienTai);
         }
 
         function chuyenSangSuaTuChiTiet() {

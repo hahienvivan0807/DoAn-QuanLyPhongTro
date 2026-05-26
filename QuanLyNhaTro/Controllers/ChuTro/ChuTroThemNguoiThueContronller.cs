@@ -386,6 +386,9 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 NgayVao = request.NgayVaoO ?? DateTime.Today,
             };
             _context.HOPDONG_KHACHO.Add(khachO);
+            var phong = await _context.PHONG.FirstOrDefaultAsync();
+            phong.soluong += 1;
+           
 
             await _context.SaveChangesAsync();
 

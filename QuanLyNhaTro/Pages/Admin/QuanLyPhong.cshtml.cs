@@ -51,14 +51,15 @@ namespace QuanLyNhaTro.Pages.Admin
         // ================================================================
         public async Task<IActionResult> OnGetAsync()
         {
-            // Tải tất cả phòng, kèm theo hợp đồng đang hiệu lực và tài khoản người thuê
+            // Tải tất cả phòng, kèm theo hợp đồng đang hiệu lực, tài khoản người thuê và khách ở
+            // Chú ý: EF Core yêu cầu Include riêng cho từng ThenInclude trên cùng một navigation
             DanhSachPhong = await _db.PHONG
                 .Include(p => p.HopDongs
                     .Where(hd => hd.TrangThaiHD == "Đang hiệu lực"))
                     .ThenInclude(hd => hd.Tenant)
                 .Include(p => p.HopDongs
                     .Where(hd => hd.TrangThaiHD == "Đang hiệu lực"))
-                    .ThenInclude(hd => hd.KhachO)  // ← add this
+                    .ThenInclude(hd => hd.KhachO)
                 .OrderBy(p => p.Khu)
                 .ThenBy(p => p.SoPhong)
                 .ToListAsync();
@@ -76,12 +77,34 @@ namespace QuanLyNhaTro.Pages.Admin
                 {
                     // Lấy hợp đồng đang hiệu lực — chỉ khi phòng không Trống
                     var hd = p.TrangThai != "Trống" ? p.HopDongs.FirstOrDefault(h => h.TrangThaiHD == "Đang hiệu lực") : null;
+
+                    // Danh sách khách đang ở thực tế (NgayRa == null)
+                    var khachOHienTai = hd?.KhachO?
+                        .Where(k => k.NgayRa == null)
+                        .ToList()
+                        ?? new List<HOPDONG_KHACHO>();
+
+                    // Nếu KhachO rỗng nhưng có Tenant (phòng 1 người = chính chủ chưa có bản ghi KhachO riêng)
+                    // → tổng hợp thông tin Tenant thành 1 entry ảo để hiển thị
+                    bool dungTenantAo = khachOHienTai.Count == 0 && hd?.Tenant != null;
+
+                    var danhSachKhach = dungTenantAo
+                        ? new[] { new { hoTen = hd!.Tenant!.FullName ?? "—", quanHe = "Chính chủ", sdt = hd.Tenant.Phone ?? "—", isChinhChu = true } }.ToList()
+                        : khachOHienTai
+                            .Select(k => new { hoTen = k.HoTen ?? "—", quanHe = k.QuanHe ?? "", sdt = k.SoDienThoai ?? "—", isChinhChu = k.IsChinhChu })
+                            .ToList();
+
+                    // Số người ở thực tế
+                    int soLuongThucTe = danhSachKhach.Count;
+                    // Nếu vẫn là 0 (không có KhachO lẫn Tenant) thì giữ nguyên 0 — không fallback về soluong (sức chứa)
+
                     return new
                     {
                         idPhong = p.IDPhong,
                         soPhong = p.SoPhong,
                         Khu = (int)p.Khu,
-                        soLuong = p.soluong,
+                        soLuong = soLuongThucTe,
+                        soLuongToiDa = p.soluong,
                         dienTich = p.DienTich,
                         giaPhongFix = p.GiaPhongFix,
                         moTa = p.MoTa,
@@ -89,15 +112,7 @@ namespace QuanLyNhaTro.Pages.Admin
                         createdAt = p.CreatedAt.ToString("dd/MM/yyyy"),
                         tenNguoiThue = hd?.Tenant?.FullName,
                         sdtNguoiThue = hd?.Tenant?.Phone,
-                            danhSachKhachO = hd?.KhachO
-                            .Where(k => k.NgayRa == null)   // only current occupants
-                            .Select(k => new {
-                                hoTen = k.HoTen,
-                                quanHe = k.QuanHe,
-                                sdt = k.SoDienThoai,
-                                isChinhChu = k.IsChinhChu
-                            })
-                            .ToList()
+                        danhSachKhachO = danhSachKhach
                     };
                 }),
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }

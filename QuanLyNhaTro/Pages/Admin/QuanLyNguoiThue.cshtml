@@ -979,6 +979,13 @@
                     <i class="fas fa-user-plus"></i>
                     Thêm người ở ghép
                 </button>
+                <button class="nt-btn-primary" id="btn-them-co-san"
+                        onclick="prompt_themNguoiCoSan()"
+                        style="background:linear-gradient(135deg,#059669,#34d399);
+                               box-shadow:0 4px 14px rgba(5,150,105,0.32);">
+                    <i class="fas fa-user-check"></i>
+                    Thêm người thuê có sẵn
+                </button>
             </div>
         </div>
 
@@ -1590,10 +1597,290 @@
     </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: DANH SÁCH NGƯỜI Ở GHÉP CẦN HỢP ĐỒNG MỚI
+     Hiện lên sau khi chủ phòng trả phòng sớm (có người ghép còn lại)
+══════════════════════════════════════════════════════════════ -->
+<div class="nt-overlay" id="ng-ghep-ds-overlay"
+     onclick="if(event.target===this)ngGhepHD_dongModalDanhSach()">
+    <div class="nt-modal" id="ng-ghep-ds-modal" style="max-width:560px;">
+
+        <div class="nt-modal-hd">
+            <div class="nt-modal-hd-left">
+                <div class="nt-modal-hd-icon" style="background:rgba(234,88,12,0.12);color:#ea580c;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="nt-modal-title">Người ở ghép cần hợp đồng mới</h3>
+                    <p class="nt-modal-sub">Chủ phòng đã trả phòng — những người dưới đây vẫn đang ở</p>
+                </div>
+            </div>
+            <button class="nt-modal-close" onclick="ngGhepHD_dongModalDanhSach()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="nt-modal-body" style="padding:0;">
+            <!-- Thông báo giải thích -->
+            <div class="nt-confirm-alert" style="margin:16px 16px 0;border-left-color:#ea580c;
+                         background:rgba(234,88,12,0.07);color:#c2410c;">
+                <i class="fas fa-info-circle"></i>
+                <p>Các người ở ghép bên dưới vẫn đang ở nhưng chưa có hợp đồng hiệu lực.
+                   Hãy lập hợp đồng mới để họ trở thành <strong>chủ phòng</strong>,
+                   hoặc gỡ họ khỏi phòng nếu cũng đã rời đi.</p>
+            </div>
+
+            <!-- Bảng danh sách người ghép -->
+            <table style="width:100%;border-collapse:collapse;margin-top:14px;">
+                <thead>
+                    <tr style="background:var(--mau-nen-2,#f8f8f8);font-size:12px;
+                                color:var(--mau-chu-phu);text-transform:uppercase;letter-spacing:.5px;">
+                        <th style="padding:8px 12px;text-align:left;font-weight:600;">Họ tên / SĐT</th>
+                        <th style="padding:8px 12px;text-align:left;font-weight:600;">Quan hệ</th>
+                        <th style="padding:8px 12px;text-align:right;font-weight:600;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="ng-ghep-ds-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="nt-modal-ft" style="margin-top:0;">
+            <div style="font-size:12px;color:var(--mau-chu-phu);">
+                <i class="fas fa-lightbulb" style="color:#f59e0b;"></i>
+                Lập hợp đồng → người ghép trở thành chủ phòng và được kích hoạt tài khoản.
+            </div>
+            <div class="nt-ft-btns">
+                <button class="nt-btn-cancel" onclick="ngGhepHD_dongModalDanhSach()">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ════════════════════════════════════════════════════════════════
+     MODAL V2: THANH LÝ HỢP ĐỒNG — Per-roommate checkout selection
+════════════════════════════════════════════════════════════════ -->
+<div class="nt-overlay" id="tpv2-overlay" onclick="traPhongV2.dongModal(event)">
+    <div class="nt-modal nt-modal-detail" id="tpv2-box" style="max-width:540px;">
+
+        <div class="nt-modal-hd">
+            <div class="nt-modal-hd-left">
+                <div class="nt-modal-hd-icon nt-hd-red">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <div>
+                    <h3 class="nt-modal-title">Thanh lý hợp đồng</h3>
+                    <p class="nt-modal-sub">
+                        Người thuê: <strong id="tpv2-ten">—</strong> &nbsp;·&nbsp;
+                        Phòng: <strong id="tpv2-phong">—</strong>
+                    </p>
+                </div>
+            </div>
+            <button class="nt-modal-close-btn" onclick="traPhongV2.dongModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="nt-modal-body">
+            <!-- Liquidation date + reason -->
+            <div class="nt-form-grid" style="margin-bottom:18px;">
+                <div class="nt-field">
+                    <label class="nt-lbl">Ngày thanh lý <span class="req">*</span></label>
+                    <div class="nt-inp-icon-wrap">
+                        <i class="fas fa-calendar-times"></i>
+                        <input class="nt-inp" type="date" id="tpv2-ngay-thanh-ly" />
+                    </div>
+                </div>
+                <div class="nt-field">
+                    <label class="nt-lbl">Lý do kết thúc</label>
+                    <input class="nt-inp" type="text" id="tpv2-ly-do"
+                           placeholder="Hết hợp đồng, chuyển nơi khác..." />
+                </div>
+            </div>
+
+            <!-- Roommate selection section -->
+            <div style="font-size:12px;font-weight:800;color:#e53e3e;text-transform:uppercase;
+                        letter-spacing:0.8px;display:flex;align-items:center;gap:6px;
+                        margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--mau-vien);">
+                <i class="fas fa-users"></i> Xử lý người ở ghép
+            </div>
+            <div id="tpv2-roommate-list">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Warning note -->
+            <div class="nt-confirm-alert" style="margin-top:16px;">
+                <i class="fas fa-triangle-exclamation"></i>
+                <p>Người <strong>không chọn rời đi</strong> sẽ vẫn ở lại — bạn sẽ được nhắc lập hợp đồng mới cho họ ngay sau đó.</p>
+            </div>
+        </div>
+
+        <div class="nt-modal-ft">
+            <div class="nt-ft-note"><span>*</span> Bắt buộc</div>
+            <div class="nt-ft-btns">
+                <button class="nt-btn-cancel" onclick="traPhongV2.dongModal()">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <button class="nt-btn-danger" id="tpv2-btn-xac-nhan"
+                        onclick="traPhongV2.xacNhan()">
+                    <i class="fas fa-check"></i> Xác nhận thanh lý
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     MODAL: DANH SÁCH NGƯỜI Ở LẠI sau khi chủ phòng trả phòng
+════════════════════════════════════════════════════════════════ -->
+<div class="nt-overlay" id="nguoi-o-lai-overlay" onclick="nguoiOLai_dongModal(event)">
+    <div class="nt-modal" id="nguoi-o-lai-box" style="max-width:560px;">
+
+        <div class="nt-modal-hd">
+            <div class="nt-modal-hd-left">
+                <div class="nt-modal-hd-icon"
+                     style="background:linear-gradient(135deg,#0891b2,#06b6d4);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="nt-modal-title">Người ở lại cần hợp đồng mới</h3>
+                    <p class="nt-modal-sub">Lập hợp đồng cho từng người để họ trở thành chủ phòng</p>
+                </div>
+            </div>
+            <button class="nt-modal-close-btn" onclick="nguoiOLai_dongModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="nt-modal-body" style="padding:0;">
+            <div class="nt-confirm-alert" style="margin:16px;border-left-color:#0891b2;
+                         background:rgba(8,145,178,0.07);color:#0369a1;">
+                <i class="fas fa-info-circle"></i>
+                <p>Những người dưới đây vẫn đang ở nhưng chưa có hợp đồng hiệu lực.
+                   Lập hợp đồng mới để họ trở thành <strong>chủ phòng</strong> và được kích hoạt tài khoản.</p>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:var(--mau-nen);font-size:11.5px;color:var(--mau-chu-phu);
+                                text-transform:uppercase;letter-spacing:.5px;">
+                        <th style="padding:8px 16px;text-align:left;font-weight:700;">Họ tên / SĐT</th>
+                        <th style="padding:8px 16px;text-align:left;font-weight:700;">Quan hệ</th>
+                        <th style="padding:8px 16px;text-align:right;font-weight:700;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="nguoi-o-lai-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="nt-modal-ft">
+            <div style="font-size:12px;color:var(--mau-chu-phu);">
+                <i class="fas fa-lightbulb" style="color:#f59e0b;"></i>
+                Đóng sau khi đã lập hợp đồng cho tất cả.
+            </div>
+            <button class="nt-btn-cancel" onclick="nguoiOLai_dongModal()">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     MODAL: THÊM NGƯỜI THUÊ CÓ SẴN vào hợp đồng
+════════════════════════════════════════════════════════════════ -->
+<div class="nt-overlay" id="tncs-overlay" onclick="themNguoiCoSan.dongModal(event)">
+    <div class="nt-modal" id="tncs-box" style="max-width:520px;">
+
+        <div class="nt-modal-hd">
+            <div class="nt-modal-hd-left">
+                <div class="nt-modal-hd-icon"
+                     style="background:linear-gradient(135deg,#059669,#34d399);">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <h3 class="nt-modal-title">Thêm người thuê có sẵn</h3>
+                    <p class="nt-modal-sub">Tìm và thêm người đã có tài khoản vào hợp đồng hiện tại</p>
+                </div>
+            </div>
+            <button class="nt-modal-close-btn" onclick="themNguoiCoSan.dongModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="nt-modal-body">
+            <!-- Search box -->
+            <div class="nt-field" style="margin-bottom:14px;">
+                <label class="nt-lbl">Tìm kiếm người thuê <span class="req">*</span></label>
+                <div class="nt-search-box" style="max-width:none;border-radius:var(--radius-sm);">
+                    <i class="fas fa-search nt-search-ico"></i>
+                    <input type="text" id="tncs-search" class="nt-search-inp"
+                           placeholder="Nhập tên, SĐT, hoặc CCCD..."
+                           oninput="themNguoiCoSan.timKiem()" />
+                </div>
+                <!-- Search results dropdown -->
+                <div id="tncs-results"
+                     style="border:1.5px solid var(--mau-vien);border-top:none;
+                            border-radius:0 0 var(--radius-sm) var(--radius-sm);
+                            max-height:200px;overflow-y:auto;background:var(--mau-trang);">
+                </div>
+            </div>
+
+            <!-- Selected person preview -->
+            <div id="tncs-selected-preview"
+                 style="display:none;align-items:center;gap:12px;padding:12px 14px;
+                        background:rgba(5,150,105,0.07);border:1.5px solid rgba(5,150,105,0.2);
+                        border-radius:var(--radius-md);margin-bottom:16px;">
+                <!-- Filled by JS -->
+            </div>
+
+            <!-- Extra fields -->
+            <div class="nt-form-grid">
+                <div class="nt-field">
+                    <label class="nt-lbl">Ngày vào ở</label>
+                    <div class="nt-inp-icon-wrap">
+                        <i class="fas fa-calendar-check"></i>
+                        <input class="nt-inp" type="date" id="tncs-ngay-vao" />
+                    </div>
+                </div>
+                <div class="nt-field">
+                    <label class="nt-lbl">Quan hệ với chủ phòng</label>
+                    <select class="nt-inp" id="tncs-quan-he">
+                        <option value="">-- Chọn quan hệ --</option>
+                        <option value="Bạn bè">Bạn bè</option>
+                        <option value="Anh/Em">Anh / Em</option>
+                        <option value="Vợ/Chồng">Vợ / Chồng</option>
+                        <option value="Đồng nghiệp">Đồng nghiệp</option>
+                        <option value="Người ở ghép">Người ở ghép</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <div class="nt-field full">
+                    <label class="nt-lbl">Ghi chú</label>
+                    <textarea class="nt-inp" id="tncs-ghi-chu" rows="2"
+                              placeholder="Ghi chú thêm..." maxlength="300"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="nt-modal-ft">
+            <div class="nt-ft-note"><span>*</span> Bắt buộc chọn từ danh sách</div>
+            <div class="nt-ft-btns">
+                <button class="nt-btn-cancel" onclick="themNguoiCoSan.dongModal()">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <button class="nt-btn-submit" id="tncs-btn-luu"
+                        onclick="themNguoiCoSan.luu()"
+                        style="background:linear-gradient(135deg,#059669,#34d399);
+                               box-shadow:0 4px 12px rgba(5,150,105,0.28);">
+                    <i class="fas fa-check"></i> Thêm vào phòng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast container -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
+    function prompt_themNguoiCoSan() {
+    hienToast('Mở tab "Có sẵn" trong modal Thêm người ở ghép và chọn phòng trước.', 'info');
+}
   // Sidebar toggle
   function dongMoSidebar() {
     const sb = document.getElementById('thanh-sidebar');

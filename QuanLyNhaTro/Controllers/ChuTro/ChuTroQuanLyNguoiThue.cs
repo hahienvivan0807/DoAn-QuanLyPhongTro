@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyNhaTro.Models;
+using static QuanLyNhaTro.Controllers.ChuTro.ChuTroQuanLyNguoiThueController;
 
 namespace QuanLyNhaTro.Controllers.ChuTro
 {
@@ -81,14 +82,25 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 .Distinct()
                 .ToList();
 
+            // BƯỚC 3b: Lấy TẤT CẢ IDHopDong (kể cả đã kết thúc) — để tìm người ghép bị "mồ côi"
+            //          khi chủ phòng trả phòng sớm nhưng người ghép chưa có HĐ mới
+            var idHopDongTatCa = dsHopDongLoc
+                .Select(hd => hd.IDHopDong)
+                .Distinct()
+                .ToList();
+
             // BƯỚC 4: Load người ở ghép — khớp theo IDHopDong để tránh lấy nhầm
             // record của hợp đồng cũ cùng phòng (FIX: dùng IDHopDong thay vì IDPhong)
+            // THÊM: cũng load người ghép của HĐ đã kết thúc (NgayRa = null) → họ cần HĐ mới
             var nguoiOGhepRaw = await _context.HOPDONG_KHACHO
                 .AsNoTracking()
                 .Where(ko =>
                     ko.NgayRa == null &&                        // Vẫn đang ở (chưa rời đi)
                     ko.IsChinhChu == false &&                   // Chỉ lấy người ở ghép
-                    idHopDongList.Contains(ko.IDHopDong))       // Thuộc đúng hợp đồng hiệu lực
+                    (idHopDongList.Contains(ko.IDHopDong)       // Thuộc HĐ đang hiệu lực
+                     || (idHopDongTatCa.Contains(ko.IDHopDong) // HOẶC HĐ đã kết thúc nhưng người ghép chưa có HĐ mới
+                         && ko.HopDong.TrangThaiHD != "Đang hiệu lực"
+                         && !_context.HOPDONG.Any(hd2 => hd2.IDUser == ko.IDUser && hd2.TrangThaiHD == "Đang hiệu lực"))))
                 .Select(ko => new {
                     ko.IDKhachO,
                     ko.IDHopDong,                               // FIX: thêm IDHopDong
@@ -105,6 +117,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     ko.GhiChu,
                     IDPhong = ko.HopDong.IDPhong,
                     IDUserChuPhong = ko.HopDong.IDUser,
+                    HopDongConHieuLuc = ko.HopDong.TrangThaiHD == "Đang hiệu lực",
                 })
                 .ToListAsync();
 
@@ -120,6 +133,13 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 .GroupBy(ko => new { ko.IDHopDong, ko.IDUser })  // dedup mỗi người trong 1 HĐ
                 .Select(g => g.OrderByDescending(x => x.IDKhachO).First())
                 .GroupBy(ko => ko.IDHopDong)                     // FIX: group theo IDHopDong
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // BƯỚC 5b: Tách riêng người ghép "mồ côi" — HĐ gốc đã kết thúc, chưa có HĐ mới
+            //          Nhóm theo IDPhong để ghép vào đúng nhà trọ trên bảng
+            var nguoiGhepMoCoi = nguoiOGhepRaw
+                .Where(ko => !ko.HopDongConHieuLuc && !idUserChuPhongSet.Contains(ko.IDUser))
+                .GroupBy(ko => ko.IDPhong)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             // BƯỚC 6: Ghép kết quả — lookup theo IDHopDong
@@ -148,7 +168,13 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     ? nguoiOGhepDict[hd.IDHopDong]
                         .Where(ko => ko.IDUser != hd.IDUser)
                         .ToList()
-                   : nguoiOGhepRaw.Where(_ => false).ToList()
+                   : nguoiOGhepRaw.Where(_ => false).ToList(),
+                // THÊM: người ghép mồ côi thuộc phòng này (HĐ cũ đã kết thúc, cần lập HĐ mới)
+                NguoiGhepCanHopDong = nguoiGhepMoCoi.ContainsKey(hd.IDPhong)
+                    ? nguoiGhepMoCoi[hd.IDPhong]
+                        .Where(ko => ko.IDUser != hd.IDUser)
+                        .ToList()
+                    : nguoiOGhepRaw.Where(_ => false).ToList(),
             });
 
             return Ok(new { success = true, danhSach = ketQua });
@@ -220,7 +246,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
         [HttpPut("tra-phong/{idUser}")]
         public async Task<IActionResult> TraPhong(int idUser, [FromBody] TraPhongDto dto)
         {
-            // 1. Khóa tài khoản
+            // 1. Khóa tài khoản chủ phòng
             var account = await _context.ACCOUNT.FindAsync(idUser);
             if (account == null) return NotFound(new { success = false, message = "Không tìm tài khoản" });
             account.IsActive = false;
@@ -229,6 +255,8 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             var hopDong = await _context.HOPDONG
                 .Where(hd => hd.IDUser == idUser && hd.TrangThaiHD == "Đang hiệu lực")
                 .FirstOrDefaultAsync();
+
+            var nguoiGhepConLai = new List<object>();
 
             if (hopDong != null)
             {
@@ -241,17 +269,79 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 var phong = await _context.PHONG.FindAsync(hopDong.IDPhong);
                 if (phong != null) phong.TrangThai = "Trống";
 
-                // 4. FIX: Đóng tất cả record HOPDONG_KHACHO còn NgayRa = null
-                //    thuộc hợp đồng này để tránh orphan records gây duplicate sau này
+                // 4. Chỉ đóng record của CHÍNH CHỦ PHÒNG (IsChinhChu = true)
+                //    Giữ nguyên NgayRa = null cho người ở ghép → họ vẫn hiển thị trên bảng
+                //    và có thể được thiết lập hợp đồng mới (trở thành chủ phòng)
                 var khachOCuaHD = await _context.HOPDONG_KHACHO
                     .Where(ko => ko.IDHopDong == hopDong.IDHopDong && ko.NgayRa == null)
                     .ToListAsync();
+
                 foreach (var ko in khachOCuaHD)
-                    ko.NgayRa = DateTime.Today;
+                {
+                    if (ko.IsChinhChu == true || ko.IDUser == idUser)
+                    {
+                        // Đóng record của chủ phòng
+                        ko.NgayRa = DateTime.Today;
+                    }
+                    else
+                    {
+                        // Người ở ghép: giữ nguyên để hiển thị trên bảng
+                        // Trả về danh sách để frontend hiện modal tạo hợp đồng mới
+                        nguoiGhepConLai.Add(new
+                        {
+                            ko.IDKhachO,
+                            ko.IDUser,
+                            ko.HoTen,
+                            ko.SoDienThoai,
+                            ko.SoCCCD,
+                            ko.QuanHe,
+                            IDPhong = hopDong.IDPhong,
+                            SoPhong = phong?.SoPhong ?? "",
+                        });
+                    }
+                }
             }
 
             await _context.SaveChangesAsync();
-            return Ok(new { success = true, message = "Đã trả phòng thành công" });
+            return Ok(new
+            {
+                success = true,
+                message = "Đã trả phòng thành công",
+                nguoiGhepConLai,       // Danh sách người ở ghép còn lại (cần tạo HĐ mới)
+                coNguoiGhep = nguoiGhepConLai.Count > 0
+            });
+        }
+
+        // GET: api/ChuTroQuanLyNguoiThue/nguoi-ghep-can-hop-dong
+        // Trả về danh sách người ở ghép đang không có hợp đồng hiệu lực
+        // (hợp đồng gốc đã kết thúc nhưng NgayRa vẫn null — chủ phòng đã trả phòng sớm)
+        [HttpGet("nguoi-ghep-can-hop-dong")]
+        public async Task<IActionResult> GetNguoiGhepCanHopDong()
+        {
+            var ds = await _context.HOPDONG_KHACHO
+                .AsNoTracking()
+                .Where(ko =>
+                    ko.NgayRa == null &&
+                    ko.IsChinhChu == false &&
+                    ko.HopDong.TrangThaiHD != "Đang hiệu lực") // HĐ gốc đã kết thúc
+                .Select(ko => new
+                {
+                    ko.IDKhachO,
+                    ko.IDUser,
+                    ko.HoTen,
+                    ko.SoDienThoai,
+                    ko.SoCCCD,
+                    ko.NgaySinh,
+                    ko.GioiTinh,
+                    ko.QuanHe,
+                    ko.NgayVao,
+                    IDPhong = ko.HopDong.IDPhong,
+                    SoPhong = ko.HopDong.Phong.SoPhong,
+                    IDHopDongCu = ko.IDHopDong,
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, danhSach = ds });
         }
 
         // PUT: api/ChuTroQuanLyNguoiThue/khoi-phuc/{idUser}
@@ -527,6 +617,237 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             public DateTime? NgayKetThuc { get; set; }
             public decimal? TienCoc { get; set; }
             public string? GhiChuHD { get; set; }
+        }
+        [HttpPut("tra-phong-v2/{idUser}")]
+        public async Task<IActionResult> TraPhongV2(int idUser, [FromBody] TraPhongV2Dto dto)
+        {
+            // 1. Find the active contract for this user
+            var hopDong = await _context.HOPDONG
+                .Include(h => h.Phong)
+                .FirstOrDefaultAsync(h => h.IDUser == idUser && h.TrangThaiHD == "Đang hiệu lực");
+
+            if (hopDong == null)
+                return NotFound(new { success = false, message = "Không tìm thấy hợp đồng đang hiệu lực" });
+
+            // 2. Lock the main tenant's account
+            var account = await _context.ACCOUNT.FindAsync(idUser);
+            if (account != null) account.IsActive = false;
+
+            // 3. End the contract
+            hopDong.TrangThaiHD = "Đã kết thúc";
+            hopDong.NgayKetThuc = dto.NgayThanhLy ?? DateTime.Today;
+            hopDong.LyDoKetThuc = dto.LyDo;
+            hopDong.NgayThanhLy = dto.NgayThanhLy ?? DateTime.Today;
+
+            // 4. Get all active HOPDONG_KHACHO records for this contract
+            var tatCaKhachO = await _context.HOPDONG_KHACHO
+                .Where(ko => ko.IDHopDong == hopDong.IDHopDong && ko.NgayRa == null)
+                .ToListAsync();
+
+            // 5. Always close the main tenant's own KHACHO record
+            var chiChiChu = tatCaKhachO.FirstOrDefault(ko => ko.IDUser == idUser || ko.IsChinhChu);
+            if (chiChiChu != null) chiChiChu.NgayRa = dto.NgayThanhLy ?? DateTime.Today;
+
+            // 6. Process each roommate per the landlord's decision
+            var idNguoiRoiDi = dto.IDUserRoiDi ?? new List<int>();
+            var nguoiOLai = new List<object>();
+
+            foreach (var ko in tatCaKhachO.Where(ko => ko.IDUser != idUser && !ko.IsChinhChu))
+            {
+                if (idNguoiRoiDi.Contains(ko.IDUser))
+                {
+                    // Roommate leaves with main tenant
+                    ko.NgayRa = dto.NgayThanhLy ?? DateTime.Today;
+                    var accRoiDi = await _context.ACCOUNT.FindAsync(ko.IDUser);
+                    if (accRoiDi != null) accRoiDi.IsActive = false;
+                }
+                else
+                {
+                    // Roommate stays — NgayRa stays NULL, appears in "needs new contract" list
+                    nguoiOLai.Add(new
+                    {
+                        ko.IDKhachO,
+                        ko.IDUser,
+                        ko.HoTen,
+                        ko.SoDienThoai,
+                        ko.SoCCCD,
+                        ko.QuanHe,
+                        ko.NgayVao,
+                        IDPhong = hopDong.IDPhong,
+                        SoPhong = hopDong.Phong?.SoPhong ?? ""
+                    });
+                }
+            }
+
+            // 7. Set room to Trống only if NO one is staying
+            if (!nguoiOLai.Any())
+                hopDong.Phong.TrangThai = "Trống";
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Đã thanh lý hợp đồng thành công",
+                nguoiOLai,
+                coNguoiOLai = nguoiOLai.Any()
+            });
+        }
+        [HttpGet("tim-nguoi-thue")]
+        public async Task<IActionResult> TimNguoiThue(
+    [FromQuery] string? q,
+    [FromQuery] int? idPhong)
+        {
+            var query = _context.ACCOUNT
+                .AsNoTracking()
+                .Where(a => a.Roles == "Tenant");
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var lower = q.ToLower();
+                query = query.Where(a =>
+                    a.FullName.ToLower().Contains(lower) ||
+                    a.Phone.Contains(q) ||
+                    (a.Email != null && a.Email.ToLower().Contains(lower)));
+            }
+
+            // Exclude users already in an active contract on this specific room
+            if (idPhong.HasValue)
+            {
+                var activeUsers = await _context.HOPDONG
+                    .Where(h => h.IDPhong == idPhong && h.TrangThaiHD == "Đang hiệu lực")
+                    .SelectMany(h => _context.HOPDONG_KHACHO
+                        .Where(ko => ko.IDHopDong == h.IDHopDong && ko.NgayRa == null)
+                        .Select(ko => ko.IDUser))
+                    .ToListAsync();
+
+                query = query.Where(a => !activeUsers.Contains(a.IDUser));
+            }
+
+            var results = await query
+                .OrderByDescending(a => a.UpdatedAt)
+                .Take(20)
+                .Select(a => new
+                {
+                    a.IDUser,
+                    a.FullName,
+                    a.Phone,
+                    a.Email,
+                    a.IsActive,
+                    // Pull extra info from KHACH_THUE
+                    KhachThue = _context.KHACH_THUE
+                        .Where(kt => kt.IDUser == a.IDUser)
+                        .Select(kt => new { kt.SoCCCD, kt.GioiTinh, kt.QueQuan, kt.AnhChanDung })
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, danhSach = results });
+        }
+        [HttpPost("them-nguoi-co-san/{idHopDong}")]
+        public async Task<IActionResult> ThemNguoiCoSan(
+    int idHopDong,
+    [FromBody] ThemNguoiCoSanDto dto)
+        {
+            // Verify contract exists and is active
+            var hopDong = await _context.HOPDONG
+                .Include(h => h.Phong)
+                .FirstOrDefaultAsync(h => h.IDHopDong == idHopDong && h.TrangThaiHD == "Đang hiệu lực");
+
+            if (hopDong == null)
+                return NotFound(new { success = false, message = "Hợp đồng không tồn tại hoặc đã kết thúc" });
+
+            // Prevent duplicates — check if already an active occupant
+            var daCoTrong = await _context.HOPDONG_KHACHO.AnyAsync(ko =>
+                ko.IDHopDong == idHopDong &&
+                ko.IDUser == dto.IDUser &&
+                ko.NgayRa == null);
+
+            if (daCoTrong)
+                return BadRequest(new { success = false, message = "Người này đã đang ở trong phòng này" });
+
+            // Pull name/phone from ACCOUNT
+            var account = await _context.ACCOUNT.FindAsync(dto.IDUser);
+            if (account == null)
+                return NotFound(new { success = false, message = "Không tìm thấy tài khoản" });
+
+            var khachThue = await _context.KHACH_THUE
+                .FirstOrDefaultAsync(kt => kt.IDUser == dto.IDUser);
+
+            // Create the KHACHO record
+            var khachO = new HOPDONG_KHACHO
+            {
+                IDHopDong = idHopDong,
+                IDUser = dto.IDUser,
+                HoTen = account.FullName,
+                SoCCCD = khachThue?.SoCCCD ?? dto.SoCCCD,
+                NgaySinh = khachThue?.NgaySinh ?? dto.NgaySinh,
+                GioiTinh = khachThue?.GioiTinh ?? dto.GioiTinh,
+                SoDienThoai = account.Phone,
+                QuanHe = dto.QuanHe ?? "Người ở ghép",
+                IsChinhChu = false,
+                NgayVao = dto.NgayVao ?? DateTime.Today,
+                NgayRa = null,
+                GhiChu = dto.GhiChu,
+            };
+
+            _context.HOPDONG_KHACHO.Add(khachO);
+
+            // Re-activate the account if it was locked
+            if (!account.IsActive)
+            {
+                account.IsActive = true;
+                account.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã thêm {account.FullName} vào phòng {hopDong.Phong?.SoPhong}",
+                idKhachO = khachO.IDKhachO
+            });
+        }
+        [HttpGet("nguoi-ghep-trong-phong/{idHopDong}")]
+        public async Task<IActionResult> GetNguoiGhepTrongPhong(int idHopDong)
+        {
+            var danhSach = await _context.HOPDONG_KHACHO
+                .AsNoTracking()
+                .Where(ko => ko.IDHopDong == idHopDong && ko.NgayRa == null && ko.IsChinhChu == false)
+                .Select(ko => new
+                {
+                    ko.IDKhachO,
+                    ko.IDUser,
+                    ko.HoTen,
+                    ko.SoDienThoai,
+                    ko.SoCCCD,
+                    ko.QuanHe,
+                    ko.NgayVao,
+                    ko.GioiTinh,
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, danhSach });
+        }
+        public class TraPhongV2Dto
+        {
+            public DateTime? NgayThanhLy { get; set; }
+            public string? LyDo { get; set; }
+            /// <summary>IDUser values of roommates who are LEAVING with the main tenant</summary>
+            public List<int>? IDUserRoiDi { get; set; }
+        }
+
+        public class ThemNguoiCoSanDto
+        {
+            public int IDUser { get; set; }
+            public string? QuanHe { get; set; }
+            public DateTime? NgayVao { get; set; }
+            public string? GhiChu { get; set; }
+            // Fallback fields if KHACH_THUE record doesn't exist yet
+            public string? SoCCCD { get; set; }
+            public DateTime? NgaySinh { get; set; }
+            public string? GioiTinh { get; set; }
         }
     }
 }
