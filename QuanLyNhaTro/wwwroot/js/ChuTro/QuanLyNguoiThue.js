@@ -1176,12 +1176,15 @@ function ntXemChiTiet(id) {
         <div class="nt-detail-val" style="font-weight:400;">${ntEscape(item.GhiChuHD)}</div>
       </div>` : ''}
     </div>
-    ${item.NguoiOGhep && item.NguoiOGhep.length > 0 ? `
+${(item.NguoiOGhep?.length > 0 || item.NguoiGhepCanHopDong?.length > 0) ? `
     <div class="nt-detail-sec" style="margin-top:12px;">
-        <i class="fas fa-user-friends"></i> Người ở ghép (${item.NguoiOGhep.length})
+        <i class="fas fa-user-friends"></i>
+        Người ở ghép
+        (${(item.NguoiOGhep?.length || 0) + (item.NguoiGhepCanHopDong?.length || 0)})
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-        ${item.NguoiOGhep.map(ko => `
+
+        ${(item.NguoiOGhep || []).map(ko => `
         <div style="display:flex;align-items:center;gap:12px;
                     background:var(--mau-nen);border-radius:var(--radius-sm);
                     padding:10px 13px;border:1px solid var(--mau-vien);">
@@ -1192,46 +1195,93 @@ function ntXemChiTiet(id) {
                 ${ntLayChuCai(ko.hoTen)}
             </div>
             <div style="flex:1;min-width:0;">
-                <div style="font-weight:700;font-size:13.5px;color:var(--mau-chu);
-                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                <div style="font-weight:700;font-size:13.5px;color:var(--mau-chu);">
                     ${ntEscape(ko.hoTen)}
+                    ${ko.isChinhChu ? `<span style="font-size:10px;background:#fef3c7;
+                        color:#b45309;padding:1px 6px;border-radius:99px;
+                        font-weight:700;margin-left:5px;">Chủ phòng</span>` : ''}
                 </div>
                 <div style="font-size:11.5px;color:var(--mau-chu-phu);margin-top:2px;">
+                    <i class="fas fa-phone" style="font-size:9px;color:#059669;"></i>
                     ${ntEscape(ko.soDienThoai || '—')}
-                    ${ko.quanHe ? ` · ${ntEscape(ko.quanHe)}` : ''}
-                    · Vào: ${ntDinhDangNgay(ko.ngayVao)}
+                    ${ko.soCCCD ? ` &nbsp;·&nbsp; <i class="fas fa-id-card"
+                        style="font-size:9px;"></i> ${ntEscape(ko.soCCCD)}` : ''}
+                    ${ko.quanHe ? ` &nbsp;·&nbsp; ${ntEscape(ko.quanHe)}` : ''}
+                </div>
+                <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:2px;">
+                    <i class="fas fa-calendar-check" style="font-size:9px;color:#0891b2;"></i>
+                    Vào: ${ntDinhDangNgay(ko.ngayVao)}
                 </div>
             </div>
-            ${ko.isChinhChu ? `
-            <span style="font-size:10px;background:#fef3c7;color:#b45309;
-                         padding:2px 8px;border-radius:99px;font-weight:700;
-                         flex-shrink:0;white-space:nowrap;">
-                Chính chủ
-            </span>` : ''}
+            <button class="nt-act nt-act-view"
+                    title="Xem chi tiết"
+                    style="background:rgba(124,58,237,0.1);color:#7c3aed;"
+                    onclick="ntDongOverlay('nt-detail-overlay');
+                             ntXemChiTietGhep(${ko.idKhachO}, ${item.IDKhachThue})">
+                <i class="fas fa-eye"></i>
+            </button>
         </div>`).join('')}
+
+        ${(item.NguoiGhepCanHopDong || []).map(ko => `
+        <div style="display:flex;align-items:center;gap:12px;
+                    background:rgba(234,88,12,0.04);border-radius:var(--radius-sm);
+                    padding:10px 13px;border:1px solid rgba(234,88,12,0.25);">
+            <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;
+                        background:linear-gradient(135deg,#ea580c,#f97316);
+                        display:flex;align-items:center;justify-content:center;
+                        color:#fff;font-size:14px;font-weight:800;">
+                ${ntLayChuCai(ko.hoTen || ko.HoTen)}
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:13.5px;color:var(--mau-chu);">
+                    ${ntEscape(ko.hoTen || ko.HoTen)}
+                    <span style="font-size:10px;background:rgba(234,88,12,0.1);
+                        color:#ea580c;padding:1px 6px;border-radius:99px;
+                        font-weight:700;margin-left:5px;">Chưa có HĐ</span>
+                </div>
+                <div style="font-size:11.5px;color:var(--mau-chu-phu);margin-top:2px;">
+                    <i class="fas fa-phone" style="font-size:9px;color:#059669;"></i>
+                    ${ntEscape(ko.soDienThoai || ko.SoDienThoai || '—')}
+                    ${(ko.quanHe || ko.QuanHe) ? ` &nbsp;·&nbsp;
+                        ${ntEscape(ko.quanHe || ko.QuanHe)}` : ''}
+                </div>
+                <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:2px;">
+                    <i class="fas fa-calendar-check" style="font-size:9px;color:#0891b2;"></i>
+                    Vào: ${ntDinhDangNgay(ko.ngayVao || ko.NgayVao)}
+                </div>
+            </div>
+            <button class="nt-act"
+                    title="Lập hợp đồng mới"
+                    style="background:rgba(5,150,105,0.1);color:#059669;
+                           width:30px;height:30px;"
+                    onclick="ntDongOverlay('nt-detail-overlay');
+                             ngGhep_moModalHD(${ko.idKhachO || ko.IDKhachO},
+                             '${ntEscape(ko.hoTen || ko.HoTen)}',
+                             ${item.IDPhong}, '${ntEscape(item.SoPhong)}')">
+                <i class="fas fa-file-contract"></i>
+            </button>
+        </div>`).join('')}
+
     </div>` : ''}
     `;
 
     ntMoOverlay('nt-detail-overlay');
 }
 function ntXemChiTietGhep(idKhachO, idChuPhong) {
-    // Find the parent contract to get room info
     const chuPhong = NT.duLieu.find(x => x.IDKhachThue === idChuPhong);
     const ko = chuPhong?.NguoiOGhep?.find(k => k.idKhachO === idKhachO);
     if (!ko || !chuPhong) return;
 
     document.getElementById('nt-detail-mo-ta').textContent = `Người ở ghép — Phòng ${chuPhong.SoPhong}`;
 
-    // Hide edit button — co-tenants edited separately
     const btnSua = document.getElementById('nt-detail-btn-sua');
     if (btnSua) btnSua.style.display = 'none';
 
     const body = document.getElementById('nt-detail-body');
     body.innerHTML = `
-    <div class="nt-detail-hero" style="background:rgba(124,58,237,0.06);
-         border:1.5px solid rgba(124,58,237,0.15);">
-        <div class="nt-detail-ava"
-             style="background:linear-gradient(135deg,#7c3aed,#9333ea);">
+    <!-- Hero người ở ghép (giữ nguyên) -->
+    <div class="nt-detail-hero" style="background:rgba(124,58,237,0.06);border:1.5px solid rgba(124,58,237,0.15);">
+        <div class="nt-detail-ava" style="background:linear-gradient(135deg,#7c3aed,#9333ea);">
             ${ntLayChuCai(ko.hoTen)}
         </div>
         <div>
@@ -1239,8 +1289,7 @@ function ntXemChiTietGhep(idKhachO, idChuPhong) {
             <div class="nt-detail-sub">
                 <span style="display:inline-flex;align-items:center;gap:5px;
                              background:rgba(124,58,237,0.1);color:#7c3aed;
-                             padding:3px 10px;border-radius:99px;
-                             font-size:11px;font-weight:700;">
+                             padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">
                     <i class="fas fa-user-friends" style="font-size:9px;"></i>
                     Người ở ghép · Phòng ${ntEscape(chuPhong.SoPhong)}
                 </span>
@@ -1248,6 +1297,7 @@ function ntXemChiTietGhep(idKhachO, idChuPhong) {
         </div>
     </div>
 
+    <!-- Thông tin cá nhân người ở ghép -->
     <div class="nt-detail-sec">
         <i class="fas fa-id-card"></i> Thông tin cá nhân
     </div>
@@ -1280,15 +1330,75 @@ function ntXemChiTietGhep(idKhachO, idChuPhong) {
             <div class="nt-detail-key">Ngày vào ở</div>
             <div class="nt-detail-val">${ntDinhDangNgay(ko.ngayVao) || '—'}</div>
         </div>
-        <div class="nt-detail-item">
-            <div class="nt-detail-key">Chủ phòng</div>
-            <div class="nt-detail-val">${ntEscape(chuPhong.HoTen)}</div>
-        </div>
         ${ko.ghiChu ? `
         <div class="nt-detail-item full">
             <div class="nt-detail-key">Ghi chú</div>
             <div class="nt-detail-val" style="font-weight:400;">${ntEscape(ko.ghiChu)}</div>
         </div>` : ''}
+    </div>
+
+    <!-- THÊM MỚI: Thông tin chủ phòng -->
+    <div class="nt-detail-sec" style="margin-top:12px;">
+        <i class="fas fa-user-tie"></i> Thông tin chủ phòng
+    </div>
+    <div class="nt-detail-grid">
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Họ và tên</div>
+            <div class="nt-detail-val">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;
+                                background:linear-gradient(135deg,#06b6d4,#0891b2);
+                                display:flex;align-items:center;justify-content:center;
+                                color:#fff;font-size:11px;font-weight:800;">
+                        ${ntLayChuCai(chuPhong.HoTen)}
+                    </div>
+                    ${ntEscape(chuPhong.HoTen || '—')}
+                </div>
+            </div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Số điện thoại</div>
+            <div class="nt-detail-val">
+                <i class="fas fa-phone" style="color:#059669;font-size:11px;margin-right:4px;"></i>
+                ${ntEscape(chuPhong.SoDienThoai || '—')}
+            </div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Email</div>
+            <div class="nt-detail-val">${ntEscape(chuPhong.Email || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Số CCCD</div>
+            <div class="nt-detail-val">${ntEscape(chuPhong.SoCCCD || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Phòng</div>
+            <div class="nt-detail-val">
+                <span style="background:var(--mau-chu-de-nhat);color:var(--mau-chu-de);
+                             padding:2px 10px;border-radius:99px;font-weight:800;font-size:12px;">
+                    ${ntEscape(chuPhong.SoPhong || '—')}
+                </span>
+            </div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Trạng thái hợp đồng</div>
+            <div class="nt-detail-val">${ntEscape(chuPhong.TrangThaiHD || '—')}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Ngày vào ở</div>
+            <div class="nt-detail-val">${ntDinhDangNgay(chuPhong.NgayVaoO) || '—'}</div>
+        </div>
+        <div class="nt-detail-item">
+            <div class="nt-detail-key">Hạn hợp đồng</div>
+            <div class="nt-detail-val">
+                ${chuPhong.NgayKetThuc
+            ? `${ntDinhDangNgay(chuPhong.NgayKetThuc)}
+                       <span style="font-size:10.5px;color:${(chuPhong.SoNgayConLai ?? 999) < 0 ? 'var(--mau-do)' : '#d97706'};">
+                         (${(chuPhong.SoNgayConLai ?? 0) < 0 ? 'Đã hết hạn' : `Còn ${chuPhong.SoNgayConLai} ngày`})
+                       </span>`
+            : '<span style="color:var(--mau-chu-phu);font-style:italic;">Không thời hạn</span>'}
+            </div>
+        </div>
     </div>`;
 
     ntMoOverlay('nt-detail-overlay');
