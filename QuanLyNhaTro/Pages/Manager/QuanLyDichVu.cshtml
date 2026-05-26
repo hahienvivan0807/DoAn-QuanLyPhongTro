@@ -956,6 +956,8 @@
 
         .modal-lg {
         width: 680px;
+        max-height: 90vh;
+        overflow-y: auto;
         }
 
         @@keyframes slideUp {
@@ -1732,7 +1734,7 @@
                                                 };
                                             }
                                             <span class="badge @cls">@don.TrangThai_DV</span>
-                                            @if (don.TrangThai_DV == "Chờ thanh toán" && !string.IsNullOrEmpty(don.AnhChuyenKhoan))
+                                            @if (don.TrangThai_DV == "Chờ thanh toán" && !string.IsNullOrEmpty(don.AnhBienLai))
                                             {
                                                 <br /><span style="font-size:10px;color:#059669;font-weight:700;margin-top:3px;display:inline-block;">
                                                 <i class="fas fa-camera"></i> Có ảnh CK
@@ -1758,26 +1760,21 @@
                                             @if (don.TrangThai_DV == "Chờ thanh toán")
                                             {
                                                 <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-start;">
-                                                    @if (!string.IsNullOrEmpty(don.AnhChuyenKhoan))
+                                                    @if (!string.IsNullOrEmpty(don.AnhBienLai))
                                                     {
-                                                        <button class="btn btn-ghost btn-sm"
-                                                                onclick="xemAnhChuyenKhoan('@don.AnhChuyenKhoan', @don.IDDonDV, '@don.SoPhong', '@don.TenKhach')">
-                                                            <i class="fas fa-image"></i> Xem ảnh CK
+                                                        <!-- Có ảnh CK → bắt buộc xem ảnh trước, xác nhận TT nằm trong modal -->
+                                                        <button class="btn btn-success btn-sm"
+                                                                onclick="xemAnhBienLai('@don.AnhBienLai', @don.IDDonDV, '@don.SoPhong', '@don.TenKhach')">
+                                                            <i class="fas fa-image"></i> Xem ảnh & Xác nhận TT
                                                         </button>
                                                     }
                                                     else
                                                     {
-                                                        <span style="font-size:11px;color:#b45309;background:#fef3c7;padding:3px 8px;border-radius:6px;">
-                                                            <i class="fas fa-clock"></i> Chưa có ảnh CK
+                                                        <!-- Chưa có ảnh CK → chỉ hiện nhắc nhở, không cho xác nhận -->
+                                                        <span style="font-size:11px;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;">
+                                                            <i class="fas fa-clock"></i> Chờ khách gửi ảnh CK
                                                         </span>
                                                     }
-                                                    <form method="post" asp-page-handler="XacNhanThanhToanNuoc" style="display:inline;">
-                                                        <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
-                                                        <button type="submit" class="btn btn-success btn-sm"
-                                                                onclick="return confirm('Xác nhận khách đã thanh toán?')">
-                                                            <i class="fas fa-check"></i> Xác nhận TT
-                                                        </button>
-                                                    </form>
                                                     <form method="post" asp-page-handler="NhacNhoThanhToanNuoc" style="display:inline;">
                                                         <input type="hidden" name="idDonDV" value="@don.IDDonDV" />
                                                         <button type="submit" class="btn btn-warning btn-sm"
@@ -1915,7 +1912,7 @@
                 <div class="card-header">
                     <div>
                         <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Chỉ số điện – nước theo kỳ</h3>
-                        <div class="sub">Khách nhập chỉ số + gửi ảnh → Quản lý xác nhận ảnh</div>
+                        <div class="sub">Khách chụp ảnh đồng hồ + nhập chỉ số → Quản lý xem & xác nhận (không có ảnh chuyển khoản)</div>
                     </div>
                 </div>
                 <div class="toolbar">
@@ -1954,7 +1951,7 @@
                                         @if (!string.IsNullOrEmpty(dn.AnhChupDongHo))
                                         {
                                             <button class="btn btn-ghost btn-sm"
-                                                    onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', @dn.IDGhiNhan, '@dn.SoPhong')">
+                                                    onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
                                                 <i class="fas fa-image"></i> Xem ảnh
                                             </button>
                                         }
@@ -1974,14 +1971,22 @@
                                     <td>
                                         @if (dn.TrangThaiDuyet == 0)
                                         {
-                                            <div style="display:flex;gap:6px;">
-                                                <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
-                                                    <input type="hidden" name="idGhiNhan" value="@dn.IDGhiNhan" />
-                                                    <input type="hidden" name="chapNhan" value="true" />
-                                                    <button type="submit" class="btn btn-success btn-sm">
-                                                        <i class="fas fa-check"></i> Duyệt
+                                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                                @if (!string.IsNullOrEmpty(dn.AnhChupDongHo))
+                                                {
+                                                    <button class="btn btn-success btn-sm"
+                                                            onclick="xemAnhDienNuoc('@dn.AnhChupDongHo', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
+                                                        <i class="fas fa-image"></i> Xem ảnh & Duyệt
                                                     </button>
-                                                </form>
+                                                }
+                                                else
+                                                {
+                                                    <!-- Không có ảnh → cho phép duyệt trực tiếp sau khi xem chỉ số -->
+                                                    <button class="btn btn-success btn-sm"
+                                                            onclick="xemAnhDienNuoc('', '@(dn.AnhChupDongHoNuoc ?? "")', @dn.IDGhiNhan, '@dn.SoPhong', @dn.SoDienCu, @dn.SoDienMoi, @dn.SoNuocCu, @dn.SoNuocMoi)">
+                                                        <i class="fas fa-bolt"></i> Xem chỉ số & Duyệt
+                                                    </button>
+                                                }
                                                 <button class="btn btn-danger btn-sm"
                                                         onclick="moModalTuChoiDN(@dn.IDGhiNhan, '@dn.SoPhong')">
                                                     <i class="fas fa-times"></i> Từ chối
@@ -2040,6 +2045,7 @@
                                 <th>Ngày tạo đơn</th>
                                 <th>Ghi chú</th>
                                 <th>Trạng thái</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyNo">
@@ -2053,6 +2059,15 @@
                                     <td style="color:var(--mau-chu-phu);font-size:12px;">@no.NgayTao.ToString("dd/MM/yyyy")</td>
                                     <td style="font-size:12px;color:var(--mau-chu-phu);">@(no.GhiChuXuLy ?? "—")</td>
                                     <td><span class="badge qua-han">Chờ thanh toán</span></td>
+                                    <td>
+                                        <form method="post" asp-page-handler="NhacNhoDichVu" style="display:inline;">
+                                            <input type="hidden" name="idDonDV" value="@no.IDDonDV" />
+                                            <button type="submit" class="btn btn-warning btn-sm"
+                                                    onclick="return confirm('Gửi nhắc nhở đến khách phòng @no.SoPhong về khoản nợ @no.LoaiDV (@no.TongTien.ToString("N0") đ)?')">
+                                                <i class="fas fa-bell"></i> Nhắc nhở
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -2192,18 +2207,78 @@
     <div class="modal modal-lg">
         <div class="modal-header">
             <div>
-                <h3><i class="fas fa-image" style="color:#059669;margin-right:8px;"></i>Ảnh đồng hồ điện – nước</h3>
+                <h3><i class="fas fa-bolt" style="color:#059669;margin-right:8px;"></i>Xác nhận chỉ số điện – nước</h3>
                 <div class="sub" id="subAnhDN">Phòng —</div>
             </div>
             <button class="btn-dong-modal" onclick="dongModal('modal-xem-anh-dn')"><i class="fas fa-times"></i></button>
         </div>
-        <img id="anhDienNuocPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ" />
+
+        <!-- Bảng chỉ số để quản lý đối chiếu -->
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 18px;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:10px;">
+                <i class="fas fa-tachometer-alt" style="margin-right:6px;"></i>Chỉ số khách gửi
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="background:#fff;border-radius:8px;padding:10px 14px;border:1px solid #d1fae5;">
+                    <div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-bolt" style="color:#f59e0b;"></i> ĐIỆN</div>
+                    <div style="font-size:13px;">Chỉ số cũ: <strong id="anhDN_dienCu">—</strong></div>
+                    <div style="font-size:13px;">Chỉ số mới: <strong id="anhDN_dienMoi" style="color:#059669;">—</strong></div>
+                    <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tiêu thụ: <strong id="anhDN_dienTieu">—</strong></div>
+                </div>
+                <div style="background:#fff;border-radius:8px;padding:10px 14px;border:1px solid #d1fae5;">
+                    <div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-tint" style="color:#3b82f6;"></i> NƯỚC</div>
+                    <div style="font-size:13px;">Chỉ số cũ: <strong id="anhDN_nuocCu">—</strong></div>
+                    <div style="font-size:13px;">Chỉ số mới: <strong id="anhDN_nuocMoi" style="color:#059669;">—</strong></div>
+                    <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tiêu thụ: <strong id="anhDN_nuocTieu">—</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ảnh đồng hồ điện & nước -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+
+            <!-- Cột ảnh ĐIỆN -->
+            <div>
+                <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">
+                    <i class="fas fa-bolt" style="color:#f59e0b;margin-right:4px;"></i>Ảnh đồng hồ điện
+                </div>
+                <img id="anhDienPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ điện"
+                     style="display:none;max-height:220px;cursor:zoom-in;"
+                     onclick="window.open(this.src,'_blank')" />
+                <div id="anhDN_noimg_dien" style="display:none;background:#fef3c7;border:1px solid #fcd34d;
+                    border-radius:10px;padding:14px;flex-direction:column;align-items:center;
+                    gap:5px;text-align:center;margin-top:2px;">
+                    <i class="fas fa-camera" style="font-size:24px;color:#d97706;"></i>
+                    <div style="font-size:12px;color:#92400e;font-weight:600;">Chưa có ảnh đồng hồ điện</div>
+                    <div style="font-size:11px;color:#b45309;">Khách chưa gửi hoặc chụp chung 1 ảnh</div>
+                </div>
+            </div>
+
+            <!-- Cột ảnh NƯỚC -->
+            <div>
+                <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">
+                    <i class="fas fa-tint" style="color:#3b82f6;margin-right:4px;"></i>Ảnh đồng hồ nước
+                </div>
+                <img id="anhNuocPreview" class="anh-xem-truoc" src="" alt="Ảnh đồng hồ nước"
+                     style="display:none;max-height:220px;cursor:zoom-in;"
+                     onclick="window.open(this.src,'_blank')" />
+                <div id="anhDN_noimg_nuoc" style="display:none;background:#eff6ff;border:1px solid #93c5fd;
+                    border-radius:10px;padding:14px;flex-direction:column;align-items:center;
+                    gap:5px;text-align:center;margin-top:2px;">
+                    <i class="fas fa-camera" style="font-size:24px;color:#3b82f6;"></i>
+                    <div style="font-size:12px;color:#1e40af;font-weight:600;">Chưa có ảnh đồng hồ nước</div>
+                    <div style="font-size:11px;color:#1d4ed8;">Khách chưa gửi hoặc chụp chung 1 ảnh</div>
+                </div>
+            </div>
+
+        </div>
+
         <div class="modal-footer">
             <button type="button" class="btn btn-ghost" onclick="dongModal('modal-xem-anh-dn')">Đóng</button>
             <form method="post" asp-page-handler="DuyetDienNuoc" style="display:inline;">
                 <input type="hidden" name="idGhiNhan" id="anhDN_idGhiNhan" />
                 <input type="hidden" name="chapNhan" value="true" />
-                <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Xác nhận ảnh & Duyệt</button>
+                <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Xác nhận & Duyệt</button>
             </form>
             <button class="btn btn-danger" onclick="dongModal('modal-xem-anh-dn');moModalTuChoiDN(document.getElementById('anhDN_idGhiNhan').value, '')">
                 <i class="fas fa-times"></i> Từ chối
@@ -2467,7 +2542,7 @@
     document.getElementById('modal-nhap-gia-nuoc').classList.add('hien');
     }
 
-    function xemAnhChuyenKhoan(url, id, phong, khach) {
+    function xemAnhBienLai(url, id, phong, khach) {
     document.getElementById('anhCKPreview').src = url;
     document.getElementById('ck_idDonDV').value = id;
     document.getElementById('subAnhCK').textContent = `Phòng ${phong} | Khách: ${khach}`;
@@ -2486,10 +2561,44 @@
     document.getElementById('modal-nhap-gia-gs').classList.add('hien');
     }
 
-    function xemAnhDienNuoc(url, id, phong) {
-    document.getElementById('anhDienNuocPreview').src   = url;
-    document.getElementById('anhDN_idGhiNhan').value    = id;
-    document.getElementById('subAnhDN').textContent     = `Phòng ${phong}`;
+    function xemAnhDienNuoc(urlDien, urlNuoc, id, phong, dienCu, dienMoi, nuocCu, nuocMoi) {
+    document.getElementById('anhDN_idGhiNhan').value = id;
+    document.getElementById('subAnhDN').textContent  = `Phòng ${phong}`;
+
+    // ── Cập nhật chỉ số ──────────────────────────────────────────────────
+    document.getElementById('anhDN_dienCu').textContent    = dienCu;
+    document.getElementById('anhDN_dienMoi').textContent   = dienMoi;
+    document.getElementById('anhDN_dienTieu').textContent  = (parseInt(dienMoi) - parseInt(dienCu)) + ' số';
+    document.getElementById('anhDN_nuocCu').textContent    = nuocCu;
+    document.getElementById('anhDN_nuocMoi').textContent   = nuocMoi;
+    document.getElementById('anhDN_nuocTieu').textContent  = (parseInt(nuocMoi) - parseInt(nuocCu)) + ' số';
+
+    // ── Ảnh đồng hồ điện ─────────────────────────────────────────────────
+    var imgDien   = document.getElementById('anhDienPreview');
+    var noDien    = document.getElementById('anhDN_noimg_dien');
+    if (urlDien) {
+    imgDien.src             = urlDien;
+    imgDien.style.display   = 'block';
+    noDien.style.display    = 'none';
+    } else {
+    imgDien.src             = '';
+    imgDien.style.display   = 'none';
+    noDien.style.display    = 'flex';
+    }
+
+    // ── Ảnh đồng hồ nước ─────────────────────────────────────────────────
+    var imgNuoc   = document.getElementById('anhNuocPreview');
+    var noNuoc    = document.getElementById('anhDN_noimg_nuoc');
+    if (urlNuoc) {
+    imgNuoc.src             = urlNuoc;
+    imgNuoc.style.display   = 'block';
+    noNuoc.style.display    = 'none';
+    } else {
+    imgNuoc.src             = '';
+    imgNuoc.style.display   = 'none';
+    noNuoc.style.display    = 'flex';
+    }
+
     document.getElementById('modal-xem-anh-dn').classList.add('hien');
     }
 

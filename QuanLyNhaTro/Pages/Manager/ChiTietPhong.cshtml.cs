@@ -152,40 +152,58 @@ namespace QuanLyNhaTro.Pages
             if (phong == null)
                 return new JsonResult(new { error = "Không tìm thấy phòng" }) { StatusCode = 404 };
 
-            // Lấy hợp đồng đang hiệu lực + danh sách người ở (HOPDONG_KHACHO)
+            // Lấy hợp đồng đang hiệu lực
+            // ✅ Trim + ToLower để tránh lỗi khoảng trắng / chữ hoa thường không khớp trong DB
             var hopDong = await _db.HOPDONG
                 .AsNoTracking()
-                .Include(hd => hd.KhachO)
-                    .ThenInclude(ko => ko.Account)
-                .Where(hd => hd.IDPhong == idPhong && hd.TrangThaiHD == "Đang hiệu lực")
-                .Select(hd => new
-                {
-                    hd.IDHopDong,
-                    NguoiO = hd.KhachO
-                        .Where(ko => ko.NgayRa == null)  // Đang ở (chưa rời)
-                        .Select(ko => new
-                        {
-                            ko.HoTen,
-                            ko.SoDienThoai,
-                            ko.QuanHe,
-                            ko.IsChinhChu,
-                            GioiTinh = ko.GioiTinh ?? "—"
-                        }).ToList()
-                })
+                .Where(hd => hd.IDPhong == idPhong
+                          && hd.TrangThaiHD.Trim().ToLower() == "đang hiệu lực")
+                .Select(hd => new { hd.IDHopDong })
                 .FirstOrDefaultAsync();
 
-            // Lấy lịch sử người đã rời phòng (NgayRa != null) — không lọc theo trạng thái hợp đồng
+            // Lấy danh sách người đang ở
+            List<object> danhSachNguoiO = new();
+            if (hopDong != null)
+            {
+                // ✅ Sửa: bỏ so sánh DateTime.MinValue vì EF Core không dịch sang SQL đúng
+                // Dùng ngưỡng năm 1900 để bắt cả trường hợp DB lưu MinValue thay vì NULL
+                var minDate = new DateTime(1900, 1, 1);
+                danhSachNguoiO = await _db.HOPDONG_KHACHO
+                    .AsNoTracking()
+                    .Where(ko => ko.IDHopDong == hopDong.IDHopDong
+                              && (ko.NgayRa == null || ko.NgayRa < minDate))
+                    .OrderByDescending(ko => ko.IsChinhChu)
+                    .Select(ko => (object)new
+                    {
+                        hoTen = ko.HoTen ?? "—",
+                        soDienThoai = ko.SoDienThoai ?? "",
+                        quanHe = ko.QuanHe ?? "Người ở",
+                        isChinhChu = ko.IsChinhChu,
+                        gioiTinh = ko.GioiTinh ?? "—"
+                    })
+                    .ToListAsync();
+            }
+
+            var trangThaiHienThi = (hopDong != null) ? "Đã thuê" : phong.TrangThai;
+
+            // Lấy lịch sử người đã rời phòng (NgayRa != null) — join rõ ràng để tránh lỗi navigation property
+            var idHopDongCuaPhong = await _db.HOPDONG
+                .AsNoTracking()
+                .Where(hd => hd.IDPhong == idPhong)
+                .Select(hd => hd.IDHopDong)
+                .ToListAsync();
+
             var lichSuNguoiO = await _db.HOPDONG_KHACHO
                 .AsNoTracking()
-                .Where(ko => ko.HopDong.IDPhong == idPhong && ko.NgayRa != null)
+                .Where(ko => idHopDongCuaPhong.Contains(ko.IDHopDong) && ko.NgayRa != null)
                 .OrderByDescending(ko => ko.NgayRa)
                 .Select(ko => new
                 {
-                    ko.HoTen,
-                    NgayVao = ko.NgayVao == DateTime.MinValue ? "-" : ko.NgayVao.ToString("dd/MM/yyyy"),
-                    NgayRa = ko.NgayRa.HasValue ? ko.NgayRa.Value.ToString("dd/MM/yyyy") : "—",
-                    QuanHe = ko.QuanHe ?? "—",
-                    ko.IsChinhChu
+                    hoTen = ko.HoTen ?? "—",
+                    ngayVao = ko.NgayVao != null ? ko.NgayVao.ToString("dd/MM/yyyy") : "—",
+                    ngayRa = ko.NgayRa != null ? ko.NgayRa.Value.ToString("dd/MM/yyyy") : "—",
+                    quanHe = ko.QuanHe ?? "—",
+                    isChinhChu = ko.IsChinhChu
                 })
                 .ToListAsync();
 
@@ -193,15 +211,15 @@ namespace QuanLyNhaTro.Pages
             {
                 phong = new
                 {
-                    phong.SoPhong,
-                    phong.Khu,
-                    DienTich = phong.DienTich.HasValue ? $"{phong.DienTich:0.#} m²" : "Chưa cập nhật",
-                    GiaPhong = phong.GiaPhongFix,
-                    phong.TrangThai,
-                    CoSoVatChat = string.IsNullOrWhiteSpace(phong.MoTa) ? "Chưa có mô tả" : phong.MoTa,
-                    SoLuongToiDa = phong.soluong
+                    soPhong = phong.SoPhong,
+                    khu = phong.Khu,
+                    dienTich = phong.DienTich.HasValue ? $"{phong.DienTich:0.#} m²" : "Chưa cập nhật",
+                    giaPhong = phong.GiaPhongFix,
+                    trangThai = trangThaiHienThi,
+                    coSoVatChat = string.IsNullOrWhiteSpace(phong.MoTa) ? "Chưa có mô tả" : phong.MoTa,
+                    soLuongToiDa = phong.soluong
                 },
-                danhSachNguoiO = (IEnumerable<object>?)hopDong?.NguoiO ?? new List<object>(),
+                danhSachNguoiO = danhSachNguoiO,
                 lichSuNguoiO = lichSuNguoiO
             });
         }

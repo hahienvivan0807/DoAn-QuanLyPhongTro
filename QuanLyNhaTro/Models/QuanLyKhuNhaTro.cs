@@ -343,9 +343,12 @@
             [Required]
             public int SoNuocCu { get; set; }
 
-            [Required]
-            [StringLength(255)]
-            public string AnhChupDongHo { get; set; } = null!;
+        [Required]
+        [StringLength(255)]
+        public string AnhChupDongHo { get; set; } = null!;
+        [Required]
+        [StringLength(255)]
+        public string AnhChupDongHoNuoc { get; set; } = null!;
 
             // 0=Chờ duyệt | 1=Đã duyệt | 2=Từ chối
             public byte TrangThaiDuyet { get; set; } = 0;

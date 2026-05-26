@@ -28,4 +28,10 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\bills\" />
+    <Folder Include="wwwroot\uploads\bill\" />
+    <Folder Include="wwwroot\uploads\dien-nuoc\" />
+  </ItemGroup>
+
 </Project>
