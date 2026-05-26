@@ -800,7 +800,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 }
                 if (hopDong.Phong != null)
                 {
-                    hopDong.Phong.soluong += 1;
+                    hopDong.Phong.soluong += 1; // Hoặc hopDong.Phong.soluong++;
                 }
             await _context.SaveChangesAsync();
 

@@ -62,7 +62,7 @@ namespace QuanLyNhaTro.Pages.Admin
         {
             public int IDPhong { get; set; }
             public string SoPhong { get; set; } = "";
-            public byte Tang { get; set; }
+            public byte Khu { get; set; }
             public string TrangThai { get; set; } = "";
             public decimal GiaPhongFix { get; set; }
         }
@@ -181,7 +181,7 @@ namespace QuanLyNhaTro.Pages.Admin
                 {
                     IDPhong = reader.GetInt32(0),
                     SoPhong = reader.GetString(1),
-                    Tang = reader.GetByte(2),
+                    Khu = reader.GetByte(2),
                     TrangThai = reader.GetString(3),
                     GiaPhongFix = reader.GetDecimal(4)
                 });
@@ -841,7 +841,7 @@ namespace QuanLyNhaTro.Pages.Admin
                     {
                         p.IDPhong,
                         p.SoPhong,
-                        tang = (int)p.Tang,
+                        khu = (int)p.Khu,
                         p.TrangThai
                     })
                 }));
@@ -900,10 +900,10 @@ namespace QuanLyNhaTro.Pages.Admin
                 conn.Open();
 
                 var sql = @"
-            SELECT IDPhong, SoPhong, Tang, TrangThai, GiaPhongFix, DienTich
+            SELECT IDPhong, SoPhong, Khu, TrangThai, GiaPhongFix, DienTich
             FROM   PHONG
             WHERE  (@trangThai IS NULL OR TrangThai = @trangThai)
-            ORDER  BY Tang, SoPhong";
+            ORDER  BY Khu, SoPhong";
 
                 using var cmd = new SqlCommand(sql, conn);
                 cmd.Parameters.AddWithValue("@trangThai",
@@ -916,7 +916,7 @@ namespace QuanLyNhaTro.Pages.Admin
                     {
                         iDPhong = reader.GetInt32(0),
                         soPhong = reader.GetString(1),
-                        tang = (int)reader.GetByte(2),
+                        khu = (int)reader.GetByte(2),
                         trangThai = reader.GetString(3),
                         giaPhongFix = reader.GetDecimal(4),
                         dienTich = reader.IsDBNull(5) ? (decimal?)null : reader.GetDecimal(5)

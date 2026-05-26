@@ -17,14 +17,14 @@
                                 isActive = q.IsActive,
                                 createdAt = q.CreatedAt.ToString("dd/MM/yyyy"),
                                 permissions = q.Permissions,
-                                phongs = q.Phongs.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai })
+                                phongs = q.Phongs.Select(p => new { p.IDPhong, p.SoPhong, khu = (int)p.Khu, p.TrangThai })
                     }),
                     new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
     ))
 </script>
 <script id="data-phong" type="application/json">
     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                    Model.TatCaPhong.Select(p => new { p.IDPhong, p.SoPhong, tang = (int)p.Tang, p.TrangThai }),
+                    Model.TatCaPhong.Select(p => new { p.IDPhong, p.SoPhong, khu = (int)p.Khu, p.TrangThai }),
                     new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }
     ))
 </script>
