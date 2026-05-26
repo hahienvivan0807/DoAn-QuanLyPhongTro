@@ -191,6 +191,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                     NgaySinh = req.NgaySinh,
                     GhiChu = req.GhiChu
                 };
+                _context.HOPDONG_KHACHO.Add(newNguoiOGhep);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -288,69 +289,111 @@ namespace QuanLyNhaTro.Controllers.ChuTro
         [HttpPost("them-nguoi-o-ghep")]
         public async Task<IActionResult> ThemNguoiOGhep([FromBody] NguoiOGhepRequest request)
         {
-            if (request.IDPhong == null || request.IDPhong <= 0)
-                return BadRequest(new { message = "Vui lòng chọn phòng hợp lệ" });
-            var phong = await _context.PHONG.FindAsync(request.IDPhong.Value);
-            if (phong == null)
-                return NotFound(new { message = "Phòng không tồn tại" });
-            if (phong.TrangThai != "Đã thuê")
-                return BadRequest(new { message = "Chỉ có thể thêm người ở ghép vào phòng đã có người thuê" });
+            // ── Kiểm tra phòng có hợp đồng hiệu lực không ──
             var hopDongHienTai = await _context.HOPDONG
-                .Where(h => h.IDPhong == request.IDPhong && h.TrangThaiHD == "Đang hiệu lực")
-                .FirstOrDefaultAsync();
+                .Include(h => h.Phong)
+                .FirstOrDefaultAsync(h => h.IDPhong == request.IDPhong
+                                       && h.TrangThaiHD == "Đang hiệu lực");
+
             if (hopDongHienTai == null)
                 return BadRequest(new { message = "Không tìm thấy hợp đồng đang hiệu lực cho phòng này" });
-            // Tạo tài khoản mới cho người ở ghép
-            var newAccount = new ACCOUNT
+
+            // ── FIX: Kiểm tra account đã tồn tại chưa ──────────────────────
+            var accountTonTai = await _context.ACCOUNT
+                .FirstOrDefaultAsync(a => a.Username == request.Username.Trim());
+
+            int idUser;
+
+            if (accountTonTai != null)
             {
-                FullName = request.HoTen.Trim(),
-                Username = request.Username.Trim(),
-                Passwords = BCrypt.Net.BCrypt.HashPassword(request.Passwords),
-                Phone = request.Phone.Trim(),
-                Email = request.Email.Trim(),
-                Roles = request.Roles,
-                QR_Link = "",
-                IsActive = true,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
-            _context.ACCOUNT.Add(newAccount);
-            await _context.SaveChangesAsync();
-            // Tạo khách thuê mới cho người ở ghép
-            var newKhachThue = new KHACH_THUE
+                // Dùng lại account cũ, kích hoạt lại nếu bị khóa
+                accountTonTai.IsActive = true;
+                accountTonTai.UpdatedAt = DateTime.UtcNow;
+                idUser = accountTonTai.IDUser;
+            }
+            else
             {
-                IDUser = newAccount.IDUser,
-                HoTen = request.HoTen.Trim(),
-                SoDienThoai = request.Phone.Trim(),
-                SoCCCD = request.SoCCCD.Trim(),
-                NgaySinh = request.NgaySinh,
-                GioiTinh = request.GioiTinh,
-                QueQuan = request.QueQuan.Trim(),
-                DiaChiThuongTru = "",
-                GhiChu = $"Người ở ghép, quan hệ: {request.QuanHe}. {request.GhiChu}",
-                AnhChanDung = null,
-                NgayVaoO = request.NgayVaoO ?? DateTime.Now
-            };
-            _context.KHACH_THUE.Add(newKhachThue);
-            await _context.SaveChangesAsync();
-            var newNguoiOGhep = new HOPDONG_KHACHO
+                // Kiểm tra thêm SĐT trùng không
+                var sdtTonTai = await _context.ACCOUNT
+                    .FirstOrDefaultAsync(a => a.Phone == request.Phone.Trim());
+                if (sdtTonTai != null)
+                    return BadRequest(new { message = $"Số điện thoại {request.Phone} đã được dùng bởi tài khoản khác" });
+
+                // Tạo tài khoản mới
+                var newAccount = new ACCOUNT
+                {
+                    FullName = request.HoTen.Trim(),
+                    Username = request.Username.Trim(),
+                    Passwords = BCrypt.Net.BCrypt.HashPassword(request.Passwords),
+                    Phone = request.Phone.Trim(),
+                    Email = request.Email?.Trim(),
+                    Roles = request.Roles,
+                    QR_Link = "",
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                };
+                _context.ACCOUNT.Add(newAccount);
+                await _context.SaveChangesAsync(); // ← SaveChanges riêng để lấy IDUser
+                idUser = newAccount.IDUser;
+            }
+            // ───────────────────────────────────────────────────────────────
+
+            // ── Tạo KHACH_THUE nếu chưa có ──
+            var khachThueTonTai = await _context.KHACH_THUE
+                .AnyAsync(k => k.IDUser == idUser);
+
+            if (!khachThueTonTai)
+            {
+                var newKhachThue = new KHACH_THUE
+                {
+                    IDUser = idUser,
+                    HoTen = request.HoTen.Trim(),
+                    SoCCCD = request.SoCCCD?.Trim(),
+                    NgaySinh = request.NgaySinh,
+                    GioiTinh = request.GioiTinh,
+                    SoDienThoai = request.Phone.Trim(),
+                    QueQuan = request.QueQuan?.Trim(),
+                    DiaChiThuongTru = "",
+                    GhiChu = request.GhiChu?.Trim()
+                                      ?? $"Người ở ghép, quan hệ: {request.QuanHe}",
+                    NgayVaoO = request.NgayVaoO ?? DateTime.Today,
+                };
+                _context.KHACH_THUE.Add(newKhachThue);
+            }
+
+            // ── Thêm vào HOPDONG_KHACHO ──────────────────────────────────
+            // Kiểm tra đã có trong hợp đồng này chưa
+            var daCoTrongHD = await _context.HOPDONG_KHACHO
+                .AnyAsync(ko => ko.IDHopDong == hopDongHienTai.IDHopDong
+                             && ko.IDUser == idUser
+                             && ko.NgayRa == null);
+
+            if (daCoTrongHD)
+                return BadRequest(new { message = "Người này đã có trong hợp đồng của phòng" });
+
+            var khachO = new HOPDONG_KHACHO
             {
                 IDHopDong = hopDongHienTai.IDHopDong,
-                IDUser = newAccount.IDUser,
-                HoTen= request.HoTen.Trim(),
-                SoCCCD= request.SoCCCD.Trim(),
-                SoDienThoai = request.Phone.Trim(),
-                QuanHe =  request.QuanHe,
-                NgayVao = request.NgayVaoO ?? DateTime.Now,
+                IDUser = idUser,
+                HoTen = request.HoTen.Trim(),
+                SoCCCD = request.SoCCCD?.Trim(),
                 NgaySinh = request.NgaySinh,
-                GhiChu = request.GhiChu
+                GioiTinh = request.GioiTinh,
+                SoDienThoai = request.Phone.Trim(),
+                QuanHe = request.QuanHe,
+                IsChinhChu = false,
+                NgayVao = request.NgayVaoO ?? DateTime.Today,
             };
-            _context.HOPDONG_KHACHO.Add(newNguoiOGhep);
+            _context.HOPDONG_KHACHO.Add(khachO);
+
             await _context.SaveChangesAsync();
+
             return Ok(new
             {
                 success = true,
-                message = $"Đã thêm người ở ghép thành công cho phòng {phong.SoPhong}"
+                message = $"Đã thêm người ở ghép vào phòng {hopDongHienTai.Phong.SoPhong}",
+                idUser = idUser
             });
         }
     }
