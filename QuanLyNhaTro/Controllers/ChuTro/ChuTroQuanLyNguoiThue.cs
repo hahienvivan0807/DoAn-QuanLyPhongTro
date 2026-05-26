@@ -16,6 +16,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             _context = context;
             _configuration = configuration;
         }
+
         [HttpGet("ds-nguoi-thue")]
         public async Task<IActionResult> GetDanhSachNguoiThue()
         {
@@ -73,23 +74,24 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 )
                 .ToList();
 
-            // BƯỚC 3: Lấy IDPhong đang hiệu lực
-            var idPhongList = dsHopDongLoc
+            // BƯỚC 3: Lấy IDHopDong đang hiệu lực (FIX: dùng IDHopDong thay vì IDPhong)
+            var idHopDongList = dsHopDongLoc
                 .Where(hd => hd.TrangThaiHD == "Đang hiệu lực")
-                .Select(hd => hd.IDPhong)
+                .Select(hd => hd.IDHopDong)
                 .Distinct()
                 .ToList();
 
-            // BƯỚC 4: Load người ở ghép riêng
+            // BƯỚC 4: Load người ở ghép — khớp theo IDHopDong để tránh lấy nhầm
+            // record của hợp đồng cũ cùng phòng (FIX: dùng IDHopDong thay vì IDPhong)
             var nguoiOGhepRaw = await _context.HOPDONG_KHACHO
                 .AsNoTracking()
                 .Where(ko =>
-                    ko.NgayRa == null &&
-                    ko.IsChinhChu == false &&
-                    idPhongList.Contains(ko.HopDong.IDPhong) &&
-                    ko.HopDong.TrangThaiHD == "Đang hiệu lực")
+                    ko.NgayRa == null &&                        // Vẫn đang ở (chưa rời đi)
+                    ko.IsChinhChu == false &&                   // Chỉ lấy người ở ghép
+                    idHopDongList.Contains(ko.IDHopDong))       // Thuộc đúng hợp đồng hiệu lực
                 .Select(ko => new {
                     ko.IDKhachO,
+                    ko.IDHopDong,                               // FIX: thêm IDHopDong
                     ko.IDUser,
                     ko.HoTen,
                     ko.SoCCCD,
@@ -107,13 +109,20 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 .ToListAsync();
 
             // BƯỚC 5: GroupBy trong memory — mỗi IDUser chỉ lấy record mới nhất
+            var idUserChuPhongSet = dsHopDongLoc
+                .Select(hd => hd.IDUser)
+                .ToHashSet();
+
+            // FIX: group theo IDHopDong (không phải IDPhong) để tránh duplicate
+            // khi cùng một phòng có nhiều hợp đồng lịch sử
             var nguoiOGhepDict = nguoiOGhepRaw
-                .GroupBy(ko => new { ko.IDPhong, ko.IDUser })
+                .Where(ko => !idUserChuPhongSet.Contains(ko.IDUser))
+                .GroupBy(ko => new { ko.IDHopDong, ko.IDUser })  // dedup mỗi người trong 1 HĐ
                 .Select(g => g.OrderByDescending(x => x.IDKhachO).First())
-                .GroupBy(ko => ko.IDPhong)
+                .GroupBy(ko => ko.IDHopDong)                     // FIX: group theo IDHopDong
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            // BƯỚC 6: Ghép kết quả
+            // BƯỚC 6: Ghép kết quả — lookup theo IDHopDong
             var ketQua = dsHopDongLoc.Select(hd => new
             {
                 hd.IDHopDong,
@@ -134,11 +143,12 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 hd.SoPhong,
                 hd.KhachThue,
                 hd.SoNgayConLai,
-                NguoiOGhep = nguoiOGhepDict.ContainsKey(hd.IDPhong)
-                    ? nguoiOGhepDict[hd.IDPhong]
+                // FIX: lookup theo IDHopDong thay vì IDPhong
+                NguoiOGhep = nguoiOGhepDict.ContainsKey(hd.IDHopDong)
+                    ? nguoiOGhepDict[hd.IDHopDong]
                         .Where(ko => ko.IDUser != hd.IDUser)
                         .ToList()
-                    : nguoiOGhepRaw.Take(0).ToList()
+                   : nguoiOGhepRaw.Where(_ => false).ToList()
             });
 
             return Ok(new { success = true, danhSach = ketQua });
@@ -205,6 +215,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
 
             return Ok(new { success = true, thongKe, danhSach = dsPhong });
         }
+
         // PUT: api/ChuTroQuanLyNguoiThue/tra-phong/{idUser}
         [HttpPut("tra-phong/{idUser}")]
         public async Task<IActionResult> TraPhong(int idUser, [FromBody] TraPhongDto dto)
@@ -229,6 +240,14 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 // 3. Đặt phòng về Trống
                 var phong = await _context.PHONG.FindAsync(hopDong.IDPhong);
                 if (phong != null) phong.TrangThai = "Trống";
+
+                // 4. FIX: Đóng tất cả record HOPDONG_KHACHO còn NgayRa = null
+                //    thuộc hợp đồng này để tránh orphan records gây duplicate sau này
+                var khachOCuaHD = await _context.HOPDONG_KHACHO
+                    .Where(ko => ko.IDHopDong == hopDong.IDHopDong && ko.NgayRa == null)
+                    .ToListAsync();
+                foreach (var ko in khachOCuaHD)
+                    ko.NgayRa = DateTime.Today;
             }
 
             await _context.SaveChangesAsync();
@@ -252,6 +271,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
         {
             public string? GhiChu { get; set; }
         }
+
         [HttpGet("account/{idUser}")]
         public async Task<IActionResult> GetAccount(int idUser)
         {
@@ -273,6 +293,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
 
             return Ok(new { success = true, username = acc.Username, email = acc.Email });
         }
+
         [HttpGet("ds-phong-dang-thue")]
         public async Task<IActionResult> GetPhongDangThue()
         {
@@ -319,7 +340,8 @@ namespace QuanLyNhaTro.Controllers.ChuTro
 
             return Ok(new { success = true, danhSach = dsPhong });
         }
-        // DELETE người ở ghép — khóa tài khoản + đánh dấu NgayRa
+
+        // PUT người ở ghép rời đi — khóa tài khoản + đánh dấu NgayRa
         [HttpPut("nguoi-ghep/roi-di/{idKhachO}")]
         public async Task<IActionResult> NguoiGhepRoiDi(int idKhachO, [FromBody] NguoiGhepRoiDiDto dto)
         {
@@ -356,7 +378,7 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 .FirstOrDefaultAsync();
             if (hdCu != null) return BadRequest(new { success = false, message = "Phòng vẫn còn hợp đồng hiệu lực" });
 
-            // ── FIX: Đánh dấu NgayRa cho TẤT CẢ record cũ của người này ──────
+            // Đánh dấu NgayRa cho TẤT CẢ record cũ của người này
             var cacRecordCu = await _context.HOPDONG_KHACHO
                 .Where(ko => ko.IDUser == khachO.IDUser && ko.NgayRa == null)
                 .ToListAsync();
@@ -364,7 +386,6 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             {
                 record.NgayRa = DateTime.Today;
             }
-            // ──────────────────────────────────────────────────────────────────
 
             // Tạo hợp đồng mới
             var hdMoi = new HOPDONG
@@ -414,10 +435,9 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 });
             }
 
-            // ── FIX: Kích hoạt lại tài khoản cho người ghép thành chủ phòng ──
+            // Kích hoạt lại tài khoản cho người ghép thành chủ phòng
             var account = await _context.ACCOUNT.FindAsync(khachO.IDUser);
             if (account != null) account.IsActive = true;
-            // ──────────────────────────────────────────────────────────────────
 
             await _context.SaveChangesAsync();
             return Ok(new { success = true, message = "Đã tạo hợp đồng mới", idHopDong = hdMoi.IDHopDong });
@@ -435,11 +455,11 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             public int NuocDauKy { get; set; } = 0;
             public string? GhiChu { get; set; }
         }
-        // Trong ChuTroThemNguoiThueController.cs
+
         [HttpPut("cap-nhat/{idHopDong}")]
         public async Task<IActionResult> CapNhatNguoiThue(int idHopDong, [FromBody] CapNhatNguoiThueDto dto)
         {
-            // Tìm hop dong
+            // Tìm hợp đồng
             var hopDong = await _context.HOPDONG
                 .Include(h => h.Phong)
                 .FirstOrDefaultAsync(h => h.IDHopDong == idHopDong);
