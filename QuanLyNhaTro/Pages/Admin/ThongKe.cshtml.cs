@@ -8,12 +8,13 @@ using System.Security.Claims;
 namespace QuanLyNhaTro.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
+
     // ================================================================
-    // DTOs returned by the API endpoints (consumed by fetch() in JS)
+    // DTOs trả về cho các API endpoint (được fetch() trong JS gọi)
     // ================================================================
 
     /// <summary>
-    /// Mirrors THONGKE_DOANHTHU_THANG – returned by GET /api/thongke/doanh-thu
+    /// Mirrors THONGKE_DOANHTHU_THANG – trả về bởi GET ?handler=DoanhThu
     /// </summary>
     public class DoanhThuThangDto
     {
@@ -29,7 +30,7 @@ namespace QuanLyNhaTro.Pages.Admin
     }
 
     /// <summary>
-    /// Mirrors THONGKE_TONG – returned by GET /api/thongke/tong-quan
+    /// Mirrors THONGKE_TONG – trả về bởi GET ?handler=TongQuan
     /// </summary>
     public class TongQuanDto
     {
@@ -50,7 +51,7 @@ namespace QuanLyNhaTro.Pages.Admin
     }
 
     /// <summary>
-    /// Returned by GET /api/thongke/admin-info
+    /// Trả về bởi GET ?handler=AdminInfo
     /// </summary>
     public class AdminInfoDto
     {
@@ -72,20 +73,31 @@ namespace QuanLyNhaTro.Pages.Admin
             _logger = logger;
         }
 
-
-
-        public IActionResult OnGet()
+        // ================================================================
+        // OnGet — Tự động refresh snapshot mỗi khi trang được load
+        // ================================================================
+        public async Task<IActionResult> OnGetAsync()
         {
- 
+            try
+            {
+                await RefreshSnapshotAsync();
+            }
+            catch (Exception ex)
+            {
+                // Không chặn trang nếu refresh thất bại, chỉ ghi log
+                _logger.LogWarning(ex, "RefreshSnapshotAsync thất bại khi load trang, bỏ qua.");
+            }
+
             return Page();
         }
 
-
+        // ================================================================
+        // API: GET ?handler=AdminInfo
+        // ================================================================
         public async Task<IActionResult> OnGetAdminInfoAsync()
         {
             try
             {
-                // Try to read the current user's ID from claims
                 var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                                ?? User.FindFirstValue("IDUser");
 
@@ -100,7 +112,7 @@ namespace QuanLyNhaTro.Pages.Admin
                         .FirstOrDefaultAsync();
                 }
 
-                // Fallback: first Admin/Manager account
+                // Fallback: tài khoản Admin/Manager đầu tiên
                 account ??= await _db.ACCOUNT
                     .AsNoTracking()
                     .Where(a => (a.Roles == "Admin" || a.Roles == "Manager") && a.IsActive)
@@ -118,24 +130,26 @@ namespace QuanLyNhaTro.Pages.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "OnGetAdminInfoAsync failed");
+                _logger.LogError(ex, "OnGetAdminInfoAsync thất bại");
                 return new JsonResult(new AdminInfoDto { FullName = "Chủ Trọ" });
             }
         }
 
-
+        // ================================================================
+        // API: GET ?handler=TongQuan
+        // Luôn đọc từ snapshot (đã được refresh ở OnGetAsync)
+        // ================================================================
         public async Task<IActionResult> OnGetTongQuanAsync()
         {
             try
             {
-                // 1. Try the pre-computed snapshot first (fast path)
                 var snap = await _db.THONGKE_TONG
                     .AsNoTracking()
                     .FirstOrDefaultAsync(t => t.ID == 1);
 
                 if (snap != null)
                 {
-                    var dto = new TongQuanDto
+                    return new JsonResult(new TongQuanDto
                     {
                         TongSoPhong = snap.TongSoPhong,
                         PhongDangThue = snap.PhongDangThue,
@@ -151,28 +165,29 @@ namespace QuanLyNhaTro.Pages.Admin
                         DonDVChoXuLy = snap.DonDVChoXuLy,
                         DonDVKhanCap = snap.DonDVKhanCap,
                         NgayCapNhat = snap.NgayCapNhat
-                    };
-                    return new JsonResult(dto);
+                    });
                 }
 
-                // 2. Fallback: compute live from source tables
+                // Fallback an toàn: tính live nếu snapshot không tồn tại
                 return new JsonResult(await ComputeLiveTongQuanAsync());
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "OnGetTongQuanAsync failed");
+                _logger.LogError(ex, "OnGetTongQuanAsync thất bại");
                 return StatusCode(500, "Lỗi khi tải tổng quan.");
             }
         }
 
-
+        // ================================================================
+        // API: GET ?handler=DoanhThu&nam=2026
+        // ================================================================
         public async Task<IActionResult> OnGetDoanhThuAsync([FromQuery] int nam = 0)
         {
             try
             {
                 if (nam <= 0) nam = DateTime.Now.Year;
 
-                // 1. Try snapshot table
+                // Thử đọc từ bảng snapshot trước (fast path)
                 var rows = await _db.THONGKE_DOANHTHU_THANG
                     .AsNoTracking()
                     .Where(t => t.Nam == (short)nam)
@@ -194,65 +209,110 @@ namespace QuanLyNhaTro.Pages.Admin
                 if (rows.Any())
                     return new JsonResult(rows);
 
-                // 2. Fallback: aggregate from HDTHANG
+                // Fallback: tổng hợp từ HDTHANG
                 rows = await ComputeDoanhThuFromHdThangAsync(nam);
                 return new JsonResult(rows);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "OnGetDoanhThuAsync failed for year {Nam}", nam);
+                _logger.LogError(ex, "OnGetDoanhThuAsync thất bại cho năm {Nam}", nam);
                 return StatusCode(500, "Lỗi khi tải doanh thu.");
             }
         }
 
         // ================================================================
-        // PRIVATE 
+        // CORE: Tính toán dữ liệu thực tế và ghi vào THONGKE_TONG
+        // Được gọi mỗi lần OnGetAsync() chạy
         // ================================================================
+        private async Task RefreshSnapshotAsync()
+        {
+            var live = await ComputeLiveTongQuanAsync();
 
+            var snap = await _db.THONGKE_TONG.FirstOrDefaultAsync(t => t.ID == 1);
 
+            if (snap == null)
+            {
+                // Chưa có bản ghi → tạo mới
+                snap = new THONGKE_TONG { ID = 1 };
+                _db.THONGKE_TONG.Add(snap);
+            }
+
+            // Ghi đè toàn bộ giá trị từ dữ liệu thực
+            snap.TongSoPhong = live.TongSoPhong;
+            snap.PhongDangThue = live.PhongDangThue;
+            snap.PhongConTrong = live.PhongConTrong;
+            snap.PhongDangSua = live.PhongDangSua;
+            snap.TiLeLapDay = live.TiLeLapDay;
+            snap.DoanhThuThangNay = live.DoanhThuThangNay;
+            snap.DoanhThuThangTruoc = live.DoanhThuThangTruoc;
+            snap.TangTruongDoanhThu = live.TangTruongDoanhThu;
+            snap.HoaDonChuaDong = live.HoaDonChuaDong;
+            snap.HoaDonSapDenHan = live.HoaDonSapDenHan;
+            snap.HoaDonQuaHan = live.HoaDonQuaHan;
+            snap.DonDVChoXuLy = live.DonDVChoXuLy;
+            snap.DonDVKhanCap = live.DonDVKhanCap;
+            snap.NgayCapNhat = live.NgayCapNhat;
+
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Snapshot THONGKE_TONG đã được refresh lúc {Time}. TongSoPhong={Phong}, PhongDangThue={DangThue}",
+                live.NgayCapNhat, live.TongSoPhong, live.PhongDangThue);
+        }
+
+        // ================================================================
+        // PRIVATE: Tính tổng quan trực tiếp từ các bảng nguồn
+        // ================================================================
         private async Task<TongQuanDto> ComputeLiveTongQuanAsync()
         {
             var now = DateTime.Now;
-            var month = now.Month;
-            var year = now.Year;
-
-            // Current period key e.g. "05/2025"
-            var kyNay = $"{month:D2}/{year}";
+            var kyNay = $"{now.Month:D2}/{now.Year}";
             var prevDate = now.AddMonths(-1);
             var kyTruoc = $"{prevDate.Month:D2}/{prevDate.Year}";
 
-            // ── Rooms ──────────────────────────────────────────────
-            var phongs = await _db.PHONG.AsNoTracking()
-                .Select(p => p.TrangThai).ToListAsync();
+            // ── Trạng thái phòng ───────────────────────────────────────
+            var trangThaiPhongs = await _db.PHONG
+                .AsNoTracking()
+                .Select(p => p.TrangThai)
+                .ToListAsync();
 
-            int tongPhong = phongs.Count;
-            int dangThue = phongs.Count(s => s == "Đã thuê");
-            int conTrong = phongs.Count(s => s == "Trống");
-            int dangSua = phongs.Count(s => s == "Đang sửa");
-            decimal tiLe = tongPhong > 0 ? Math.Round((decimal)dangThue / tongPhong * 100, 2) : 0;
+            int tongPhong = trangThaiPhongs.Count;
+            int dangThue = trangThaiPhongs.Count(s => s == "Đã thuê");
+            int conTrong = trangThaiPhongs.Count(s => s == "Trống");
+            int dangSua = trangThaiPhongs.Count(s => s == "Đang sửa");
+            decimal tiLe = tongPhong > 0
+                ? Math.Round((decimal)dangThue / tongPhong * 100, 2)
+                : 0;
 
-            // ── Revenue this month / last month ────────────────────
+            // ── Doanh thu tháng này / tháng trước ─────────────────────
             var dtNay = await RevenueForPeriod(kyNay);
             var dtTruoc = await RevenueForPeriod(kyTruoc);
-            decimal tang = dtTruoc > 0 ? Math.Round((dtNay - dtTruoc) / dtTruoc * 100, 2) : 0;
+            decimal tang = dtTruoc > 0
+                ? Math.Round((dtNay - dtTruoc) / dtTruoc * 100, 2)
+                : 0;
 
-            // ── Invoices ───────────────────────────────────────────
-            var invoices = await _db.HDTHANG.AsNoTracking()
-                .Select(h => new { h.TrangThai_TT, h.HanDong }).ToListAsync();
+            // ── Hóa đơn ───────────────────────────────────────────────
+            var invoices = await _db.HDTHANG
+                .AsNoTracking()
+                .Select(h => new { h.TrangThai_TT, h.HanDong })
+                .ToListAsync();
 
             int chuaDong = invoices.Count(h => h.TrangThai_TT == "Chưa đóng");
-            int sapDenHan = invoices.Count(h => h.TrangThai_TT == "Chưa đóng"
-                                                && h.HanDong >= now
-                                                && h.HanDong <= now.AddDays(7));
+            int sapDenHan = invoices.Count(h =>
+                h.TrangThai_TT == "Chưa đóng" &&
+                h.HanDong >= now &&
+                h.HanDong <= now.AddDays(7));
             int quaHan = invoices.Count(h => h.TrangThai_TT == "Quá hạn");
 
-            // ── Service orders ─────────────────────────────────────
-            var dvList = await _db.DONDV.AsNoTracking()
+            // ── Đơn dịch vụ ───────────────────────────────────────────
+            var mucDoDVList = await _db.DONDV
+                .AsNoTracking()
                 .Where(d => d.TrangThai_DV == "Chờ xử lý")
-                .Select(d => d.MucDo).ToListAsync();
+                .Select(d => d.MucDo)
+                .ToListAsync();
 
-            int choXuLy = dvList.Count;
-            int khanCap = dvList.Count(m => m == "Khẩn cấp");
+            int choXuLy = mucDoDVList.Count;
+            int khanCap = mucDoDVList.Count(m => m == "Khẩn cấp");
 
             return new TongQuanDto
             {
@@ -273,17 +333,23 @@ namespace QuanLyNhaTro.Pages.Admin
             };
         }
 
+        // ================================================================
+        // PRIVATE: Tổng doanh thu theo kỳ thanh toán
+        // ================================================================
         private async Task<decimal> RevenueForPeriod(string ky)
         {
-            return await _db.HDTHANG.AsNoTracking()
+            return await _db.HDTHANG
+                .AsNoTracking()
                 .Where(h => h.KyThanhToan == ky
                          && (h.TrangThai_TT == "Đã hoàn thành" || h.TrangThai_TT == "Chờ duyệt"))
                 .SumAsync(h => (decimal?)h.TongCong) ?? 0;
         }
 
+        // ================================================================
+        // PRIVATE: Tổng hợp doanh thu từ HDTHANG khi bảng snapshot thiếu
+        // ================================================================
         private async Task<List<DoanhThuThangDto>> ComputeDoanhThuFromHdThangAsync(int nam)
         {
-       
             var suffix = $"/{nam}";
 
             var allRows = await _db.HDTHANG
@@ -294,7 +360,6 @@ namespace QuanLyNhaTro.Pages.Admin
             var grouped = allRows
                 .GroupBy(h =>
                 {
-                 
                     if (h.KyThanhToan != null
                         && int.TryParse(h.KyThanhToan.Split('/')[0], out int m))
                         return m;
@@ -304,8 +369,10 @@ namespace QuanLyNhaTro.Pages.Admin
                 .OrderBy(g => g.Key)
                 .Select(g =>
                 {
-                    var paid = g.Where(h => h.TrangThai_TT == "Đã hoàn thành"
-                                         || h.TrangThai_TT == "Chờ duyệt").ToList();
+                    var paid = g.Where(h =>
+                        h.TrangThai_TT == "Đã hoàn thành" ||
+                        h.TrangThai_TT == "Chờ duyệt").ToList();
+
                     return new DoanhThuThangDto
                     {
                         Nam = (short)nam,
@@ -316,7 +383,7 @@ namespace QuanLyNhaTro.Pages.Admin
                         TongTienDV = paid.Sum(h => (h.TienDV ?? 0) + (h.TienNoDV ?? 0)),
                         TongCong = paid.Sum(h => h.TongCong),
                         SoHoaDonDaDong = paid.Count(h => h.TrangThai_TT == "Đã hoàn thành"),
-                        ChiPhiThang = 0 
+                        ChiPhiThang = 0
                     };
                 })
                 .ToList();

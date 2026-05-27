@@ -199,13 +199,71 @@ async function ntTaiDuLieu() {
                         // Trạng thái hiển thị
                         TrangThai: hd.trangThaiHD === 'Đang hiệu lực' ? 'dang-o' : 'da-roi',
 
-                        // Người ở ghép — lấy từ row đầu tiên (đã là mảng từ API)
-                        NguoiOGhep: hd.nguoiOGhep || [],
+                        // Người ở ghép — chỉ lấy khi hợp đồng đang hiệu lực.
+                        // Hợp đồng đã kết thúc không được render người ghép (tránh duplicate).
+                        NguoiOGhep: hd.trangThaiHD === 'Đang hiệu lực'
+                            ? (hd.nguoiOGhep || [])
+                            : [],
                         // Người ở ghép cần hợp đồng mới (chủ phòng đã trả phòng sớm)
                         NguoiGhepCanHopDong: hd.nguoiGhepCanHopDong || [],
                     });
                 }
                 // Nếu key đã tồn tại → bỏ qua, không thêm duplicate
+            });
+
+            // ── Pass 1: thu thập idKhachO đã có trong NguoiOGhep của hợp đồng ĐANG HIỆU LỰC ──
+            // Đảm bảo người ghép chỉ xuất hiện dưới đúng 1 hợp đồng active,
+            // kể cả khi API vẫn trả họ trong nguoiOGhep của hợp đồng cũ đã kết thúc.
+            const ghepInActiveContracts = new Set();
+            hopDongMap.forEach(row => {
+                if (row.TrangThai === 'dang-o') {
+                    (row.NguoiOGhep || []).forEach(ko => {
+                        const id = ko.idKhachO ?? ko.IDKhachO;
+                        if (id != null) ghepInActiveContracts.add(id);
+                    });
+                }
+            });
+
+            // ── Pass 2: thu thập idKhachO đã có trong NguoiGhepCanHopDong của hợp đồng ĐANG HIỆU LỰC ──
+            // Ngăn cùng một người xuất hiện dưới cả hợp đồng đã kết thúc lẫn hợp đồng active
+            // khi API trả NguoiGhepCanHopDong trùng trên cả hai contract của cùng một phòng.
+            const ghepCanHDInActiveContracts = new Set();
+            hopDongMap.forEach(row => {
+                if (row.TrangThai === 'dang-o') {
+                    (row.NguoiGhepCanHopDong || []).forEach(ko => {
+                        const id = ko.idKhachO ?? ko.IDKhachO;
+                        if (id != null) ghepCanHDInActiveContracts.add(id);
+                    });
+                }
+            });
+
+            // ── Pass 3: làm sạch từng contract ──
+            hopDongMap.forEach(row => {
+                // Hợp đồng đã kết thúc: xóa sạch NguoiOGhep (không render người ghép dưới contract cũ)
+                if (row.TrangThai === 'da-roi') {
+                    row.NguoiOGhep = [];
+                }
+
+                // NguoiGhepCanHopDong: loại bỏ bất kỳ ai đã xuất hiện trong NguoiGhepCanHopDong
+                // của một hợp đồng ĐANG HIỆU LỰC (tránh hàng cam bị nhân đôi).
+                // Cũng loại bỏ ai đã là NguoiOGhep của chính hợp đồng này (đã có HĐ, không cần cảnh báo).
+                const nguoiOGhepCuaRow = new Set(
+                    (row.NguoiOGhep || []).map(ko => ko.idKhachO ?? ko.IDKhachO)
+                );
+                row.NguoiGhepCanHopDong = (row.NguoiGhepCanHopDong || []).filter(ko => {
+                    const id = ko.idKhachO ?? ko.IDKhachO;
+                    // Giữ lại chỉ khi:
+                    // 1. Không có trong NguoiGhepCanHopDong của bất kỳ hợp đồng dang-o nào khác
+                    //    (trừ chính hợp đồng này)
+                    // 2. Không đã là NguoiOGhep của hợp đồng này
+                    const coTrongActiveCanHD = ghepCanHDInActiveContracts.has(id);
+                    const daLaNguoiOGhep = nguoiOGhepCuaRow.has(id);
+                    const dayLaHopDongDangO = row.TrangThai === 'dang-o';
+
+                    if (daLaNguoiOGhep) return false; // đã có trong NguoiOGhep → không cần cảnh báo cam
+                    if (coTrongActiveCanHD && !dayLaHopDongDangO) return false; // chỉ giữ ở contract dang-o
+                    return true;
+                });
             });
 
             NT.duLieu = Array.from(hopDongMap.values());
@@ -265,7 +323,7 @@ async function ntXacNhanXoa() {
     try {
         const res = await fetch(`/api/ChuTroThemNguoiThue/${id}/tra-phong`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${layToken()}` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 LyDo: lyDo,
                 IDUser: parseInt(idUser)
@@ -2670,22 +2728,34 @@ async function ntLuuNguoiThue() {
                 NgaySinh: _getEl('og-inp-ngay-sinh')?.value || null,
                 GioiTinh: _getEl('og-inp-gioi-tinh')?.value || null,
                 QueQuan: (_getEl('og-inp-que-quan')?.value || '').trim(),
-                NgayVaoO: _getEl('og-inp-ngay-vao')?.value || null,
+                NgayVaoO: (() => {
+    const val = _getEl('og-inp-ngay-vao')?.value;
+    return val ? new Date(val).toISOString() : null;
+})(),
                 QuanHe: _getEl('og-inp-quan-he')?.value || null,
                 GhiChu: (_getEl('og-inp-ghi-chu')?.value || '').trim(),
             };
 
             try {
+                // DEBUG: log payload để kiểm tra field names gửi lên server
+                console.log('payload:', JSON.stringify(payload));
+
                 const response = await fetch('/api/ChuTroThemNguoiThue/them-nguoi-o-ghep', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${layToken()}`
                     },
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.message || 'Lỗi không xác định');
+                if (!response.ok) {
+                    // Hiển thị lỗi thực từ server thay vì "Lỗi không xác định"
+                    const errMsg = result.message
+                        || result.title
+                        || (result.errors ? JSON.stringify(result.errors) : null)
+                        || 'Lỗi không xác định';
+                    throw new Error(errMsg);
+                }
 
                 if (typeof hienToast === 'function')
                     hienToast(`Đã thêm người ở ghép "${payload.HoTen}" vào phòng ${_S.phongDaChon?.soPhong} thành công!`, 'success');

@@ -202,6 +202,59 @@ namespace QuanLyNhaTro.Controllers.ChuTro
                 _context.HOPDONG_KHACHO.Add(newKhachO);
                 await _context.SaveChangesAsync();
 
+                // 6. Tự động gán người ở ghép còn lại vào hợp đồng mới
+                // Tìm tất cả HOPDONG_KHACHO thuộc cùng phòng, chưa rời đi (NgayRa == null),
+                // thuộc hợp đồng đã kết thúc, không phải chủ phòng cũ,
+                // và chưa có trong bất kỳ hợp đồng đang hiệu lực nào của phòng này.
+                var idUserDangHieuLuc = await _context.HOPDONG_KHACHO
+                    .Where(ko => ko.HopDong.IDPhong == req.IDPhong
+                              && ko.HopDong.TrangThaiHD == "Đang hiệu lực"
+                              && ko.NgayRa == null)
+                    .Select(ko => ko.IDUser)
+                    .ToListAsync();
+
+                var nguoiGhepConLai = await _context.HOPDONG_KHACHO
+                    .Where(ko => ko.HopDong.IDPhong == req.IDPhong
+                              && ko.HopDong.TrangThaiHD == "Đã kết thúc"
+                              && ko.NgayRa == null
+                              && ko.IsChinhChu == false
+                              && !idUserDangHieuLuc.Contains(ko.IDUser))
+                    .ToListAsync();
+
+                foreach (var nguoiGhep in nguoiGhepConLai)
+                {
+                    // Thêm vào hợp đồng mới
+                    var khachOGhep = new HOPDONG_KHACHO
+                    {
+                        IDHopDong = newHopDong.IDHopDong,
+                        IDUser = nguoiGhep.IDUser,
+                        HoTen = nguoiGhep.HoTen,
+                        SoCCCD = nguoiGhep.SoCCCD,
+                        NgaySinh = nguoiGhep.NgaySinh,
+                        GioiTinh = nguoiGhep.GioiTinh,
+                        SoDienThoai = nguoiGhep.SoDienThoai,
+                        QuanHe = nguoiGhep.QuanHe,
+                        IsChinhChu = false,
+                        NgayVao = DateTime.Today,
+                    };
+                    _context.HOPDONG_KHACHO.Add(khachOGhep);
+
+                    // Kích hoạt lại tài khoản (họ vẫn đang ở trong phòng)
+                    var taiKhoan = await _context.ACCOUNT
+                        .FirstOrDefaultAsync(a => a.IDUser == nguoiGhep.IDUser);
+                    if (taiKhoan != null)
+                    {
+                        taiKhoan.IsActive = true;
+                        taiKhoan.UpdatedAt = DateTime.Now;
+                    }
+
+                    // Tăng số lượng người trong phòng
+                    phong.soluong += 1;
+                }
+
+                if (nguoiGhepConLai.Any())
+                    await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
                 return Ok(new { message = "Thêm người thuê thành công!", idUser = newAccount.IDUser });

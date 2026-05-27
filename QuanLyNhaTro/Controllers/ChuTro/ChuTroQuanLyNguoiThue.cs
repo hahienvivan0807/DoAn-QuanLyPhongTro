@@ -126,10 +126,10 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             var idUserChuPhongSet = dsHopDongLoc
                 .Select(hd => hd.IDUser)
                 .ToHashSet();
-                    var idUserDaCoHDHieuLuc = nguoiOGhepRaw
-            .Where(ko => ko.HopDongConHieuLuc)
-            .Select(ko => ko.IDUser)
-            .ToHashSet();
+            var idUserDaCoHDHieuLuc = nguoiOGhepRaw
+    .Where(ko => ko.HopDongConHieuLuc)
+    .Select(ko => ko.IDUser)
+    .ToHashSet();
 
             var nguoiGhepMoCoi = nguoiOGhepRaw
                 .Where(ko => !ko.HopDongConHieuLuc
@@ -513,8 +513,30 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             _context.HOPDONG.Add(hdMoi);
             phong.TrangThai = "Đã thuê";
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // hdMoi now has a real IDHopDong
 
+            // ── BƯỚC X: Thu thập người ghép còn lại TRƯỚC khi lưu KHACHO của chủ mới ──
+            //
+            // Query lúc này: hdMoi đã tồn tại nhưng chưa có KHACHO nào → chưa bị đếm vào
+            // idUserDaCoHDHieuLuc khi ta kiểm tra qua HOPDONG_KHACHO.
+            // Điều kiện tìm kiếm:
+            //   - Cùng phòng (IDPhong == phong.IDPhong)
+            //   - Hợp đồng gốc đã kết thúc (TrangThaiHD == "Đã kết thúc")
+            //   - Chưa chính thức rời đi (NgayRa == null)
+            //   - Là người ở ghép (IsChinhChu == false)
+            //   - Không phải người vừa ký HĐ mới (IDUser != khachO.IDUser)
+            var nguoiGhepCanGan = await _context.HOPDONG_KHACHO
+                .Include(ko => ko.HopDong)
+                .Where(ko =>
+                    ko.HopDong.IDPhong == phong.IDPhong &&
+                    ko.HopDong.TrangThaiHD == "Đã kết thúc" &&
+                    ko.NgayRa == null &&
+                    ko.IsChinhChu == false &&
+                    ko.IDUser != khachO.IDUser)
+                .ToListAsync();
+            // ── KẾT THÚC thu thập ──
+
+            // Thêm record HOPDONG_KHACHO cho chủ phòng mới
             _context.HOPDONG_KHACHO.Add(new HOPDONG_KHACHO
             {
                 IDHopDong = hdMoi.IDHopDong,
@@ -548,8 +570,56 @@ namespace QuanLyNhaTro.Controllers.ChuTro
             var account = await _context.ACCOUNT.FindAsync(khachO.IDUser);
             if (account != null) account.IsActive = true;
 
+            // ── BƯỚC X (tiếp theo): Gán người ghép còn lại vào hợp đồng mới ──
+            //
+            // Dùng danh sách đã thu thập trước khi chủ mới được thêm vào KHACHO,
+            // nên không lo bị nhiễm bởi trạng thái mới của hdMoi.
+            var idUserDaXuLy = new HashSet<int>();
 
+            foreach (var nguoiGhep in nguoiGhepCanGan)
+            {
+                if (!idUserDaXuLy.Add(nguoiGhep.IDUser))
+                    continue; // đã xử lý IDUser này rồi (dedup)
+
+                // 1. Đóng TẤT CẢ record cũ còn mở của người này
+                var recordsCuNguoiGhep = await _context.HOPDONG_KHACHO
+                    .Where(ko => ko.IDUser == nguoiGhep.IDUser && ko.NgayRa == null)
+                    .ToListAsync();
+                foreach (var rec in recordsCuNguoiGhep)
+                    rec.NgayRa = DateTime.Today;
+
+                // 2. Lấy thông tin tài khoản để điền vào record mới
+                var accNguoiGhep = await _context.ACCOUNT.FindAsync(nguoiGhep.IDUser);
+
+                // 3. Tạo record HOPDONG_KHACHO mới trong hợp đồng vừa được tạo
+                _context.HOPDONG_KHACHO.Add(new HOPDONG_KHACHO
+                {
+                    IDHopDong = hdMoi.IDHopDong,
+                    IDUser = nguoiGhep.IDUser,
+                    HoTen = nguoiGhep.HoTen,
+                    SoCCCD = nguoiGhep.SoCCCD,
+                    NgaySinh = nguoiGhep.NgaySinh,
+                    GioiTinh = nguoiGhep.GioiTinh,
+                    SoDienThoai = accNguoiGhep?.Phone ?? nguoiGhep.SoDienThoai,
+                    QuanHe = nguoiGhep.QuanHe ?? "Người ở ghép",
+                    IsChinhChu = false,
+                    NgayVao = dto.NgayBatDau,
+                    NgayRa = null,
+                    GhiChu = nguoiGhep.GhiChu,
+                });
+
+                // 4. Kích hoạt lại tài khoản của người ghép (nếu bị khoá)
+                if (accNguoiGhep != null && !accNguoiGhep.IsActive)
+                {
+                    accNguoiGhep.IsActive = true;
+                    accNguoiGhep.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+
+            // Lưu tất cả: KHACHO chủ mới + KHACH_THUE + người ghép được gán lại
             await _context.SaveChangesAsync();
+            // ── KẾT THÚC BƯỚC X ──
+
             return Ok(new { success = true, message = "Đã tạo hợp đồng mới", idHopDong = hdMoi.IDHopDong });
         }
 
