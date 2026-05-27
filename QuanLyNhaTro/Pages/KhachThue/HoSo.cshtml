@@ -396,7 +396,9 @@
   <a href="/KhachThue/KhachThue" class="menu-item" onclick="chuyenTrang('trang-chu', this); return false;">
     <i class="fas fa-home"></i><span>Trang chủ</span>
   </a>
-
+    <a href="/Manager/Manager" class="menu-item" onclick="chuyenTrang('trang-quan-ly', this); return false;">
+        <i class="fas fa-home"></i><span>Trang Quản Lý</span>
+    </a>
   <div class="nhan-nhom">Dịch vụ</div>
   <a href="/KhachThue/ThanhToan" class="menu-item" onclick="chuyenTrang('thanh-toan', this); return false;">
     <i class="fas fa-credit-card"></i><span>Thanh toán</span>
@@ -840,6 +842,7 @@
       'thong-bao':  '/KhachThue/ThongBao',
       'ho-so':      '/KhachThue/HoSo',
       'cai-dat':    '/KhachThue/CaiDat',
+      'trang-quan-ly':'/Manager/Manager',
     };
     if (bang[tenTrang]) window.location.href = bang[tenTrang];
   }
