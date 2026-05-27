@@ -2268,6 +2268,10 @@
             <i class="fas fa-home"></i>
             <span>Trang chủ</span>
         </div>
+        <div class="menu-item dang-chon" onclick="chuyenTrang('phong-cua-toi', this)">
+            <i class="fas fa-home"></i>
+            <span>Phòng của tôi</span>
+        </div>
 
         <!-- ===== NHÓM QUẢN LÝ ===== -->
         <div class="nhan-nhom">Quản lý</div>
@@ -3198,6 +3202,7 @@
             'su-co-bao-tri':       '/Manager/SuCoBaoTri',
             'thong-ke':             '/Manager/ThongKe',
             'cai-dat':             '/Manager/CaiDat',
+            'phong-cua-toi':        '/KhachThue/KhachThue'
             };
             const duongDan = bangDieuHuong[tenTrang];
             if (duongDan) {

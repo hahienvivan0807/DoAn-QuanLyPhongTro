@@ -167,6 +167,7 @@ function chonQuanLy(idUser) {
     // ─── Panel Phân công phòng ───────────────────────────────
     const phongInfo = document.getElementById('phong-no-selection');
     const phongContent = document.getElementById('phong-content');
+    if (phongContent) tqlRenderPhongHD(phongContent, q.phongs);
     if (phongInfo) phongInfo.style.display = 'none';
     if (phongContent) phongContent.style.display = '';
 
@@ -627,14 +628,17 @@ function timKiem(keyword) {
 // ═══════════════════════════════════════════════════════════
 // 13. MODAL HELPERS
 // ═══════════════════════════════════════════════════════════
-function moModal(id) {
-    const el = document.getElementById(id);
-    if (el) { el.style.display = 'flex'; el.classList.add('hien'); }
-}
 
 function dongModal(id) {
-    const el = document.getElementById(id);
-    if (el) { el.style.display = ''; el.classList.remove('hien'); }
+    document.getElementById(id)?.classList.remove('hien');
+    if (id === 'modal-them-ql') {
+        moTabThem(0);          // reset về tab 0
+        tqlResetPhongHDPanel(); // xóa chọn phòng
+        // reset extra roles chips
+        document.querySelectorAll('#them-extra-roles-wrap .them-role-chip')
+            .forEach(el => el.classList.remove('selected'));
+        document.getElementById('them-extra-roles').value = '';
+    }
 }
 
 function dongModalNgoai(event, id) {
@@ -781,43 +785,59 @@ function moModalDanhSachQuanLy() {
 }
 // ── Hàm gom nhóm dữ liệu và gửi lên Server tạo tài khoản ──
 async function themQuanLyFull() {
+    const g = id => (document.getElementById(id)?.value || '').trim();
 
     const dulieu = {
-        FullName: document.getElementById('them-fullname')?.value.trim(),
-        Username: document.getElementById('them-username')?.value.trim(),
-        Phone: document.getElementById('them-phone')?.value.trim(),
-        Email: document.getElementById('them-email')?.value.trim(),
-        Password: document.getElementById('them-password')?.value.trim(),
+        // Tab 0 — bắt buộc
+        FullName: g('them-fullname'),
+        Username: g('them-username'),
+        Phone: g('them-phone'),
+        Email: g('them-email') || null,
+        Password: g('them-password'),
 
-        CCCD: document.getElementById('them-cccd')?.value.trim(),
-        NgaySinh: document.getElementById('them-ngaysinh')?.value,
-        GioiTinh: document.getElementById('them-gioitinh')?.value,
-        QueQuan: document.getElementById('them-quequan')?.value.trim(),
-        DiaChiThuongTru: document.getElementById('them-diachi')?.value.trim(),
-        GhiChu: document.getElementById('them-ghichu')?.value.trim(),
+        // Tab 1 — tùy chọn
+        CCCD: g('them-cccd') || null,
+        NgaySinh: g('them-ngaysinh') || null,
+        GioiTinh: g('them-gioitinh') || null,
+        QueQuan: g('them-quequan') || null,
+        DiaChiThuongTru: g('them-diachi') || null,
+        GhiChu: g('them-ghichu') || null,
+        ExtraRoles: g('them-extra-roles') || null,
+
+        // Tab 2 — Phòng & HĐ
+        ...tqlLayPayloadPhongHD(),
     };
 
-    console.log("📦 Toàn bộ dulieu đã được gom nhóm chuẩn bị gửi:", dulieu);
-
-    if (!dulieu.FullName || !dulieu.Username || !dulieu.Phone || !dulieu.Password || !dulieu.CCCD) {
-        alert("Vui lòng điền đầy đủ thông tin bắt buộc ở tất cả các tab (Tài khoản, Hồ sơ cá nhân, Hợp đồng & Phòng).");
+    if (!dulieu.FullName || !dulieu.Username || !dulieu.Phone || !dulieu.Password) {
+        showToast('Vui lòng điền đầy đủ thông tin bắt buộc.', 'error');
+        moTabThem(0);
         return;
     }
 
+    const btn = document.getElementById('btn-them-next');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
+
     try {
-        const respone = await fetch('/api/ChuTro/tao-tai-khoan', {
+        const res = await fetch('/api/ChuTro/tao-tai-khoan', {
             method: 'POST',
             headers: headers(),
-            body: JSON.stringify(dulieu)
+            body: JSON.stringify(dulieu),
         });
-        let data = await respone.json();
-        if (respone.ok) {
-            alert(data.message || "Tạo tài khoản thành công!");
+        const data = await res.json();
+
+        if (res.ok) {
+            alert(data.message || 'Tạo tài khoản thành công!', 'success');
+            dongModal('modal-them-ql');
+            await laiDanhSach();
         } else {
-            alert(data.message || "Lỗi khi tạo tài khoản. Vui lòng thử lại.");
+            showToast(data.message || 'Lỗi khi tạo tài khoản.', 'error');
         }
-    } catch (error) {
-        alert("Lỗi kết nối máy chủ. Vui lòng kiểm tra lại.");
+    } catch {
+        showToast('Lỗi kết nối máy chủ.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Tạo tài khoản';
     }
 }
 // ── Biến lưu toàn bộ phòng từ API ──────────────────────────
@@ -1279,3 +1299,41 @@ function __pcTogglePageAll(checked) {
     __pcOnCheck();
 }
 function onCheckPhong() { }
+// ── Search + filter wrappers for table toolbar ──────────────
+function timKiemQL(keyword) {
+    const kw = (keyword || '').toLowerCase().trim();
+    const filterTT = document.getElementById('sel-filter')?.value || '';
+
+    const filtered = danhSachQL.filter(q => {
+        const matchKW = !kw
+            || q.fullName.toLowerCase().includes(kw)
+            || (q.username || '').toLowerCase().includes(kw)
+            || (q.phone || '').includes(kw);
+        const matchTT = !filterTT
+            || (filterTT === 'active' && q.isActive)
+            || (filterTT === 'locked' && !q.isActive);
+        return matchKW && matchTT;
+    });
+
+    _renderTable(filtered);
+}
+
+function locTrangThai(value) {
+    const kw = (document.getElementById('inp-search')?.value || '').toLowerCase().trim();
+    timKiemQL(kw); // reuse timKiemQL which already reads sel-filter
+}
+
+function _renderTable(ds) {
+    const count = document.getElementById('pg-count');
+    if (count) count.textContent = ds.length;
+
+    const tbody = document.getElementById('tbody-quan-ly');
+    if (!tbody) return;
+
+    // Show/hide rows based on filtered set
+    const allRows = tbody.querySelectorAll('tr[data-id]');
+    const visibleIds = new Set(ds.map(q => q.idUser));
+    allRows.forEach(row => {
+        row.style.display = visibleIds.has(parseInt(row.dataset.id)) ? '' : 'none';
+    });
+}

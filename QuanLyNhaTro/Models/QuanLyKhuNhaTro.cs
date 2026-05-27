@@ -48,9 +48,11 @@
             public DateTime CreatedAt { get; set; }
 
             public DateTime UpdatedAt { get; set; }
+            [StringLength(50)]
+            public string ?ExtraRoles { get; set; }
 
-            // Navigation Properties
-            public virtual ICollection<REFRESH_TOKEN> RefreshTokens { get; set; } = new List<REFRESH_TOKEN>();
+        // Navigation Properties
+        public virtual ICollection<REFRESH_TOKEN> RefreshTokens { get; set; } = new List<REFRESH_TOKEN>();
             public virtual ICollection<HOPDONG> HopDongTenants { get; set; } = new List<HOPDONG>();
             public virtual ICollection<HOPDONG> HopDongManagers { get; set; } = new List<HOPDONG>();
             public virtual ICollection<PHONG_MANAGER> PhongManagers { get; set; } = new List<PHONG_MANAGER>();

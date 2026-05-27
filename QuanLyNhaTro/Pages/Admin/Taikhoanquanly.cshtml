@@ -2050,6 +2050,74 @@
         .phong-card.selected .pc-so {
         color: #5b21b6;
         }
+        /* ── TENANT INFO SECTION (in Thêm Quản Lý modal) ── */
+        .them-tenant-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        }
+
+        .them-tenant-grid .full {
+        grid-column: 1 / -1;
+        }
+
+        .them-inp-icon-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+        }
+
+        .them-inp-icon-wrap > i:first-child {
+        position: absolute;
+        left: 10px;
+        color: var(--mau-chu-phu);
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 1;
+        }
+
+        .them-inp-icon-wrap .form-input {
+        padding-left: 30px;
+        }
+
+        .them-extra-roles-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 6px;
+        }
+
+        .them-role-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        background: var(--mau-trang);
+        color: var(--mau-chu-phu);
+        user-select: none;
+        }
+
+        .them-role-chip:hover {
+        border-color: #7c3aed;
+        color: #7c3aed;
+        }
+
+        .them-role-chip.selected {
+        background: #ede9fe;
+        border-color: #7c3aed;
+        color: #5b21b6;
+        font-weight: 700;
+        }
+
+        .them-role-chip i {
+        font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -2561,194 +2629,240 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div style="display:flex;border-bottom:1.5px solid var(--mau-vien);padding:0 20px;background:var(--mau-nen-card);gap:4px;" id="them-tabs">
+            <div style="display:flex;border-bottom:1.5px solid var(--mau-vien);padding:0 20px;
+                        background:var(--mau-nen-card);gap:4px;" id="them-tabs">
                 <div class="them-tab them-tab-on" onclick="moTabThem(0)">
                     <i class="fas fa-user-circle"></i> Tài khoản
                 </div>
                 <div class="them-tab" onclick="moTabThem(1)">
-                    <i class="fas fa-id-card"></i> Hồ sơ cá nhân
+                    <i class="fas fa-id-card"></i> Hồ sơ &amp; Quyền
+                </div>
+                <div class="them-tab" onclick="moTabThem(2)">
+                    <i class="fas fa-door-open"></i> Phòng &amp; HĐ
                 </div>
             </div>
 
+
             <div class="modal-body" style="padding:20px 24px 8px;">
 
+                <!-- PANEL 0: TÀI KHOẢN -->
                 <div class="them-panel them-panel-on" id="them-panel-0">
-    <div class="them-section-label"><i class="fas fa-user-circle"></i> Thông tin đăng nhập</div>
-    <div class="form-2col">
-        <div class="form-row">
-            <label>Họ và tên <span class="req">*</span></label>
-            <input type="text" id="them-fullname" class="form-input" placeholder="Nguyễn Văn A" autocomplete="off" />
-        </div>
-        <div class="form-row">
-            <label>Username <span class="req">*</span></label>
-            <input type="text" id="them-username" class="form-input" placeholder="nguyenvana" autocomplete="off" />
-        </div>
-    </div>
-    <div class="form-2col">
-        <div class="form-row">
-            <label>Số điện thoại <span class="req">*</span></label>
-            <input type="tel" id="them-phone" class="form-input" placeholder="09xxxxxxxx" />
-        </div>
-        <div class="form-row">
-            <label>Gmail</label>
-            <input type="email" id="them-email" class="form-input" placeholder="email@gmail.com" />
-        </div>
-    </div>
-    <div class="form-row">
-        <label>Mật khẩu <span class="req">*</span></label>
-        <div class="pass-wrap">
-            <input type="password" id="them-password" class="form-input"
-                   placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" />
-            <button type="button" class="btn-toggle-pass" onclick="togglePass('them-password',this)">
-                <i class="fas fa-eye"></i>
-            </button>
-        </div>
-        <div class="form-hint">Tối thiểu 8 ký tự.</div>
-    </div>
-
-    <div class="them-section-label" style="margin-top:14px;">
-        <i class="fas fa-shield-alt"></i> Phân quyền
-    </div>
-    <div class="form-row">
-        <label>Vai trò</label>
-        <div style="margin-top:4px;">
-            <span class="them-perm-badge">
-                <i class="fas fa-user-shield"></i> Manager – mặc định, không thay đổi
-            </span>
-        </div>
-        <div class="form-hint">Tài khoản quản lý luôn có vai trò Manager.</div>
-    </div>
-</div>
-
-<!-- PANEL 2: HỒ SƠ -->
-<div class="them-panel" id="them-panel-1">
-    <div class="them-section-label"><i class="fas fa-id-card"></i> Thông tin cá nhân</div>
-    <div class="form-2col">
-        <div class="form-row">
-            <label>Số CCCD <span class="req">*</span></label>
-            <input type="text" id="them-cccd" class="form-input"
-                   placeholder="012xxxxxxxxx" maxlength="12" />
-        </div>
-        <div class="form-row">
-            <label>Ngày sinh</label>
-            <input type="date" id="them-ngaysinh" class="form-input" />
-        </div>
-    </div>
-    <div class="form-2col">
-        <div class="form-row">
-            <label>Giới tính</label>
-            <select id="them-gioitinh" class="form-input tql-filter-select" style="width:100%;padding:9px 12px;">
-                <option value="">— Chọn —</option>
-                <option>Nam</option>
-                <option>Nữ</option>
-                <option>Khác</option>
-            </select>
-        </div>
-        <div class="form-row">
-            <label>Quê quán</label>
-            <input type="text" id="them-quequan" class="form-input" placeholder="Tỉnh / thành phố" />
-        </div>
-    </div>
-    <div class="form-row">
-        <label>Địa chỉ thường chú</label>
-        <input type="text" id="them-diachi" class="form-input"
-               placeholder="Số nhà, đường, phường/xã, quận/huyện..." />
-    </div>
-    <div class="form-row">
-        <label>Ghi chú</label>
-        <textarea id="them-ghichu" class="form-input" rows="3"
-                  placeholder="Thông tin bổ sung..." style="resize:vertical;"></textarea>
-    </div>
-</div>
-
-<!-- PANEL 3: HỢP ĐỒNG & PHÒNG -->
-<div class="them-panel" id="them-panel-2">
-    <div class="them-section-label">
-        <i class="fas fa-door-open"></i> Thiết lập hợp đồng & Phòng
-        <span class="them-optional-tag">Tùy chọn</span>
-    </div>
-    <div class="form-row">
-        <label>CHỌN PHÒNG</label>
-                        <!-- Bộ lọc trạng thái phòng -->
-                        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                            <button type="button" class="btn-filter-phong active" data-filter=""
-                                    onclick="filterPhong(this,'')">
-                                Tất cả
-                            </button>
-                            <button type="button" class="btn-filter-phong" data-filter="Trống"
-                                    onclick="filterPhong(this,'Trống')">
-                                🟢 Trống
-                            </button>
-                            <button type="button" class="btn-filter-phong" data-filter="Đã thuê"
-                                    onclick="filterPhong(this,'Đã thuê')">
-                                🔵 Đang thuê
-                            </button>
-                            <button type="button" class="btn-filter-phong" data-filter="Đang sửa"
-                                    onclick="filterPhong(this,'Đang sửa')">
-                                🟡 Bảo trì
+                    <div class="them-section-label"><i class="fas fa-user-circle"></i> Thông tin đăng nhập</div>
+                    <div class="form-2col">
+                        <div class="form-row">
+                            <label>Họ và tên <span class="req">*</span></label>
+                            <input type="text" id="them-fullname" class="form-input"
+                                   placeholder="Nguyễn Văn A" autocomplete="off" />
+                        </div>
+                        <div class="form-row">
+                            <label>Username <span class="req">*</span></label>
+                            <input type="text" id="them-username" class="form-input"
+                                   placeholder="nguyenvana" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="form-2col">
+                        <div class="form-row">
+                            <label>Số điện thoại <span class="req">*</span></label>
+                            <input type="tel" id="them-phone" class="form-input" placeholder="09xxxxxxxx" />
+                        </div>
+                        <div class="form-row">
+                            <label>Email</label>
+                            <input type="email" id="them-email" class="form-input" placeholder="email@gmail.com" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>Mật khẩu <span class="req">*</span></label>
+                        <div class="pass-wrap">
+                            <input type="password" id="them-password" class="form-input"
+                                   placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" />
+                            <button type="button" class="btn-toggle-pass"
+                                    onclick="togglePass('them-password',this)">
+                                <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <div class="form-hint">Tối thiểu 8 ký tự.</div>
+                    </div>
+                    <div class="them-section-label" style="margin-top:14px;">
+                        <i class="fas fa-shield-alt"></i> Phân quyền
+                    </div>
+                    <div class="form-row">
+                        <div style="margin-top:4px;">
+                            <span class="them-perm-badge">
+                                <i class="fas fa-user-shield"></i> Manager – mặc định, không thay đổi
+                            </span>
+                        </div>
+                        <div class="form-hint">Tài khoản quản lý luôn có vai trò Manager.</div>
+                    </div>
+                </div>
 
-                        <!-- Grid chọn phòng -->
-                        <div id="phong-grid-container" style="
-                            max-height:220px;overflow-y:auto;
-                            display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
-                            padding:4px 0;">
-                            <div style="grid-column:1/-1;text-align:center;
-                                color:var(--mau-chu-phu);padding:20px;font-size:13px;">
-                                <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách phòng...
+                <!-- PANEL 1: HỒ SƠ + EXTRA ROLES -->
+                <div class="them-panel" id="them-panel-1">
+                    <div class="them-section-label"><i class="fas fa-id-card"></i> Thông tin cá nhân</div>
+                    <div class="form-2col">
+                        <div class="form-row">
+                            <label>Số CCCD</label>
+                            <input type="text" id="them-cccd" class="form-input"
+                                   placeholder="012xxxxxxxxx" maxlength="12" />
+                        </div>
+                        <div class="form-row">
+                            <label>Ngày sinh</label>
+                            <input type="date" id="them-ngaysinh" class="form-input" />
+                        </div>
+                    </div>
+                    <div class="form-2col">
+                        <div class="form-row">
+                            <label>Giới tính</label>
+                            <select id="them-gioitinh" class="form-input"
+                                    style="width:100%;padding:9px 12px;">
+                                <option value="">— Chọn —</option>
+                                <option>Nam</option>
+                                <option>Nữ</option>
+                                <option>Khác</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Quê quán</label>
+                            <input type="text" id="them-quequan" class="form-input"
+                                   placeholder="Tỉnh / thành phố" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>Địa chỉ thường trú</label>
+                        <input type="text" id="them-diachi" class="form-input"
+                               placeholder="Số nhà, đường, phường/xã, quận/huyện..." />
+                    </div>
+                    <div class="form-row">
+                        <label>Ghi chú</label>
+                        <textarea id="them-ghichu" class="form-input" rows="2"
+                                  placeholder="Thông tin bổ sung..." style="resize:vertical;"></textarea>
+                    </div>
+
+                    <div class="them-section-label" style="margin-top:14px;">
+                        <i class="fas fa-shield-halved"></i> Vai trò bổ sung
+                        <span class="them-optional-tag">Tùy chọn</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="them-extra-roles-wrap" id="them-extra-roles-wrap">
+                            <label class="them-role-chip" onclick="toggleRoleChip(this,'Supervisor')">
+                                <i class="fas fa-user-tie"></i> Supervisor
+                            </label>
+                            <label class="them-role-chip" onclick="toggleRoleChip(this,'Accountant')">
+                                <i class="fas fa-calculator"></i> Accountant
+                            </label>
+                            <label class="them-role-chip" onclick="toggleRoleChip(this,'Maintenance')">
+                                <i class="fas fa-wrench"></i> Maintenance
+                            </label>
+                            <label class="them-role-chip" onclick="toggleRoleChip(this,'Support')">
+                                <i class="fas fa-headset"></i> Support
+                            </label>
+                        </div>
+                        <input type="hidden" id="them-extra-roles" value="" />
+                        <div class="form-hint">Các vai trò bổ sung ngoài Manager mặc định.</div>
+                    </div>
+                </div>
+
+                <!-- PANEL 2: PHÒNG & HỢP ĐỒNG -->
+                <div class="them-panel" id="them-panel-2">
+                    <div class="them-section-label">
+                        <i class="fas fa-door-open"></i> Chọn phòng
+                        <span class="them-optional-tag">Tùy chọn</span>
+                    </div>
+                    <div class="form-row">
+                        <label>Phòng được phân công</label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <div class="form-input" id="tql-phong-display-box"
+                                 style="flex:1;cursor:pointer;display:flex;align-items:center;
+                                justify-content:space-between;user-select:none;
+                                background:var(--mau-nen);"
+                                 onclick="tqlMoPickerPhong()">
+                                <span id="tql-phong-display-text"
+                                      style="color:var(--mau-chu-phu);">-- Chọn phòng --</span>
+                                <i class="fas fa-chevron-down"
+                                   style="font-size:10px;color:var(--mau-chu-phu);"></i>
                             </div>
+                            <button type="button" class="btn-huy" onclick="tqlMoPickerPhong()"
+                                    style="white-space:nowrap;flex-shrink:0;">
+                                <i class="fas fa-door-open"></i> Chọn
+                            </button>
+                            <button type="button" class="btn-huy" id="tql-btn-xoa-phong"
+                                    onclick="tqlXoaChonPhong()"
+                                    style="display:none;flex-shrink:0;" title="Bỏ chọn">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        <input type="hidden" id="them-phong-phan-cong" value="0" />
-                        <div id="phong-selected-label" style="
-                            margin-top:8px;font-size:12px;
-                            color:var(--mau-chu-phu);min-height:18px;">
+                        <input type="hidden" id="tql-inp-id-phong" value="" />
+                        <div class="form-hint">Để trống nếu chưa phân công phòng ngay.</div>
+
+                        <div id="tql-room-preview"
+                             style="display:none;margin-top:10px;padding:12px 14px;
+                            background:#f5f3ff;border:1.5px solid rgba(124,58,237,0.18);
+                            border-radius:var(--radius-md);">
+                            <div style="font-size:11px;font-weight:800;color:#7c3aed;
+                                text-transform:uppercase;letter-spacing:0.7px;
+                                margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                                <i class="fas fa-door-open"></i> Thông tin phòng đã chọn
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;"
+                                 id="tql-rp-body"></div>
                         </div>
-        <div class="form-hint">Quản lý sẽ được giao phòng này ngay sau khi tạo.</div>
-    </div>
+                    </div>
 
-    <div class="form-2col">
-        <div class="form-row">
-            <label>Ngày bắt đầu</label>
-            <input type="date" id="them-ngay-bd-hd" class="form-input" />
-        </div>
-        <div class="form-row">
-            <label>Ngày kết thúc</label>
-            <input type="date" id="them-ngay-kt-hd" class="form-input" />
-        </div>
-    </div>
-    <div class="form-hint" style="margin-bottom:14px;">Để trống nếu chưa cần tạo hợp đồng.</div>
+                    <div class="them-section-label" style="margin-top:16px;">
+                        <i class="fas fa-file-contract"></i> Thông tin hợp đồng
+                        <span class="them-optional-tag">Tùy chọn</span>
+                    </div>
+                    <div class="form-2col">
+                        <div class="form-row">
+                            <label>Ngày bắt đầu HĐ</label>
+                            <input type="date" id="tql-them-ngay-bd-hd" class="form-input" />
+                        </div>
+                        <div class="form-row">
+                            <label>Ngày kết thúc HĐ</label>
+                            <input type="date" id="tql-them-ngay-kt-hd" class="form-input" />
+                            <div class="form-hint">Để trống nếu không thời hạn.</div>
+                        </div>
+                    </div>
 
-    <div class="them-section-label">
-        <i class="fas fa-tachometer-alt"></i> Chỉ số đầu kỳ &amp; Cọc
-        <span class="them-optional-tag">Tùy chọn</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-        <div class="form-row">
-            <label>Điện đầu kỳ (kWh)</label>
-            <input type="number" id="them-dien-dau-ky" class="form-input" placeholder="0" min="0" />
-        </div>
-        <div class="form-row">
-            <label>Nước đầu kỳ (m³)</label>
-            <input type="number" id="them-nuoc-dau-ky" class="form-input" placeholder="0" min="0" />
-        </div>
-        <div class="form-row">
-            <label>Tiền cọc (VNĐ)</label>
-            <input type="number" id="them-tien-coc" class="form-input" placeholder="0" min="0" />
-        </div>
-    </div>
-</div>
+                    <div class="them-section-label" style="margin-top:14px;">
+                        <i class="fas fa-tachometer-alt"></i> Chỉ số đầu kỳ &amp; Cọc
+                        <span class="them-optional-tag">Tùy chọn</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                        <div class="form-row">
+                            <label>Điện đầu kỳ (kWh)</label>
+                            <input type="number" id="tql-them-dien-dau-ky" class="form-input"
+                                   placeholder="0" min="0" />
+                        </div>
+                        <div class="form-row">
+                            <label>Nước đầu kỳ (m³)</label>
+                            <input type="number" id="tql-them-nuoc-dau-ky" class="form-input"
+                                   placeholder="0" min="0" />
+                        </div>
+                        <div class="form-row">
+                            <label>Tiền cọc (VNĐ)</label>
+                            <input type="number" id="tql-them-tien-coc" class="form-input"
+                                   placeholder="0" min="0" />
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top:4px;">
+                        <label>Ghi chú hợp đồng</label>
+                        <textarea id="tql-them-ghi-chu-hd" class="form-input" rows="2"
+                                  placeholder="Điều khoản thêm, thỏa thuận đặc biệt..."
+                                  style="resize:vertical;"></textarea>
+                    </div>
+                </div>
+
             </div><!-- /modal-body -->
 
             <div class="modal-footer" style="justify-content:space-between;">
                 <div style="display:flex;gap:6px;align-items:center;" id="them-step-dots">
                     <div style="width:18px;height:7px;border-radius:4px;background:#7c3aed;" id="them-dot-0"></div>
-                    <div style="width:7px;height:7px;border-radius:50%;background:var(--mau-vien);" id="them-dot-1"></div>
-                    <div style="width:7px;height:7px;border-radius:50%;background:var(--mau-vien);" id="them-dot-2"></div>
+                    <div style="width:7px;height:7px;border-radius:50%;background:var(--mau-vien);"  id="them-dot-1"></div>
+                    <div style="width:7px;height:7px;border-radius:50%;background:var(--mau-vien);"  id="them-dot-2"></div>
                 </div>
                 <div style="display:flex;gap:8px;">
                     <button class="btn-huy" id="btn-them-back" style="display:none;"
-                            onclick="moTabThem(window.__themTab-1)">
+                            onclick="moTabThem(window.__themTab - 1)">
                         ← Quay lại
                     </button>
                     <button class="btn-luu-modal" id="btn-them-next" onclick="tiepTabThem()">
@@ -2853,9 +2967,312 @@
         if (theThongBao.parentNode) theThongBao.remove();
         }, 3000);
         };
+        /* ════════════════════════════════════════════════════════════
+        TQL ROOM PICKER — Namespace: tql* (no conflict with NT / oGhep)
+        ════════════════════════════════════════════════════════════ */
+        let _tqlPickerPhongs = [];
+        let _tqlPhongDaChon  = null;
 
+        async function tqlMoPickerPhong() {
+        const overlay = document.getElementById('tql-picker-overlay');
+        if (overlay) overlay.classList.add('hien');
+
+        document.getElementById('tql-picker-search').value = '';
+        document.getElementById('tql-picker-filter-tt').value = 'Trống';
+
+        if (_tqlPickerPhongs.length > 0) {
+        tqlPickerLoc();
+        return;
+        }
+        await _tqlTaiPhong();
+        }
+
+        function tqlDongPicker() {
+        document.getElementById('tql-picker-overlay')?.classList.remove('hien');
+        }
+
+        function tqlDongPickerNeuClick(e) {
+        if (e && e.target === document.getElementById('tql-picker-overlay')) tqlDongPicker();
+        }
+
+        async function _tqlTaiPhong() {
+        const loading = document.getElementById('tql-picker-loading');
+        const grid    = document.getElementById('tql-picker-grid');
+        const empty   = document.getElementById('tql-picker-empty');
+
+        if (loading) loading.style.display = 'flex';
+        if (grid)    grid.style.display    = 'none';
+        if (empty)   empty.style.display   = 'none';
+
+        try {
+        const res  = await fetch('/api/ChuTro/DanhSachPhong');
+        const data = await res.json();
+        _tqlPickerPhongs = Array.isArray(data) ? data : (data.danhSach || []);
+        tqlPickerLoc();
+        } catch (err) {
+        if (loading) loading.innerHTML =
+        '<i class="fas fa-exclamation-triangle" style="color:#e53e3e;"></i>' +
+        '&nbsp;Không tải được danh sách phòng';
+        }
+        }
+
+        function tqlPickerLoc() {
+        const kw = (document.getElementById('tql-picker-search')?.value || '').toLowerCase().trim();
+        const tt = document.getElementById('tql-picker-filter-tt')?.value || '';
+
+        const filtered = _tqlPickerPhongs.filter(p => {
+        const matchTT  = !tt || p.trangThai === tt;
+        const matchKey = !kw
+        || String(p.soPhong  || '').toLowerCase().includes(kw)
+        || String(p.khu      || '').toLowerCase().includes(kw);
+        return matchTT && matchKey;
+        });
+        _tqlRenderPickerGrid(filtered);
+        }
+
+        function _tqlRenderPickerGrid(list) {
+        const loading = document.getElementById('tql-picker-loading');
+        const grid    = document.getElementById('tql-picker-grid');
+        const empty   = document.getElementById('tql-picker-empty');
+
+        if (loading) loading.style.display = 'none';
+
+        if (!list.length) {
+        if (grid)  grid.style.display  = 'none';
+        if (empty) empty.style.display = 'block';
+        return;
+        }
+        if (empty) empty.style.display = 'none';
+        if (grid)  grid.style.display  = 'grid';
+
+        const badgeCls = {
+        'Trống'    : 'rp-badge-trong',
+        'Đã thuê'  : 'rp-badge-datthue',
+        'Đang sửa' : 'rp-badge-suachua',
+        };
+
+        grid.innerHTML = list.map(p => {
+        const isSelected = _tqlPhongDaChon && _tqlPhongDaChon.idPhong === p.idPhong;
+        const disabled   = p.trangThai !== 'Trống' ? 'disabled' : '';
+
+        return `
+        <div class="rp-card ${isSelected ? 'selected' : ''} ${disabled}"
+        onclick="_tqlChonPhong(${p.idPhong})">
+        <div class="rp-check"><i class="fas fa-check"></i></div>
+        <div class="rp-so-phong">P.${_tqlEsc(p.soPhong)}</div>
+        <div class="rp-tang">Khu ${_tqlEsc(String(p.khu ?? ''))}</div>
+        <span class="rp-badge ${badgeCls[p.trangThai] || 'rp-badge-trong'}">
+        ${_tqlEsc(p.trangThai)}
+        </span>
+        <div class="rp-gia">${_tqlFmtTien(p.giaPhongFix)}/tháng</div>
+        </div>`;
+        }).join('');
+        }
+
+        function _tqlChonPhong(idPhong) {
+        const phong = _tqlPickerPhongs.find(p => p.idPhong === idPhong);
+        if (!phong) return;
+
+        _tqlPhongDaChon = phong;
+
+        // Update hidden input
+        const inp = document.getElementById('tql-inp-id-phong');
+        if (inp) inp.value = idPhong;
+
+        // Update display box
+        const txt = document.getElementById('tql-phong-display-text');
+        if (txt) {
+        txt.textContent = `Phòng ${phong.soPhong} — Khu ${phong.khu}`;
+        txt.style.color = 'var(--mau-chu)';
+        }
+
+        // Show clear button
+        const btnXoa = document.getElementById('tql-btn-xoa-phong');
+        if (btnXoa) btnXoa.style.display = '';
+
+        // Render room preview
+        const preview = document.getElementById('tql-room-preview');
+        const rpBody  = document.getElementById('tql-rp-body');
+        if (preview && rpBody) {
+        rpBody.innerHTML = [
+        { k: 'Số phòng',    v: `Phòng ${phong.soPhong}` },
+        { k: 'Khu',         v: `Khu ${phong.khu}` },
+        { k: 'Trạng thái',  v: phong.trangThai },
+        { k: 'Giá thuê',    v: `${_tqlFmtTien(phong.giaPhongFix)}/tháng` },
+        { k: 'Diện tích',   v: phong.dienTich ? `${phong.dienTich} m²` : '—' },
+        { k: 'Số người tối đa', v: phong.soNguoiToiDa ?? '—' },
+        ].map(item => `
+        <div>
+        <div style="font-size:10.5px;color:var(--mau-chu-phu);
+        text-transform:uppercase;letter-spacing:0.5px;
+        font-weight:700;margin-bottom:2px;">${item.k}</div>
+        <div style="font-size:13px;font-weight:700;
+        color:var(--mau-chu);">${_tqlEsc(String(item.v))}</div>
+        </div>`).join('');
+        preview.style.display = 'block';
+        }
+
+        // Auto-fill ngay-bd-hd if empty
+        const ngayBD = document.getElementById('tql-them-ngay-bd-hd');
+        if (ngayBD && !ngayBD.value)
+        ngayBD.value = new Date().toISOString().split('T')[0];
+
+        tqlDongPicker();
+        }
+
+        function tqlXoaChonPhong() {
+        _tqlPhongDaChon = null;
+        const inp = document.getElementById('tql-inp-id-phong');
+        if (inp) inp.value = '';
+        const txt = document.getElementById('tql-phong-display-text');
+        if (txt) { txt.textContent = '-- Chọn phòng --'; txt.style.color = 'var(--mau-chu-phu)'; }
+        const preview = document.getElementById('tql-room-preview');
+        if (preview) preview.style.display = 'none';
+        const btnXoa = document.getElementById('tql-btn-xoa-phong');
+        if (btnXoa) btnXoa.style.display = 'none';
+        const ngayBD = document.getElementById('tql-them-ngay-bd-hd');
+        if (ngayBD) ngayBD.value = '';
+        }
+
+        /* ────────────────────────────────────────────────────────────
+        TQL PAYLOAD COLLECTOR — gọi từ themQuanLyFull() hiện có
+        Trả về object chứa các field Phòng & HĐ để merge vào payload
+        ──────────────────────────────────────────────────────────── */
+        function tqlLayPayloadPhongHD() {
+        const get = id => (document.getElementById(id)?.value || '').trim();
+        return {
+        IDPhong         : parseInt(get('tql-inp-id-phong'))        || null,
+        NgayBatDauHD    : get('tql-them-ngay-bd-hd')               || null,
+        NgayKetThucHD   : get('tql-them-ngay-kt-hd')               || null,
+        DienDauKy       : parseInt(get('tql-them-dien-dau-ky'))     || 0,
+        NuocDauKy       : parseInt(get('tql-them-nuoc-dau-ky'))     || 0,
+        TienCocHD       : parseFloat(get('tql-them-tien-coc'))      || 0,
+        GhiChuHD        : get('tql-them-ghi-chu-hd'),
+        };
+        }
+
+        /* ────────────────────────────────────────────────────────────
+        TQL RENDER — Hiển thị thông tin Phòng & HĐ trong bảng hoặc
+        sidebar phải (dùng khi click chọn quản lý)
+        ──────────────────────────────────────────────────────────── */
+
+        /**
+        * Render một card tóm tắt Phòng & HĐ vào container chỉ định.
+        * @@param {HTMLElement} container - phần tử sẽ nhận nội dung
+        * @@param {Object[]} phongs       - mảng phòng từ data-quan-ly JSON
+        */
+        function tqlRenderPhongHD(container, phongs) {
+        if (!container) return;
+
+        if (!phongs || phongs.length === 0) {
+        container.innerHTML = `
+        <div style="padding:14px;text-align:center;color:var(--mau-chu-phu);
+        font-size:13px;font-style:italic;">
+        <i class="fas fa-door-closed" style="margin-right:6px;opacity:.4;"></i>
+        Chưa được phân công phòng nào
+        </div>`;
+        return;
+        }
+
+        container.innerHTML = phongs.map(p => {
+        const ttClass = {
+        'Đã thuê'  : 'badge-active',
+        'Trống'    : 'badge-empty',
+        'Đang sửa' : 'badge-locked',
+        }[p.TrangThai || p.trangThai] || 'badge-empty';
+
+        const soPhong  = p.SoPhong   || p.soPhong   || '—';
+        const khu      = p.khu !== undefined ? p.khu : (p.Khu ?? '');
+        const trangThai= p.TrangThai || p.trangThai || '—';
+
+        return `
+        <div style="display:flex;align-items:center;justify-content:space-between;
+        padding:9px 12px;border-radius:var(--radius-sm);
+        background:var(--mau-nen);border:1px solid var(--mau-vien);
+        margin-bottom:6px;font-size:13px;">
+        <div style="display:flex;align-items:center;gap:9px;">
+        <div style="width:32px;height:32px;border-radius:8px;flex-shrink:0;
+        background:#ede9fe;display:flex;align-items:center;
+        justify-content:center;font-size:13px;font-weight:700;
+        color:#5b21b6;">
+        ${_tqlEsc(String(soPhong))}
+        </div>
+        <div>
+        <div style="font-weight:700;color:var(--mau-chu);">
+        Phòng ${_tqlEsc(String(soPhong))}
+        ${khu !== '' ? `<span style="font-size:11px;color:var(--mau-chu-phu);
+        font-weight:500;"> — Khu ${_tqlEsc(String(khu))}</span>` : ''}
+        </div>
+        </div>
+        </div>
+        <span class="badge ${ttClass}" style="font-size:11px;">
+        ${_tqlEsc(trangThai)}
+        </span>
+        </div>`;
+        }).join('');
+        }
+
+        /**
+        * Render block Phòng & HĐ vào sidebar phải khi chọn 1 quản lý.
+        * Gọi trong chonQuanLy() hiện có — thêm 2 dòng ở cuối hàm đó:
+        *
+        *   const phongContent = document.getElementById('phong-content');
+        *   tqlRenderPhongHD(phongContent, ql.phongs);
+        */
+
+        /* ────────────────────────────────────────────────────────────
+        VALIDATE Phòng & HĐ (gọi từ tiepTabThem khi tab = 2)
+        ──────────────────────────────────────────────────────────── */
+        function tqlValidatePhongHD() {
+        const idPhong  = document.getElementById('tql-inp-id-phong')?.value || '';
+        const ngayBD   = document.getElementById('tql-them-ngay-bd-hd')?.value || '';
+        const ngayKT   = document.getElementById('tql-them-ngay-kt-hd')?.value || '';
+
+        // Phòng & Hợp đồng đều optional — chỉ validate nếu nhập một phần
+        if (ngayKT && ngayBD && new Date(ngayKT) <= new Date(ngayBD)) {
+        alert('Ngày kết thúc hợp đồng phải sau ngày bắt đầu.');
+        return false;
+        }
+        if ((ngayBD || ngayKT || idPhong) && !idPhong) {
+        // Đã nhập ngày nhưng chưa chọn phòng
+        const txt = document.getElementById('tql-phong-display-text');
+        if (txt) txt.style.color = 'var(--mau-do)';
+        alert('Vui lòng chọn phòng khi điền thông tin hợp đồng.');
+        return false;
+        }
+        return true;
+        }
+
+        /* ────────────────────────────────────────────────────────────
+        RESET panel 2 khi đóng modal Thêm quản lý
+        Gọi trong hàm dongModal('modal-them-ql') hiện có
+        ──────────────────────────────────────────────────────────── */
+        function tqlResetPhongHDPanel() {
+        tqlXoaChonPhong();
+        ['tql-them-ngay-bd-hd','tql-them-ngay-kt-hd',
+        'tql-them-dien-dau-ky','tql-them-nuoc-dau-ky',
+        'tql-them-tien-coc','tql-them-ghi-chu-hd']
+        .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+        });
+        _tqlPickerPhongs = [];
+        }
+
+        /* ────────────────────────────────────────────────────────────
+        UTILS (scoped so they don't collide with NT / oGhep)
+        ──────────────────────────────────────────────────────────── */
+        function _tqlEsc(s) {
+        return String(s || '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function _tqlFmtTien(v) {
+        return new Intl.NumberFormat('vi-VN').format(v || 0) + 'đ';
+        }
         // ─── Tab stepper cho modal Thêm quản lý ─────────────────────────
         window.__themTab = 0;
+        const THEM_TAB_COUNT = 3;
 
         function moTabThem(i) {
         const n = 2; // Tài khoản (0) + Hồ sơ cá nhân (1)
@@ -2882,20 +3299,133 @@
         : 'Tiếp theo <i class="fas fa-arrow-right"></i>';
         }
 
-        function tiepTabThem() {
-        if (window.__themTab < 1) {
-        moTabThem(window.__themTab + 1);
-        } else {
-        themQuanLyFull();
+        function moTabThem(i) {
+        for (let j = 0; j < THEM_TAB_COUNT; j++) {
+        document.getElementById('them-panel-' + j)
+        ?.classList.toggle('them-panel-on', j === i);
+        document.querySelectorAll('#them-tabs .them-tab')[j]
+        ?.classList.toggle('them-tab-on', j === i);
+
+        const dot = document.getElementById('them-dot-' + j);
+        if (dot) {
+        dot.style.width        = j === i ? '18px' : '7px';
+        dot.style.borderRadius = j === i ? '4px'  : '50%';
+        dot.style.background   = j === i ? '#7c3aed' : 'var(--mau-vien)';
         }
         }
+        window.__themTab = i;
+        document.getElementById('btn-them-back').style.display = i > 0 ? '' : 'none';
+
+        const nb = document.getElementById('btn-them-next');
+        nb.innerHTML = i === THEM_TAB_COUNT - 1
+        ? '<i class="fas fa-user-plus"></i> Tạo tài khoản'
+        : 'Tiếp theo <i class="fas fa-arrow-right"></i>';
+        }
+
 
         // ─── Toggle sidebar ──────────────────────────────────────────────
         function dongMoSidebar() {
         const sb = document.getElementById('thanh-sidebar');
         sb.classList.toggle('an');
         }
+        // Toggle Extra Role chips
+        function toggleRoleChip(el, role) {
+        el.classList.toggle('selected');
+        const hidden = document.getElementById('them-extra-roles');
+        const current = hidden.value ? hidden.value.split(',') : [];
+        const idx = current.indexOf(role);
+        if (idx === -1) current.push(role); else current.splice(idx, 1);
+        hidden.value = current.filter(Boolean).join(',');
+        }
+        function tiepTabThem() {
+        if (window.__themTab < THEM_TAB_COUNT - 1) {
+        moTabThem(window.__themTab + 1);
+        } else {
+        themQuanLyFull();
+        }
+        }
+
     </script>
+    <!-- ════════════════════════════════════════════════════════════
+     MODAL: CHỌN PHÒNG cho taikhoanquanly (tql-picker)
+════════════════════════════════════════════════════════════ -->
+    <div class="lop-phu-modal" id="tql-picker-overlay"
+         onclick="tqlDongPickerNeuClick(event)">
+        <div class="hop-modal" style="max-width:600px;">
+
+            <div class="modal-header-purple">
+                <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+                    <div class="mh-icon"><i class="fas fa-door-open"></i></div>
+                    <div>
+                        <div class="mh-title">Chọn phòng</div>
+                        <div class="mh-sub">Lọc và chọn phòng để phân công</div>
+                    </div>
+                </div>
+                <button class="mh-close" onclick="tqlDongPicker()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Toolbar -->
+            <div style="padding:12px 20px;border-bottom:1px solid var(--mau-vien);
+                display:flex;gap:10px;flex-wrap:wrap;background:var(--mau-nen-card);">
+                <div class="tql-search-wrap" style="flex:1;min-width:150px;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="tql-picker-search"
+                           placeholder="Tìm số phòng, khu..."
+                           oninput="tqlPickerLoc()" />
+                </div>
+                <select class="tql-filter-select" id="tql-picker-filter-tt"
+                        onchange="tqlPickerLoc()" style="min-width:160px;">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Trống" selected>Phòng trống</option>
+                    <option value="Đã thuê">Đang có người thuê</option>
+                    <option value="Đang sửa">Đang sửa chữa</option>
+                </select>
+            </div>
+
+            <!-- Grid -->
+            <div class="modal-body" style="padding:14px 16px;max-height:420px;overflow-y:auto;">
+                <div id="tql-picker-loading"
+                     style="display:flex;align-items:center;gap:10px;padding:32px;
+                    justify-content:center;color:var(--mau-chu-phu);font-size:13px;">
+                    <div style="width:20px;height:20px;border:3px solid var(--mau-vien);
+                    border-top-color:#7c3aed;border-radius:50%;
+                    animation:spin .7s linear infinite;flex-shrink:0;"></div>
+                    Đang tải...
+                </div>
+                <div id="tql-picker-grid"
+                     style="display:none;display:grid;
+                grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+                gap:10px;"></div>
+                <div id="tql-picker-empty"
+                     style="display:none;text-align:center;padding:40px 16px;
+                    color:var(--mau-chu-phu);">
+                    <div style="font-size:32px;margin-bottom:10px;">
+                        <i class="fas fa-door-closed"></i>
+                    </div>
+                    <div style="font-weight:700;font-size:13px;color:var(--mau-chu);
+                        margin-bottom:4px;">
+                        Không tìm thấy phòng
+                    </div>
+                    <div style="font-size:12px;">Thử thay đổi bộ lọc trạng thái</div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="justify-content:flex-end;">
+                <button class="btn-huy" onclick="tqlDongPicker()">
+                    <i class="fas fa-times"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+    <style>
+        @@keyframes spin {
+        to {
+        transform: rotate(360deg);
+        }
+        }
+    </style>
     <!--Thông báo-->
     <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;"></div>
 </body>
