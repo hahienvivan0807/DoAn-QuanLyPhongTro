@@ -1336,4 +1336,55 @@ function _renderTable(ds) {
     allRows.forEach(row => {
         row.style.display = visibleIds.has(parseInt(row.dataset.id)) ? '' : 'none';
     });
+} function _tqlRenderPickerGrid(list) {
+    const loading = document.getElementById('tql-picker-loading');
+    const grid = document.getElementById('tql-picker-grid');
+    const empty = document.getElementById('tql-picker-empty');
+
+    if (loading) loading.style.display = 'none';
+
+    if (!list.length) {
+        if (grid) grid.style.display = 'none';
+        if (empty) empty.style.display = 'block';
+        return;
+    }
+    if (empty) empty.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+
+    const badgeCls = {
+        'Trống': 'rp-badge-trong',
+        'Đã thuê': 'rp-badge-datthue',
+        'Đang sửa': 'rp-badge-suachua',
+    };
+
+    const badgeIcon = {
+        'Trống': '🟢',
+        'Đã thuê': '🔵',
+        'Đang sửa': '🟡',
+    };
+
+    grid.innerHTML = list.map(p => {
+        const isSelected = _tqlPhongDaChon && _tqlPhongDaChon.idPhong === p.idPhong;
+        const isDisabled = p.trangThai !== 'Trống';
+        const cardClass = [
+            'rp-card',
+            isSelected ? 'selected' : '',
+            isDisabled ? 'disabled' : '',
+        ].filter(Boolean).join(' ');
+
+        const onClick = isDisabled
+            ? ''
+            : `onclick="_tqlChonPhong(${p.idPhong})"`;
+
+        return `
+        <div class="${cardClass}" ${onClick}>
+            <div class="rp-check"><i class="fas fa-check"></i></div>
+            <div class="rp-so-phong">P.${_tqlEsc(p.soPhong)}</div>
+            <div class="rp-tang">Khu ${_tqlEsc(String(p.khu ?? ''))}</div>
+            <span class="rp-badge ${badgeCls[p.trangThai] || 'rp-badge-trong'}">
+                ${badgeIcon[p.trangThai] || ''} ${_tqlEsc(p.trangThai)}
+            </span>
+            <div class="rp-gia">${_tqlFmtTien(p.giaPhongFix)}/tháng</div>
+        </div>`;
+    }).join('');
 }

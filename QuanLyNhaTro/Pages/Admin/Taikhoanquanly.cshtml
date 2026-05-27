@@ -2118,6 +2118,109 @@
         .them-role-chip i {
         font-size: 11px;
         }
+        /* ── ROOM PICKER CARDS ─────────────────────────────────── */
+        #tql-picker-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+        }
+
+        .rp-card {
+        border: 1.5px solid var(--mau-vien);
+        border-radius: var(--radius-md);
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+        position: relative;
+        background: var(--mau-trang);
+        }
+
+        .rp-card:hover:not(.disabled) {
+        border-color: #7c3aed;
+        background: #f5f3ff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(124,58,237,0.12);
+        }
+
+        .rp-card.selected {
+        border-color: #7c3aed;
+        background: #ede9fe;
+        box-shadow: 0 0 0 2px rgba(124,58,237,0.25);
+        }
+
+        .rp-card.disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        }
+
+        /* Check icon góc trên phải */
+        .rp-check {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #7c3aed;
+        color: #fff;
+        font-size: 9px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        }
+
+        .rp-card.selected .rp-check {
+        display: flex;
+        }
+
+        .rp-so-phong {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--mau-chu);
+        margin-bottom: 2px;
+        }
+
+        .rp-card.selected .rp-so-phong {
+        color: #5b21b6;
+        }
+
+        .rp-tang {
+        font-size: 11px;
+        color: var(--mau-chu-phu);
+        margin-bottom: 6px;
+        }
+
+        .rp-gia {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--mau-chu);
+        margin-top: 6px;
+        }
+
+        /* Badge trạng thái */
+        .rp-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+        }
+
+        .rp-badge-trong {
+        background: #ecfdf5;
+        color: #059669;
+        }
+
+        .rp-badge-datthue {
+        background: #eff6ff;
+        color: #2563eb;
+        }
+
+        .rp-badge-suachua {
+        background: #fffbeb;
+        color: #d97706;
+        }
     </style>
 </head>
 <body>
@@ -2768,7 +2871,7 @@
                         <span class="them-optional-tag">Tùy chọn</span>
                     </div>
                     <div class="form-row">
-                        <label>Phòng được phân công</label>
+                        <label>Chọn phòng cho quản lý</label>
                         <div style="display:flex;gap:8px;align-items:center;">
                             <div class="form-input" id="tql-phong-display-box"
                                  style="flex:1;cursor:pointer;display:flex;align-items:center;
