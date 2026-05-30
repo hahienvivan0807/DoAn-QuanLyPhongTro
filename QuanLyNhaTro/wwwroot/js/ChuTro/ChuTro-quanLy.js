@@ -1388,3 +1388,169 @@ function _renderTable(ds) {
         </div>`;
     }).join('');
 }
+// ── MODAL PHÂN CÔNG PHÒNG (inline modal from table row) ─────
+let _mpcManagerId = null;
+let _mpcSelected = new Set();   // IDPhong đã chọn
+let _mpcAllRooms = [];          // cache từ tatCaPhong
+
+function moModalPhanCong(idUser, event) {
+    if (event) event.stopPropagation();
+
+    const ql = danhSachQL.find(x => x.idUser === idUser);
+    if (!ql) return;
+
+    _mpcManagerId = idUser;
+    _mpcSelected = new Set((ql.phongs || []).map(p => p.IDPhong));
+    _mpcAllRooms = tatCaPhong; // already loaded from server
+
+    // Update modal sub-title
+    const sub = document.getElementById('mpc-sub');
+    if (sub) sub.textContent =
+        `${ql.fullName} (@${ql.username})`;
+
+    // Reset filters
+    document.getElementById('mpc-search').value = '';
+    document.getElementById('mpc-filter-tt').value = '';
+    const onlyMine = document.getElementById('mpc-only-mine');
+    if (onlyMine) onlyMine.checked = false;
+
+    mpcLoc();
+    document.getElementById('modal-phan-cong-phong').classList.add('hien');
+}
+
+function mpcLoc() {
+    const kw = (document.getElementById('mpc-search')?.value || '').toLowerCase().trim();
+    const filterTT = document.getElementById('mpc-filter-tt')?.value || '';
+    const onlyMine = document.getElementById('mpc-only-mine')?.checked || false;
+
+    const takenByOthers = getRoomsOwnedByOthers(_mpcManagerId);
+
+    const list = _mpcAllRooms.filter(p => {
+        const soPhong = (p.SoPhong || p.soPhong || '').toLowerCase();
+        const tt = p.TrangThai || p.trangThai || '';
+        if (kw && !soPhong.includes(kw)) return false;
+        if (filterTT && tt !== filterTT) return false;
+        if (onlyMine && !_mpcSelected.has(p.IDPhong)) return false;
+        return true;
+    });
+
+    mpcRenderGrid(list, takenByOthers);
+}
+
+function mpcRenderGrid(list, takenByOthers) {
+    const grid = document.getElementById('mpc-grid');
+    const empty = document.getElementById('mpc-empty');
+    if (!grid) return;
+
+    if (!list.length) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        mpcUpdateBadge();
+        return;
+    }
+    empty.style.display = 'none';
+    grid.style.display = 'grid';
+
+    grid.innerHTML = list.map(p => {
+        const id = p.IDPhong;
+        const soPhong = p.SoPhong || p.soPhong || '';
+        const tt = p.TrangThai || p.trangThai || '';
+        const khu = (p.Khu || p.khu || '');
+        const isMine = _mpcSelected.has(id);
+        const isTaken = takenByOthers.has(id);
+
+        const badgeCls = tt === 'Trống' ? 'trong' : tt === 'Đã thuê' ? 'datthue' : 'suachua';
+        const cardCls = [
+            'mpc-card',
+            isMine ? 'mpc-selected' : '',
+            isTaken ? 'mpc-taken' : '',
+        ].filter(Boolean).join(' ');
+
+        const onClick = isTaken ? '' : `onclick="mpcToggle(${id})"`;
+        const title = isTaken ? 'Đã phân công cho quản lý khác' : `Phòng ${soPhong}`;
+
+        return `
+        <div class="${cardCls}" ${onClick} title="${title}" data-id="${id}">
+            <div class="mpc-check-icon"><i class="fas fa-check"></i></div>
+            <div class="mpc-so">${escHtml(soPhong)}</div>
+            <div class="mpc-khu">Khu ${escHtml(String(khu))}</div>
+            <span class="mpc-badge ${badgeCls}">${escHtml(tt)}</span>
+        </div>`;
+    }).join('');
+
+    mpcUpdateBadge();
+}
+
+function mpcToggle(idPhong) {
+    const card = document.querySelector(`#mpc-grid .mpc-card[data-id="${idPhong}"]`);
+    if (!card) return;
+
+    if (_mpcSelected.has(idPhong)) {
+        _mpcSelected.delete(idPhong);
+        card.classList.remove('mpc-selected');
+    } else {
+        _mpcSelected.add(idPhong);
+        card.classList.add('mpc-selected');
+    }
+    mpcUpdateBadge();
+}
+
+function mpcUpdateBadge() {
+    const badge = document.getElementById('mpc-count-badge');
+    if (badge) badge.textContent = `${_mpcSelected.size} đã chọn`;
+}
+
+function mpcChonTatCa() {
+    const takenByOthers = getRoomsOwnedByOthers(_mpcManagerId);
+    _mpcAllRooms.forEach(p => {
+        const tt = p.TrangThai || p.trangThai || '';
+        if (tt === 'Trống' && !takenByOthers.has(p.IDPhong)) {
+            _mpcSelected.add(p.IDPhong);
+        }
+    });
+    mpcLoc(); // re-render
+}
+
+async function mpcLuu() {
+    if (!_mpcManagerId) return;
+
+    setBtnLoading('btn-mpc-luu', true);
+    try {
+        const res = await fetch('/Admin/Taikhoanquanly?handler=PhanCongPhong', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({
+                IDManager: _mpcManagerId,
+                IDPhongs: [..._mpcSelected]
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) return showToast(data.message || 'Lỗi phân công.', 'error');
+
+        showToast(data.message || `Đã phân công ${_mpcSelected.size} phòng.`, 'success');
+        dongModal('modal-phan-cong-phong');
+
+        // Update in-memory state
+        const ql = danhSachQL.find(x => x.idUser === _mpcManagerId);
+        if (ql) {
+            ql.phongs = tatCaPhong
+                .filter(p => _mpcSelected.has(p.IDPhong))
+                .map(p => ({
+                    IDPhong: p.IDPhong,
+                    SoPhong: p.SoPhong || p.soPhong,
+                    khu: p.Khu || p.khu,
+                    TrangThai: p.TrangThai || p.trangThai
+                }));
+            capNhatChipPhongTrongBang(_mpcManagerId, ql.phongs);
+        }
+
+        // Refresh right panel if this manager is currently selected
+        if (idDangChon === _mpcManagerId) {
+            renderFloorGroups(ql?.phongs || []);
+        }
+    } catch {
+        showToast('Lỗi kết nối máy chủ.', 'error');
+    } finally {
+        setBtnLoading('btn-mpc-luu', false);
+    }
+}

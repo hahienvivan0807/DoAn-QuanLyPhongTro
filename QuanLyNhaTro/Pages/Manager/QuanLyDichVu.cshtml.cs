@@ -1084,7 +1084,7 @@ namespace QuanLyNhaTro.Pages.Manager
                 UpdatedAt    = GETDATE()
             WHERE IDDonDV = @ID",
                     P("@ID", idDonDV));
-
+                                 
                 // TODO (tuỳ bạn): xóa file vật lý anhCu khỏi wwwroot nếu cần
                 // if (!string.IsNullOrEmpty(anhCu)) { ... }
 

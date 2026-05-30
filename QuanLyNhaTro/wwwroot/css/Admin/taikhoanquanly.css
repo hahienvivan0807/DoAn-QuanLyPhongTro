@@ -2123,3 +2123,108 @@ body {
     background: #fffbeb;
     color: #d97706;
 }
+/* MPC = Modal Phân Công */
+.mpc-card {
+    border: 2px solid var(--mau-vien);
+    border-radius: var(--radius-md);
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(.34,1.56,.64,1);
+    user-select: none;
+    position: relative;
+    background: var(--mau-trang);
+    text-align: center;
+}
+
+    .mpc-card:hover:not(.mpc-disabled) {
+        border-color: #7c3aed;
+        background: #f5f3ff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(124,58,237,0.15);
+    }
+
+    .mpc-card.mpc-selected {
+        border-color: #7c3aed;
+        background: #ede9fe;
+        transform: scale(1.04);
+        box-shadow: 0 0 0 3px rgba(124,58,237,0.25);
+    }
+
+    .mpc-card.mpc-disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: var(--mau-nen);
+    }
+
+    .mpc-card.mpc-taken {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+.mpc-check-icon {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #7c3aed;
+    color: #fff;
+    font-size: 9px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: popIn .2s cubic-bezier(.34,1.56,.64,1);
+}
+
+.mpc-card.mpc-selected .mpc-check-icon {
+    display: flex;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.mpc-so {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--mau-chu);
+    margin-bottom: 3px;
+}
+
+.mpc-khu {
+    font-size: 10px;
+    color: var(--mau-chu-phu);
+    margin-bottom: 5px;
+}
+
+.mpc-badge {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+    .mpc-badge.trong {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .mpc-badge.datthue {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .mpc-badge.suachua {
+        background: #fffbeb;
+        color: #d97706;
+    }

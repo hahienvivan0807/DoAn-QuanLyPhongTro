@@ -46,7 +46,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
             }
 
             DanhSachThongBao = await _db.THONGBAO
-                .Where(tb => tb.IDUser == idUser || tb.IDUser == null)
+                .Where(tb => tb.IDUser == idUser)
                 .OrderByDescending(tb => tb.NgayTao)
                 .ToListAsync();
 

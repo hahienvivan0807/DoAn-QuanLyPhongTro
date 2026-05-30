@@ -405,7 +405,7 @@
                                                         <i class="fas fa-pen"></i>
                                                     </button>
                                                     <button class="btn-icon btn-icon-assign" title="Phân công phòng"
-                                                            onclick="chonQuanLy(@ql.IDUser)">
+                                                            onclick="moModalPhanCong(@ql.IDUser, event)">
                                                         <i class="fas fa-door-open"></i>
                                                     </button>
                                                     @if (ql.IsActive)
@@ -1406,6 +1406,79 @@
         }
         }
     </style>
+    <!-- MODAL: PHÂN CÔNG PHÒNG INLINE -->
+    <div class="lop-phu-modal" id="modal-phan-cong-phong"
+         onclick="dongModalNgoai(event,'modal-phan-cong-phong')">
+        <div class="hop-modal" style="max-width:680px;">
+            <div class="modal-header-purple">
+                <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+                    <div class="mh-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <div>
+                        <div class="mh-title">Phân công phòng</div>
+                        <div class="mh-sub" id="mpc-sub">Chọn phòng để phân công</div>
+                    </div>
+                </div>
+                <button class="mh-close" onclick="dongModal('modal-phan-cong-phong')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Toolbar -->
+            <div style="padding:12px 20px;border-bottom:1px solid var(--mau-vien);
+                display:flex;gap:10px;flex-wrap:wrap;background:var(--mau-nen-card);
+                align-items:center;">
+                <div class="tql-search-wrap" style="flex:1;min-width:150px;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="mpc-search" placeholder="Tìm số phòng, khu..."
+                           oninput="mpcLoc()" />
+                </div>
+                <select class="tql-filter-select" id="mpc-filter-tt" onchange="mpcLoc()">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Trống">🟢 Trống</option>
+                    <option value="Đã thuê">🔵 Đang thuê</option>
+                    <option value="Đang sửa">🟡 Bảo trì</option>
+                </select>
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px;
+                    color:var(--mau-chu-phu);cursor:pointer;white-space:nowrap;">
+                    <input type="checkbox" id="mpc-only-mine" style="accent-color:#7c3aed;"
+                           onchange="mpcLoc()" />
+                    Đang phụ trách
+                </label>
+                <span id="mpc-count-badge" style="
+                    background:#7c3aed;color:#fff;font-size:11px;font-weight:700;
+                    border-radius:20px;padding:3px 10px;white-space:nowrap;flex-shrink:0;">
+                    0 đã chọn
+                </span>
+            </div>
+
+            <!-- Grid phòng -->
+            <div class="modal-body" style="padding:16px;max-height:420px;overflow-y:auto;">
+                <div id="mpc-grid" style="
+                    display:grid;
+                    grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+                    gap:10px;">
+                </div>
+                <div id="mpc-empty" style="display:none;text-align:center;
+                    padding:40px;color:var(--mau-chu-phu);font-size:13px;">
+                    <i class="fas fa-door-closed" style="font-size:28px;opacity:.3;
+                    display:block;margin-bottom:10px;"></i>
+                    Không tìm thấy phòng nào.
+                </div>
+            </div>
+
+            <div class="modal-footer" style="justify-content:space-between;">
+                <button class="btn-huy" onclick="mpcChonTatCa()">
+                    <i class="fas fa-check-double"></i> Chọn tất cả trống
+                </button>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn-huy" onclick="dongModal('modal-phan-cong-phong')">Hủy</button>
+                    <button class="btn-luu-modal" id="btn-mpc-luu" onclick="mpcLuu()">
+                        <i class="fas fa-check-circle"></i> Lưu phân công
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!--Thông báo-->
     <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999;"></div>
 </body>
