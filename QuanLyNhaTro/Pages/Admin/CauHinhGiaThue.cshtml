@@ -35,7 +35,7 @@
         --mau-chu-de: #b8720a;
         --mau-chu-de-sang: #e8971c;
         --mau-chu-de-nhat: #fdf6e3;
-        --mau-chu-de-vien: rgba(184,114,10,0.15);   
+        --mau-chu-de-vien: rgba(184,114,10,0.15);
         --mau-sidebar: #0d1b2e;
         --mau-sidebar-dam: #081020;
         --mau-sidebar-vien: rgba(255,255,255,0.06);
@@ -1786,23 +1786,23 @@
                         </div>
 
                         <div class="fg2" id="chg-dv-form">
-                                <div class="field">
-                                    <label class="f-lbl">Mã dịch vụ <span class="req">*</span></label>
-                                    <div style="display:flex; gap:0; position:relative;">
-                                        <input class="inp" type="text" id="dv-ma"
-                                               placeholder="VD: DIEN, NUOC..."
-                                               style="border-radius:8px 0 0 8px; border-right:none;" readonly />
-                                        <button type="button" onclick="dvMaMoPopup()"
-                                                style="padding:0 14px; border:1.5px solid var(--mau-vien); border-left:none;
-                                                       border-radius:0 8px 8px 0; background:var(--page-accent); color:#fff;
-                                                       cursor:pointer; font-size:12px; font-weight:700; font-family:inherit;
-                                                       display:flex; align-items:center; gap:6px; white-space:nowrap;
-                                                       transition:background .15s;">
-                                            <i class="fas fa-database"></i> Chọn mã
-                                        </button>
-                                    </div>
-                                    <div class="f-note">Nhấn "Chọn mã" để chọn từ danh sách dịch vụ trong hệ thống.</div>
+                            <div class="field">
+                                <label class="f-lbl">Mã dịch vụ <span class="req">*</span></label>
+                                <div style="display:flex; gap:0; position:relative;">
+                                    <input class="inp" type="text" id="dv-ma"
+                                           placeholder="VD: DIEN, NUOC..."
+                                           style="border-radius:8px 0 0 8px; border-right:none;" readonly />
+                                    <button type="button" onclick="dvMaMoPopup()"
+                                            style="padding:0 14px; border:1.5px solid var(--mau-vien); border-left:none;
+                                        border-radius:0 8px 8px 0; background:var(--page-accent); color:#fff;
+                                        cursor:pointer; font-size:12px; font-weight:700; font-family:inherit;
+                                        display:flex; align-items:center; gap:6px; white-space:nowrap;
+                                        transition:background .15s;">
+                                        <i class="fas fa-database"></i> Chọn mã
+                                    </button>
                                 </div>
+                                <div class="f-note">Nhấn "Chọn mã" để chọn từ danh sách dịch vụ trong hệ thống.</div>
+                            </div>
                             <div class="field">
                                 <label class="f-lbl">Tên dịch vụ <span class="req">*</span></label>
                                 <input class="inp" type="text" id="dv-ten"
@@ -1826,6 +1826,8 @@
                                     <option value="phong/thang">phòng / tháng</option>
                                     <option value="nguoi/thang">người / tháng</option>
                                     <option value="xe/thang">xe / tháng</option>
+                                    <option value="lan">lần (dịch vụ theo lần)</option>
+                                    <option value="binh">bình (nước bình)</option>
                                     <option value="thang">tháng (khoán)</option>
                                 </select>
                             </div>
@@ -1855,7 +1857,8 @@
                         <div class="sec-lbl"><i class="fas fa-bolt"></i> Dịch vụ phổ biến</div>
 
                         <div style="display:flex;flex-direction:column;gap:10px;">
-                            <!-- Mỗi quick-fill card -->
+                            <!-- Mỗi quick-fill card — MaDichVu khớp với CONFIG_GIA.MaDichVu -->
+                            <!-- DIEN: tính theo kWh (đồng bộ DIENNUOC.SoDienMoi) -->
                             <div onclick="chgQuickFill('DIEN','Tiền điện','3500','kWh')"
                                  style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);cursor:pointer;transition:all 0.18s;"
                                  onmouseover="this.style.borderColor='var(--page-accent)';this.style.background='var(--page-accent-pale)'"
@@ -1865,11 +1868,12 @@
                                 </div>
                                 <div style="flex:1;">
                                     <div style="font-size:13px;font-weight:700;">Tiền điện</div>
-                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">3.500 đ / kWh</div>
+                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">3.500 đ / kWh &nbsp;·&nbsp; Mã: DIEN</div>
                                 </div>
                                 <i class="fas fa-arrow-right" style="color:var(--page-accent);font-size:12px;opacity:0.5;"></i>
                             </div>
 
+                            <!-- NUOC: tính theo m³ (đồng bộ DIENNUOC.SoNuocMoi) -->
                             <div onclick="chgQuickFill('NUOC','Tiền nước','15000','m3')"
                                  style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);cursor:pointer;transition:all 0.18s;"
                                  onmouseover="this.style.borderColor='var(--page-accent)';this.style.background='var(--page-accent-pale)'"
@@ -1879,12 +1883,13 @@
                                 </div>
                                 <div style="flex:1;">
                                     <div style="font-size:13px;font-weight:700;">Tiền nước</div>
-                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">15.000 đ / m³</div>
+                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">15.000 đ / m³ &nbsp;·&nbsp; Mã: NUOC</div>
                                 </div>
                                 <i class="fas fa-arrow-right" style="color:var(--page-accent);font-size:12px;opacity:0.5;"></i>
                             </div>
 
-                            <div onclick="chgQuickFill('INET','Internet','100000','phong/thang')"
+                            <!-- WIFI: đổi từ 'INET' → 'WIFI' để tránh lỗi "Không tìm thấy dịch vụ 'INET'" -->
+                            <div onclick="chgQuickFill('WIFI','Internet (Wi-Fi)','100000','phong/thang')"
                                  style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);cursor:pointer;transition:all 0.18s;"
                                  onmouseover="this.style.borderColor='var(--page-accent)';this.style.background='var(--page-accent-pale)'"
                                  onmouseout="this.style.borderColor='var(--mau-vien)';this.style.background='var(--mau-nen)'">
@@ -1892,13 +1897,14 @@
                                     <i class="fas fa-wifi"></i>
                                 </div>
                                 <div style="flex:1;">
-                                    <div style="font-size:13px;font-weight:700;">Internet</div>
-                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">100.000 đ / phòng / tháng</div>
+                                    <div style="font-size:13px;font-weight:700;">Internet (Wi-Fi)</div>
+                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">100.000 đ / phòng / tháng &nbsp;·&nbsp; Mã: WIFI</div>
                                 </div>
                                 <i class="fas fa-arrow-right" style="color:var(--page-accent);font-size:12px;opacity:0.5;"></i>
                             </div>
 
-                            <div onclick="chgQuickFill('GIAM','Giữ xe','80000','xe/thang')"
+                            <!-- GIU_XE: đổi từ 'GIAM' → 'GIU_XE' (tên rõ nghĩa, tránh nhầm với giảm giá) -->
+                            <div onclick="chgQuickFill('GIU_XE','Giữ xe','80000','xe/thang')"
                                  style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);cursor:pointer;transition:all 0.18s;"
                                  onmouseover="this.style.borderColor='var(--page-accent)';this.style.background='var(--page-accent-pale)'"
                                  onmouseout="this.style.borderColor='var(--mau-vien)';this.style.background='var(--mau-nen)'">
@@ -1907,7 +1913,52 @@
                                 </div>
                                 <div style="flex:1;">
                                     <div style="font-size:13px;font-weight:700;">Giữ xe</div>
-                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">80.000 đ / xe / tháng</div>
+                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">80.000 đ / xe / tháng &nbsp;·&nbsp; Mã: GIU_XE</div>
+                                </div>
+                                <i class="fas fa-arrow-right" style="color:var(--page-accent);font-size:12px;opacity:0.5;"></i>
+                            </div>
+
+                            <!-- RAC: phí rác/vệ sinh theo người (DONDV.LoaiDV = 'Dịch vụ') -->
+                            <div onclick="chgQuickFill('RAC','Phí vệ sinh / rác','20000','nguoi/thang')"
+                                 style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);cursor:pointer;transition:all 0.18s;"
+                                 onmouseover="this.style.borderColor='var(--page-accent)';this.style.background='var(--page-accent-pale)'"
+                                 onmouseout="this.style.borderColor='var(--mau-vien)';this.style.background='var(--mau-nen)'">
+                                <div style="width:36px;height:36px;border-radius:9px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;color:#16a34a;font-size:15px;flex-shrink:0;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:13px;font-weight:700;">Phí vệ sinh / rác</div>
+                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">20.000 đ / người / tháng &nbsp;·&nbsp; Mã: RAC</div>
+                                </div>
+                                <i class="fas fa-arrow-right" style="color:var(--page-accent);font-size:12px;opacity:0.5;"></i>
+                            </div>
+
+                            <!-- GIAT_SAY: đồng bộ DONDV.LoaiDV = 'Giặt sấy' -->
+                            <div onclick="chgQuickFill('GIAT_SAY','Giặt sấy','25000','lan')"
+                                 style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);cursor:pointer;transition:all 0.18s;"
+                                 onmouseover="this.style.borderColor='var(--page-accent)';this.style.background='var(--page-accent-pale)'"
+                                 onmouseout="this.style.borderColor='var(--mau-vien)';this.style.background='var(--mau-nen)'">
+                                <div style="width:36px;height:36px;border-radius:9px;background:#fdf4ff;display:flex;align-items:center;justify-content:center;color:#a21caf;font-size:15px;flex-shrink:0;">
+                                    <i class="fas fa-soap"></i>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:13px;font-weight:700;">Giặt sấy</div>
+                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">25.000 đ / lần &nbsp;·&nbsp; Mã: GIAT_SAY</div>
+                                </div>
+                                <i class="fas fa-arrow-right" style="color:var(--page-accent);font-size:12px;opacity:0.5;"></i>
+                            </div>
+
+                            <!-- NUOC_BINH: đồng bộ DONDV.LoaiDV = 'Nước bình' -->
+                            <div onclick="chgQuickFill('NUOC_BINH','Nước bình','25000','binh')"
+                                 style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mau-nen);border:1.5px solid var(--mau-vien);border-radius:var(--radius-md);cursor:pointer;transition:all 0.18s;"
+                                 onmouseover="this.style.borderColor='var(--page-accent)';this.style.background='var(--page-accent-pale)'"
+                                 onmouseout="this.style.borderColor='var(--mau-vien)';this.style.background='var(--mau-nen)'">
+                                <div style="width:36px;height:36px;border-radius:9px;background:#f0f9ff;display:flex;align-items:center;justify-content:center;color:#0284c7;font-size:15px;flex-shrink:0;">
+                                    <i class="fas fa-bottle-water" style="font-size:13px;"></i>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:13px;font-weight:700;">Nước bình</div>
+                                    <div style="font-size:11px;color:var(--mau-chu-phu);margin-top:1px;">25.000 đ / bình &nbsp;·&nbsp; Mã: NUOC_BINH</div>
                                 </div>
                                 <i class="fas fa-arrow-right" style="color:var(--page-accent);font-size:12px;opacity:0.5;"></i>
                             </div>
@@ -2100,7 +2151,7 @@
         // Tạo phần tử DOM
         const theThongBao = document.createElement('div');
         theThongBao.className = `thong-bao-muc ${classMauSac}`;
-    
+
         // Gắn HTML nội dung và nút X
         theThongBao.innerHTML = `
         <span>${noiDung}</span>

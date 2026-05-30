@@ -29,13 +29,13 @@ function dongMoSidebar() { document.getElementById('thanh-sidebar').classList.to
      → polling bắt → hiện nút Xác nhận nhận hàng + Thanh toán
 ============================================= */
 let gsDaDat = false;
-let gsDaCoGia = false;     
+let gsDaCoGia = false;
 let gsTienThanhToan = 0;
 let gsDonId = null;
 
 let nuocDaDat = false;
-let nuocDaGiao = false;     
-let nuocDaXacNhan = false;  
+let nuocDaGiao = false;
+let nuocDaXacNhan = false;
 let nuocTienThanhToan = 0;
 let nuocDonId = null;
 
@@ -718,30 +718,82 @@ function dongFormDN() {
 
 /* Tính tiền theo chỉ số */
 function tinhTienDienNuoc() {
+    const elDienMoi = document.getElementById('dn-dien-moi');
+    const elNuocMoi = document.getElementById('dn-nuoc-moi');
+
+    // FIX: ID đúng là 'dn-btn-gui', không phải 'dn-chi-so-input'
+    const btnGui = document.getElementById('dn-btn-gui');
+
     const dienCu = parseFloat(document.getElementById('dn-dien-cu').value) || 0;
-    const dienMoi = parseFloat(document.getElementById('dn-dien-moi').value) || null;
+    const dienMoi = parseFloat(elDienMoi.value);
+
     const nuocCu = parseFloat(document.getElementById('dn-nuoc-cu').value) || 0;
-    const nuocMoi = parseFloat(document.getElementById('dn-nuoc-moi').value) || null;
+    const nuocMoi = parseFloat(elNuocMoi.value);
 
     let dienKWh = null, dienTien = null;
     let nuocM3 = null, nuocTien = null;
+    let coLoi = false;
 
-    if (dienMoi !== null && dienMoi >= dienCu) {
-        dienKWh = dienMoi - dienCu;
-        dienTien = dienKWh * GIA_DIEN_KWH;
-    }
-    if (nuocMoi !== null && nuocMoi >= nuocCu) {
-        nuocM3 = nuocMoi - nuocCu;
-        nuocTien = nuocM3 * GIA_NUOC_M3;
+    // Lấy phần tử hiển thị lỗi inline (nếu có trong HTML)
+    const errDien = document.getElementById('dn-dien-error');
+    const errNuoc = document.getElementById('dn-nuoc-error');
+
+    // --- XỬ LÝ PHẦN ĐIỆN ---
+    if (elDienMoi.value.trim() !== '' && !isNaN(dienMoi)) {
+        if (dienMoi < dienCu) {
+            elDienMoi.style.borderColor = '#dc2626';
+            elDienMoi.style.outline = 'none';
+            if (errDien) {
+                errDien.textContent = `⚠ Chỉ số điện mới (${dienMoi}) không được nhỏ hơn chỉ số cũ (${dienCu})`;
+                errDien.style.display = 'block';
+            }
+            coLoi = true;
+        } else {
+            elDienMoi.style.borderColor = '';
+            if (errDien) { errDien.textContent = ''; errDien.style.display = 'none'; }
+            dienKWh = dienMoi - dienCu;
+            dienTien = dienKWh * GIA_DIEN_KWH;
+        }
+    } else {
+        elDienMoi.style.borderColor = '';
+        if (errDien) { errDien.textContent = ''; errDien.style.display = 'none'; }
     }
 
+    // --- XỬ LÝ PHẦN NƯỚC ---
+    if (elNuocMoi.value.trim() !== '' && !isNaN(nuocMoi)) {
+        if (nuocMoi < nuocCu) {
+            elNuocMoi.style.borderColor = '#dc2626';
+            elNuocMoi.style.outline = 'none';
+            if (errNuoc) {
+                errNuoc.textContent = `⚠ Chỉ số nước mới (${nuocMoi}) không được nhỏ hơn chỉ số cũ (${nuocCu})`;
+                errNuoc.style.display = 'block';
+            }
+            coLoi = true;
+        } else {
+            elNuocMoi.style.borderColor = '';
+            if (errNuoc) { errNuoc.textContent = ''; errNuoc.style.display = 'none'; }
+            nuocM3 = nuocMoi - nuocCu;
+            nuocTien = nuocM3 * GIA_NUOC_M3;
+        }
+    } else {
+        elNuocMoi.style.borderColor = '';
+        if (errNuoc) { errNuoc.textContent = ''; errNuoc.style.display = 'none'; }
+    }
+
+    // --- KHÓA / MỞ NÚT GỬI ---
+    if (btnGui) {
+        btnGui.disabled = coLoi;
+        btnGui.style.opacity = coLoi ? '0.45' : '1';
+        btnGui.style.cursor = coLoi ? 'not-allowed' : 'pointer';
+    }
+
+    // --- HIỂN THỊ KẾT QUẢ ---
     document.getElementById('dn-dien-so-kwh').textContent = dienKWh !== null ? dienKWh + ' kWh' : '— kWh';
-    document.getElementById('dn-dien-tien').textContent = formatVND(dienTien);
+    document.getElementById('dn-dien-tien').textContent = dienTien !== null ? formatVND(dienTien) : '— đ';
     document.getElementById('dn-nuoc-so-m3').textContent = nuocM3 !== null ? nuocM3 + ' m³' : '— m³';
-    document.getElementById('dn-nuoc-tien').textContent = formatVND(nuocTien);
-
-    document.getElementById('dn-sum-dien').textContent = formatVND(dienTien);
-    document.getElementById('dn-sum-nuoc').textContent = formatVND(nuocTien);
+    document.getElementById('dn-nuoc-tien').textContent = nuocTien !== null ? formatVND(nuocTien) : '— đ';
+    document.getElementById('dn-sum-dien').textContent = dienTien !== null ? formatVND(dienTien) : '— đ';
+    document.getElementById('dn-sum-nuoc').textContent = nuocTien !== null ? formatVND(nuocTien) : '— đ';
 
     const tong = (dienTien || 0) + (nuocTien || 0);
     document.getElementById('dn-sum-tong').textContent =
@@ -814,10 +866,8 @@ async function guiDonDienNuoc() {
     if (dienMoi) { fd.append('dienMoi', dienMoi); fd.append('anhDien', dienFile); }
     if (nuocMoi) { fd.append('nuocMoi', nuocMoi); fd.append('anhNuoc', nuocFile); }
 
-    // 1. Lấy Token chống giả mạo — dùng hàm chung từ DichVu.js (layTokenCSRF)
-    //    hoặc tự lấy nếu hàm chưa có. Tránh crash khi querySelector trả null.
-    const tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
-    const token = tokenEl ? tokenEl.value : '';
+    // Lấy Token chống giả mạo — dùng hàm chung layTokenCSRF()
+    const token = layTokenCSRF();
 
     if (!token) {
         alert('Không lấy được token bảo mật. Vui lòng tải lại trang.');

@@ -64,8 +64,10 @@ namespace QuanLyNhaTro.Pages.KhachThue
             if (idPhong < 0) return RedirectToPage("/KhachThue/KhachThue");
 
             var hopDong = await _db.HOPDONG
-                .Include(h => h.Tenant).Include(h => h.Phong)
-                .FirstOrDefaultAsync(h => h.IDPhong == idPhong && h.TrangThaiHD == "Đang hiệu lực");
+            .AsNoTracking() // Thêm dòng này
+            .Include(h => h.Tenant)
+             .Include(h => h.Phong)
+            .FirstOrDefaultAsync(h => h.IDPhong == idPhong && h.TrangThaiHD == "Đang hiệu lực");
 
             if (hopDong == null) return Page();
 
@@ -135,7 +137,7 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 IDUser = idUser,
                 IDManagerXuLy = idManager,          // ← gán manager phụ trách
                 LoaiDV = "Giặt sấy",
-                TrangThai_DV = "Chờ xử lý",       
+                TrangThai_DV = "Chờ xử lý",
                 NoiDung = $"[{req.LoaiDV}] {req.GhiChu}".Trim(),
                 MucDo = "Trung bình",
                 TongTien = 0,
@@ -348,14 +350,23 @@ namespace QuanLyNhaTro.Pages.KhachThue
                 nM = n;
             }
 
+            var hopDong = await _db.HOPDONG
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.IDPhong == idPhong && h.TrangThaiHD == "Đang hiệu lực");
+            if (hopDong == null) return BadRequest("Không tìm thấy hợp đồng đang hiệu lực.");
+
             var last = await _db.DIENNUOC
                 .Where(d => d.IDPhong == idPhong && d.TrangThaiDuyet == 1)
                 .OrderByDescending(d => d.NgayGhi).FirstOrDefaultAsync();
 
-            if (dM.HasValue && dM < (last?.SoDienMoi ?? 0))
-                return BadRequest("Chỉ số điện mới không được nhỏ hơn chỉ số cũ.");
-            if (nM.HasValue && nM < (last?.SoNuocMoi ?? 0))
-                return BadRequest("Chỉ số nước mới không được nhỏ hơn chỉ số cũ.");
+            // Chỉ số cũ thực tế: ưu tiên bản ghi đã duyệt, fallback về đầu kỳ hợp đồng
+            int dienCuThucTe = last?.SoDienMoi ?? hopDong.DienDauKy;
+            int nuocCuThucTe = last?.SoNuocMoi ?? hopDong.NuocDauKy;
+
+            if (dM.HasValue && dM < dienCuThucTe)
+                return BadRequest($"Chỉ số điện mới ({dM}) không được nhỏ hơn chỉ số cũ ({dienCuThucTe}).");
+            if (nM.HasValue && nM < nuocCuThucTe)
+                return BadRequest($"Chỉ số nước mới ({nM}) không được nhỏ hơn chỉ số cũ ({nuocCuThucTe}).");
 
             string anhDienPath = "";
             string anhNuocPath = "";
@@ -381,10 +392,10 @@ namespace QuanLyNhaTro.Pages.KhachThue
             {
                 IDPhong = idPhong,
                 KyGhiNhan = DateTime.Now.ToString("MM/yyyy"),
-                SoDienCu = last?.SoDienMoi ?? 0,
-                SoDienMoi = dM ?? (last?.SoDienMoi ?? 0),
-                SoNuocCu = last?.SoNuocMoi ?? 0,
-                SoNuocMoi = nM ?? (last?.SoNuocMoi ?? 0),
+                SoDienCu = dienCuThucTe,
+                SoDienMoi = dM ?? dienCuThucTe,
+                SoNuocCu = nuocCuThucTe,
+                SoNuocMoi = nM ?? nuocCuThucTe,
                 AnhChupDongHo = anhDienPath,
                 AnhChupDongHoNuoc = anhNuocPath,
                 NgayGhi = DateTime.Now,

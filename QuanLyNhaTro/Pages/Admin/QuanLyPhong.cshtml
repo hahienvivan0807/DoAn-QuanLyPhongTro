@@ -1742,10 +1742,10 @@
                     <option value="Đang sửa">Đang sửa</option>
                 </select>
                 <select class="chon-loc" id="loc-tang" onchange="locDanhSachPhong()">
-                    <option value="">Tất cả tầng</option>
+                    <option value="">Tất cả khu</option>
                     @for (int tang = 1; tang <= Model.SoTangToiDa; tang++)
                     {
-                        <option value="@tang">Tầng @tang</option>
+                        <option value="@tang">Khu @tang</option>
                     }
                 </select>
                 <select class="chon-loc" id="sap-xep-phong" onchange="locDanhSachPhong()">
@@ -1770,7 +1770,7 @@
                         <thead>
                             <tr>
                                 <th>Số phòng</th>
-                                <th>Tầng</th>
+                                <th>Khu</th>
                                 <th>Diện tích</th>
                                 <th>Giá cố định</th>
                                 <th>Trạng thái</th>
@@ -1934,7 +1934,7 @@
                 <div class="nhom-nhap">
                     <label class="nhan-nhap">Khu <span style="color:#dc2626;">*</span></label>
                     <input class="o-nhap" type="number" id="them-tang" min="1" max="20" value="1" placeholder="VD: 1, 2, 3..." />
-                    <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">Nhập số khu (1 – 20)</div>
+                    <div style="font-size:10.5px;color:var(--mau-chu-phu);margin-top:4px;">Nhập số khu (1 – 2)</div>
                 </div>
                 <div class="nhom-nhap">
                     <label class="nhan-nhap">Số người ở tối đa <span style="color:#dc2626;">*</span></label>
@@ -2013,7 +2013,7 @@
                     <input class="o-nhap" type="text" id="sua-so-phong" maxlength="10" />
                 </div>
                 <div class="nhom-nhap">
-                    <label class="nhan-nhap">Tầng <span style="color:#dc2626;">*</span></label>
+                    <label class="nhan-nhap">Khu <span style="color:#dc2626;">*</span></label>
                     <input class="o-nhap" type="number" id="sua-tang" min="1" max="20" />
                 </div>
                 <div class="nhom-nhap">
@@ -2122,7 +2122,7 @@
                     <span class="chi-tiet-gia-tri" id="cdt-so-phong" style="font-weight:900;font-size:15px;font-family:'Lexend',sans-serif;">—</span>
                 </div>
                 <div class="chi-tiet-hang">
-                    <span class="chi-tiet-nhan"><i class="fas fa-layer-group" style="width:14px;color:var(--mau-chu-phu);margin-right:5px;"></i> Tầng</span>
+                    <span class="chi-tiet-nhan"><i class="fas fa-layer-group" style="width:14px;color:var(--mau-chu-phu);margin-right:5px;"></i> Khu</span>
                     <span class="chi-tiet-gia-tri" id="cdt-tang">—</span>
                 </div>
                 <div class="chi-tiet-hang">
@@ -2183,7 +2183,7 @@
         // Tạo phần tử DOM
         const theThongBao = document.createElement('div');
         theThongBao.className = `thong-bao-muc ${classMauSac}`;
-    
+
         // Gắn HTML nội dung và nút X
         theThongBao.innerHTML = `
         <span>${noiDung}</span>
@@ -2345,7 +2345,7 @@
         const trangThai = document.getElementById('them-trang-thai').value;
         const moTa = document.getElementById('them-mo-ta').value.trim();
         if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
-        if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
+        if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Khu phải từ 1 đến 20!', 'canh-bao'); return; }
         if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
         if (!giaPhong || giaPhong < 0) { hienThiThongBao('Vui lòng nhập giá phòng hợp lệ!', 'canh-bao'); return; }
         fetch('?handler=ThemPhong', {
@@ -2399,7 +2399,7 @@
         const trangThai = document.getElementById('sua-trang-thai').value;
         const moTa = document.getElementById('sua-mo-ta').value.trim();
         if (!soPhong) { hienThiThongBao('Vui lòng nhập số phòng!', 'canh-bao'); return; }
-        if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Tầng phải từ 1 đến 20!', 'canh-bao'); return; }
+        if (!tang || tang < 1 || tang > 20) { hienThiThongBao('Khu phải từ 1 đến 20!', 'canh-bao'); return; }
         if (!soLuong || soLuong < 1) { hienThiThongBao('Số lượng người ở phải ít nhất là 1!', 'canh-bao'); return; }
         if (!giaPhong || giaPhong < 0) { hienThiThongBao('Vui lòng nhập giá phòng hợp lệ!', 'canh-bao'); return; }
 
@@ -2464,8 +2464,8 @@
         // Cột 0: Số phòng
         cells[0].querySelector('.ten-phong-noi-bat').textContent = soPhong;
 
-        // Cột 1: Tầng
-        cells[1].querySelector('span').textContent = 'Tầng ' + tang;
+        // Cột 1: Khu
+        cells[1].querySelector('span').textContent = 'Khu ' + tang;
 
         // Cột 2: Diện tích
         cells[2].innerHTML = dienTich
