@@ -39,3 +39,6 @@ Bước 3: Thay đổi chuỗi kết nối (Connection String) trong file appset
 Bước 4: Mở Package Manager Console và chạy lệnh Update-Database để Entity Framework tự động khởi tạo các bảng dữ liệu.
 
 Bước 5: Bấm Run (F5) để khởi chạy dự án và test API thông qua Swagger.
+Mật khẩu chủ trọ cố định:
+Tên đăng nhập: ChuTro
+Mật Khẩu :123456
